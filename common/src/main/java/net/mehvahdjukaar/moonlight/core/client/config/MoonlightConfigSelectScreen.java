@@ -77,9 +77,9 @@ public class MoonlightConfigSelectScreen extends Screen {
 
         // bottom bar: Back flanked by the author's media links (matches the Configured integration screen)
         MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
-                this.width / 2, this.height - 29, 22, modId, this::onClose);
+                this.width / 2, this.height - 28, 22, modId, this::onClose);
         // bottom-left: icon-only jump to the mods hub grid
-        IconButton modsButton = new IconButton(8, this.height - 29, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
+        IconButton modsButton = new IconButton(8, this.height - 28, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
                 b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))).borderless();
         modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
         this.addRenderableWidget(modsButton);

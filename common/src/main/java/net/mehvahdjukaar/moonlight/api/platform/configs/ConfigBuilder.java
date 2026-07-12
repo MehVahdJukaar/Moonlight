@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
+import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -12,7 +13,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
-import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
@@ -25,19 +25,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-/** A loader independent config builder. Supports common config syncing. */
+/**
+ * A loader independent config builder. Supports common config syncing.
+ */
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new HashMap<>();
@@ -74,7 +71,16 @@ public abstract class ConfigBuilder {
     // several backing values but want a single combined row instead of one row per backing value.
     protected boolean suppressUi = false;
 
-    /** Reserved child name for the boolean a {@link #feature} declares. */
+    // name -> effective enabled supplier for every feature() declared, so mods can query "is feature X on?" by name
+    // (e.g. to gate content registration) without keeping their own map. Each feature is registered under BOTH its
+    // short name and its full dotted path (see registerFeature). Handed to the built ModConfigHolder.
+    private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
+    // raw category-name stack (root first), kept parallel to uiStack so a feature's full path can be built
+    private final Deque<String> categoryPath = new ArrayDeque<>();
+
+    /**
+     * Reserved child name for the boolean a {@link #feature} declares.
+     */
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
     protected boolean usesDataBuddy = true; // on by default; setWriteJsons() disables it
@@ -86,7 +92,9 @@ public abstract class ConfigBuilder {
     @Nullable
     private ResourceLocation pendingIcon;
 
-    /** How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row). */
+    /**
+     * How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row).
+     */
     @FunctionalInterface
     protected interface CommentTarget {
         void applyComment(String rawComment);
@@ -168,7 +176,9 @@ public abstract class ConfigBuilder {
         return new RegexPatternValue(defineRegexSource(name, defaultValue));
     }
 
-    /** Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} screen row. */
+    /**
+     * Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} screen row.
+     */
     protected abstract Supplier<String> defineRegexSource(String name, String defaultValue);
 
     /**
@@ -223,20 +233,26 @@ public abstract class ConfigBuilder {
                                                                Supplier<List<String>> options,
                                                                @Nullable Function<String, ItemStack> icon);
 
-    /** A string list whose entries are each picked from a fixed set of {@code options} via a dropdown. */
+    /**
+     * A string list whose entries are each picked from a fixed set of {@code options} via a dropdown.
+     */
     public Supplier<List<String>> defineList(String name, List<String> defaultValue, List<String> options) {
         List<String> copy = List.copyOf(options);
         return defineListSource(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
-    /** A list of registry ids, each picked from {@code registry} via a dropdown. Stored as resource location strings. */
+    /**
+     * A list of registry ids, each picked from {@code registry} via a dropdown. Stored as resource location strings.
+     */
     public Supplier<List<ResourceLocation>> defineRegistryList(String name, List<ResourceLocation> defaultValue, Registry<?> registry) {
         Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);
         return () -> handle.get().stream().map(ResourceLocation::parse).toList();
     }
 
-    /** Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon. */
+    /**
+     * Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon.
+     */
     public Supplier<List<Item>> defineItemList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),
@@ -244,7 +260,9 @@ public abstract class ConfigBuilder {
         return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
     }
 
-    /** Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon. */
+    /**
+     * Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon.
+     */
     public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
@@ -384,9 +402,12 @@ public abstract class ConfigBuilder {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private Supplier<?> defineBeanField(String name, Class<?> type, Object current) {
         if (type == boolean.class || type == Boolean.class) return define(name, (Boolean) current);
-        if (type == int.class || type == Integer.class) return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        if (type == double.class || type == Double.class) return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
-        if (type == float.class || type == Float.class) return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
+        if (type == int.class || type == Integer.class)
+            return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        if (type == double.class || type == Double.class)
+            return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
+        if (type == float.class || type == Float.class)
+            return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
         // must reject null: a null-accepting validator (o -> true) makes NeoForge treat a MISSING string field as
         // valid, so it never writes the default. The key stays absent while the spec still carries its comment,
         // which NeoForge tries to re-apply every load -> endless "config is not correct. Correcting" loop.
@@ -435,7 +456,9 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    /** Multi line variant of {@link #comment(String)}, mirroring Forge's {@code comment(String...)}. */
+    /**
+     * Multi line variant of {@link #comment(String)}, mirroring Forge's {@code comment(String...)}.
+     */
     public ConfigBuilder comment(String... comment) {
         return comment(String.join("\n", comment));
     }
@@ -489,7 +512,9 @@ public abstract class ConfigBuilder {
         return null;
     }
 
-    /** Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}). */
+    /**
+     * Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}).
+     */
     public ConfigBuilder worldRestart() {
         return worldReload();
     }
@@ -499,7 +524,9 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    /** Accepted for Forge parity but a no-op: Moonlight derives translation keys from the category/value names. */
+    /**
+     * Accepted for Forge parity but a no-op: Moonlight derives translation keys from the category/value names.
+     */
     public ConfigBuilder translation(String translationKey) {
         return this;
     }
@@ -537,7 +564,9 @@ public abstract class ConfigBuilder {
 
     // ===== loader independent UI tree (consumed by the native config screen) =====
 
-    /** Pushes a UI sub category mirroring a {@code push(...)}. No-op while UI emission is suppressed. */
+    /**
+     * Pushes a UI sub category mirroring a {@code push(...)}. No-op while UI emission is suppressed.
+     */
     protected void uiPush(Component title) {
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
@@ -548,13 +577,22 @@ public abstract class ConfigBuilder {
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
         this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it
+        this.categoryPath.addLast(currentCategory()); // raw-name path, so features can be looked up by full path
     }
 
-    /** Pops the current UI sub category. No-op while UI emission is suppressed. */
+    /**
+     * Pops the current UI sub category. No-op while UI emission is suppressed.
+     */
     protected void uiPop() {
         if (this.suppressUi) return;
         this.uiStack.pop();
         this.gateStack.pop();
+        this.categoryPath.pollLast();
+    }
+
+    /** The current category as a dotted raw-name path (e.g. {@code redstone.speaker_block}), root first. */
+    protected String currentCategoryPath() {
+        return String.join(".", this.categoryPath);
     }
 
     /**
@@ -563,7 +601,7 @@ public abstract class ConfigBuilder {
      * read-time only, so a parent turning off makes this (and any nested feature) read {@code false} without ever
      * rewriting the stored child values; turning the parent back on restores them. Only one feature per category.
      */
-    public Supplier<Boolean> feature(boolean defaultEnabled) {
+    public Supplier<Boolean> mainFeature(boolean defaultEnabled) {
         ConfigCategory cat = this.uiStack.peek();
         if (cat == this.uiRoot) {
             throw new IllegalStateException("feature() must be called inside a category (use push/pushFeature first), not at the config root");
@@ -576,19 +614,29 @@ public abstract class ConfigBuilder {
         List<ConfigNode> entries = cat.entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
-            // so the gate row (shown inside the category) draws the category's item next to its ✓/✗ symbol, just
-            // like a named feature leaf. An explicit icon(...) on the enabled value itself still wins.
-            if (bv.icon() == null && cat.icon() != null) bv.setIcon(cat.icon());
+            // icon priority: an explicit icon(...) on the value or the category wins; otherwise infer one from the
+            // category's own name (a feature named after its block shows that block). Then mirror it onto the category
+            // button so it and the enable-gate row share the same icon.
+            if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
+            if (cat.icon() == null) cat.setIcon(bv.icon());
         }
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
         this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
         this.gateStack.push(effective);
+        // a category gate is referenced by the category's own name, so its short key IS the category name
+        registerFeature(currentCategory(), currentCategoryPath(), effective);
         return effective;
     }
 
+    /** A category gate enabled by default, mirroring {@link #pushFeature(String)}. */
+    public Supplier<Boolean> mainFeature() {
+        return this.mainFeature(true);
+    }
+
+
     /**
-     * Declares a named boolean "feature" leaf: a standalone toggle that, like a category's {@link #feature(boolean)}
+     * Declares a named boolean "feature" leaf: a standalone toggle that, like a category's {@link #mainFeature(boolean)}
      * gate, draws as the ✓/✗ switch (with its {@link #icon} shown next to the symbol) rather than a plain ON/OFF
      * button. The returned supplier is <em>effective</em>: {@code ownValue && everyAncestorFeature}, so it reads
      * {@code false} whenever an enclosing feature category is off, without ever rewriting the stored value. Combine
@@ -600,19 +648,61 @@ public abstract class ConfigBuilder {
         List<ConfigNode> entries = this.uiStack.peek().entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             bv.setFeature(true);
+            // infer the icon from the feature's own name unless an explicit icon(...) already set one
+            if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
         }
         Supplier<Boolean> ancestor = this.gateStack.peek();
-        return () -> raw.get() && ancestor.get();
+        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
+        // a leaf feature lives under the current category, so its full path is that category path plus its own name
+        String path = this.categoryPath.isEmpty() ? name : currentCategoryPath() + "." + name;
+        registerFeature(name, path, effective);
+        return effective;
     }
 
-    /** Sugar for {@code push(name)} followed by {@link #feature(boolean)}. Pop it like any other category. */
+    /**
+     * Infers a feature's decorative icon from its name: {@code <this config's mod id>:<name>}. Resolved lazily on the
+     * client (see {@code ConfigScreenIcons}), so a name that isn't a real item/block simply shows no icon. An explicit
+     * {@link #icon} always takes precedence. Returns {@code null} for a name that isn't a valid resource path.
+     */
+    @Nullable
+    private ResourceLocation inferFeatureIcon(String name) {
+        return ResourceLocation.tryBuild(this.name.getNamespace(), name);
+    }
+
+    /**
+     * Registers a feature's effective supplier under both its short {@code name} and its full dotted {@code path}, so
+     * it can be queried either way via {@link ModConfigHolder#isFeatureEnabled}. The short name is the convenient
+     * shorthand; the full path disambiguates when two features in different categories share a short name (the last
+     * short-name registration wins, but the full path is always unique).
+     */
+    private void registerFeature(String name, String path, Supplier<Boolean> effective) {
+        this.featureToggles.put(name, effective);
+        this.featureToggles.put(path, effective);
+    }
+
+    /** The feature registry (short name and full path -> effective enabled supplier), handed to the built holder. */
+    protected Map<String, Supplier<Boolean>> getFeatureToggles() {
+        return this.featureToggles;
+    }
+
+    /** A named leaf feature enabled by default. */
+    public Supplier<Boolean> feature(String name) {
+        return feature(name, true);
+    }
+
     public Supplier<Boolean> pushFeature(String name, boolean defaultEnabled) {
         push(name);
-        return feature(defaultEnabled);
+        return mainFeature(defaultEnabled);
     }
 
-    /** Adds a value row to the current UI category, stamping (and clearing) any pending reload/restart flag onto it.
-     *  No-op while UI emission is suppressed, so a compound value's backing rows don't consume the flag before it. */
+    public Supplier<Boolean> pushFeature(String name) {
+        return pushFeature(name, true);
+    }
+
+    /**
+     * Adds a value row to the current UI category, stamping (and clearing) any pending reload/restart flag onto it.
+     * No-op while UI emission is suppressed, so a compound value's backing rows don't consume the flag before it.
+     */
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
         // Both change-effect flags (reload + dynamic packs) were already stamped onto each backing leaf value as it
@@ -625,7 +715,9 @@ public abstract class ConfigBuilder {
         this.uiStack.peek().add(option);
     }
 
-    /** The root of the loader independent screen model, ready once {@link #build()} has run. */
+    /**
+     * The root of the loader independent screen model, ready once {@link #build()} has run.
+     */
     public ConfigCategory getUiRoot() {
         return this.uiRoot;
     }
@@ -675,7 +767,9 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
-    /** A {@link Vec3i} (three ints) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}. */
+    /**
+     * A {@link Vec3i} (three ints) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}.
+     */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);

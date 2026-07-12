@@ -104,8 +104,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ForgeConfigHolder build() {
         flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
-        return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
+        ForgeConfigHolder holder = new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
                 this.buildChangeCallback(), trackedValues, getUiRoot());
+        holder.setFeatureToggles(getFeatureToggles());
+        return holder;
     }
 
     @Override

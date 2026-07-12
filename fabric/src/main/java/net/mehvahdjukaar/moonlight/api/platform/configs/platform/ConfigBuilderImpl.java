@@ -45,7 +45,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public FabricConfigHolder build() {
         flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
         assert categoryStack.size() == 1;
-        return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback(), getUiRoot());
+        FabricConfigHolder holder = new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback(), getUiRoot());
+        holder.setFeatureToggles(getFeatureToggles());
+        return holder;
     }
 
     @Override

@@ -53,6 +53,9 @@ public abstract class ModConfigHolder {
     private final ConfigType type;
     @Nullable
     private final Runnable changeCallback;
+    // feature (short name and full path) -> effective enabled supplier, collected by the builder (see
+    // ConfigBuilder.feature/mainFeature) and stamped in at build(). Lets mods gate content by feature name.
+    private Map<String, Supplier<Boolean>> featureToggles = Map.of();
 
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this.configId = id;
@@ -67,6 +70,28 @@ public abstract class ModConfigHolder {
 
     public Component getReadableName() {
         return readableName;
+    }
+
+    /** Internal: the builder hands over its collected feature registry at build time. */
+    @org.jetbrains.annotations.ApiStatus.Internal
+    public void setFeatureToggles(Map<String, Supplier<Boolean>> featureToggles) {
+        this.featureToggles = Map.copyOf(featureToggles);
+    }
+
+    /**
+     * Whether the {@code feature(...)}/{@code mainFeature(...)} toggle with the given name is currently on. Accepts
+     * either the feature's short name or its full dotted path (e.g. {@code "speaker_block"} or
+     * {@code "redstone.speaker_block"}). Returns {@code true} for an unknown name, so content not gated by a feature
+     * is enabled by default. The value composes ancestor gates, so it reads {@code false} when a parent feature is off.
+     */
+    public boolean isFeatureEnabled(String nameOrPath) {
+        Supplier<Boolean> toggle = this.featureToggles.get(nameOrPath);
+        return toggle == null || Boolean.TRUE.equals(toggle.get());
+    }
+
+    /** The raw feature registry (short name and full path keys -> effective enabled supplier). */
+    public Map<String, Supplier<Boolean>> getFeatureToggles() {
+        return this.featureToggles;
     }
 
     protected void onRefresh() {

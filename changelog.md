@@ -1,3 +1,1 @@
-- improvements to archive utils
-- misc cleanups
-- new icons for media links
+- added new native config screen
