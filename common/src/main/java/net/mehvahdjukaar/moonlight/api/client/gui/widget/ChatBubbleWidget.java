@@ -22,7 +22,7 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     public static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
-    private static final int TAIL_HEIGHT = 4;
+    private static final int TAIL_HEIGHT = 5;
     private static final int TAIL_TIP = 3;
     private static final int PADDING = 6;
     private static final int CAP_INSET = 3;
@@ -82,18 +82,18 @@ public class ChatBubbleWidget extends AbstractWidget {
         int targetCenterX = target.getX() + target.getWidth() / 2;
 
         int bob = bobOffset();
-        int tailY = target.getY() - TIP_GAP - TAIL_HEIGHT + 1 + bob;
+        int tailY = target.getY() - TIP_GAP - TAIL_HEIGHT + 2 + bob;
         int bubbleY = tailY - HEIGHT + 1;
 
         int bubbleX = targetCenterX - bubbleW / 2;
         int maxX = screenWidth - bubbleW - SCREEN_MARGIN;
         bubbleX = maxX < SCREEN_MARGIN ? SCREEN_MARGIN
-                : Math.max(SCREEN_MARGIN, Math.min(bubbleX, maxX));
+                : Math.clamp(bubbleX, SCREEN_MARGIN, maxX);
 
         int tailX = targetCenterX - TAIL_TIP;
         int tailMin = bubbleX + CAP_INSET;
         int tailMax = bubbleX + bubbleW - TAIL_WIDTH - CAP_INSET;
-        tailX = tailMax < tailMin ? tailMin : Math.max(tailMin, Math.min(tailX, tailMax));
+        tailX = tailMax < tailMin ? tailMin : Math.clamp(tailX, tailMin, tailMax);
 
         this.setX(bubbleX);
         this.setY(bubbleY);

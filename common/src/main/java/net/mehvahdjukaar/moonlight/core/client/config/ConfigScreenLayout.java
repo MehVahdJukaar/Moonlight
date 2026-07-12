@@ -37,6 +37,9 @@ final class ConfigScreenLayout {
     static final ResourceLocation EDIT_ICON = Moonlight.res("edit");
     static final ResourceLocation WORLD_RELOAD_ICON = Moonlight.res("world_reload");
     static final ResourceLocation GAME_RESTART_ICON = Moonlight.res("game_restart");
+    // 7x7 disclosure triangles for expandable option descriptions
+    static final ResourceLocation SECTION_COLLAPSED_ICON = Moonlight.res("widget/section_collapsed");
+    static final ResourceLocation SECTION_EXPANDED_ICON = Moonlight.res("widget/section_expanded");
 
     /** The reload/restart hint sprite for a value, or null when it applies immediately. */
     @Nullable

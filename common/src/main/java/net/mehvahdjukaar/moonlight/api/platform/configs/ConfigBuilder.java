@@ -609,12 +609,33 @@ public abstract class ConfigBuilder {
         List<ConfigNode> entries = cat.entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
+            // so the gate row (shown inside the category) draws the category's item next to its ✓/✗ symbol, just
+            // like a named feature leaf. An explicit icon(...) on the enabled value itself still wins.
+            if (bv.icon() == null && cat.icon() != null) bv.setIcon(cat.icon());
         }
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
         this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
         this.gateStack.push(effective);
         return effective;
+    }
+
+    /**
+     * Declares a named boolean "feature" leaf: a standalone toggle that, like a category's {@link #feature(boolean)}
+     * gate, draws as the ✓/✗ switch (with its {@link #icon} shown next to the symbol) rather than a plain ON/OFF
+     * button. The returned supplier is <em>effective</em>: {@code ownValue && everyAncestorFeature}, so it reads
+     * {@code false} whenever an enclosing feature category is off, without ever rewriting the stored value. Combine
+     * with {@link #icon}: {@code builder.icon("lever").feature("test_bool", true)}.
+     */
+    public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
+        Supplier<Boolean> raw = define(name, defaultEnabled);
+        // adopt the just-recorded BooleanValue so the client draws it as a ✓/✗ toggle instead of an ON/OFF button
+        List<ConfigNode> entries = this.uiStack.peek().entries();
+        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
+            bv.setFeature(true);
+        }
+        Supplier<Boolean> ancestor = this.gateStack.peek();
+        return () -> raw.get() && ancestor.get();
     }
 
     /** Sugar for {@code push(name)} followed by {@link #feature(boolean)}. Pop it like any other category. */

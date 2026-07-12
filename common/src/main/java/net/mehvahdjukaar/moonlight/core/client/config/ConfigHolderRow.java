@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,11 +18,7 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-/**
- * One full-width button on the config select screen: opens a single registered config of a mod. Styled like a
- * {@link CategoryRow} (gear icon + accent label + chevron, with the file name as a subtitle) so both read as
- * "navigate in".
- */
+
 class ConfigHolderRow extends ConfigListRow {
 
     private final Button button;
@@ -54,17 +51,18 @@ class ConfigHolderRow extends ConfigListRow {
 
         int iconX = left + 8;
         int textLeft = iconX + ROW_ICON + 6;
-        int chevronX = left + width - 12;
-        int textRight = chevronX - GAP;
+        int editX = left + width - 8 - ROW_ICON;
+        int textRight = editX - GAP;
 
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        Component boldLabel = label.copy().withStyle(ChatFormatting.BOLD);
         if (subtitle != null) {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, DESCRIPTION);
+            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT_SECONDARY);
         } else {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY);
+            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top, height, CATEGORY);
         }
-        graphics.drawString(font, "›", chevronX, top + (height - font.lineHeight) / 2, CRUMB_SEPARATOR, false);
+        graphics.blitSprite(EDIT_ICON, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
     }
 
     @Override

@@ -29,11 +29,12 @@ public final class ConfigGuiColors {
     // ── core text ──
     public static final int LABEL = chat(ChatFormatting.WHITE);        // primary label — MC white
     public static final int TEXT = chat(ChatFormatting.WHITE);         // editable field text
+    public static final int TEXT_SECONDARY = chat(ChatFormatting.GRAY);         // editable field text
     public static final int DESCRIPTION = 0xA8B0C0;                    // subtitles / secondary text — custom muted blue-gray (softer than MC gray)
     public static final int ERROR = chat(ChatFormatting.RED);          // invalid value — MC red
     public static final int TITLE = chat(ChatFormatting.GOLD);         // screen title — MC gold
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);    // unsaved edit — MC yellow, pops against the gold title
-    public static final int CATEGORY = chat(ChatFormatting.AQUA);      // category labels / accents — MC aqua
+    public static final int CATEGORY = chat(ChatFormatting.DARK_AQUA);      // category labels / accents — MC aqua
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE); // highlighted / selected entry — MC light purple, a distinct accent hue
 
     // ── breadcrumb / navigation ──

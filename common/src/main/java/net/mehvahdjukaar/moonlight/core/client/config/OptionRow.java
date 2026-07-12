@@ -37,6 +37,7 @@ class OptionRow extends ConfigListRow {
     @Nullable
     private final ConfigCategory owner; // the category this value lives under, for feature-gating greyout
     private final boolean isGate; // this value IS its category's feature() toggle (the "enabled" switch)
+    private final boolean asToggle; // drawn as the ✓/✗ feature toggle (a category gate, or a named feature leaf)
     private final Component title;
     @Nullable
     private final Component description;
@@ -60,7 +61,9 @@ class OptionRow extends ConfigListRow {
         this.title = value.title();
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
-        this.control = isGate
+        // both the category "enabled" gate and a named feature leaf render as the ✓/✗ toggle (icon beside the symbol)
+        this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
+        this.control = asToggle
                 ? ConfigControls.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
                 : ConfigControls.create(value, session, this::onEdited);
 
@@ -118,12 +121,16 @@ class OptionRow extends ConfigListRow {
         int textLeft = left;
         if (hasDescription()) {
             boolean expanded = session.isExpanded(value);
-            graphics.drawString(font, expanded ? "▼" : "▶", left + 1, top + (height - font.lineHeight) / 2,
-                    contextEnabled ? DESCRIPTION : 0x606060, false);
+            ResourceLocation arrow = expanded ? SECTION_EXPANDED_ICON : SECTION_COLLAPSED_ICON;
+            int arrowSize = 7;
+            if (!contextEnabled) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
+            graphics.blitSprite(arrow, left + 2, top + (height - arrowSize) / 2, arrowSize, arrowSize);
+            if (!contextEnabled) graphics.setColor(1f, 1f, 1f, 1f);
             textLeft = left + ARROW_WIDTH;
         }
-        // decorative, hover-animated item/block icon just before the label, if this value declares one
-        if (ConfigScreenIcons.has(value.icon())) {
+        // decorative, hover-animated item/block icon just before the label, if this value declares one. Feature
+        // toggles draw their icon inside the control (next to the ✓/✗ symbol) instead, so skip it here for them.
+        if (!asToggle && ConfigScreenIcons.has(value.icon())) {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, value.icon(), textLeft, top + (height - ROW_ICON) / 2,
                     iconAnim.phase(), contextEnabled);

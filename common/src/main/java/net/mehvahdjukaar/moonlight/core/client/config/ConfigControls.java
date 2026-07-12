@@ -9,7 +9,9 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.*;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.Vec3i;
@@ -212,11 +214,27 @@ public final class ConfigControls {
      * matching the small inline toggle the parent screen shows next to the category button.
      */
     static ConfigVisuals<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
+        ResourceLocation icon = o.icon();
+        // draw the feature's decorative item just left of the ✓/✗ symbol, when it resolves to something
+        BooleanToggleWidget.IconRenderer iconRenderer = icon == null ? null : new BooleanToggleWidget.IconRenderer() {
+            private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
+
+            @Override
+            public boolean available() {
+                return ConfigScreenIcons.has(icon);
+            }
+
+            @Override
+            public void render(GuiGraphics graphics, int x, int y, int size, boolean hovered, boolean lit) {
+                anim.update(hovered && lit);
+                ConfigScreenIcons.renderAnimated(graphics, icon, x, y, anim.phase(), lit);
+            }
+        };
         BooleanToggleWidget w = new BooleanToggleWidget(CONTROL_WIDTH, CONTROL_HEIGHT, ON_ICON, OFF_ICON,
                 Boolean.TRUE.equals(s.current(o)), val -> {
             s.put(o, val);
             onChange.run();
-        });
+        }, iconRenderer);
         return new ConfigVisuals<Boolean>(w, w::set);
     }
     // ===== widget builders =====

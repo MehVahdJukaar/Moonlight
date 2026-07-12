@@ -115,8 +115,22 @@ public abstract class ConfigOption<T> extends ConfigNode {
     // ===== concrete value kinds =====
 
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
+        // a "feature" boolean renders as the ✓/✗ toggle (with its icon drawn next to the symbol) instead of the
+        // plain ON/OFF button; set by ConfigBuilder.feature(...). A category's enabled gate is also drawn this way,
+        // but keyed off the owning category's gate() rather than this flag.
+        private boolean feature;
+
         public BooleanValue(Component title, @Nullable Component description, WritableConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
+        }
+
+        public boolean isFeature() {
+            return feature;
+        }
+
+        @org.jetbrains.annotations.ApiStatus.Internal
+        public void setFeature(boolean feature) {
+            this.feature = feature;
         }
     }
 
