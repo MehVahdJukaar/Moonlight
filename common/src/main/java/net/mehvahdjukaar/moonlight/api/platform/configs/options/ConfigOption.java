@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
+import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.codecui.Schema;
 import net.mehvahdjukaar.codecui.SchemaCodec;
@@ -48,19 +48,19 @@ public abstract class ConfigOption<T> extends ConfigNode {
      */
     public ConfigReloadType reloadType() {
         return backingMeta()
-                .map(WritableConfigValue::reloadType)
+                .map(IConfigValue::reloadType)
                 .max(Comparator.comparingInt(Enum::ordinal))
                 .orElse(ConfigReloadType.NONE);
     }
 
     /** The backing leaf value(s), read for their change metadata: one for a leaf row, several for a grouped one. */
-    protected abstract Stream<WritableConfigValue<?>> backingMeta();
+    protected abstract Stream<IConfigValue<?>> backingMeta();
 
-    /** Picks the {@link WritableConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
-    protected static Stream<WritableConfigValue<?>> metaOf(Supplier<?>... handles) {
+    /** Picks the {@link IConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
+    protected static Stream<IConfigValue<?>> metaOf(Supplier<?>... handles) {
         return Arrays.stream(handles)
-                .filter(h -> h instanceof WritableConfigValue)
-                .map(h -> (WritableConfigValue<?>) h);
+                .filter(h -> h instanceof IConfigValue)
+                .map(h -> (IConfigValue<?>) h);
     }
 
     /**
@@ -79,15 +79,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     /**
      * The common case: an option backed by a single writable leaf of the same type {@code T}. Reading, writing and
-     * change metadata all go straight through that one {@link WritableConfigValue} — the very object {@code define(...)}
+     * change metadata all go straight through that one {@link IConfigValue} — the very object {@code define(...)}
      * returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge). The compound kinds instead sit on
      * top of several leaves and extend {@link ConfigOption} directly.
      */
     public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
-        protected final WritableConfigValue<T> handle;
+        protected final IConfigValue<T> handle;
 
-        protected SimpleConfigOption(Component title, @Nullable Component description, WritableConfigValue<T> handle, T defaultValue) {
+        protected SimpleConfigOption(Component title, @Nullable Component description, IConfigValue<T> handle, T defaultValue) {
             super(title, description, defaultValue);
             this.handle = handle;
         }
@@ -107,7 +107,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return Stream.of(this.handle);
         }
     }
@@ -120,7 +120,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         // but keyed off the owning category's gate() rather than this flag.
         private boolean feature;
 
-        public BooleanValue(Component title, @Nullable Component description, WritableConfigValue<Boolean> handle, Boolean defaultValue) {
+        public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
         }
 
@@ -138,7 +138,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         public final int min;
         public final int max;
 
-        public IntValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
+        public IntValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -150,7 +150,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * the control registry keys on the exact class, so no separate style flag is needed.
      */
     public static class IntSliderValue extends IntValue {
-        public IntSliderValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
+        public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
@@ -159,7 +159,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         public final double min;
         public final double max;
 
-        public DoubleValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue, double min, double max) {
+        public DoubleValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -168,14 +168,14 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
     /** A double drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class DoubleSliderValue extends DoubleValue {
-        public DoubleSliderValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue, double min, double max) {
+        public DoubleSliderValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
     /** A {@code [0, 1]} double drawn as a slider that displays a percentage. */
     public static class PercentValue extends DoubleValue {
-        public PercentValue(Component title, @Nullable Component description, WritableConfigValue<Double> handle, Double defaultValue) {
+        public PercentValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
         }
     }
@@ -184,7 +184,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         public final float min;
         public final float max;
 
-        public FloatValue(Component title, @Nullable Component description, WritableConfigValue<Float> handle, Float defaultValue, float min, float max) {
+        public FloatValue(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
@@ -192,7 +192,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class FloatSliderValue extends FloatValue {
-        public FloatSliderValue(Component title, @Nullable Component description, WritableConfigValue<Float> handle, Float defaultValue, float min, float max) {
+        public FloatSliderValue(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
@@ -200,7 +200,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     public static class EnumValue<E extends Enum<E>> extends SimpleConfigOption<E> {
         public final E[] options;
 
-        public EnumValue(Component title, @Nullable Component description, WritableConfigValue<E> handle, E defaultValue, E[] options) {
+        public EnumValue(Component title, @Nullable Component description, IConfigValue<E> handle, E defaultValue, E[] options) {
             super(title, description, handle, defaultValue);
             this.options = options;
         }
@@ -210,7 +210,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Nullable
         public final Predicate<Object> validator;
 
-        public StringValue(Component title, @Nullable Component description, WritableConfigValue<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
+        public StringValue(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
             super(title, description, handle, defaultValue);
             this.validator = validator;
         }
@@ -221,7 +221,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class RegexValue extends StringValue {
-        public RegexValue(Component title, @Nullable Component description, WritableConfigValue<String> handle, String defaultValue) {
+        public RegexValue(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue) {
             super(title, description, handle, defaultValue, o -> o instanceof String s && isValidRegex(s));
         }
 
@@ -240,7 +240,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public DropdownValue(Component title, @Nullable Component description, WritableConfigValue<String> handle,
+        public DropdownValue(Component title, @Nullable Component description, IConfigValue<String> handle,
                              String defaultValue, Supplier<List<String>> options,
                              @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
@@ -250,7 +250,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class ColorValue extends SimpleConfigOption<Integer> {
-        public ColorValue(Component title, @Nullable Component description, WritableConfigValue<Integer> handle, Integer defaultValue) {
+        public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {
             super(title, description, handle, defaultValue);
         }
     }
@@ -283,7 +283,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return metaOf(minHandle, maxHandle);
         }
     }
@@ -324,7 +324,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return metaOf(xHandle, yHandle, zHandle);
         }
     }
@@ -364,7 +364,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return metaOf(xHandle, yHandle, zHandle);
         }
     }
@@ -382,12 +382,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public ListValue(Component title, @Nullable Component description, WritableConfigValue<List<String>> handle,
+        public ListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
                          List<String> defaultValue, @Nullable Predicate<String> entryValidator) {
             this(title, description, handle, defaultValue, entryValidator, null, null);
         }
 
-        public ListValue(Component title, @Nullable Component description, WritableConfigValue<List<String>> handle,
+        public ListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
                          List<String> defaultValue, @Nullable Predicate<String> entryValidator,
                          @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
@@ -434,7 +434,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
         }
     }
@@ -449,11 +449,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
      * @param <T> the object type
      */
     public static class SchemaValue<T> extends ConfigOption<T> {
-        private final WritableConfigValue<T> handle;
+        private final IConfigValue<T> handle;
         private final Supplier<T> lazyDefault;
         public final SchemaCodec<T> codec;
 
-        public SchemaValue(Component title, @Nullable Component description, WritableConfigValue<T> handle,
+        public SchemaValue(Component title, @Nullable Component description, IConfigValue<T> handle,
                            Supplier<T> lazyDefault, SchemaCodec<T> codec) {
             super(title, description, null);
             this.handle = handle;
@@ -483,7 +483,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return Stream.of(this.handle);
         }
     }
@@ -511,7 +511,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<WritableConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingMeta() {
             return metaOf(handle);
         }
     }

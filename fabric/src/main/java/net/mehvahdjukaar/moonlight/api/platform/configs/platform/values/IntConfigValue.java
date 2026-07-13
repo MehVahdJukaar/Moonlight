@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
@@ -13,7 +13,7 @@ public class IntConfigValue extends ConfigValue<Integer> {
     private final Integer min;
     private final Integer max;
 
-    public IntConfigValue(String name, Integer defaultValue, Integer min, Integer max, ConfigMeta meta) {
+    public IntConfigValue(String name, Integer defaultValue, Integer min, Integer max, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.min = Objects.requireNonNull(min);
         this.max = Objects.requireNonNull(max);

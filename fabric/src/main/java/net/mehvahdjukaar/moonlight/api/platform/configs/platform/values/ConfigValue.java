@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
-import net.mehvahdjukaar.moonlight.api.platform.configs.WritableConfigValue;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
+import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -14,19 +14,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements WritableConfigValue<T> {
+public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue<T> {
 
     protected final T defaultValue;
     protected T value;
     private boolean loaded;
-    private final ConfigMeta meta;
+    private final ConfigMetadata meta;
     private String translationKey = "";
     private String commentKey = "";
     private String rawComment = "";
     private boolean slider = false;
     private boolean percent = false;
 
-    protected ConfigValue(String name, T defaultValue, ConfigMeta meta) {
+    protected ConfigValue(String name, T defaultValue, ConfigMetadata meta) {
         super(name);
         this.defaultValue = defaultValue;
         this.meta = meta;

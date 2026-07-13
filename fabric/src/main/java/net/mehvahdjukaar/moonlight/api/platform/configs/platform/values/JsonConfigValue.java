@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
@@ -11,7 +11,7 @@ public class JsonConfigValue extends ConfigValue<JsonElement> {
 
     private final Supplier<JsonElement> defValue;
 
-    public JsonConfigValue(String name, Supplier<JsonElement> defaultSupplier, ConfigMeta meta) {
+    public JsonConfigValue(String name, Supplier<JsonElement> defaultSupplier, ConfigMetadata meta) {
         super(name, null, meta);
         this.defValue = Suppliers.memoize(defaultSupplier::get);
     }

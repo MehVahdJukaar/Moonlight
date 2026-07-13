@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
@@ -41,13 +41,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     //doesn't load it immediately. happens after registration to mimic forge
+    @Override
     @NotNull
-    public FabricConfigHolder build() {
-        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
+    protected FabricConfigHolder buildHolder() {
         assert categoryStack.size() == 1;
-        FabricConfigHolder holder = new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback(), getUiRoot());
-        holder.setFeatureToggles(getFeatureToggles());
-        return holder;
+        return new FabricConfigHolder(this.getName(), mainCategory, this.type, this.buildChangeCallback(), getUiRoot());
     }
 
     @Override
@@ -92,8 +90,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
      * The flags stay set across a compound value's suppressed inner defines (recordOption no-ops while suppressed),
      * so every leaf of a range/vec3 gets the same meta; they are cleared at the compound boundary in recordOption.
      */
-    private ConfigMeta pendingMeta() {
-        return new ConfigMeta(this.pendingReload, this.pendingDynamicPacks);
+    private ConfigMetadata pendingMeta() {
+        return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
 
     private void doAddConfig(String name, ConfigValue<?> config) {

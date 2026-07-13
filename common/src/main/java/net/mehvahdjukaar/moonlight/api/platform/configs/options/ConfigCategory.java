@@ -25,11 +25,6 @@ public class ConfigCategory extends ConfigNode {
         entry.setParent(this);
     }
 
-    /**
-     * The optional "feature" boolean that enables/disables this whole category (see
-     * {@code ConfigBuilder.feature}). When null the category is always active. Its value only <em>gates</em> the
-     * category at read time (through composed suppliers); it never rewrites the child entries.
-     */
     @Nullable
     public ConfigOption.BooleanValue gate() {
         return gate;

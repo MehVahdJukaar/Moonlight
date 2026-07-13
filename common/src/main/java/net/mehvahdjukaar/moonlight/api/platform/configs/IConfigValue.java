@@ -6,7 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public interface WritableConfigValue<T> extends Supplier<T> {
+public interface IConfigValue<T> extends Supplier<T> {
 
     boolean setValue(T value);
 

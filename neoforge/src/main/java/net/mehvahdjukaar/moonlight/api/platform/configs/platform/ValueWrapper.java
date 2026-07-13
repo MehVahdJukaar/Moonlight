@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -15,22 +15,22 @@ import java.util.Objects;
  * NeoForge leaf value: a loader independent {@link TrackedConfigValue} view over a raw {@link ModConfigSpec.ConfigValue}.
  * The stored raw type {@code C} (what the {@code ModConfigSpec} persists) is mapped to/from the exposed type {@code T}
  * via {@link #map}/{@link #unmap}, so colours, json and beans can live behind the same interface as plain values. The
- * change metadata is injected once at construction ({@link ConfigMeta}); there are no setters.
+ * change metadata is injected once at construction ({@link ConfigMetadata}); there are no setters.
  */
 abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
-    private final ConfigMeta meta;
+    private final ConfigMetadata meta;
     private T cachedValue = null;
     private C cachedRaw = null;
     private boolean initialized = false;
 
-    ValueWrapper(ModConfigSpec.ConfigValue<C> original, ConfigMeta meta) {
+    ValueWrapper(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
         this.original = original;
         this.meta = meta;
     }
 
     // simple pass‑through wrapper
-    public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMeta meta) {
+    public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
         return new ValueWrapper<>(original, meta) {
             @Override
             T map(T value) { return value; }
@@ -40,7 +40,7 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
     }
 
     // wrapper that uses a Codec to convert between String and T (e.g. for colours)
-    public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMeta meta) {
+    public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
         return new ValueWrapper<>(original, meta) {
             @Override
             T map(String value) {
@@ -54,7 +54,7 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
     }
 
     // wrapper that handles JSON config values (stored as String, exposed as JsonElement)
-    public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMeta meta) {
+    public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
         return new ValueWrapper<>(original, meta) {
             @Override
             JsonElement map(String value) {
@@ -73,7 +73,7 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMeta meta) {
+    public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
         return new ValueWrapper<>(original, meta) {
             @Override
             T map(String raw) {

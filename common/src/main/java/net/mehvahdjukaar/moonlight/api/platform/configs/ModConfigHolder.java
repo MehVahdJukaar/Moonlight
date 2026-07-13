@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -73,7 +74,7 @@ public abstract class ModConfigHolder {
     }
 
     /** Internal: the builder hands over its collected feature registry at build time. */
-    @org.jetbrains.annotations.ApiStatus.Internal
+    @ApiStatus.Internal
     public void setFeatureToggles(Map<String, Supplier<Boolean>> featureToggles) {
         this.featureToggles = Map.copyOf(featureToggles);
     }
@@ -130,12 +131,12 @@ public abstract class ModConfigHolder {
     /**
      * Writes a new (already validated) value to a config handle and saves it. {@code config} is the object a
      * {@code define(...)} returned; it is exposed to mods as a read-only {@link Supplier} but is always really one of
-     * ours ({@link WritableConfigValue}), so this recovers that type with a single boundary cast rather than an
+     * ours ({@link IConfigValue}), so this recovers that type with a single boundary cast rather than an
      * {@code instanceof} chain. Invalidates this config's pack cache when the write actually changed a pack-affecting
      * value. Shared by both loaders; only {@link #persist()} differs.
      */
     public <T> void manuallySetValue(Supplier<T> config, T value) {
-        if (!(config instanceof WritableConfigValue<T> handle)) {
+        if (!(config instanceof IConfigValue<T> handle)) {
             throw new IllegalArgumentException("Config value is not settable: " + config);
         }
         if (handle.setValue(value) && handle.affectsDynamicPacks()) {

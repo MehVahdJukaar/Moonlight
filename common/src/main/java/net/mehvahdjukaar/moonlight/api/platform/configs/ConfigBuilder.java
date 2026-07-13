@@ -25,6 +25,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,9 +35,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-/**
- * A loader independent config builder. Supports common config syncing.
- */
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new HashMap<>();
@@ -124,7 +124,16 @@ public abstract class ConfigBuilder {
         Moonlight.addDependent(name.getNamespace());
     }
 
-    public abstract ModConfigHolder build();
+    public final ModConfigHolder build() {
+        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
+        ModConfigHolder holder = buildHolder();
+        holder.setFeatureToggles(getFeatureToggles());
+        return holder;
+    }
+
+    /** Platform hook: build the loader specific holder. The shared {@link #build()} wraps it with the trailing
+     * comment flush and feature-toggle wiring so both loaders share that boilerplate. */
+    protected abstract ModConfigHolder buildHolder();
 
     public ResourceLocation getName() {
         return name;
@@ -307,11 +316,6 @@ public abstract class ConfigBuilder {
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    /**
-     * Defines a value stored via {@code codec}, edited on the native config screen as a schema-driven form: the codec
-     * is wrapped into a {@link SchemaCodec} (one that already is keeps its declared schema; a plain codec degrades to
-     * a raw-JSON editor). Be careful with defaults referencing objects that aren't registered this early.
-     */
     public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
 
     public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
@@ -330,12 +334,6 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue);
 
-    /**
-     * Defines a config value from a plain Java bean (POJO or record), for when you'd rather not write a {@link Codec}.
-     * Each field becomes its own native config value grouped under a sub-category named {@code name}, and the returned
-     * supplier reconstructs the bean from those live values. Supported field types: boolean, int, double, float, String
-     * and enums; the bean must be a record or have a no-arg constructor.
-     */
     public <T> Supplier<T> defineBean(String name, T defaultValue) {
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) defaultValue.getClass();
@@ -348,12 +346,12 @@ public abstract class ConfigBuilder {
     }
 
     private <T> Supplier<T> definePojoBean(Class<T> type, T defaultValue) {
-        List<java.lang.reflect.Field> fields = new java.util.ArrayList<>();
-        List<Supplier<?>> readers = new java.util.ArrayList<>();
+        List<Field> fields = new ArrayList<>();
+        List<Supplier<?>> readers = new ArrayList<>();
         try {
-            for (java.lang.reflect.Field f : type.getDeclaredFields()) {
+            for (Field f : type.getDeclaredFields()) {
                 int mods = f.getModifiers();
-                if (java.lang.reflect.Modifier.isStatic(mods) || java.lang.reflect.Modifier.isTransient(mods)) continue;
+                if (Modifier.isStatic(mods) || Modifier.isTransient(mods)) continue;
                 f.setAccessible(true);
                 fields.add(f);
                 readers.add(defineBeanField(f.getName(), f.getType(), f.get(defaultValue)));
@@ -375,8 +373,8 @@ public abstract class ConfigBuilder {
     }
 
     private <T> Supplier<T> defineRecordBean(Class<T> type, T defaultValue) {
-        java.lang.reflect.RecordComponent[] comps = type.getRecordComponents();
-        List<Supplier<?>> readers = new java.util.ArrayList<>();
+        RecordComponent[] comps = type.getRecordComponents();
+        List<Supplier<?>> readers = new ArrayList<>();
         Class<?>[] paramTypes = new Class<?>[comps.length];
         try {
             for (int i = 0; i < comps.length; i++) {
@@ -441,13 +439,6 @@ public abstract class ConfigBuilder {
                 (name.isEmpty() ? "" : "." + name);
     }
 
-
-    /**
-     * Adds a comment/description to a value. Lenient: it may be called either before or after that value's
-     * {@code define(...)}. A comment always binds forward to the next define; if none follows before another
-     * comment arrives or the section closes, it falls back onto the most recently defined value (an "after"
-     * comment). Ends up in the english language file and as the hover description of the value's screen row.
-     */
     public ConfigBuilder comment(String comment) {
         // a new comment means the previous one had no define of its own -> it was an "after" comment; flush it first
         if (this.pendingComment != null) applyComment(this.pendingComment);
@@ -456,27 +447,15 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    /**
-     * Multi line variant of {@link #comment(String)}, mirroring Forge's {@code comment(String...)}.
-     */
     public ConfigBuilder comment(String... comment) {
         return comment(String.join("\n", comment));
     }
 
-    /**
-     * Attaches a decorative icon to the NEXT category {@code push(...)}/{@code pushFeature(...)} or defined value.
-     * Eye candy for the native config screen, resolved to an item/block (or GUI sprite) lazily on the client, so the
-     * {@code id} may reference things not registered yet at build time. Chainable, like {@link #comment}.
-     */
     public ConfigBuilder icon(ResourceLocation id) {
         this.pendingIcon = id;
         return this;
     }
 
-    /**
-     * Convenience {@link #icon(ResourceLocation)}: a bare path (no {@code :}) is namespaced to this config's mod id,
-     * so {@code icon("faucet")} means {@code <modid>:faucet}.
-     */
     public ConfigBuilder icon(String id) {
         return icon(id.indexOf(':') >= 0
                 ? ResourceLocation.parse(id)
@@ -512,21 +491,12 @@ public abstract class ConfigBuilder {
         return null;
     }
 
-    /**
-     * Forge parity alias for {@link #worldReload()} (Forge calls it {@code worldRestart()}).
-     */
-    public ConfigBuilder worldRestart() {
-        return worldReload();
-    }
-
     public ConfigBuilder pop(int count) {
         for (int i = 0; i < count; i++) pop();
         return this;
     }
 
-    /**
-     * Accepted for Forge parity but a no-op: Moonlight derives translation keys from the category/value names.
-     */
+    @Deprecated(forRemoval = true)
     public ConfigBuilder translation(String translationKey) {
         return this;
     }
@@ -562,11 +532,6 @@ public abstract class ConfigBuilder {
         }
     }
 
-    // ===== loader independent UI tree (consumed by the native config screen) =====
-
-    /**
-     * Pushes a UI sub category mirroring a {@code push(...)}. No-op while UI emission is suppressed.
-     */
     protected void uiPush(Component title) {
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
@@ -580,9 +545,6 @@ public abstract class ConfigBuilder {
         this.categoryPath.addLast(currentCategory()); // raw-name path, so features can be looked up by full path
     }
 
-    /**
-     * Pops the current UI sub category. No-op while UI emission is suppressed.
-     */
     protected void uiPop() {
         if (this.suppressUi) return;
         this.uiStack.pop();
@@ -590,7 +552,6 @@ public abstract class ConfigBuilder {
         this.categoryPath.pollLast();
     }
 
-    /** The current category as a dotted raw-name path (e.g. {@code redstone.speaker_block}), root first. */
     protected String currentCategoryPath() {
         return String.join(".", this.categoryPath);
     }
@@ -659,11 +620,16 @@ public abstract class ConfigBuilder {
         return effective;
     }
 
-    /**
-     * Infers a feature's decorative icon from its name: {@code <this config's mod id>:<name>}. Resolved lazily on the
-     * client (see {@code ConfigScreenIcons}), so a name that isn't a real item/block simply shows no icon. An explicit
-     * {@link #icon} always takes precedence. Returns {@code null} for a name that isn't a valid resource path.
-     */
+    public Supplier<Boolean> feature(String name) {
+        return feature(name, true);
+    }
+
+    public Supplier<Boolean> pushFeature(String name, boolean defaultEnabled) {
+        push(name);
+        return mainFeature(defaultEnabled);
+    }
+
+
     @Nullable
     private ResourceLocation inferFeatureIcon(String name) {
         return ResourceLocation.tryBuild(this.name.getNamespace(), name);
@@ -683,16 +649,6 @@ public abstract class ConfigBuilder {
     /** The feature registry (short name and full path -> effective enabled supplier), handed to the built holder. */
     protected Map<String, Supplier<Boolean>> getFeatureToggles() {
         return this.featureToggles;
-    }
-
-    /** A named leaf feature enabled by default. */
-    public Supplier<Boolean> feature(String name) {
-        return feature(name, true);
-    }
-
-    public Supplier<Boolean> pushFeature(String name, boolean defaultEnabled) {
-        push(name);
-        return mainFeature(defaultEnabled);
     }
 
     public Supplier<Boolean> pushFeature(String name) {
@@ -745,11 +701,6 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
-    /**
-     * A {@link Vec3} (three doubles) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}.
-     * Stored as three doubles nested under a {@code name} section (their individual rows suppressed, like
-     * {@link #defineRange}), written back together.
-     */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);
@@ -767,9 +718,6 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
-    /**
-     * A {@link Vec3i} (three ints) shown as one row of x/y/z number fields, each bounded by {@code [min, max]}.
-     */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);
@@ -827,11 +775,7 @@ public abstract class ConfigBuilder {
 
     public static final Predicate<Object> REGEX_CHECK = o -> o instanceof String s && ConfigOption.RegexValue.isValidRegex(s);
 
-    public static final Predicate<Object> LIST_STRING_CHECK = (s) -> {
-        if (s instanceof List<?>) {
-            return ((Collection<?>) s).stream().allMatch(o -> o instanceof String);
-        }
-        return false;
-    };
+    public static final Predicate<Object> LIST_STRING_CHECK = o ->
+            o instanceof List<?> l && l.stream().allMatch(e -> e instanceof String);
 
 }

@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public record ConfigMeta(ConfigReloadType reloadType, boolean affectsDynamicPacks) {
+public record ConfigMetadata(ConfigReloadType reloadType, boolean affectsDynamicPacks) {
 
-    public static final ConfigMeta NONE = new ConfigMeta(ConfigReloadType.NONE, false);
+    public static final ConfigMetadata NONE = new ConfigMetadata(ConfigReloadType.NONE, false);
 }

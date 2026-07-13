@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -22,12 +22,12 @@ public class ListStringConfigValue<T extends String> extends ConfigValue<List<St
     @Nullable
     private final Function<String, ItemStack> icon;
 
-    public ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator, ConfigMeta meta) {
+    public ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator, ConfigMetadata meta) {
         this(name, defaultValue, validator, null, null, meta);
     }
 
     public ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator,
-                                 @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMeta meta) {
+                                 @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.predicate = validator;
         this.options = options;

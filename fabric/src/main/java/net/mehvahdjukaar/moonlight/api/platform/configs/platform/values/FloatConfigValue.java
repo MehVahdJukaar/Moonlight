@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
@@ -13,7 +13,7 @@ public class FloatConfigValue extends ConfigValue<Float> {
     private final Float min;
     private final Float max;
 
-    public FloatConfigValue(String name, Float defaultValue, Float min, Float max, ConfigMeta meta) {
+    public FloatConfigValue(String name, Float defaultValue, Float min, Float max, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.min = Objects.requireNonNull(min);
         this.max = Objects.requireNonNull(max);

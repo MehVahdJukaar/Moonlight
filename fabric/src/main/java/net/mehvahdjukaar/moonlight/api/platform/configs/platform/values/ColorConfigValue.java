@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 
 public class ColorConfigValue extends IntConfigValue {
 
-    public ColorConfigValue(String name, int defaultValue, ConfigMeta meta) {
+    public ColorConfigValue(String name, int defaultValue, ConfigMetadata meta) {
         super(name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE, meta);
     }
 

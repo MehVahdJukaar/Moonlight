@@ -29,7 +29,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.TrackedConfigValue;
 import net.neoforged.fml.ModList;
@@ -125,10 +125,10 @@ public class ConfigHelper {
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
      */
     public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
-        return defineObject(builder, name, codec, defaultSupplier, ConfigMeta.NONE);
+        return defineObject(builder, name, codec, defaultSupplier, ConfigMetadata.NONE);
     }
 
-    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMeta meta) {
+    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMetadata meta) {
         com.google.common.base.Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
             T defaultValue = defaultSupplier.get();
             var encodeResult = codec.encodeStart(TomlConfigOps.INSTANCE, defaultValue);
@@ -150,9 +150,9 @@ public class ConfigHelper {
         private T parsedObject;
         private final Supplier<T> defaultObject;
         private boolean initialized;
-        private final ConfigMeta meta;
+        private final ConfigMetadata meta;
 
-        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMeta meta) {
+        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMetadata meta) {
             this.value = value;
             this.codec = codec;
             this.defaultObject = Suppliers.memoize(defaultSupplier);

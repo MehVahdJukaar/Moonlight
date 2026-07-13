@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ public class DropdownConfigValue extends StringConfigValue {
     private final Function<String, ItemStack> icon;
 
     public DropdownConfigValue(String name, String defaultValue, Predicate<Object> validator,
-                               Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMeta meta) {
+                               Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
         super(name, defaultValue, validator, meta);
         this.options = options;
         this.icon = icon;

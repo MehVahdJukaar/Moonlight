@@ -7,7 +7,7 @@ import com.mojang.serialization.JavaOps;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMeta;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
@@ -74,8 +74,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
      * suppressed inner defines, so every leaf of a range/vec3 gets the same meta; they are cleared at the compound
      * boundary in {@code recordOption}.
      */
-    private ConfigMeta pendingMeta() {
-        return new ConfigMeta(this.pendingReload, this.pendingDynamicPacks);
+    private ConfigMetadata pendingMeta() {
+        return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
 
     private <T> T track(T value) {
@@ -102,12 +102,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public ForgeConfigHolder build() {
-        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
-        ForgeConfigHolder holder = new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
+    protected ForgeConfigHolder buildHolder() {
+        return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
                 this.buildChangeCallback(), trackedValues, getUiRoot());
-        holder.setFeatureToggles(getFeatureToggles());
-        return holder;
     }
 
     @Override
