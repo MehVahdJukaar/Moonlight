@@ -33,13 +33,6 @@ import java.util.Locale;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * Native, loader independent Moonlight config screen. Renders a server safe {@link ConfigCategory} tree
- * (produced by the config holder) using vanilla list screens. It only handles layout and navigation: rows live
- * in their own classes, widgets come from the {@link ConfigControls} registry and edit state lives in a
- * {@link ConfigEditSession} shared across the navigation stack, so this class stays small and the system is open
- * for new control types without touching it.
- */
 public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
     // reused so re-opening/leaving repeatedly refreshes one toast instead of stacking duplicates
@@ -65,9 +58,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     private String searchQuery = "";
     private final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
 
-    /**
-     * Root entry point: starts a fresh editing session for the whole config.
-     */
     public MoonlightConfigScreen(ModConfigHolder holder, ConfigCategory root, Screen returnScreen,
                                  @Nullable ResourceLocation background) {
         this(root, null, new ConfigEditSession(holder, returnScreen), background);
@@ -120,8 +110,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         ConfigCategory parent = cat.parent();
         return own && (parent == null || isCategoryEnabled(parent));
     }
-
-    // ===== screen =====
 
     @Override
     public OverlayLayer getOverlayLayer() {

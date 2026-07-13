@@ -19,11 +19,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * Entry point for a mod's configs: lists every config registered for the mod (common, client, ...) as a button
- * that opens that config's {@link MoonlightConfigScreen}. When a mod only has a single config this is skipped and
- * that config opens directly (see {@link #create}).
- */
 public class MoonlightConfigSelectScreen extends Screen {
 
     private final String modId;

@@ -5,10 +5,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.Font;
 
-/**
- * The small surface rows use to talk back to their owning screen, so rows can live as their own classes instead
- * of inner classes of a god screen.
- */
 interface ConfigScreenAccess {
 
     Font font();

@@ -25,7 +25,7 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
 /**
  * A single editable config value on the main config screen: a single-line name with the editing control from
- * {@link ConfigControls} pinned to the right and an icon reset button. Values that have a description show a
+ * {@link ConfigControllers} pinned to the right and an icon reset button. Values that have a description show a
  * disclosure triangle in the left gutter; clicking the label area toggles it, dropping the wrapped description
  * beneath the row as read-only {@link DescriptionRow}s. A reload/restart hint sprite sits in the far-left gutter.
  */
@@ -64,8 +64,8 @@ class OptionRow extends ConfigListRow {
         // both the category "enabled" gate and a named feature leaf render as the ✓/✗ toggle (icon beside the symbol)
         this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
         this.control = asToggle
-                ? ConfigControls.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
-                : ConfigControls.create(value, session, this::onEdited);
+                ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
+                : ConfigControllers.create(value, session, this::onEdited);
 
         this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
                 RESET_ICON, 12, 12, b -> rollback());

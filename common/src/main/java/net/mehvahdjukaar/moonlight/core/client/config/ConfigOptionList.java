@@ -12,10 +12,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.ROW_WIDTH;
 
-/**
- * The scrolling list of config rows. Uniform row height (a vanilla {@link ContainerObjectSelectionList}
- * constraint); expanded descriptions are represented as extra {@link DescriptionRow}s rather than taller rows.
- */
 class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
 
     ConfigOptionList(Minecraft minecraft, int width, int height, int y, int itemHeight) {

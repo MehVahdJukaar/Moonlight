@@ -32,7 +32,7 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
  * type itself, so adding a new control means registering one provider here (or, for add-ons,
  * {@link #register} from their own client init) rather than touching the screen.
  */
-public final class ConfigControls {
+public final class ConfigControllers {
 
     private static final Map<Class<?>, ConfigVisuals. Provider<?>> PROVIDERS = new HashMap<>();
 
@@ -59,7 +59,7 @@ public final class ConfigControls {
                         s.put(o, val);
                         onChange.run();
                     });
-            return new ConfigVisuals<Boolean>(w, w::setValue);
+            return new ConfigVisuals<>(w, w::setValue);
         });
 
         @SuppressWarnings("unchecked")
@@ -75,7 +75,7 @@ public final class ConfigControls {
                 }));
 
         register(ConfigOption.RegexValue.class, (o, s, onChange) -> {
-            ConfigVisuals control = textField(s.current(o), String::valueOf, str -> {
+            ConfigVisuals<Object> control = textField(s.current(o), String::valueOf, str -> {
                 if (!o.isValid(str)) throw new IllegalArgumentException();
                 s.put(o, str);
                 onChange.run();
@@ -141,7 +141,7 @@ public final class ConfigControls {
                 s.put(o, r);
                 onChange.run();
             });
-            return new ConfigVisuals<Range>(w, w::setRange);
+            return new ConfigVisuals<>(w, w::setRange);
         });
 
         register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
@@ -169,7 +169,7 @@ public final class ConfigControls {
                 s.put(o, val);
                 onChange.run();
             });
-            return new ConfigVisuals<String>(w, w::setValue);
+            return new ConfigVisuals<>(w, w::setValue);
         });
 
         register(ConfigOption.ListValue.class, (o, s, onChange) -> {
@@ -200,7 +200,7 @@ public final class ConfigControls {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
                     Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
                     Minecraft.getInstance().setScreen(SchemaEditScreen.create(o, s, onChange)));
-            return new ConfigVisuals<Object>(button, v -> {
+            return new ConfigVisuals<>(button, v -> {
             });
         });
 
@@ -216,7 +216,7 @@ public final class ConfigControls {
     static ConfigVisuals<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
         ResourceLocation icon = o.icon();
         // draw the feature's decorative item just left of the ✓/✗ symbol, when it resolves to something
-        BooleanToggleWidget.IconRenderer iconRenderer = icon == null ? null : new BooleanToggleWidget.IconRenderer() {
+        BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
 
             @Override
@@ -262,7 +262,7 @@ public final class ConfigControls {
             store.accept(v);
             onChange.run();
         });
-        return new ConfigVisuals<Number>(slider, n -> slider.setActualValue(n.doubleValue()));
+        return new ConfigVisuals<>(slider, n -> slider.setActualValue(n.doubleValue()));
     }
 
     private static ConfigVisuals<Object> textField(String initial, Function<Object, String> display, TextCommit commit) {
@@ -288,7 +288,7 @@ public final class ConfigControls {
         Button button = Button.builder(Component.translatable("gui.moonlight.config.edit_manually"), b -> {
         }).bounds(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT).build();
         button.active = false;
-        return new ConfigVisuals<Object>(button, v -> {
+        return new ConfigVisuals<>(button, v -> {
         });
     }
 

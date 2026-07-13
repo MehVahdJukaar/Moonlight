@@ -10,12 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-/**
- * An on/off button that draws a checkmark/cross sprite instead of ON/OFF text. The two sprites are supplied by the
- * caller, so the widget carries no dependency on any particular screen's assets. An optional {@link IconRenderer}
- * lets a caller draw a decorative item just to the left of the symbol (used by feature toggles), still without the
- * widget knowing how that icon is resolved or drawn.
- */
 public class BooleanToggleWidget extends AbstractButton {
 
     private static final int ICON_SIZE = 12;
@@ -27,7 +21,7 @@ public class BooleanToggleWidget extends AbstractButton {
     private boolean value;
     private final Consumer<Boolean> onChange;
     @Nullable
-    private final IconRenderer iconRenderer;
+    private final ExtraIcon iconRenderer;
 
     public BooleanToggleWidget(int width, int height, ResourceLocation onIcon, ResourceLocation offIcon,
                                boolean initial, Consumer<Boolean> onChange) {
@@ -35,7 +29,7 @@ public class BooleanToggleWidget extends AbstractButton {
     }
 
     public BooleanToggleWidget(int width, int height, ResourceLocation onIcon, ResourceLocation offIcon,
-                               boolean initial, Consumer<Boolean> onChange, @Nullable IconRenderer iconRenderer) {
+                               boolean initial, Consumer<Boolean> onChange, @Nullable ExtraIcon iconRenderer) {
         super(0, 0, width, height, Component.empty());
         this.onIcon = onIcon;
         this.offIcon = offIcon;
@@ -44,11 +38,7 @@ public class BooleanToggleWidget extends AbstractButton {
         this.iconRenderer = iconRenderer;
     }
 
-    /**
-     * Draws the optional decorative icon shown next to the ✓/✗ symbol. {@link #available()} is checked first so the
-     * widget can reserve room and center the icon+symbol group only when there really is an icon to draw.
-     */
-    public interface IconRenderer {
+    public interface ExtraIcon {
         boolean available();
 
         void render(GuiGraphics graphics, int x, int y, int size, boolean hovered, boolean lit);

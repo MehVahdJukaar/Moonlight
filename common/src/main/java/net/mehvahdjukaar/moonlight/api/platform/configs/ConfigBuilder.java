@@ -208,7 +208,6 @@ public abstract class ConfigBuilder {
 
     public static final Predicate<Object> REGISTRY_ID_CHECK = o -> o instanceof String s && ResourceLocation.tryParse(s) != null;
 
-    /** Platform hook for the lists below: stores a validated string list and records a {@link ConfigOption.ListValue} row. */
     protected abstract Supplier<List<String>> defineListInternal(String name, List<String> defaultValue,
                                                                  Predicate<Object> entryValidator,
                                                                  Supplier<List<String>> options,
@@ -225,7 +224,6 @@ public abstract class ConfigBuilder {
         return () -> handle.get().stream().map(ResourceLocation::parse).toList();
     }
 
-    /** Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon. */
     public Supplier<List<Item>> defineItemList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),

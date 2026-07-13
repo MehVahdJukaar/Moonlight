@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * A transient, in-memory {@link IConfigValue} used only by the schema-driven editor ({@link SchemaEditScreen}):
  * it backs each generated form leaf so the whole reused config-row/control machinery ({@code OptionRow},
- * {@link ConfigControls}) can drive it exactly like a real config value, without touching any on-disk config. Nothing
+ * {@link ConfigControllers}) can drive it exactly like a real config value, without touching any on-disk config. Nothing
  * is persisted through here — the editor reads the working values straight out of its {@code ConfigEditSession} and
  * re-encodes them through the codec on Done. Carries no change metadata (it never triggers a reload / pack refresh).
  */

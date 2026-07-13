@@ -1,1 +1,2 @@
 - added new native config screen
+- fixed a server side issue

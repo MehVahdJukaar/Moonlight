@@ -33,7 +33,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
  * A schema-driven form editor for a single codec-backed config value ({@link ConfigOption.SchemaValue}). A CodecUI
  * {@link net.mehvahdjukaar.codecui.Schema} is converted (by {@link SchemaForm}) into the same
  * {@link ConfigCategory}/{@link ConfigOption} tree the main config screen renders, and this screen drives it with the
- * exact same rows ({@code OptionRow}/{@code CategoryRow}), controls ({@link ConfigControls}) and edit session — so a
+ * exact same rows ({@code OptionRow}/{@code CategoryRow}), controls ({@link ConfigControllers}) and edit session — so a
  * generated form looks and behaves identically to a hand-written config page, with no bespoke widget code.
  *
  * <p>All working edits live in a private {@link ConfigEditSession} (holder-less: nothing here writes to disk) shared
@@ -189,7 +189,7 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
             this.minecraft.setScreen(state.session.returnScreen());
         } else {
             this.error = Component.translatable("gui.moonlight.config.schema_invalid",
-                    result.error().map(e -> e.message()).orElse(""));
+                    result.error().map(DataResult.Error::message).orElse(""));
         }
     }
 

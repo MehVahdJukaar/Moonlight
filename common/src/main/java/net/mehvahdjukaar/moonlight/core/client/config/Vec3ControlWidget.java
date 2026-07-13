@@ -15,7 +15,6 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
 class Vec3ControlWidget extends CompositeWidget {
 
-    /** Receives a valid x/y/z triple as doubles (the provider rounds to ints for the Vec3i case). */
     @FunctionalInterface
     interface Sink {
         void accept(double x, double y, double z);

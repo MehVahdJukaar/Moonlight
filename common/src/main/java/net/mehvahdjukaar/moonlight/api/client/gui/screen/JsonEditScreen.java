@@ -15,12 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * A screen for editing a JSON string as pretty-printed, syntax-highlighted text in one big {@link SyntaxEditBox}.
- * On Done it hands the edited text back through {@code onApply} and returns to {@code parent}; Done is disabled
- * while the text isn't valid JSON, so nothing invalid is ever committed. Follows the same "edit on a sub page, hand
- * the result back on Done" shape as {@link ColorPickerScreen}.
- */
 public class JsonEditScreen extends Screen {
 
     private static final int HEADER = 44;
@@ -111,7 +105,6 @@ public class JsonEditScreen extends Screen {
         }
     }
 
-    /** The config comment, word-wrapped under the title so it stays visible while editing. */
     private void renderDescription(GuiGraphics graphics) {
         if (this.descriptionLines.isEmpty()) return;
         int bandBottom = HEADER + this.descriptionBlockHeight;

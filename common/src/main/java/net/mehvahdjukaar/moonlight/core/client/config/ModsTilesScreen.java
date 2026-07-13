@@ -25,11 +25,6 @@ import java.util.Set;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * A hub listing every mod that registered a config with Moonlight, drawn as a scrollable grid of cards (mod icon +
- * name + version). Clicking a card opens that mod's config(s) (via {@link MoonlightConfigSelectScreen#create}).
- * Reached from the bottom-left button on the config screens.
- */
 public class ModsTilesScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");

@@ -88,7 +88,7 @@ class CategoryRow extends ConfigListRow {
             graphics.blitSprite(FOLDER_ICON, iconX, iconY, ROW_ICON, ROW_ICON);
         }
         Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
-        GuiHelper. renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
+        GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         if (toggle != null && gate != null) {
             toggle.set(Boolean.TRUE.equals(view.session().current(gate)));
