@@ -43,6 +43,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
@@ -250,6 +251,20 @@ public class ClientHelperImpl {
             }
         }
         return null;
+    }
+
+    @Nullable
+    public static Screen getModConfigScreen(String modId, Screen parent) {
+        return ModList.get().getModContainerById(modId)
+                .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
+                        .map(factory -> factory.createScreen(container, parent)))
+                .orElse(null);
+    }
+
+    public static boolean hasModConfigScreen(String modId) {
+        return ModList.get().getModContainerById(modId)
+                .map(container -> container.getCustomExtension(IConfigScreenFactory.class).isPresent())
+                .orElse(false);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {

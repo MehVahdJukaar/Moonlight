@@ -5,8 +5,10 @@ import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -28,6 +30,9 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 public class ModsTilesScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
+    // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
+    // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists.
+    private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
     // the same tiling list background the vanilla selection lists use (the field is private on AbstractSelectionList)
     private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
     private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
@@ -76,6 +81,15 @@ public class ModsTilesScreen extends Screen {
         // distinct mod ids that registered a config, ordered by display name
         Set<String> modIds = new LinkedHashSet<>();
         for (ModConfigHolder h : ModConfigHolder.getTrackedSpecs()) modIds.add(h.getModId());
+        // extra mods (and, if enabled, every installed mod) that expose a loader/Mod Menu config screen
+        for (String modId : EXTRA_MODS) {
+            if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
+        }
+        if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get()) {
+            for (String modId : PlatHelper.getInstalledMods()) {
+                if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
+            }
+        }
         for (String modId : modIds) {
             String name = safe(() -> PlatHelper.getModName(modId), modId);
             String version = safe(() -> PlatHelper.getModVersion(modId), null);
@@ -231,7 +245,10 @@ public class ModsTilesScreen extends Screen {
             for (int i = 0; i < entries.size(); i++) {
                 int x = cardX(i), y = cardY(i);
                 if (mouseX >= x && mouseX < x + CARD_W && mouseY >= y && mouseY < y + CARD_H) {
-                    Screen s = MoonlightConfigSelectScreen.create(entries.get(i).modId(), this, background);
+                    String modId = entries.get(i).modId();
+                    // Moonlight-tracked mods open our own screen; the rest defer to the loader/Mod Menu screen
+                    Screen s = MoonlightConfigSelectScreen.create(modId, this, background);
+                    if (s == null) s = ClientHelper.getModConfigScreen(modId, this);
                     if (s != null) {
                         this.minecraft.setScreen(s);
                         return true;

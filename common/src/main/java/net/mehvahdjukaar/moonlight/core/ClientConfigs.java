@@ -17,6 +17,7 @@ public class ClientConfigs {
     public static final Supplier<Boolean> DEBUG_RENDERS;
     public static final Supplier<TooltipMode> TAGS_TOOLTIP;
     public static final Supplier<Boolean> CUSTOM_CONFIG_SCREEN;
+    public static final Supplier<Boolean> SHOW_ALL_MOD_CONFIGS;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
@@ -47,6 +48,8 @@ public class ClientConfigs {
 
         CUSTOM_CONFIG_SCREEN = builder.comment("Use Moonlight's own custom config screen. When disabled, config screens are left to the loader instead: on NeoForge that means NeoForge's own screen (or Configured, if installed), and on Fabric the old Cloth Config / YACL screens")
                 .define("custom_config_screen", true);
+        SHOW_ALL_MOD_CONFIGS = builder.comment("Show a config tile for every installed mod that exposes a config screen, not just the ones using Moonlight's config system. Clicking one opens the screen the mod itself registered (NeoForge's screen extension, or Mod Menu on Fabric)")
+                .define("show_all_mod_configs", false);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

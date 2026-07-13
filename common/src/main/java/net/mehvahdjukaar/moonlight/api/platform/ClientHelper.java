@@ -307,6 +307,23 @@ public class ClientHelper {
     }
 
     /**
+     * Opens the config screen a mod registered with the loader itself (NeoForge's screen extension, or Mod Menu
+     * on Fabric) rather than through Moonlight's config system. Returns null when that mod exposes no such screen
+     * (which on Fabric includes the case where Mod Menu is not installed).
+     */
+    @PlatformImpl
+    @Nullable
+    public static Screen getModConfigScreen(String modId, Screen parent) {
+        throw new AssertionError();
+    }
+
+    /** Whether {@link #getModConfigScreen} would return a screen for this mod. */
+    @PlatformImpl
+    public static boolean hasModConfigScreen(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
      * Pack in /resources/resourcepacks
      */
     @PlatformImpl

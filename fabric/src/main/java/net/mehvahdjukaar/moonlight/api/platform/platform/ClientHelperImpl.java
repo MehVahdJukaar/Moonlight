@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mehvahdjukaar.moonlight.api.client.model.platform.MLFabricModelLoaderRegistry;
+import net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -230,6 +231,18 @@ public class ClientHelperImpl {
     public static Path getModIcon(String modId) {
         var container = FabricLoader.getInstance().getModContainer(modId).orElseThrow();
         return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
+    }
+
+    public static Screen getModConfigScreen(String modId, Screen parent) {
+        // Mod Menu is optional: only touch its classes when it is loaded
+        if (PlatHelper.isModLoaded("modmenu")) {
+            return ModMenuCompat.getModConfigScreen(modId, parent);
+        }
+        return null;
+    }
+
+    public static boolean hasModConfigScreen(String modId) {
+        return PlatHelper.isModLoaded("modmenu") && ModMenuCompat.hasModConfigScreen(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {
