@@ -234,7 +234,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected Supplier<String> defineRegexSource(String name, String defaultValue) {
+    protected Supplier<String> defineRegexInternal(String name, String defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, ConfigBuilder.REGEX_CHECK);
         var w = track(ValueWrapper.simple(value, pendingMeta()));
@@ -243,8 +243,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected Supplier<String> defineChoiceSource(String name, String defaultValue, Predicate<Object> validator,
-                                                  Supplier<List<String>> options, Function<String, ItemStack> icon) {
+    protected Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
+                                                    Supplier<List<String>> options, Function<String, ItemStack> icon) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
         var w = track(ValueWrapper.simple(value, pendingMeta()));
@@ -273,8 +273,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected Supplier<List<String>> defineListSource(String name, List<String> defaultValue, Predicate<Object> entryValidator,
-                                                      Supplier<List<String>> options, Function<String, ItemStack> icon) {
+    protected Supplier<List<String>> defineListInternal(String name, List<String> defaultValue, Predicate<Object> entryValidator,
+                                                        Supplier<List<String>> options, Function<String, ItemStack> icon) {
         addTranslationsAndComments(name);
         var value = builder.defineList(name, defaultValue, entryValidator);
         @SuppressWarnings("unchecked")

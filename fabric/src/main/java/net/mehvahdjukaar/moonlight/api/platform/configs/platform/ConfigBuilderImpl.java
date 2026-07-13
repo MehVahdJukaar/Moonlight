@@ -249,15 +249,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected Supplier<String> defineRegexSource(String name, String defaultValue) {
+    protected Supplier<String> defineRegexInternal(String name, String defaultValue) {
         var config = new RegexConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
-    protected Supplier<String> defineChoiceSource(String name, String defaultValue, Predicate<Object> validator,
-                                                  Supplier<List<String>> options, Function<String, ItemStack> icon) {
+    protected Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
+                                                    Supplier<List<String>> options, Function<String, ItemStack> icon) {
         var config = new DropdownConfigValue(name, defaultValue, validator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;
@@ -271,8 +271,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    protected Supplier<List<String>> defineListSource(String name, List<String> defaultValue, Predicate<Object> entryValidator,
-                                                      Supplier<List<String>> options, Function<String, ItemStack> icon) {
+    protected Supplier<List<String>> defineListInternal(String name, List<String> defaultValue, Predicate<Object> entryValidator,
+                                                        Supplier<List<String>> options, Function<String, ItemStack> icon) {
         var config = new ListStringConfigValue<>(name, defaultValue, entryValidator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;

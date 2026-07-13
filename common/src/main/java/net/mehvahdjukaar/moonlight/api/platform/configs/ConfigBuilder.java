@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.configs;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
-import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -41,60 +40,46 @@ public abstract class ConfigBuilder {
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
-    // ===== lenient comment wiring =====
-    // A comment(...) may come before or after its define(...). A comment always binds FORWARD to the next define
-    // (pendingComment, consumed there). If no define claims it before another comment arrives or the section
-    // closes, it was really an "after" comment for the last define (lastCommentTarget), so it's flushed there.
-    // This forward-first rule stops an un-commented define (e.g. a feature() "enabled" toggle) from greedily
-    // stealing the before-comment meant for the value that follows it. applyComment() writes the readable text
-    // into the lang map and lets the platform stamp it onto the on-disk value and the screen row.
+    // Lenient comments: comment(...) may come before or after its define(...). It binds forward to the next define
+    // (pendingComment); if none claims it, it falls back onto the last one (lastCommentTarget). Forward-first stops
+    // an un-commented define (e.g. a feature() toggle) from stealing the before-comment of the value that follows it.
     @Nullable
     private String pendingComment;
-    // whether pendingComment has already been handed to the backing store (Forge attaches to the next define, so
-    // it must be forwarded once, before that define — see pollCommentToForward); avoids re-emitting it for each
-    // suppressed backing value of a compound define.
+    // Forge attaches a comment to the NEXT define, so pendingComment is forwarded once (see pollCommentToForward);
+    // this stops it re-emitting for each suppressed backing value of a compound define.
     private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
     @Nullable
     private String lastCommentKey;
 
-    // parallel, loader independent UI tree consumed by the native config screen. Built as values are defined so
-    // both loaders end up with the exact same tree regardless of how they store the actual config.
+    // loader independent UI tree consumed by the native config screen, built as values are defined
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
-    // Effective "enabled" supplier of the current category, kept parallel to uiStack. A feature() replaces the top
-    // with its own (ANDed with the ancestor beneath it) so nested feature() suppliers compose at read time without
-    // ever touching the stored child values.
+    // effective "enabled" supplier of the current category (parallel to uiStack); a feature() ANDs its own value with
+    // the ancestor beneath it, so nested features compose at read time without touching stored child values
     private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
-    // while set, define(...)/push(...) skip UI emission: used by compound values (e.g. defineRange) that own
-    // several backing values but want a single combined row instead of one row per backing value.
+    // while set, define(...)/push(...) skip UI emission, so a compound value (e.g. defineRange) shows one combined row
     protected boolean suppressUi = false;
 
-    // name -> effective enabled supplier for every feature() declared, so mods can query "is feature X on?" by name
-    // (e.g. to gate content registration) without keeping their own map. Each feature is registered under BOTH its
-    // short name and its full dotted path (see registerFeature). Handed to the built ModConfigHolder.
+    // every feature()'s effective supplier, keyed by both short name and full dotted path so mods can query it either
+    // way; handed to the built ModConfigHolder
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
-    // raw category-name stack (root first), kept parallel to uiStack so a feature's full path can be built
+    // raw category-name stack (root first), parallel to uiStack, so a feature's full path can be built
     private final Deque<String> categoryPath = new ArrayDeque<>();
 
-    /**
-     * Reserved child name for the boolean a {@link #feature} declares.
-     */
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
     protected boolean usesDataBuddy = true; // on by default; setWriteJsons() disables it
 
-    // set by worldReload()/gameRestart(), applied to (and cleared by) the next recorded option — see recordOption
+    // set by worldReload()/gameRestart(), applied to and cleared by the next recorded option
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
-    // set by icon(...), applied to (and cleared by) the next category push or defined option — see uiPush/noteDefined
+    // set by icon(...), applied to and cleared by the next category push or defined option
     @Nullable
     private ResourceLocation pendingIcon;
 
-    /**
-     * How a pending/late comment is applied to the value it belongs to (its on-disk comment and screen row).
-     */
+    // how a pending/late comment is applied to its value (on-disk comment + screen row)
     @FunctionalInterface
     protected interface CommentTarget {
         void applyComment(String rawComment);
@@ -131,8 +116,7 @@ public abstract class ConfigBuilder {
         return holder;
     }
 
-    /** Platform hook: build the loader specific holder. The shared {@link #build()} wraps it with the trailing
-     * comment flush and feature-toggle wiring so both loaders share that boilerplate. */
+    // platform hook: build the loader specific holder; build() wraps it with the comment flush + toggle wiring
     protected abstract ModConfigHolder buildHolder();
 
     public ResourceLocation getName() {
@@ -148,10 +132,7 @@ public abstract class ConfigBuilder {
         return (T) this;
     }
 
-    /**
-     * Marks the <em>next</em> defined value as affecting dynamic resource/data packs (so changing it invalidates the
-     * matching pack cache). Fluent and sticky until the next value is recorded, like {@link #worldReload()}.
-     */
+    /** Marks the next defined value as affecting dynamic resource/data packs. Sticky until the next value, like {@link #worldReload()}. */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
         return (T) this;
@@ -182,41 +163,36 @@ public abstract class ConfigBuilder {
     }
 
     public Supplier<Pattern> defineRegex(String name, String defaultValue) {
-        return new RegexPatternValue(defineRegexSource(name, defaultValue));
+        return new RegexPatternValue(defineRegexInternal(name, defaultValue));
     }
 
-    /**
-     * Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} screen row.
-     */
-    protected abstract Supplier<String> defineRegexSource(String name, String defaultValue);
+    /** Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} row. */
+    protected abstract Supplier<String> defineRegexInternal(String name, String defaultValue);
 
-    /**
-     * Platform hook backing every dropdown/picker: stores a string (validated by {@code validator}) and records a
-     * {@link ConfigOption.DropdownValue} screen row with the given lazy {@code options} and optional {@code icon}.
-     */
-    protected abstract Supplier<String> defineChoiceSource(String name, String defaultValue, Predicate<Object> validator,
-                                                           Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon);
+    /** Platform hook for dropdowns/pickers: stores a validated string and records a {@link ConfigOption.DropdownValue} row. */
+    protected abstract Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
+                                                             Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon);
 
     public Supplier<String> defineDropdown(String name, String defaultValue, List<String> options) {
         List<String> copy = List.copyOf(options);
-        return defineChoiceSource(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
+        return defineChoiceInternal(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
     public Supplier<ResourceLocation> defineRegistry(String name, ResourceLocation defaultValue, Registry<?> registry) {
-        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+        Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);
         return () -> ResourceLocation.parse(handle.get());
     }
 
     public Supplier<Item> defineItem(String name, ResourceLocation defaultValue) {
-        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+        Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),
                 id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
         return () -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(handle.get()));
     }
 
     public Supplier<Block> defineBlock(String name, ResourceLocation defaultValue) {
-        Supplier<String> handle = defineChoiceSource(name, defaultValue.toString(), REGISTRY_ID_CHECK,
+        Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
                 id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
         return () -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(handle.get()));
@@ -232,48 +208,34 @@ public abstract class ConfigBuilder {
 
     public static final Predicate<Object> REGISTRY_ID_CHECK = o -> o instanceof String s && ResourceLocation.tryParse(s) != null;
 
-    /**
-     * Platform hook backing the option-backed lists below: stores a string list (entries validated by
-     * {@code entryValidator}) and records a {@link ConfigOption.ListValue} whose editor rows are dropdowns fed by
-     * {@code options} (with an optional {@code icon}).
-     */
-    protected abstract Supplier<List<String>> defineListSource(String name, List<String> defaultValue,
-                                                               Predicate<Object> entryValidator,
-                                                               Supplier<List<String>> options,
-                                                               @Nullable Function<String, ItemStack> icon);
+    /** Platform hook for the lists below: stores a validated string list and records a {@link ConfigOption.ListValue} row. */
+    protected abstract Supplier<List<String>> defineListInternal(String name, List<String> defaultValue,
+                                                                 Predicate<Object> entryValidator,
+                                                                 Supplier<List<String>> options,
+                                                                 @Nullable Function<String, ItemStack> icon);
 
-    /**
-     * A string list whose entries are each picked from a fixed set of {@code options} via a dropdown.
-     */
     public Supplier<List<String>> defineList(String name, List<String> defaultValue, List<String> options) {
         List<String> copy = List.copyOf(options);
-        return defineListSource(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
+        return defineListInternal(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
-    /**
-     * A list of registry ids, each picked from {@code registry} via a dropdown. Stored as resource location strings.
-     */
     public Supplier<List<ResourceLocation>> defineRegistryList(String name, List<ResourceLocation> defaultValue, Registry<?> registry) {
-        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+        Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);
         return () -> handle.get().stream().map(ResourceLocation::parse).toList();
     }
 
-    /**
-     * Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon.
-     */
+    /** Like {@link #defineRegistryList} but preset to the item registry, previewing each item's icon. */
     public Supplier<List<Item>> defineItemList(String name, List<ResourceLocation> defaultValue) {
-        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+        Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),
                 id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
         return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
     }
 
-    /**
-     * Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon.
-     */
+    /** Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon. */
     public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
-        Supplier<List<String>> handle = defineListSource(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
+        Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
                 id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
         return () -> handle.get().stream().map(id -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id))).toList();
@@ -406,9 +368,8 @@ public abstract class ConfigBuilder {
             return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
         if (type == float.class || type == Float.class)
             return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
-        // must reject null: a null-accepting validator (o -> true) makes NeoForge treat a MISSING string field as
-        // valid, so it never writes the default. The key stays absent while the spec still carries its comment,
-        // which NeoForge tries to re-apply every load -> endless "config is not correct. Correcting" loop.
+        // must reject null: a null-accepting validator makes NeoForge treat a MISSING string field as valid, so it
+        // never writes the default, and then re-corrects the spec every load -> endless "config is not correct" loop
         if (type == String.class) return define(name, (String) current);
         if (type.isEnum()) return define(name, (Enum) current);
         throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");
@@ -416,8 +377,7 @@ public abstract class ConfigBuilder {
 
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
-        // stored (and screen-edited) as a validated string; the returned supplier just parses it, exactly like
-        // defineRegistry/defineItem below. The dynamic-pack flag rides on the backing string handle.
+        // stored and screen-edited as a validated string; the returned supplier just parses it
         Supplier<String> handle = define(name, defaultValue.toString(), REGISTRY_ID_CHECK);
         return () -> ResourceLocation.parse(handle.get());
     }
@@ -462,12 +422,7 @@ public abstract class ConfigBuilder {
                 : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
-    /**
-     * A still-pending comment at a section boundary ({@link #pop()}, {@link #build()}) had no following define, so
-     * it was an "after" comment for the last defined value; attach it there. Skipped while {@link #suppressUi} is
-     * set, because a compound value's internal push/pop (see {@link #defineRange}) must not consume the comment
-     * before the compound's own combined row does.
-     */
+    // a still-pending comment at a section boundary (pop/build) was an "after" comment for the last value; attach it there
     protected void flushPendingComment() {
         if (this.suppressUi) return;
         if (this.pendingComment != null) {
@@ -476,12 +431,8 @@ public abstract class ConfigBuilder {
         }
     }
 
-    /**
-     * For platforms whose backing store attaches a comment to the NEXT define (Forge's {@code ModConfigSpec}):
-     * returns the pending before-comment exactly once, to be forwarded right before that define runs, then marks
-     * it forwarded so the suppressed backing values of a compound value don't each re-emit it. Returns
-     * {@code null} when there is nothing new to forward.
-     */
+    // Forge attaches a comment to the NEXT define: hand out the pending before-comment once, to be forwarded right
+    // before that define runs (null when there is nothing new to forward)
     @Nullable
     protected String pollCommentToForward() {
         if (this.pendingComment != null && !this.pendingCommentForwarded) {
@@ -508,11 +459,7 @@ public abstract class ConfigBuilder {
         this.lastCommentKey = null;
     }
 
-    /**
-     * Called by each define once its value and screen row exist. Wires the comment target so a comment given
-     * before (held as {@link #pendingComment}) or after (via the retained target) reaches this value. Skipped
-     * while {@link #suppressUi} is set, so the backing values of a compound value don't steal its comment.
-     */
+    // wires the comment target so a before- or after-comment reaches this value; skipped while suppressed
     protected void noteDefined(String name, @Nullable ConfigNode uiNode, @Nullable Consumer<String> rawCommentSink) {
         if (this.suppressUi) return;
         String key = this.tooltipKey(name);
@@ -542,7 +489,7 @@ public abstract class ConfigBuilder {
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
         this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it
-        this.categoryPath.addLast(currentCategory()); // raw-name path, so features can be looked up by full path
+        this.categoryPath.addLast(currentCategory());
     }
 
     protected void uiPop() {
@@ -557,10 +504,8 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * Declares the current category's single "feature" boolean — the switch that enables the whole category — and
-     * returns its <em>effective</em> supplier: {@code ownValue && everyAncestorFeature}. The composition is
-     * read-time only, so a parent turning off makes this (and any nested feature) read {@code false} without ever
-     * rewriting the stored child values; turning the parent back on restores them. Only one feature per category.
+     * Declares the current category's single feature toggle and returns its effective supplier (own value AND every
+     * ancestor feature). Composition is read-time only, so toggling a parent never rewrites stored child values.
      */
     public Supplier<Boolean> mainFeature(boolean defaultEnabled) {
         ConfigCategory cat = this.uiStack.peek();
@@ -575,9 +520,8 @@ public abstract class ConfigBuilder {
         List<ConfigNode> entries = cat.entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
-            // icon priority: an explicit icon(...) on the value or the category wins; otherwise infer one from the
-            // category's own name (a feature named after its block shows that block). Then mirror it onto the category
-            // button so it and the enable-gate row share the same icon.
+            // icon: an explicit icon(...) on the value or category wins, else infer from the category name; mirror it
+            // so the category button and the enable-gate row share one icon
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
             if (cat.icon() == null) cat.setIcon(bv.icon());
         }
@@ -585,23 +529,19 @@ public abstract class ConfigBuilder {
         Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
         this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
         this.gateStack.push(effective);
-        // a category gate is referenced by the category's own name, so its short key IS the category name
         registerFeature(currentCategory(), currentCategoryPath(), effective);
         return effective;
     }
 
-    /** A category gate enabled by default, mirroring {@link #pushFeature(String)}. */
     public Supplier<Boolean> mainFeature() {
         return this.mainFeature(true);
     }
 
 
     /**
-     * Declares a named boolean "feature" leaf: a standalone toggle that, like a category's {@link #mainFeature(boolean)}
-     * gate, draws as the ✓/✗ switch (with its {@link #icon} shown next to the symbol) rather than a plain ON/OFF
-     * button. The returned supplier is <em>effective</em>: {@code ownValue && everyAncestorFeature}, so it reads
-     * {@code false} whenever an enclosing feature category is off, without ever rewriting the stored value. Combine
-     * with {@link #icon}: {@code builder.icon("lever").feature("test_bool", true)}.
+     * A named boolean feature leaf: draws as a ✓/✗ switch (with its {@link #icon}) instead of an ON/OFF button, and
+     * returns an effective supplier (own value AND every ancestor feature), so it reads false whenever an enclosing
+     * feature category is off. Combine with {@link #icon}: {@code builder.icon("lever").feature("test_bool", true)}.
      */
     public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
         Supplier<Boolean> raw = define(name, defaultEnabled);
@@ -609,12 +549,10 @@ public abstract class ConfigBuilder {
         List<ConfigNode> entries = this.uiStack.peek().entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             bv.setFeature(true);
-            // infer the icon from the feature's own name unless an explicit icon(...) already set one
-            if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
+            if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name)); // infer icon from the name unless icon(...) set one
         }
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
-        // a leaf feature lives under the current category, so its full path is that category path plus its own name
         String path = this.categoryPath.isEmpty() ? name : currentCategoryPath() + "." + name;
         registerFeature(name, path, effective);
         return effective;
@@ -630,23 +568,18 @@ public abstract class ConfigBuilder {
     }
 
 
+    // resolved lazily on the client, so a name that isn't a real item/block simply shows no icon
     @Nullable
     private ResourceLocation inferFeatureIcon(String name) {
         return ResourceLocation.tryBuild(this.name.getNamespace(), name);
     }
 
-    /**
-     * Registers a feature's effective supplier under both its short {@code name} and its full dotted {@code path}, so
-     * it can be queried either way via {@link ModConfigHolder#isFeatureEnabled}. The short name is the convenient
-     * shorthand; the full path disambiguates when two features in different categories share a short name (the last
-     * short-name registration wins, but the full path is always unique).
-     */
+    // register under both short name and full dotted path, so a feature can be queried either way
     private void registerFeature(String name, String path, Supplier<Boolean> effective) {
         this.featureToggles.put(name, effective);
         this.featureToggles.put(path, effective);
     }
 
-    /** The feature registry (short name and full path -> effective enabled supplier), handed to the built holder. */
     protected Map<String, Supplier<Boolean>> getFeatureToggles() {
         return this.featureToggles;
     }
@@ -655,25 +588,16 @@ public abstract class ConfigBuilder {
         return pushFeature(name, true);
     }
 
-    /**
-     * Adds a value row to the current UI category, stamping (and clearing) any pending reload/restart flag onto it.
-     * No-op while UI emission is suppressed, so a compound value's backing rows don't consume the flag before it.
-     */
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
-        // Both change-effect flags (reload + dynamic packs) were already stamped onto each backing leaf value as it
-        // was defined (see the platform builders); the option derives what it shows from those leaves. Here we just
-        // clear the pending flags at this single, compound-safe boundary so they don't leak onto the next value. A
-        // grouped value keeps them set across its suppressed inner defines (recordOption no-ops while suppressed),
-        // so every leaf of the group is stamped, not just the first.
+        // clear the pending change-effect flags at this compound-safe boundary (they were already stamped onto each
+        // backing leaf as it was defined); recordOption no-ops while suppressed, so every leaf of a group is stamped
         this.pendingReload = ConfigReloadType.NONE;
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
     }
 
-    /**
-     * The root of the loader independent screen model, ready once {@link #build()} has run.
-     */
+    /** Root of the loader independent screen model, ready after {@link #build()}. */
     public ConfigCategory getUiRoot() {
         return this.uiRoot;
     }
@@ -683,8 +607,7 @@ public abstract class ConfigBuilder {
     }
 
     public Supplier<Range> defineRange(String name, double defaultMin, double defaultMax, double min, double max) {
-        // Storage: two doubles nested under a `name` section. Their individual rows are suppressed so the whole
-        // range shows as a single combined row instead.
+        // two doubles nested under `name`, their rows suppressed so the range shows as one combined row
         this.suppressUi = true;
         push(name);
         Supplier<Double> minHandle = define("min", defaultMin, min, max);
@@ -701,6 +624,7 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
+    /** A {@link Vec3} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);
@@ -718,6 +642,7 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
+    /** A {@link Vec3i} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);
@@ -756,16 +681,12 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    /**
-     * Platform hook: forward the flag to a backing store that needs it set <em>before</em> the next define (Forge's
-     * {@code ModConfigSpec}). The screen-side enum is instead read from {@link #pendingReload} at record time, so
-     * loaders that keep the flag on their own value object (Fabric) don't need to override this.
-     */
+    // platform hook: forward the flag to a store that needs it before the next define (Forge). Fabric keeps it on its
+    // own value object and reads pendingReload at record time, so it doesn't override this
     protected void forwardReloadFlag(ConfigReloadType type) {
     }
 
     protected void addTranslationsAndComments(String name) {
-        //name translation (comments are wired separately, see noteDefined/comment, so they can come before or after)
         this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
         if (this.currentCategory() == null && PlatHelper.isDev())
             throw new AssertionError("Current config category was null. How?");
