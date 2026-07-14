@@ -42,6 +42,9 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
+        // Dungeon's Delight - REASON: is treated as Bamboo
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood").bambooLike(true);
+
         // Abundant Atmosphere - REASON: Naming-Convention, 2-Words
         woodReg.addSimpleFinder("abundant_atmosphere", "red_bamboo")
                 .log("red_bamboo_block")
