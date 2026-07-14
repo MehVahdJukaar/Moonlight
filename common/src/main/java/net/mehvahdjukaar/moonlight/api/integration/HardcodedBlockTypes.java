@@ -208,7 +208,8 @@ public class HardcodedBlockTypes {
 
         // My Nether's Delight - REASON: Naming-Convention
         woodReg.addSimpleFinder("mynethersdelight", "powdery")
-                .logSuffix("_block");
+                .logSuffix("_block")
+                .childBlockAffix(STRIPPED_LOG, "stripped_", "_block");
 
         // Nourished End - REASON: Naming-Convention
         woodReg.addSimpleFinder("nourished_end", "verdant")
