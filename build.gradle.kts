@@ -64,6 +64,11 @@ subprojects {
     tasks.withType<JavaCompile> {
         options.compilerArgs.addAll(listOf("-Xmaxerrs", "4000"))
     }
+    tasks.withType<net.darkhax.curseforgegradle.TaskPublishCurseForge>().configureEach {
+        doFirst {
+            uploadArtifacts.forEach { it.addEnvironment("Server","Client") }
+        }
+    }
 
 
 
