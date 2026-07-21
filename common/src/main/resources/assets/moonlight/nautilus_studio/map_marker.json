@@ -1,15 +1,13 @@
-[
-  {
-    "registry": "moonlight:map_marker",
-    "label": "Map Marker",
-    "wiki": "https://github.com/MehVahdJukaar/Supplementaries/wiki/Customization#map-markers",
-    "companion": {
-      "pattern": "moonlight/map_marker/(.+)",
-      "replace": "textures/map/decorations/$1",
-      "side": "client",
-      "ext": ".png",
-      "label": "sprite",
-      "required": true
-    }
+{
+  "registry": "moonlight:map_marker",
+  "label": "moonlight.nautilus_studio.map_marker",
+  "wiki": "https://github.com/MehVahdJukaar/Supplementaries/wiki/Customization#map-markers",
+  "companion": {
+    "pattern": "moonlight/map_marker/(.+)",
+    "replace": "textures/map/decorations/$1",
+    "side": "client",
+    "ext": ".png",
+    "label": "sprite",
+    "required": true
   }
-]
+}

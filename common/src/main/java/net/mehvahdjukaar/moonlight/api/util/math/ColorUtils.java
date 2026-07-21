@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.util.math;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.core.Direction;
@@ -13,13 +14,14 @@ import java.util.Locale;
 
 public final class ColorUtils {
 
-    //utility codec that serializes either a string or an integer
-    public static final Codec<Integer> CODEC = Codec.either(Codec.INT,
+    //utility codec that serializes either a string or an integer.
+    //wrapped as an ARGB color SchemaCodec so codecui-driven editors render a color picker (serialization is unchanged)
+    public static final Codec<Integer> CODEC = SchemaCodecs.colorArgb(Codec.either(Codec.INT,
             Codec.STRING.flatXmap(ColorUtils::isValidStringOrError, s -> isValidStringOrError(s)
                     .map(ColorUtils::formatString))).xmap(
             either -> either.map(integer -> integer, s -> Integer.parseUnsignedInt(s, 16)),
             integer -> Either.right("#" + String.format("%08X", integer))
-    );
+    ));
 
     private static String formatString(String s) {
         return "#" + s.toUpperCase(Locale.ROOT);

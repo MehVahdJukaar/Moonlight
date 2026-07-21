@@ -1,0 +1,8 @@
+{
+  "class": "net.mehvahdjukaar.moonlight.api.trades.ModItemListing",
+  "field": "CODEC",
+  "side": "server",
+  "dir": "moonlight/villager_trade",
+  "label": "moonlight.nautilus_studio.villager_trade",
+  "wiki": "https://moonlight-lib.readthedocs.io/"
+}

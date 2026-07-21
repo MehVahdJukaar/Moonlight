@@ -114,5 +114,7 @@
   "tag.block.minecraft.mineable.shear": "Mineable by Shears",
   "wood_type.twilightforest.dark": "Darkwood",
   "leaves_type.twilightforest.dark": "Darkwood",
-  "leaves_type.ulterlands.souldrained": "Petrified"
+  "leaves_type.ulterlands.souldrained": "Petrified",
+  "moonlight.nautilus_studio.map_marker": "Map Marker",
+  "moonlight.nautilus_studio.villager_trade": "Villager Trade"
 }

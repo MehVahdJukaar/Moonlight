@@ -127,6 +127,12 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         C raw = unmap(value);
         boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
         original.set(raw);
+        // NeoForge's ConfigValue.set() skips refreshing its own cache for worldRestart/gameRestart values, so
+        // original.get() would keep returning the stale old value; our pollChanged() would then revert the freshly
+        // set value on the next read (e.g. the config screen snapping back after Save). Clearing the cache makes
+        // NeoForge re-read the value we just wrote to the backing config, keeping both caches consistent (and
+        // matching Fabric, where a set is effective immediately - the reload badge stays advisory).
+        original.clearCache();
         cachedRaw = raw;
         cachedValue = value;
         initialized = true;
