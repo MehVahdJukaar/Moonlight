@@ -42,16 +42,13 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
-        // Dungeon's Delight - REASON: is treated as Bamboo
-        woodReg.addSimpleFinder("dungeonsdelight", "wormwood").bambooLike(true);
-
         // Abundant Atmosphere - REASON: Naming-Convention, 2-Words
         woodReg.addSimpleFinder("abundant_atmosphere", "red_bamboo")
                 .log("red_bamboo_block")
                 .childBlock(STRIPPED_LOG, "stripped_red_bamboo_block");
 
-        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME
-        woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
+        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME,  is treated as Bamboo
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood").bambooLike(true)
                 .log("wormroots_block");
 
         // Sniffed Out - REASON: Naming-Convention
@@ -226,7 +223,7 @@ public class HardcodedBlockTypes {
                 .childBlockSuffix(STRIPPED_WOOD, "_hyphae");
 
         // Gardens Of The Dead - REASON: Naming-Convention
-        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
+        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane").bambooLike(true)
                 .planks("whistlecane_planks")
                 .log("whistlecane_block")
                 .childItem(STICK, "whistlecane");
@@ -305,10 +302,14 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
 
         // Environmental - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("environmental", "pink_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "blue_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "purple_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "white_wisteria", "wisteria");
+        leafReg.addSimpleFinder("environmental", "pink_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "blue_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "purple_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "white_wisteria")
+                .childBlock(LOG, "wisteria_log");
         leafReg.addLeavesToWoodMapping("environmental", "cheerful_plum", "plum");
         leafReg.addLeavesToWoodMapping("environmental", "moody_plum", "plum");
 
