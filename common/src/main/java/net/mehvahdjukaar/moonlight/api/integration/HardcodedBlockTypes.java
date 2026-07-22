@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -416,6 +417,10 @@ public class HardcodedBlockTypes {
 
         // ALEX'S CAVES - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
+
+        // Ars Elemental - REASON: Associated WoodType
+        leafReg.addSimpleFinder("ars_elemental", "yellow_archwood")
+                .childBlock(LOG, ResourceLocation.parse("ars_nouveau:archwood_log"));
     }
 
 
