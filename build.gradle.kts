@@ -1,5 +1,3 @@
-import net.minecraftforge.artifactural.gradle.GradleArtifact.maven
-
 plugins {
     id("com.possible-triangle.core")
     id("com.possible-triangle.common") apply false
@@ -89,7 +87,7 @@ subprojects {
       //  maven { url = uri("https://maven.tterrag.com/") } // Flywheel, EnderIO
         maven { url = uri("https://mvn.devos.one/releases/") } // Registrate, Porting Lib (releases)
         maven { url = uri("https://mvn.devos.one/snapshots/") } // Registrate, Porting Lib (snapshots)
-        maven { url = uri("https://maven.terraformersmc.com/") } // TerraformersMC mods
+//        maven { url = uri("https://maven.terraformersmc.com/") } // TerraformersMC mods
         maven { url = uri("https://maven.saps.dev/releases") } // FTB Mods
         maven { url = uri("https://dl.cloudsmith.io/public/tslat/sbl/maven/") }
         maven { url = uri("https://maven.theillusivec4.top/") } // Curios API
