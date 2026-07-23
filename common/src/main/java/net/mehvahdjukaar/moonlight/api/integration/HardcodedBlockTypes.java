@@ -232,7 +232,7 @@ public class HardcodedBlockTypes {
                 .log("jabuticaba_log");
 
         // My Nether's Delight - REASON: Naming-Convention
-        woodReg.addSimpleFinder("mynethersdelight", "powdery")
+        woodReg.addSimpleFinder("mynethersdelight", "powdery").bambooLike(true)
                 .logSuffix("_block")
                 .childBlockAffix(STRIPPED_LOG, "stripped_", "_block");
 
