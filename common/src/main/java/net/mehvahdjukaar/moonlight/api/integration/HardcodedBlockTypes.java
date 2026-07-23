@@ -43,6 +43,30 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
+        // Shroomcraft - REASON: Naming-Convention
+        woodReg.addSimpleFinder("shroomcraft", "shroomwood")
+                .planksSuffix("_planks")
+                .log( "stripped_mushroom_stem")
+                .childBlock(WOOD, "stripped_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "blue_shroomwood")
+                .planksSuffix("_planks")
+                .log("blue_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_blue_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_blue_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "orange_shroomwood")
+                .planksSuffix("_planks")
+                .log("orange_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_orange_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_orange_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "purple_shroomwood")
+                .planksSuffix("_planks")
+                .log("purple_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_purple_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_purple_mushroom_hyphae");
+
         // Abundant Atmosphere - REASON: Naming-Convention, 2-Words
         woodReg.addSimpleFinder("abundant_atmosphere", "red_bamboo")
                 .log("red_bamboo_block")
