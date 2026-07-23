@@ -163,6 +163,7 @@ class OptionRow extends ConfigListRow {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (hasDescription() && button == 0
                 && mouseX >= toggleX0 && mouseX < toggleX1 && mouseY >= rowY0 && mouseY < rowY1) {
+            GuiHelper.playClickSound();
             view.toggleExpanded(value);
             return true;
         }

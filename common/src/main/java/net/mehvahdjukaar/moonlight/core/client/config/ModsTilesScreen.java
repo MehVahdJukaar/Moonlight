@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
@@ -33,9 +32,6 @@ public class ModsTilesScreen extends Screen {
     // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
     // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists.
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
-    // the same tiling list background the vanilla selection lists use (the field is private on AbstractSelectionList)
-    private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
-    private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
 
     private static final int GRID_PAD = 8; // inset for the first/last card row inside the scroll panel
 
@@ -50,10 +46,6 @@ public class ModsTilesScreen extends Screen {
     private static final int CARD_GAP = 6;
     private static final int SIDE_MARGIN = 24;
 
-    private static final int CARD_BG = 0xFF1B1B20;
-    private static final int CARD_BG_HOVER = 0xFF2C2C34;
-    private static final int CARD_OUTLINE = 0xFF000000;
-    private static final int CARD_OUTLINE_HOVER = 0xFF000000 | ConfigGuiColors.CATEGORY; // aqua accent (opaque)
     private static final int VERSION_COLOR = ConfigGuiColors.DESCRIPTION;
 
     private final Screen parent;
@@ -98,8 +90,11 @@ public class ModsTilesScreen extends Screen {
         }
         this.entries.sort(Comparator.comparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER));
 
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.moonlight.config.discover_mods"),
+                        b -> this.minecraft.setScreen(new DiscoverModsScreen(this)))
+                .bounds(this.width / 2 - 154, this.height - 28, 150, 20).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
-                .bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
+                .bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
     }
 
     private void computeLayout() {
@@ -129,9 +124,7 @@ public class ModsTilesScreen extends Screen {
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         // header chrome in the background layer; the card grid is scissored below HEADER, so cards slide under the bar
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
+        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
     }
 
     @Override
@@ -140,7 +133,7 @@ public class ModsTilesScreen extends Screen {
         computeLayout();
 
         // the tiling list background behind the cards, matching the config list screens' scroll panel
-        renderListBackground(graphics);
+        GuiHelper.renderListBackground(graphics, contentTop, contentBottom, this.width, this.scroll);
 
         boolean inViewport = mouseY >= contentTop && mouseY < contentBottom;
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
@@ -153,30 +146,13 @@ public class ModsTilesScreen extends Screen {
         graphics.disableScissor();
 
         // bottom inner-shadow separator framing the panel (the top edge is covered by the header bar)
-        renderFooterSeparator(graphics);
-        renderScrollbar(graphics);
-    }
-
-    /** The 32×32 tiling list background over the scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
-    private void renderListBackground(GuiGraphics graphics) {
-        ResourceLocation bg = this.minecraft.level == null ? MENU_LIST_BACKGROUND : INWORLD_MENU_LIST_BACKGROUND;
-        RenderSystem.enableBlend();
-        graphics.blit(bg, 0, contentTop, (float) this.width, (float) (contentBottom + (int) this.scroll),
-                this.width, contentBottom - contentTop, 32, 32);
-        RenderSystem.disableBlend();
-    }
-
-    /** The bottom inner-shadow strip (mirrors {@code AbstractSelectionList#renderListSeparators}, footer only). */
-    private void renderFooterSeparator(GuiGraphics graphics) {
-        ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(footer, 0, contentBottom, 0f, 0f, this.width, 2, 32, 2);
-        RenderSystem.disableBlend();
+        GuiHelper.renderFooterSeparator(graphics, contentBottom, this.width);
+        GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
     }
 
     private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover) {
-        graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? CARD_BG_HOVER : CARD_BG);
-        graphics.renderOutline(x, y, CARD_W, CARD_H, hover ? CARD_OUTLINE_HOVER : CARD_OUTLINE);
+        graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? ConfigGuiColors.TILE_BG_HOVER : ConfigGuiColors.TILE_BG);
+        graphics.renderOutline(x, y, CARD_W, CARD_H, hover ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE);
 
         int iconX = x + (CARD_W - ICON_SIZE) / 2;
         int iconY = y + CARD_PAD;
@@ -206,28 +182,8 @@ public class ModsTilesScreen extends Screen {
 
     /** No declared icon: a dark tile with the mod's capital initial, falling back to the gear sprite for blanks. */
     private void renderFallbackIcon(GuiGraphics graphics, Entry entry, int iconX, int iconY) {
-        graphics.fill(iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, 0xFF303038);
-        graphics.renderOutline(iconX, iconY, ICON_SIZE, ICON_SIZE, 0xFF000000);
-        String name = entry.name().getString().trim();
-        if (name.isEmpty()) {
-            int g = ICON_SIZE - 10;
-            graphics.blitSprite(GEAR_ICON, iconX + (ICON_SIZE - g) / 2, iconY + (ICON_SIZE - g) / 2, g, g);
-            return;
-        }
-        String initial = name.substring(0, 1).toUpperCase();
-        int tx = iconX + (ICON_SIZE - this.font.width(initial)) / 2;
-        int ty = iconY + (ICON_SIZE - this.font.lineHeight) / 2;
-        graphics.drawString(this.font, initial, tx, ty, ConfigGuiColors.CATEGORY, false);
-    }
-
-    private void renderScrollbar(GuiGraphics graphics) {
-        if (maxScroll <= 0) return;
-        int trackX = this.width - 6;
-        int trackTop = contentTop, trackH = contentBottom - contentTop;
-        int thumbH = Math.max(16, trackH * trackH / (trackH + maxScroll));
-        int thumbY = trackTop + (int) ((trackH - thumbH) * (scroll / maxScroll));
-        graphics.fill(trackX, trackTop, trackX + 3, trackTop + trackH, 0x40000000);
-        graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, 0xFFB0B0B0);
+        GuiHelper.renderInitialTile(graphics, this.font, entry.name().getString(),
+                iconX, iconY, ICON_SIZE, ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, GEAR_ICON);
     }
 
     @Override
@@ -250,6 +206,7 @@ public class ModsTilesScreen extends Screen {
                     Screen s = MoonlightConfigSelectScreen.create(modId, this, background);
                     if (s == null) s = ClientHelper.getModConfigScreen(modId, this);
                     if (s != null) {
+                        GuiHelper.playClickSound();
                         this.minecraft.setScreen(s);
                         return true;
                     }

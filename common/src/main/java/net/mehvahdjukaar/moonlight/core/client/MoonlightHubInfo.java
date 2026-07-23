@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
+import net.mehvahdjukaar.moonlight.api.util.FileDownloadUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -16,15 +17,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 @ApiStatus.Internal
 public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, String patreon, String koFi,
@@ -117,24 +109,12 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
     public static void fetchFromServer() {
         Thread t = new Thread(() -> {
             try {
-                INSTANCE = readFromURL(FETCH_URL, r -> GSON.fromJson(r, MoonlightHubInfo.class));
+                INSTANCE = GSON.fromJson(FileDownloadUtils.readString(FETCH_URL), MoonlightHubInfo.class);
             } catch (Exception e) {
                 Moonlight.LOGGER.warn("Failed to fetch hub info from {}: {}", FETCH_URL, e.toString());
             }
         }, "Moonlight Hub Fetcher");
         t.setDaemon(true);
         t.start();
-    }
-
-    private static <T> T readFromURL(String link, Function<Reader, T> consumer) throws Exception {
-        URL url = new URL(link);
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(4000);
-        connection.setReadTimeout(4000);
-        String encoding = connection.getContentEncoding();
-        Charset charset = (encoding == null) ? StandardCharsets.UTF_8 : Charset.forName(encoding);
-        try (Reader r = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset))) {
-            return consumer.apply(r);
-        }
     }
 }

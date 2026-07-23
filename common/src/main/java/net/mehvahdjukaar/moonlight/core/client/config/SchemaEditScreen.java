@@ -7,6 +7,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.codecui.SchemaCodec;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
@@ -222,9 +223,7 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
+        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
     }
 
     @Override

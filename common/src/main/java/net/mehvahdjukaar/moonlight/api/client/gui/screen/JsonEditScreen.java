@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.screen;
 
 import com.google.gson.JsonParser;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.JsonHighlighter;
@@ -95,9 +96,7 @@ public class JsonEditScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
+        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
         renderDescription(graphics);
         if (!this.done.active) {
             graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.json_invalid"),

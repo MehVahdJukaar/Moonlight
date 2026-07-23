@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -116,6 +117,30 @@ public final class FileDownloadUtils {
 
         // Move the completed temporary file to the final destination
         moveFileAtomically(tmp, target);
+    }
+
+    /**
+     * Fetches a URL fully into memory as raw bytes. For large payloads prefer {@link #download} to a file.
+     */
+    public static byte[] readBytes(String urlStr) throws IOException {
+        validateUrl(urlStr);
+        HttpURLConnection conn = createConnection(urlStr, 0, null);
+        try {
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 300) throw new HttpStatusException(code, urlStr);
+            try (InputStream in = conn.getInputStream()) {
+                return in.readAllBytes();
+            }
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    /**
+     * Fetches a URL fully into memory as a UTF-8 string.
+     */
+    public static String readString(String urlStr) throws IOException {
+        return new String(readBytes(urlStr), StandardCharsets.UTF_8);
     }
 
     // Private helpers --------------------------------------------------------

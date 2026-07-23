@@ -23,8 +23,7 @@ public final class ConfigGuiColors {
     }
 
     // ── structural chrome (the fixed dark UI frame — deliberately NOT themeable, kept here only so it isn't duplicated) ──
-    public static final int HEADER_BG = 0x90000000;       // translucent black top/bottom bars
-    public static final int HEADER_SEPARATOR = 0xFF101012; // the 1px line under the header / above the footer
+    public static final int HEADER_SEPARATOR = 0xFF101012; // 1px divider for our own inner bands (header/footer use the vanilla separator sprites)
 
     // ── core text ──
     public static final int LABEL = chat(ChatFormatting.WHITE);        // primary label — MC white
@@ -36,6 +35,13 @@ public final class ConfigGuiColors {
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);    // unsaved edit — MC yellow, pops against the gold title
     public static final int CATEGORY = chat(ChatFormatting.DARK_AQUA);      // category labels / accents — MC aqua
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE); // highlighted / selected entry — MC light purple, a distinct accent hue
+
+    // ── cards / rows of the mod grids (mods hub, discover mods) ──
+    public static final int TILE_BG = 0xFF1B1B20;
+    public static final int TILE_BG_HOVER = 0xFF2C2C34;
+    public static final int TILE_OUTLINE = 0xFF000000;
+    public static final int TILE_OUTLINE_HOVER = 0xFF000000 | CATEGORY; // aqua accent (opaque)
+    public static final int TILE_ICON_BG = 0xFF303038;                  // backdrop of the letter tile standing in for a missing icon
 
     // ── breadcrumb / navigation ──
     public static final int CRUMB = 0x8B93A5;                          // custom muted blue-gray

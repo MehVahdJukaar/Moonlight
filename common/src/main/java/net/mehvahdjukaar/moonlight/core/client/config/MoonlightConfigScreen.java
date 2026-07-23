@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.BreadcrumbWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
@@ -63,8 +64,9 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         this(root, null, new ConfigEditSession(holder, returnScreen), background);
     }
 
-    private MoonlightConfigScreen(ConfigCategory category, @Nullable MoonlightConfigScreen parentConfig, ConfigEditSession session,@Nullable ResourceLocation background) {
-        super(parentConfig == null ? session.holder().getReadableName() : category.title());
+    private MoonlightConfigScreen(ConfigCategory category, @Nullable MoonlightConfigScreen parentConfig, ConfigEditSession session, @Nullable ResourceLocation background) {
+        // the header keeps the config's own name on every sub-screen; the breadcrumb is what tracks the category
+        super(session.holder().getReadableName());
         this.category = category;
         this.parentConfig = parentConfig;
         this.session = session;
@@ -272,9 +274,9 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         // going back to a parent category stays within the shared session, so nothing is lost and no prompt is needed.
         if (isRoot() && session.unsavedCount() > 0) {
             this.minecraft.setScreen(new ConfirmScreen(discard -> {
-                        if (discard) leaveConfig();
-                        else this.minecraft.setScreen(this);
-                    },
+                if (discard) leaveConfig();
+                else this.minecraft.setScreen(this);
+            },
                     Component.translatable("gui.moonlight.config.discard.title"),
                     Component.translatable("gui.moonlight.config.discard.message", session.unsavedCount()),
                     Component.translatable("gui.moonlight.config.discard.confirm"), CommonComponents.GUI_CANCEL));
@@ -336,8 +338,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         // header chrome sits in the background layer (drawn before the widgets by super.render): the bar, its
         // separator, the title and the search magnifier. The row list is scissored below HEADER, so rows slide
         // under the bar cleanly; the breadcrumb and search box are renderable widgets drawn on top of it.
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
+        GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
         graphics.blitSprite(SEARCH_ICON, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
                 this.searchBox.getY() + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);

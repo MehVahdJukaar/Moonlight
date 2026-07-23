@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.DropdownWidget;
@@ -124,9 +125,7 @@ class ListEditScreen extends Screen implements PopupHost {
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         // header chrome in the background layer, behind the widgets (the list draws only its footer separator)
-        graphics.fill(0, 0, this.width, HEADER, ConfigGuiColors.HEADER_BG);
-        graphics.fill(0, HEADER - 1, this.width, HEADER, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, (HEADER - this.font.lineHeight) / 2, ConfigGuiColors.TITLE);
+        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
     }
 
     @Override

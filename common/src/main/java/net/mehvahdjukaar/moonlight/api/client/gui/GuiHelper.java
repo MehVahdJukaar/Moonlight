@@ -1,12 +1,102 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 public final class GuiHelper {
+
+    // ── shared chrome for Moonlight's config-style screens (header bar, scroll-panel background, scrollbar, tiles) ──
+    // the tiling list background / footer shadow the vanilla selection lists use (those fields are private on
+    // AbstractSelectionList, so we mirror them here for our custom-scrolled screens)
+    private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
+    private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
+    // Screen keeps the in-world menu background private, so mirror it here
+    private static final ResourceLocation INWORLD_MENU_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_background.png");
+
+    /**
+     * The top bar plus its bottom separator (no title). Same chrome vanilla's header/footer layouts use: the plain
+     * menu background texture with the 2px separator sprite under it. Ours is just taller.
+     */
+    public static void renderHeaderBar(GuiGraphics graphics, int width, int headerHeight) {
+        boolean inWorld = Minecraft.getInstance().level != null;
+        Screen.renderMenuBackgroundTexture(graphics, inWorld ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND,
+                0, 0, 0f, 0f, width, headerHeight - 2);
+        ResourceLocation separator = inWorld ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
+        RenderSystem.enableBlend();
+        graphics.blit(separator, 0, headerHeight - 2, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.disableBlend();
+    }
+
+    /** The header bar with the gold screen title centered in it. */
+    public static void renderHeaderBar(GuiGraphics graphics, Font font, Component title, int width, int headerHeight) {
+        renderHeaderBar(graphics, width, headerHeight);
+        graphics.drawCenteredString(font, title, width / 2, (headerHeight - font.lineHeight) / 2, ConfigGuiColors.TITLE);
+    }
+
+    /** The 32×32 tiling list background over a scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
+    public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
+        ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
+        RenderSystem.enableBlend();
+        graphics.blit(bg, 0, top, (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
+        RenderSystem.disableBlend();
+    }
+
+    /** The bottom inner-shadow strip (mirrors {@code AbstractSelectionList#renderListSeparators}, footer only). */
+    public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
+        ResourceLocation footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
+        RenderSystem.enableBlend();
+        graphics.blit(footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.disableBlend();
+    }
+
+    /** Thin right-edge scrollbar for a custom-scrolled panel. No-op when everything fits. */
+    public static void renderScrollbar(GuiGraphics graphics, int top, int bottom, int width, double scroll, int maxScroll) {
+        if (maxScroll <= 0) return;
+        int trackX = width - 6;
+        int trackH = bottom - top;
+        int thumbH = Math.max(16, trackH * trackH / (trackH + maxScroll));
+        int thumbY = top + (int) ((trackH - thumbH) * (scroll / maxScroll));
+        graphics.fill(trackX, top, trackX + 3, top + trackH, 0x40000000);
+        graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, 0xFFB0B0B0);
+    }
+
+    /**
+     * The placeholder mod icon: a dark square with the mod's capital initial, or {@code gearIcon} when the name is
+     * blank. Colors are passed in so callers can dim it (e.g. for not-installed mods).
+     */
+    public static void renderInitialTile(GuiGraphics graphics, Font font, String name, int x, int y, int size,
+                                         int tileColor, int letterColor, ResourceLocation gearIcon) {
+        graphics.fill(x, y, x + size, y + size, tileColor);
+        graphics.renderOutline(x, y, size, size, 0xFF000000);
+        String trimmed = name.trim();
+        if (trimmed.isEmpty()) {
+            int g = size - 10;
+            graphics.blitSprite(gearIcon, x + (size - g) / 2, y + (size - g) / 2, g, g);
+            return;
+        }
+        String initial = trimmed.substring(0, 1).toUpperCase();
+        int tx = x + (size - font.width(initial)) / 2;
+        int ty = y + (size - font.lineHeight) / 2;
+        graphics.drawString(font, initial, tx, ty, letterColor, false);
+    }
+
+    /**
+     * The vanilla button click sound, for clickable things that aren't {@code AbstractWidget}s (grid cards, list rows,
+     * breadcrumb segments, ...) and so can't call {@code playDownSound} themselves.
+     */
+    public static void playClickSound() {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
+    }
 
     /**
      * Left aligned text that scrolls back and forth when it doesn't fit its box, mirroring vanilla's
