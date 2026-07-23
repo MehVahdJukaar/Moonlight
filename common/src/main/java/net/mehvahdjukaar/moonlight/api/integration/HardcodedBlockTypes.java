@@ -297,6 +297,18 @@ public class HardcodedBlockTypes {
 
 
 //!! LEAVES
+        // No Man's Land - REASON: Associated WoodType
+        leafReg.addSimpleFinder("nomansland", "autumnal_oak")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("oak_log"));
+        leafReg.addSimpleFinder("nomansland", "frosted")
+                .childBlock(LOG, "pine_log");
+        leafReg.addSimpleFinder("nomansland", "pale_cherry")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("cherry_log"));
+        leafReg.addSimpleFinder("nomansland", "red_maple")
+                .childBlock(LOG, "maple_log");
+        leafReg.addSimpleFinder("nomansland", "yellow_birch")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("birch_log"));
+
         // Oh The Biomes We've Gone - REASON: Associated WoodType
         leafReg.addSimpleFinder("biomeswevegone", "flowering_palo_verde")
                 .childBlock(LOG, "palo_verde_log");
