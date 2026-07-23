@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -42,16 +43,37 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
-        // Dungeon's Delight - REASON: is treated as Bamboo
-        woodReg.addSimpleFinder("dungeonsdelight", "wormwood").bambooLike(true);
+        // Shroomcraft - REASON: Naming-Convention
+        woodReg.addSimpleFinder("shroomcraft", "shroomwood")
+                .planksSuffix("_planks")
+                .log( "stripped_mushroom_stem")
+                .childBlock(WOOD, "stripped_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "blue_shroomwood")
+                .planksSuffix("_planks")
+                .log("blue_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_blue_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_blue_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "orange_shroomwood")
+                .planksSuffix("_planks")
+                .log("orange_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_orange_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_orange_mushroom_hyphae");
+
+        woodReg.addSimpleFinder("shroomcraft", "purple_shroomwood")
+                .planksSuffix("_planks")
+                .log("purple_mushroom_stem")
+                .childBlock(STRIPPED_LOG, "stripped_purple_mushroom_stem")
+                .childBlock(STRIPPED_WOOD, "stripped_purple_mushroom_hyphae");
 
         // Abundant Atmosphere - REASON: Naming-Convention, 2-Words
         woodReg.addSimpleFinder("abundant_atmosphere", "red_bamboo")
                 .log("red_bamboo_block")
                 .childBlock(STRIPPED_LOG, "stripped_red_bamboo_block");
 
-        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME
-        woodReg.addSimpleFinder("dungeonsdelight", "wormwood")
+        // Dungeon's Delight - REASON: Naming-Convention, PLANKS-NAME,  is treated as Bamboo
+        woodReg.addSimpleFinder("dungeonsdelight", "wormwood").bambooLike(true)
                 .log("wormroots_block");
 
         // Sniffed Out - REASON: Naming-Convention
@@ -210,7 +232,7 @@ public class HardcodedBlockTypes {
                 .log("jabuticaba_log");
 
         // My Nether's Delight - REASON: Naming-Convention
-        woodReg.addSimpleFinder("mynethersdelight", "powdery")
+        woodReg.addSimpleFinder("mynethersdelight", "powdery").bambooLike(true)
                 .logSuffix("_block")
                 .childBlockAffix(STRIPPED_LOG, "stripped_", "_block");
 
@@ -226,7 +248,7 @@ public class HardcodedBlockTypes {
                 .childBlockSuffix(STRIPPED_WOOD, "_hyphae");
 
         // Gardens Of The Dead - REASON: Naming-Convention
-        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane")
+        woodReg.addSimpleFinder("gardens_of_the_dead", "whistlecane").bambooLike(true)
                 .planks("whistlecane_planks")
                 .log("whistlecane_block")
                 .childItem(STICK, "whistlecane");
@@ -275,6 +297,18 @@ public class HardcodedBlockTypes {
 
 
 //!! LEAVES
+        // No Man's Land - REASON: Associated WoodType
+        leafReg.addSimpleFinder("nomansland", "autumnal_oak")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("oak_log"));
+        leafReg.addSimpleFinder("nomansland", "frosted")
+                .childBlock(LOG, "pine_log");
+        leafReg.addSimpleFinder("nomansland", "pale_cherry")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("cherry_log"));
+        leafReg.addSimpleFinder("nomansland", "red_maple")
+                .childBlock(LOG, "maple_log");
+        leafReg.addSimpleFinder("nomansland", "yellow_birch")
+                .childBlock(LOG, ResourceLocation.withDefaultNamespace("birch_log"));
+
         // Oh The Biomes We've Gone - REASON: Associated WoodType
         leafReg.addSimpleFinder("biomeswevegone", "flowering_palo_verde")
                 .childBlock(LOG, "palo_verde_log");
@@ -305,10 +339,14 @@ public class HardcodedBlockTypes {
         leafReg.addLeavesToWoodMapping("fruitfulfun", "orange", "citrus");
 
         // Environmental - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("environmental", "pink_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "blue_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "purple_wisteria", "wisteria");
-        leafReg.addLeavesToWoodMapping("environmental", "white_wisteria", "wisteria");
+        leafReg.addSimpleFinder("environmental", "pink_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "blue_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "purple_wisteria")
+                .childBlock(LOG, "wisteria_log");
+        leafReg.addSimpleFinder("environmental", "white_wisteria")
+                .childBlock(LOG, "wisteria_log");
         leafReg.addLeavesToWoodMapping("environmental", "cheerful_plum", "plum");
         leafReg.addLeavesToWoodMapping("environmental", "moody_plum", "plum");
 
@@ -415,6 +453,10 @@ public class HardcodedBlockTypes {
 
         // ALEX'S CAVES - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
+
+        // Ars Elemental - REASON: Associated WoodType
+        leafReg.addSimpleFinder("ars_elemental", "yellow_archwood")
+                .childBlock(LOG, ResourceLocation.parse("ars_nouveau:archwood_log"));
     }
 
 

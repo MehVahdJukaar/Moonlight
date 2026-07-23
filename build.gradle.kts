@@ -1,12 +1,10 @@
-import net.minecraftforge.artifactural.gradle.GradleArtifact.maven
-
 plugins {
     id("com.possible-triangle.core")
     id("com.possible-triangle.common") apply false
     id("com.possible-triangle.fabric") apply false
     id("com.possible-triangle.neoforge") apply false
     id("net.mehvahdjukaar.candlelight") version "1.2.4" apply false
-    id("dev.mixinmcp.decompile") version "0.9.0" apply false
+    id("dev.mixinmcp.decompile") version "0.9.0" apply fals
 }
 
 mod {
@@ -23,8 +21,8 @@ subprojects {
 
     apply(plugin = "com.possible-triangle.core")
     apply(plugin = "net.mehvahdjukaar.candlelight")
-    apply(plugin = "dev.mixinmcp.decompile")
     apply(plugin = "maven-publish")
+    apply(plugin = "dev.mixinmcp.decompile")
 
     dependencies {
         compileOnly("net.mehvahdjukaar:candlelight:1.2.4")
@@ -94,7 +92,7 @@ subprojects {
       //  maven { url = uri("https://maven.tterrag.com/") } // Flywheel, EnderIO
         maven { url = uri("https://mvn.devos.one/releases/") } // Registrate, Porting Lib (releases)
         maven { url = uri("https://mvn.devos.one/snapshots/") } // Registrate, Porting Lib (snapshots)
-       // maven { url = uri("https://maven.terraformersmc.com/") } // TerraformersMC mods
+//        maven { url = uri("https://maven.terraformersmc.com/") } // TerraformersMC mods
         maven { url = uri("https://maven.saps.dev/releases") } // FTB Mods
         maven { url = uri("https://dl.cloudsmith.io/public/tslat/sbl/maven/") }
         maven { url = uri("https://maven.theillusivec4.top/") } // Curios API
