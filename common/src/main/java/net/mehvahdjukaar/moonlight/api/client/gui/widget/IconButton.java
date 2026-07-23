@@ -60,6 +60,8 @@ public class IconButton extends Button {
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }
+        if (!this.active) graphics.setColor(0.5f, 0.5f, 0.5f, 1f); // dim the icon to match the disabled button
         graphics.blitSprite(this.sprite, iconX, iconY, this.spriteWidth, this.spriteHeight);
+        if (!this.active) graphics.setColor(1f, 1f, 1f, 1f);
     }
 }

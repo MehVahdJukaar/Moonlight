@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -18,17 +19,8 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.CR
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.CRUMB_HOVER;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.CRUMB_SEPARATOR;
 
-/**
- * The clickable breadcrumb navigation trail in the config screen header (root › … › parent › current). Each
- * segment jumps to its screen when clicked, except the {@code current} one. When the full trail would overrun its
- * width the middle collapses to a single {@code …}, keeping the root and as many trailing crumbs as fit.
- */
 public class BreadcrumbWidget extends AbstractWidget {
 
-    /**
-     * One breadcrumb segment. {@code target} is the screen to jump to when clicked; {@code current} marks the
-     * segment for the page we're already on (not clickable).
-     */
     public record Crumb(Component label, Screen target, boolean current) {
     }
 
@@ -86,6 +78,7 @@ public class BreadcrumbWidget extends AbstractWidget {
         if (this.active && this.visible && button == 0) {
             Screen target = crumbAt(mouseX, mouseY);
             if (target != null) {
+                GuiHelper.playClickSound();
                 onNavigate.accept(target);
                 return true;
             }
@@ -110,11 +103,6 @@ public class BreadcrumbWidget extends AbstractWidget {
         return null;
     }
 
-    /**
-     * Picks which crumbs to draw so the trail fits in {@code maxWidth}. If it all fits, returns every index;
-     * otherwise it keeps the root and as many trailing crumbs as fit, marking the collapsed middle with a
-     * {@code -1} ellipsis placeholder (root › … › parent › current).
-     */
     private List<Integer> computeVisibleCrumbs(int maxWidth) {
         int n = crumbs.size();
         List<Integer> full = new ArrayList<>(n);

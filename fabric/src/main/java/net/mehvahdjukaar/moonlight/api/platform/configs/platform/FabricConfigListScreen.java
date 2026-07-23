@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+// superseded by MoonlightConfigSelectScreen (the native config-select UI); no longer instantiated anywhere
+@Deprecated(forRemoval = true)
 public class FabricConfigListScreen extends Screen {
 
     protected final Screen parent;

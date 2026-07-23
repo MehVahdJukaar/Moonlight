@@ -4,20 +4,8 @@ import net.minecraft.ChatFormatting;
 
 import java.util.Objects;
 
-/**
- * The single source of truth for every text/accent color used by Moonlight's native config UI and its shared GUI
- * widgets (config screen, dropdowns, color picker, JSON/SNBT/regex editors, mods hub). Change them here to retheme
- * the whole UI in one place.
- * <p>
- * The palette leans on Minecraft's own vibrant chat colors (via the {@link #chat} helper) so the UI feels native and
- * lively, with a handful of hand-tuned customs where the vanilla grays would look flat — muted secondary text,
- * breadcrumbs and separators. Each accent role gets its own distinct hue so they read as one coherent family. The
- * bulk of these are the text / accent / syntax theme; the handful of structural-chrome constants (header fills,
- * separators) are fixed and not meant to be re-themed, but they live here too so they aren't copy-pasted across screens.
- */
 public final class ConfigGuiColors {
 
-    /** RGB of one of Minecraft's 16 built-in chat colors. */
     public static int chat(ChatFormatting color) {
         return Objects.requireNonNull(color.getColor());
     }
@@ -33,7 +21,7 @@ public final class ConfigGuiColors {
     public static final int ERROR = chat(ChatFormatting.RED);          // invalid value — MC red
     public static final int TITLE = chat(ChatFormatting.GOLD);         // screen title — MC gold
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);    // unsaved edit — MC yellow, pops against the gold title
-    public static final int CATEGORY = chat(ChatFormatting.DARK_AQUA);      // category labels / accents — MC aqua
+    public static final int CATEGORY = chat(ChatFormatting.GREEN);      // category labels / accents — MC aqua
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE); // highlighted / selected entry — MC light purple, a distinct accent hue
 
     // ── cards / rows of the mod grids (mods hub, discover mods) ──

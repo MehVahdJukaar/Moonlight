@@ -478,6 +478,10 @@ public abstract class ConfigBuilder {
     }
 
     protected void uiPush(Component title) {
+        // a comment(...) right before a push belongs to the category itself, not to its first value. We don't show
+        // category descriptions yet, so drop it instead of letting the first child claim it (on screen and on disk)
+        this.pendingComment = null;
+        this.pendingCommentForwarded = false;
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
         if (this.pendingIcon != null) { // an icon(...) right before this push decorates the category row

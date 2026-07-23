@@ -296,6 +296,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
     }
 
     private void select(String v) {
+        GuiHelper.playClickSound(); // the popup is drawn by the overlay layer, so it gets no widget click sound
         this.value = v;
         onChange.accept(v);
     }

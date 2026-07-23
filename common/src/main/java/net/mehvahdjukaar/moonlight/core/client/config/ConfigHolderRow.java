@@ -55,10 +55,10 @@ class ConfigHolderRow extends ConfigListRow {
         int textRight = editX - GAP;
 
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
-        Component boldLabel = label.copy().withStyle(ChatFormatting.BOLD);
+        Component boldLabel = label.copy();//.withStyle(ChatFormatting.BOLD);
         if (subtitle != null) {
             GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT_SECONDARY);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT);
         } else {
             GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top, height, CATEGORY);
         }

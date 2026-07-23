@@ -37,7 +37,6 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.holders = configsOf(modId);
     }
 
-    /** All configs registered for a mod that can show a screen, ordered common → client. */
     private static List<ModConfigHolder> configsOf(String modId) {
         return ModConfigHolder.getTrackedSpecs().stream()
                 .filter(h -> h.getModId().equals(modId))
@@ -45,10 +44,6 @@ public class MoonlightConfigSelectScreen extends Screen {
                 .toList();
     }
 
-    /**
-     * Builds the right screen for a mod's config button: the single config directly if there's only one, the
-     * select list if there are several, or null if the mod has none.
-     */
     @Nullable
     public static Screen create(String modId, Screen parent, @Nullable ResourceLocation background) {
         List<ModConfigHolder> holders = configsOf(modId);

@@ -29,12 +29,6 @@ import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * A dedicated page for editing a string list: one editor per entry (a free text field, or a dropdown picker when
- * the list is option-backed) with a remove button, plus an add button. Follows the same "edit on a sub page, hand
- * the result back on Done" shape as {@link ColorPickerScreen}. Hosts dropdown popups the same way the main config
- * screen does (see {@link OverlayLayer}).
- */
 class ListEditScreen extends Screen implements PopupHost {
 
     private final Screen parent;
