@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -28,27 +30,20 @@ import java.util.function.Supplier;
  * the item/block registries are populated. Resolution is memoized, so it's cheap to call every frame.
  * <p>
  * By default an id resolves to the matching item, else the matching block's item. Mods that need something a plain
- * lookup can't produce (a stack with data components, a made-up icon key, ...) can {@link #registerOverride register
- * an override} from their client setup.
+ * lookup can't produce (a stack with data components, a made-up icon key, ...) register an override via
+ * {@link ConfigScreenExtensions#registerIcon} from their client setup.
  */
 public final class ConfigScreenIcons {
 
-    private static final Map<ResourceLocation, Supplier<ItemStack>> OVERRIDES = new HashMap<>();
     private static final Map<ResourceLocation, ItemStack> CACHE = new HashMap<>();
 
-    /**
-     * Binds an icon id to a custom stack, overriding the default item/block lookup. Call from client setup (after
-     * registries are frozen). The {@code id} is whatever was passed to {@code icon(...)} in the config.
-     */
+    /** @deprecated use {@link ConfigScreenExtensions#registerIcon} instead. */
+    @Deprecated(forRemoval = true)
     public static void registerOverride(ResourceLocation id, Supplier<ItemStack> stack) {
-        OVERRIDES.put(id, stack);
+        ConfigScreenExtensions.registerIcon(id, stack);
         CACHE.remove(id);
     }
 
-    /**
-     * Resolves an icon id to a renderable stack: a registered override, else the matching item, else the matching
-     * block's item, else {@link ItemStack#EMPTY}. Memoized.
-     */
     public static ItemStack resolve(@Nullable ResourceLocation id) {
         if (id == null) return ItemStack.EMPTY;
         ItemStack cached = CACHE.get(id);
@@ -59,7 +54,7 @@ public final class ConfigScreenIcons {
     }
 
     private static ItemStack compute(ResourceLocation id) {
-        Supplier<ItemStack> override = OVERRIDES.get(id);
+        Supplier<ItemStack> override = ConfigScreenExtensions.iconOverride(id);
         if (override != null) {
             ItemStack s = override.get();
             if (s != null && !s.isEmpty()) return s;
@@ -76,15 +71,10 @@ public final class ConfigScreenIcons {
         return ItemStack.EMPTY;
     }
 
-    /** Whether {@code id} resolves to a drawable icon (so callers can decide layout before drawing). */
     public static boolean has(@Nullable ResourceLocation id) {
         return id != null && !resolve(id).isEmpty();
     }
 
-    /**
-     * Draws the resolved icon as a 16x16 GUI item at {@code (x, y)}. Returns {@code true} if something was drawn, so
-     * the caller can fall back to a default (e.g. a folder sprite) when it wasn't.
-     */
     public static boolean render(GuiGraphics graphics, @Nullable ResourceLocation id, int x, int y) {
         ItemStack stack = resolve(id);
         if (stack.isEmpty()) return false;
@@ -96,20 +86,18 @@ public final class ConfigScreenIcons {
 
     private static final int PERIOD = 36; // phase wraps here: a full Y spin, or two pulse cycles
 
-    /**
-     * Draws the resolved icon at {@code (x, y)} with a hover animation: 3D block models spin about Y, flat items
-     * pulse in scale. {@code phase} comes from an {@link Anim} the caller keeps per row. {@code lit} renders the
-     * item fully bright (pass the row's enabled state; a disabled row draws it dark, like the label greys out).
-     * Returns {@code true} if something was drawn.
-     */
     public static boolean renderAnimated(GuiGraphics graphics, @Nullable ResourceLocation id, int x, int y,
                                          float phase, boolean lit) {
         ItemStack stack = resolve(id);
         if (stack.isEmpty()) return false;
-        int light = lit ? LightTexture.FULL_BRIGHT : 0;
+        // GUI items have no world lightmap, so a low combinedLight only darkens when a level is loaded (the lightmap
+        // is white on the main menu). Dim through the shader colour modulator instead, which reads the same in or out
+        // of a world, so a disabled category's icon looks dark everywhere.
+        if (!lit) RenderSystem.setShaderColor(0.35f, 0.35f, 0.35f, 1f);
         RenderUtil.renderGuiItemRelative(graphics.pose(), stack, x, y,
                 Minecraft.getInstance().getItemRenderer(),
-                (pose, model) -> animate(pose, model, phase), light, OverlayTexture.NO_OVERLAY);
+                (pose, model) -> animate(pose, model, phase), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        if (!lit) RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         return true;
     }
 
@@ -123,16 +111,10 @@ public final class ConfigScreenIcons {
         }
     }
 
-    /**
-     * Per-row hover animation phase, driven by wall-clock time so it needs no screen tick hook. Ramps up while the
-     * row is hovered and decays back to rest otherwise, mirroring the old Configured screen's {@code +1/-2 per tick}.
-     * Keep one instance per row and call {@link #update} each frame before reading {@link #phase}.
-     */
     public static final class Anim {
         private float phase;
         private long lastMs = -1;
 
-        /** Advances the phase toward spinning (hovered) or rest (not), based on elapsed real time. */
         public void update(boolean hovered) {
             long now = Util.getMillis();
             float dt = lastMs < 0 ? 0 : Math.min((now - lastMs) / 1000f, 0.1f); // clamp big gaps (e.g. screen reopen)

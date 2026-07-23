@@ -39,7 +39,8 @@ public class ModsTilesScreen extends Screen {
     private static final int CARD_PAD = 9;        // equal padding above the icon and below the last text line
     private static final int ICON_TEXT_GAP = 6;   // icon → name
     private static final int NAME_VER_GAP = 2;    // name → version
-    private static final int ICON_SIZE = 32;
+    private static final int ICON_SIZE = 32;      // icon slot height; square icons render at this, wider ones expand
+    private static final int ICON_SIDE_PAD = 8;   // min horizontal padding kept between a wide icon and the tile edge
     private static final int LINE = 9;            // vanilla font line height
     // top pad + icon + gap + name + gap + version + bottom pad — kept balanced (CARD_PAD on both ends)
     private static final int CARD_H = CARD_PAD + ICON_SIZE + ICON_TEXT_GAP + LINE + NAME_VER_GAP + LINE + CARD_PAD;
@@ -163,7 +164,18 @@ public class ModsTilesScreen extends Screen {
         int iconY = y + CARD_PAD;
         ModIcons.Icon icon = ModIcons.get(entry.modId());
         if (icon != null) {
-            graphics.blit(icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, 0f, 0f,
+            // draw at the real aspect ratio: height fills the icon slot, width grows for wider logos. If that would
+            // spill past the tile's side padding, scale the whole thing down instead so it always fits.
+            int maxW = CARD_W - 2 * ICON_SIDE_PAD;
+            int h = ICON_SIZE;
+            int w = Math.round(ICON_SIZE * (icon.width() / (float) icon.height()));
+            if (w > maxW) {
+                w = maxW;
+                h = Math.round(maxW * (icon.height() / (float) icon.width()));
+            }
+            int dx = x + (CARD_W - w) / 2;                 // centered horizontally in the tile
+            int dy = iconY + (ICON_SIZE - h) / 2;          // centered within the square icon slot
+            graphics.blit(icon.texture(), dx, dy, w, h, 0f, 0f,
                     icon.width(), icon.height(), icon.width(), icon.height());
         } else {
             renderFallbackIcon(graphics, entry, iconX, iconY);

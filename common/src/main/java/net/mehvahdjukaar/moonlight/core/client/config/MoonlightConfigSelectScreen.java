@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
@@ -104,6 +105,10 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
+        ConfigScreenExtensions.Panel panel = overlayPanel();
+        for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
+            overlay.render(graphics, panel, mouseX, mouseY, partialTick);
+        }
         // row tooltip on top of everything
         ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
@@ -112,5 +117,18 @@ public class MoonlightConfigSelectScreen extends Screen {
                 graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
             }
         }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        ConfigScreenExtensions.Panel panel = overlayPanel();
+        for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
+            if (overlay.mouseClicked(panel, mouseX, mouseY, button)) return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private ConfigScreenExtensions.Panel overlayPanel() {
+        return new ConfigScreenExtensions.Panel(this, 0, HEADER, this.width, this.height - FOOTER);
     }
 }
