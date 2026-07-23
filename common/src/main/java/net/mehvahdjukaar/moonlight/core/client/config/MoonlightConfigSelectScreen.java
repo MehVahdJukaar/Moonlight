@@ -29,12 +29,12 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     private ConfigOptionList list;
 
-    public MoonlightConfigSelectScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         super(Component.literal(LangBuilder.getReadableName(modId)));
         this.modId = modId;
         this.parent = parent;
         this.background = background;
-        this.holders = configsOf(modId);
+        this.holders = holders;
     }
 
     private static List<ModConfigHolder> configsOf(String modId) {
@@ -46,10 +46,15 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     @Nullable
     public static Screen create(String modId, Screen parent, @Nullable ResourceLocation background) {
-        List<ModConfigHolder> holders = configsOf(modId);
+        return create(modId, configsOf(modId), parent, background);
+    }
+
+    /** Same as {@link #create(String, Screen, ResourceLocation)} but over an explicit holder list (e.g. the foreign-config bridge, whose holders aren't globally tracked). */
+    @Nullable
+    public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
         if (holders.size() == 1) return holders.getFirst().makeScreen(parent, background);
-        return new MoonlightConfigSelectScreen(modId, parent, background);
+        return new MoonlightConfigSelectScreen(modId, holders, parent, background);
     }
 
     @Override

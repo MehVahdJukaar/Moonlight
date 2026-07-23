@@ -50,6 +50,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -243,6 +244,16 @@ public class ClientHelperImpl {
 
     public static boolean hasModConfigScreen(String modId) {
         return PlatHelper.isModLoaded("modmenu") && ModMenuCompat.hasModConfigScreen(modId);
+    }
+
+    @Nullable
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+        // no universal config format on Fabric to convert; callers fall back to the mod's own (Mod Menu) screen
+        return null;
+    }
+
+    public static boolean hasNativeForeignConfig(String modId) {
+        return false;
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {

@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -63,7 +64,9 @@ class ListEditScreen extends Screen implements PopupHost {
         this.addRenderableWidget(this.list);
 
         int cx = this.width / 2;
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.moonlight.config.list_add"), b -> {
+        Component addLabel = Component.literal("+ ").withStyle(ChatFormatting.AQUA)
+                .append(Component.translatable("gui.moonlight.config.list_add").withStyle(ChatFormatting.RESET));
+        this.addRenderableWidget(Button.builder(addLabel, b -> {
             working.add(options != null && !options.isEmpty() ? options.getFirst() : "");
             rebuildRows();
             this.list.setScrollAmount(this.list.getMaxScroll());

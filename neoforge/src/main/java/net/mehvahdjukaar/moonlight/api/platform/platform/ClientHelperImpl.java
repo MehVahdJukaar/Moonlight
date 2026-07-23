@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform.platform;
 import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForeignConfigBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.color.block.BlockColor;
@@ -265,6 +266,15 @@ public class ClientHelperImpl {
         return ModList.get().getModContainerById(modId)
                 .map(container -> container.getCustomExtension(IConfigScreenFactory.class).isPresent())
                 .orElse(false);
+    }
+
+    @Nullable
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+        return ForeignConfigBridge.createScreen(modId, parent, background);
+    }
+
+    public static boolean hasNativeForeignConfig(String modId) {
+        return ForeignConfigBridge.hasConfig(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {

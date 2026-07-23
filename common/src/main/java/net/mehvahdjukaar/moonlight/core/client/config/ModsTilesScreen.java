@@ -77,9 +77,14 @@ public class ModsTilesScreen extends Screen {
         for (String modId : EXTRA_MODS) {
             if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
         }
-        if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get()) {
+        // converting foreign configs implies showing every mod's tile, so you can actually reach them. In that mode a
+        // mod also qualifies if it only has a raw (loader) config we can convert, even without its own screen
+        boolean convert = ClientConfigs.CONVERT_FOREIGN_CONFIGS.get();
+        if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get() || convert) {
             for (String modId : PlatHelper.getInstalledMods()) {
-                if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
+                if (ClientHelper.hasModConfigScreen(modId) || (convert && ClientHelper.hasNativeForeignConfig(modId))) {
+                    modIds.add(modId);
+                }
             }
         }
         for (String modId : modIds) {
@@ -202,8 +207,12 @@ public class ModsTilesScreen extends Screen {
                 int x = cardX(i), y = cardY(i);
                 if (mouseX >= x && mouseX < x + CARD_W && mouseY >= y && mouseY < y + CARD_H) {
                     String modId = entries.get(i).modId();
-                    // Moonlight-tracked mods open our own screen; the rest defer to the loader/Mod Menu screen
+                    // Moonlight-tracked mods open our own screen; else, when enabled, try to convert the mod's own
+                    // config into a native screen; failing that, defer to the loader/Mod Menu screen it registered
                     Screen s = MoonlightConfigSelectScreen.create(modId, this, background);
+                    if (s == null && ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
+                        s = ClientHelper.getNativeForeignConfigScreen(modId, this, background);
+                    }
                     if (s == null) s = ClientHelper.getModConfigScreen(modId, this);
                     if (s != null) {
                         GuiHelper.playClickSound();

@@ -59,6 +59,12 @@ public abstract class ModConfigHolder {
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
 
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
+        this(id, fileExtension, configDirectory, type, changeCallback, true);
+    }
+
+    // tracked=false is for holders that only mirror another mod's config (the foreign-config bridge): they must not
+    // join the global registry, both to avoid a duplicate-id clash on re-open and to stay out of sync/enumeration logic
+    protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback, boolean tracked) {
         this.configId = id;
         this.fileName = id.getNamespace() + "-" + id.getPath() + "." + fileExtension;
         this.filePath = configDirectory.resolve(fileName);
@@ -66,7 +72,7 @@ public abstract class ModConfigHolder {
         this.changeCallback = changeCallback;
         this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName() + "_configs"));
 
-        ModConfigHolder.addTrackedSpec(this);
+        if (tracked) ModConfigHolder.addTrackedSpec(this);
     }
 
     public Component getReadableName() {

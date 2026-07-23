@@ -218,6 +218,23 @@ public abstract class ConfigBuilder {
         return defineListInternal(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
+    /**
+     * A list picker like {@link #defineList} but whose {@code suggestions} are resolved lazily (re-read each time
+     * they're needed) instead of captured now, so options that only exist later - e.g. after registration - are still
+     * offered. Entries the user enters are kept as long as they pass {@code entryValidator}; they are NOT restricted to
+     * the suggestions, so regex patterns or not-yet-loaded ids are never dropped. Suggestions act purely as autocomplete.
+     *
+     * @param suggestions    lazily-evaluated autocomplete options
+     * @param entryValidator validates each stored entry ({@link #STRING_CHECK} accepts any string, {@link #REGEX_CHECK} any valid regex)
+     * @param icon           optional per-entry preview icon, or null
+     */
+    public Supplier<List<String>> defineSuggestionList(String name, List<String> defaultValue,
+                                                       Supplier<List<String>> suggestions,
+                                                       Predicate<Object> entryValidator,
+                                                       @Nullable Function<String, ItemStack> icon) {
+        return defineListInternal(name, defaultValue, entryValidator, suggestions, icon);
+    }
+
     public Supplier<List<ResourceLocation>> defineRegistryList(String name, List<ResourceLocation> defaultValue, Registry<?> registry) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);

@@ -18,6 +18,7 @@ public class ClientConfigs {
     public static final Supplier<TooltipMode> TAGS_TOOLTIP;
     public static final Supplier<Boolean> CUSTOM_CONFIG_SCREEN;
     public static final Supplier<Boolean> SHOW_ALL_MOD_CONFIGS;
+    public static final Supplier<Boolean> CONVERT_FOREIGN_CONFIGS;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
@@ -50,6 +51,8 @@ public class ClientConfigs {
                 .define("custom_config_screen", true);
         SHOW_ALL_MOD_CONFIGS = builder.comment("Show a config tile for every installed mod that exposes a config screen, not just the ones using Moonlight's config system. Clicking one opens the screen the mod itself registered (NeoForge's screen extension, or Mod Menu on Fabric)")
                 .define("show_all_mod_configs", false);
+        CONVERT_FOREIGN_CONFIGS = builder.comment("Also show tiles for other mods that don't use Moonlight and render their config directly in Moonlight's own screen (NeoForge only). Best-effort: options Moonlight can't represent are left to the mod's own screen. Implies show_all_mod_configs for the tile grid")
+                .define("convert_foreign_configs", false);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

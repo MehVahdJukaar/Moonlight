@@ -324,6 +324,28 @@ public class ClientHelper {
     }
 
     /**
+     * Builds a Moonlight-native config screen for a mod that does <em>not</em> use Moonlight's config system, by
+     * reading the config the mod registered with the loader directly. Only NeoForge can do this (its configs share one
+     * {@code ModConfigSpec} format); Fabric always returns null. Also returns null when the mod has no readable config,
+     * so callers should fall back to {@link #getModConfigScreen}.
+     */
+    @PlatformImpl
+    @Nullable
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+        throw new AssertionError();
+    }
+
+    /**
+     * Whether {@link #getNativeForeignConfigScreen} would produce a screen for this mod (a readable config it didn't
+     * register through Moonlight). Cheaper than building the screen; used to decide whether to show the mod a tile.
+     * Always false on Fabric.
+     */
+    @PlatformImpl
+    public static boolean hasNativeForeignConfig(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
      * Pack in /resources/resourcepacks
      */
     @PlatformImpl
