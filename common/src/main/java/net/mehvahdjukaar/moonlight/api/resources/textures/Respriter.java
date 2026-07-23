@@ -104,14 +104,21 @@ public class Respriter {
 
         // in case the SOURCE texture itself has an animation we use it instead. this WILL create issues with animated planks textures but its acceptable as mcmeta of source could have more important stuff like ctm
         @Nullable
-        McMetaFile mergedAnimationData = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
+        McMetaFile mergedMcMeta = McMetaFile.merge(imageToRecolor.getMcMeta(), targetAnimationData);
 
         //is restricted to use only first original palette since it must merge a new animation following the given one
         int originalFrameCount = imageToRecolor.frameCount();
-        //if we have multiple frames we use the original image as a base and recolor with single palette, otherwise we clone it and recolor it with the new palettes
-        TextureImage outputTexture = (originalFrameCount == 1 && mergedAnimationData != null) ?
-                TextureOps.createSingleFrameAnimation(imageToRecolor, mergedAnimationData) :
-                imageToRecolor.makeCopy(); //ignore mcmeta? guess it uses the same anyways
+        //if we have multiple frames we use the original image as a base and recolor with single palette, otherwise we clone it and recolor it with the new palettes.
+        //note that having an mcmeta at all doesn't mean there's an animation to follow: ctm mods use it just to store their own data
+        boolean turnsIntoAnimation = originalFrameCount == 1 && mergedMcMeta != null && mergedMcMeta.hasAnimation();
+        TextureImage outputTexture;
+        if (turnsIntoAnimation) {
+            //one frame per given palette, but never fewer than the frame indices the animation refers to
+            int stripLength = Math.max(targetPalettes.size(), mergedMcMeta.requiredFrameCount());
+            outputTexture = TextureOps.createSingleFrameAnimation(imageToRecolor, stripLength, mergedMcMeta);
+        } else {
+            outputTexture = imageToRecolor.makeCopyWithMetadata(mergedMcMeta);
+        }
 
         FrameColorRemapper colorRemapper = FrameColorRemapper.of(originalPalette, originalFrameCount,
                 targetPalettes, outputTexture.frameCount());

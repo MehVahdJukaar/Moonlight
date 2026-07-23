@@ -108,7 +108,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         int imgWidth = imageWidth();
         int imgHeight = imageHeight();
 
-        FrameSize metaSize = (metadata == null)
+        FrameSize metaSize = (metadata == null || !metadata.hasAnimation())
                 ? new FrameSize(imgWidth, imgHeight)
                 : metadata.animation().calculateFrameSize(imgWidth, imgHeight);
 
@@ -312,7 +312,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         int maxFrames = gridW * gridH;
 
         // If there is no animation metadata, just return whole image
-        if (metadata == null || metadata.animation().frames.isEmpty()) {
+        if (metadata == null || !metadata.hasAnimation() || metadata.animation().frames.isEmpty()) {
             builder.add(image);
             return builder.build();
         }
@@ -371,7 +371,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
     @Deprecated(forRemoval = true)
     public TextureImage createAnimationTemplate(int length, McMetaFile useDataFrom) {
-        return TextureOps.createSingleFrameAnimation(this, useDataFrom);
+        return TextureOps.createSingleFrameAnimation(this, length, useDataFrom);
     }
 
 

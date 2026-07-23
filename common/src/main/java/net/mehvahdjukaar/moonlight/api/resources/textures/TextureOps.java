@@ -146,10 +146,10 @@ public final class TextureOps {
     //create
 
     /**
-     * Creates a new image using the first frame of this one. Its frame data and frame length will be the one provided
+     * Creates a new image made of {@code length} copies of this one's first frame, stacked vertically.
+     * Its frame data will be the one provided
      */
-    public static TextureImage createSingleFrameAnimation(TextureImage img, McMetaFile animationData) {
-        int length = img.frameCount();
+    public static TextureImage createSingleFrameAnimation(TextureImage img, int length, McMetaFile animationData) {
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be greater than 0");
         }
@@ -168,8 +168,8 @@ public final class TextureOps {
     }
 
     @Deprecated(forRemoval = true)
-    public static TextureImage createSingleFrameAnimation(TextureImage img, int length, McMetaFile animationData) {
-        return createSingleFrameAnimation(img, animationData);
+    public static TextureImage createSingleFrameAnimation(TextureImage img, McMetaFile animationData) {
+        return createSingleFrameAnimation(img, img.frameCount(), animationData);
     }
 
     public static TextureImage createScaled(TextureImage img, float widthScale, float heightScale) {
@@ -178,9 +178,11 @@ public final class TextureOps {
         McMetaFile meta = null;
         var metadata = img.getMcMeta();
         if (metadata != null) {
-            int mW = (int) (metadata.animation().frameWidth * widthScale);
-            int mH = (int) (metadata.animation().frameHeight * heightScale);
-            meta = metadata.cloneWithSize(mW, mH);
+            //nothing to rescale if there's no animation, but the modded data still carries over
+            meta = metadata.hasAnimation()
+                    ? metadata.cloneWithSize((int) (metadata.getAnimationFrameWidth() * widthScale),
+                    (int) (metadata.getAnimationFrameHeight() * heightScale))
+                    : metadata.copy();
         }
         TextureImage im = TextureImage.createNew(newW, newH, meta);
         TextureCollager transformer = TextureCollager.builder(img.frameWidth(), img.frameHeight(), im.frameWidth(), im.frameHeight())

@@ -1,1 +1,2 @@
-- bumped codecui version
+- more improvements to the config screen system
+- other mods config screens can now alos be shown
