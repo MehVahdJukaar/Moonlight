@@ -288,7 +288,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> rawCodec) {
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
-        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
+        addTranslationsAndComments(name);
         if (usesDataBuddy) {
             var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
             ui(name, new ConfigOption.SchemaValue<>(uiTitle(name), uiDescription(name), w, defaultSupplier::get, codec));
@@ -321,7 +321,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<JsonElement> defineJson(String path, JsonElement defaultValue) {
-        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
+        addTranslationsAndComments(path);
         var w = track(ValueWrapper.json(builder.define(path,
                 defaultValue.toString().replace(" ", "").replace("\"", "'")), pendingMeta()));
         ui(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
@@ -330,7 +330,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<JsonElement> defineJson(String path, Supplier<JsonElement> defaultValue) {
-        forwardPendingComment(); // this path calls builder.define directly, bypassing addTranslationsAndComments
+        addTranslationsAndComments(path);
         com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
         var w = track(ValueWrapper.json(builder.define(path,
                 () -> lazyDefaultValue.get().toString().replace(" ", "").replace("\"", "'"),
@@ -370,9 +370,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
      * Forge attaches a .toml comment to the NEXT defined value, so hand it the pending before-comment right
      * before that define runs (once per comment — {@link #pollCommentToForward()} guards against re-emitting it
      * for the suppressed backing values of a compound define). After-comments never reach a define this way, so
-     * they don't make it into the .toml file; they still reach the lang file and the screen row. Must be called
-     * before every {@code builder.define(...)} — most paths get it via {@link #addTranslationsAndComments}, but
-     * the json/object defines call {@code builder.define} directly and so invoke this themselves.
+     * they don't make it into the .toml file; they still reach the lang file and the screen row. Must run before
+     * every {@code builder.define(...)}, which is why every define path goes through
+     * {@link #addTranslationsAndComments}.
      */
     private void forwardPendingComment() {
         String toForward = pollCommentToForward();

@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,6 +55,8 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     private final OverlayLayer overlay = new OverlayLayer();
 
     private ConfigOptionList list;
+    @Nullable
+    private Button addButton; // list pages only; kept to re-evaluate its enabled state after an entry is added
     @Nullable
     private Component error;
 
@@ -145,12 +148,24 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     @Override
     protected void init() {
         this.overlay.clear();
-        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
+        SchemaForm.ListCategory listCategory = listCategory();
+        // a list page needs a second button row above the usual one for "add entry", plus the line the decode error
+        // is drawn on: on a root list page both are present at once and would otherwise overlap
+        int footer = listCategory != null ? FOOTER + 36 : FOOTER;
+        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
         populate();
         this.addRenderableWidget(this.list);
 
         int y = this.height - 28;
         int cx = this.width / 2;
+        if (listCategory != null) {
+            Component label = Component.literal("+ ").withStyle(ChatFormatting.AQUA)
+                    .append(Component.translatable("gui.moonlight.config.list_add").withStyle(ChatFormatting.RESET));
+            this.addButton = Button.builder(label, b -> addEntry(listCategory))
+                    .bounds(cx - 100, y - 24, 200, 20).build();
+            this.addButton.active = listCategory.canAdd();
+            this.addRenderableWidget(this.addButton);
+        }
         if (isRoot()) {
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> commit())
                     .bounds(cx - 100, y, 96, 20).build());
@@ -162,22 +177,68 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         }
     }
 
+    @Nullable
+    private SchemaForm.ListCategory listCategory() {
+        return category instanceof SchemaForm.ListCategory lc ? lc : null;
+    }
+
     private void populate() {
+        SchemaForm.ListCategory listCategory = listCategory();
         List<ConfigListRow> rows = new ArrayList<>();
-        for (ConfigNode e : category.entries()) {
+        List<ConfigNode> entries = category.entries();
+        for (int i = 0; i < entries.size(); i++) {
+            ConfigNode e = entries.get(i);
+            ConfigListRow row;
             if (e instanceof ConfigCategory cat) {
-                rows.add(new CategoryRow(this, cat));
+                row = new CategoryRow(this, cat);
             } else if (e instanceof ConfigOption<?> v) {
-                rows.add(new OptionRow(this, v));
-                if (v.description() != null && state.session.isExpanded(v)) {
-                    List<FormattedCharSequence> lines = this.font.split(v.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
-                    for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
-                        rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
-                    }
+                row = new OptionRow(this, v);
+            } else {
+                continue;
+            }
+            if (listCategory != null) {
+                int index = i;
+                rows.add(new ListEntryRow(row, listCategory.canRemove(), () -> removeEntry(listCategory, index)));
+                continue; // generated list entries never carry a description, so there is nothing to expand
+            }
+            rows.add(row);
+            if (e instanceof ConfigOption<?> v && v.description() != null && state.session.isExpanded(v)) {
+                List<FormattedCharSequence> lines = this.font.split(v.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
+                for (int j = 0; j < lines.size(); j += DESC_LINES_PER_ROW) {
+                    rows.add(new DescriptionRow(this.font, lines.subList(j, Math.min(j + DESC_LINES_PER_ROW, lines.size()))));
                 }
             }
         }
         this.list.setRows(rows);
+    }
+
+    private void addEntry(SchemaForm.ListCategory cat) {
+        List<JsonElement> values = cat.snapshot(state.session);
+        values.add(cat.newEntry());
+        rebuild(cat, values);
+        this.list.setScrollAmount(this.list.getMaxScroll()); // reveal the entry that was just appended
+    }
+
+    private void removeEntry(SchemaForm.ListCategory cat, int index) {
+        List<JsonElement> values = cat.snapshot(state.session);
+        if (index >= values.size()) return;
+        values.remove(index);
+        rebuild(cat, values);
+    }
+
+    /**
+     * Adding or removing an entry changes the page's row set, so the list node is rebuilt from the JSON its entries
+     * currently hold and the rows regenerated in place. The rows own no state the node doesn't (each was seeded from,
+     * and reads back to, that JSON), so a rebuild round-trips every edit made so far.
+     */
+    private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
+        double scroll = this.list.getScrollAmount();
+        cat.setEntries(values);
+        this.overlay.clear(); // the rows are recreated below, and with them any popup one of them had open
+        populate();
+        this.list.setScrollAmount(scroll);
+        if (this.addButton != null) this.addButton.active = cat.canAdd();
+        onValueEdited();
     }
 
     /** Reassembles the form's JSON, decodes it through the codec and, if valid, hands the value back and closes. */
@@ -245,7 +306,9 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
             graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
         }
         if (this.error != null) {
-            graphics.drawCenteredString(this.font, this.error, this.width / 2, this.height - 42, ConfigGuiColors.ERROR);
+            // sits just above the button strip, which is one row taller on a list page (the "add entry" button)
+            int y = this.height - (listCategory() != null ? 66 : 42);
+            graphics.drawCenteredString(this.font, this.error, this.width / 2, y, ConfigGuiColors.ERROR);
         }
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.brigadier.CommandDispatcher;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
 import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
@@ -288,6 +289,21 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addKeyBindRegistration(Consumer<KeyBindEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    /**
+     * Registers a command the client itself executes, so it also works while connected to a server that doesn't have
+     * this mod. The source type is left generic since each loader uses its own: implement it with a method reference
+     * to a generic method (a lambda can't target a generic function type).
+     */
+    @FunctionalInterface
+    public interface ClientCommandRegistration {
+        <S> void register(CommandDispatcher<S> dispatcher);
+    }
+
+    @PlatformImpl
+    public static void addClientCommandRegistration(ClientCommandRegistration eventListener) {
         throw new AssertionError();
     }
 

@@ -48,6 +48,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforgespi.language.IModInfo;
@@ -227,6 +228,13 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
+
+    public static void addClientCommandRegistration(ClientHelper.ClientCommandRegistration eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterClientCommandsEvent> eventConsumer = event -> eventListener.register(event.getDispatcher());
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
+    }
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         return sprite.getPixelRGBA(frameIndex, x, y);

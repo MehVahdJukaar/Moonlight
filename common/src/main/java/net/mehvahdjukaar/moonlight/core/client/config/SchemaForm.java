@@ -30,10 +30,11 @@ import java.util.function.Predicate;
  * JSON. The {@link Reader}s compose up the record tree, so the root reader reproduces the whole value's JSON on Done,
  * which is then decoded through the codec.</p>
  *
- * <p>Structural kinds map to rich rows: records become navigable sub-categories, primitives/enums/colours/ids become
- * their matching controls. Anything the form can't render structurally — lists, maps, pairs, alternatives, opaque or
- * recursive codecs — degrades to a raw-JSON row (the existing {@link ConfigOption.JsonValue} editor) for that node, so
- * the form never fails to represent a value; at worst a sub-tree is edited as JSON text.</p>
+ * <p>Structural kinds map to rich rows: records become navigable sub-categories, lists become sub-categories with one
+ * entry per element and add/remove controls, primitives/enums/colours/ids become their matching controls. Anything the
+ * form can't render structurally — maps, pairs, alternatives, opaque or recursive codecs — degrades to a raw-JSON row
+ * (the existing {@link ConfigOption.JsonValue} editor) for that node, so the form never fails to represent a value; at
+ * worst a sub-tree is edited as JSON text.</p>
  *
  * <p>Seeding always prefers the current value, then the encoded default (so an <em>absent</em> optional field is
  * seeded with its real default rather than a neutral zero — writing it back can't silently change the value), then a
@@ -57,18 +58,21 @@ final class SchemaForm {
 
     /**
      * Builds the form for a whole config value. {@code current} is the value's JSON, {@code defaults} the encoded
-     * default value's JSON (used to seed absent optional fields). A top-level record populates the root category
-     * directly; any other kind becomes a single row named "value".
+     * default value's JSON (used to seed absent optional fields). A top-level record or list <em>is</em> the root
+     * category; any other kind becomes a single row named "value" on an otherwise empty one.
      */
     static SchemaForm build(Component title, Schema<?> schema, JsonElement current, @Nullable JsonElement defaults) {
-        ConfigCategory root = new ConfigCategory(title);
-        Reader reader;
+        // a record or a list becomes the root page itself; anything else gets a single "value" row on an empty page
         if (schema instanceof Schema.Record<?> rec) {
-            reader = populateRecord(root, rec, current, defaults);
-        } else {
-            reader = buildField(root, "value", readable("value"), schema, current, defaults);
+            ConfigCategory root = new ConfigCategory(title);
+            return new SchemaForm(root, populateRecord(root, rec, current, defaults));
         }
-        return new SchemaForm(root, reader);
+        if (schema instanceof Schema.ListOf<?> list) {
+            ListCategory root = listCategory(title, list, current, defaults);
+            return new SchemaForm(root, root.reader());
+        }
+        ConfigCategory root = new ConfigCategory(title);
+        return new SchemaForm(root, buildField(root, "value", readable("value"), schema, current, defaults));
     }
 
     /** Adds one row (or a sub-category) for a field to {@code parent} and returns the reader producing its JSON. */
@@ -134,13 +138,26 @@ final class SchemaForm {
                 parent.add(opt);
                 yield s -> new JsonPrimitive((String) s.current(opt));
             }
+            case Schema.TagId tag -> {
+                // "#namespace:path" when hashed, a bare id otherwise; accept either so a pasted id still works
+                String v = asString(seed, "");
+                Predicate<Object> valid = o -> o instanceof String x && isTagId(x);
+                var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(v), v, valid);
+                parent.add(opt);
+                yield s -> new JsonPrimitive(normalizeTagId((String) s.current(opt), tag.hashed()));
+            }
             case Schema.Enum<?> en -> enumField(parent, title, en, seed);
             case Schema.Record<?> rec -> {
                 ConfigCategory sub = new ConfigCategory(title);
                 parent.add(sub);
                 yield populateRecord(sub, rec, current, def);
             }
-            // everything structural we don't render natively (lists, maps, pairs, alternatives, opaque/custom/recursive)
+            case Schema.ListOf<?> list -> {
+                ListCategory sub = listCategory(title, list, seed, def);
+                parent.add(sub);
+                yield sub.reader();
+            }
+            // everything structural we don't render natively (maps, pairs, alternatives, opaque/custom/recursive)
             // degrades to a raw-JSON editor for that node — the form is always representable, never a dead end
             default -> rawJsonField(parent, title, schema, seed);
         };
@@ -169,6 +186,81 @@ final class SchemaForm {
     }
 
     private record FieldReader(String name, Reader reader) {}
+
+    /**
+     * A list node: a sub page holding one entry per element, each built through {@link #buildField} (so a record
+     * element becomes its own page and a scalar element an inline row). Unlike a record the entry set is mutable, so
+     * the page owns its readers and is rebuilt wholesale from a list of JSON values whenever an entry is added or
+     * removed — {@link SchemaEditScreen} drives that and re-populates its rows.
+     */
+    static final class ListCategory extends ConfigCategory {
+
+        private final Schema<?> element;
+        private final JsonElement template; // seed for a newly added entry
+        private final int min;
+        private final int max;
+        private final List<Reader> readers = new ArrayList<>();
+
+        private ListCategory(Component title, Schema<?> element, JsonElement template, int min, int max) {
+            super(title);
+            this.element = element;
+            this.template = template;
+            this.min = min;
+            this.max = max;
+        }
+
+        Reader reader() {
+            return s -> {
+                JsonArray array = new JsonArray();
+                for (Reader r : readers) array.add(r.read(s));
+                return array;
+            };
+        }
+
+        /** Current JSON of every entry, as edited so far. The basis for any structural change. */
+        List<JsonElement> snapshot(ConfigEditSession session) {
+            List<JsonElement> out = new ArrayList<>(readers.size());
+            for (Reader r : readers) out.add(r.read(session));
+            return out;
+        }
+
+        /** Discards the existing entry rows and rebuilds them (and their readers) from {@code values}. */
+        void setEntries(List<JsonElement> values) {
+            clear();
+            readers.clear();
+            for (int i = 0; i < values.size(); i++) {
+                readers.add(buildField(this, "entry" + i, entryTitle(i), element, values.get(i), template));
+            }
+        }
+
+        JsonElement newEntry() {
+            return template.deepCopy();
+        }
+
+        boolean canAdd() {
+            return readers.size() < max;
+        }
+
+        boolean canRemove() {
+            return readers.size() > min;
+        }
+
+        private static Component entryTitle(int index) {
+            return Component.translatable("gui.moonlight.config.list_entry", index + 1);
+        }
+    }
+
+    private static ListCategory listCategory(Component title, Schema.ListOf<?> list,
+                                             @Nullable JsonElement current, @Nullable JsonElement def) {
+        // a new entry is seeded from the default list's first element when there is one: far more useful than a
+        // blank object, since it already has every required field filled in with something the codec accepts
+        JsonElement template = def instanceof JsonArray a && !a.isEmpty() ? a.get(0) : emptyFor(list.element());
+        ListCategory cat = new ListCategory(title, list.element(), template, list.min(), list.max());
+        List<JsonElement> values = new ArrayList<>();
+        if (current instanceof JsonArray a) a.forEach(values::add);
+        cat.setEntries(values);
+        return cat;
+    }
 
     private static Reader enumField(ConfigCategory parent, Component title, Schema.Enum<?> en, @Nullable JsonElement seed) {
         List<String> labels = labelsOf(en);
@@ -261,6 +353,17 @@ final class SchemaForm {
             }
         }
         return fallback;
+    }
+
+    private static boolean isTagId(String s) {
+        return ResourceLocation.tryParse(s.startsWith("#") ? s.substring(1) : s) != null;
+    }
+
+    // The on-disk form is fixed by the codec (hashedCodec writes "#ns:path", codec writes "ns:path"), so whichever
+    // way it was typed, write back the one the codec will accept.
+    private static String normalizeTagId(String s, boolean hashed) {
+        String bare = s.startsWith("#") ? s.substring(1) : s;
+        return hashed ? "#" + bare : bare;
     }
 
     private static boolean isPrim(@Nullable JsonElement e) {

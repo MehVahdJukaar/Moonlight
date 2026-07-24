@@ -68,10 +68,9 @@ public class ModsTilesScreen extends Screen {
     private record Entry(String modId, Component name, @Nullable Component version) {
     }
 
-    @Override
-    protected void init() {
-        this.entries.clear();
-        // distinct mod ids that registered a config, ordered by display name
+    /** Every mod id we can show a config screen for, in no particular order. */
+    public static Set<String> collectConfigurableMods() {
+        // distinct mod ids that registered a config
         Set<String> modIds = new LinkedHashSet<>();
         for (ModConfigHolder h : ModConfigHolder.getTrackedSpecs()) modIds.add(h.getModId());
         // extra mods (and, if enabled, every installed mod) that expose a loader/Mod Menu config screen
@@ -88,7 +87,28 @@ public class ModsTilesScreen extends Screen {
                 }
             }
         }
-        for (String modId : modIds) {
+        return modIds;
+    }
+
+    /**
+     * The config screen for a single mod. Moonlight-tracked mods open our own screen; else, when enabled, we try to
+     * convert the mod's own config into a native screen; failing that, we defer to the loader/Mod Menu screen it
+     * registered. Null when the mod has no config screen at all.
+     */
+    @Nullable
+    public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable ResourceLocation background) {
+        Screen s = MoonlightConfigSelectScreen.create(modId, parent, background);
+        if (s == null && ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
+            s = ClientHelper.getNativeForeignConfigScreen(modId, parent, background);
+        }
+        if (s == null) s = ClientHelper.getModConfigScreen(modId, parent);
+        return s;
+    }
+
+    @Override
+    protected void init() {
+        this.entries.clear();
+        for (String modId : collectConfigurableMods()) {
             String name = safe(() -> PlatHelper.getModName(modId), modId);
             String version = safe(() -> PlatHelper.getModVersion(modId), null);
             this.entries.add(new Entry(modId, Component.literal(name),
@@ -219,13 +239,7 @@ public class ModsTilesScreen extends Screen {
                 int x = cardX(i), y = cardY(i);
                 if (mouseX >= x && mouseX < x + CARD_W && mouseY >= y && mouseY < y + CARD_H) {
                     String modId = entries.get(i).modId();
-                    // Moonlight-tracked mods open our own screen; else, when enabled, try to convert the mod's own
-                    // config into a native screen; failing that, defer to the loader/Mod Menu screen it registered
-                    Screen s = MoonlightConfigSelectScreen.create(modId, this, background);
-                    if (s == null && ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
-                        s = ClientHelper.getNativeForeignConfigScreen(modId, this, background);
-                    }
-                    if (s == null) s = ClientHelper.getModConfigScreen(modId, this);
+                    Screen s = configScreenFor(modId, this, background);
                     if (s != null) {
                         GuiHelper.playClickSound();
                         this.minecraft.setScreen(s);
