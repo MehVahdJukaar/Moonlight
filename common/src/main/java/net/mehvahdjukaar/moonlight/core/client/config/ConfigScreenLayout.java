@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Shared sizing/color constants for the config screen widgets. Kept in one place so the screen, list, rows and
- * control providers all agree on the grid.
+ * Shared sizing/color constants and small drawing helpers for the config screen widgets. Kept in one place so the
+ * screen, list, rows and control providers all agree on the grid.
  */
 final class ConfigScreenLayout {
 
@@ -67,7 +67,7 @@ final class ConfigScreenLayout {
     static final int ROW_WIDTH = 280;
     static final int ROW_ICON = 16; // leading category/config icon
 
-    static final int CONTROL_WIDTH = 88; // ~80% of the former 110px, giving labels more room
+    static final int CONTROL_WIDTH = 96; // narrower than the old 110px so labels get room, wide enough to breathe
     static final int CONTROL_HEIGHT = 20;
     static final int ARROW_WIDTH = 12;
     static final int RESET_WIDTH = CONTROL_HEIGHT;

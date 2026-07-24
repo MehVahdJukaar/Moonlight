@@ -149,9 +149,9 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     protected void init() {
         this.overlay.clear();
         SchemaForm.ListCategory listCategory = listCategory();
-        // a list page needs a second button row above the usual one for "add entry", plus the line the decode error
-        // is drawn on: on a root list page both are present at once and would otherwise overlap
-        int footer = listCategory != null ? FOOTER + 36 : FOOTER;
+        // a list page needs a second button row above the usual one for "add entry". +24 keeps the gap between the
+        // list and the topmost button identical to every other config screen (8px)
+        int footer = listCategory != null ? FOOTER + 24 : FOOTER;
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
         populate();
         this.addRenderableWidget(this.list);

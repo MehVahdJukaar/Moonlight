@@ -57,7 +57,7 @@ public class ModsTilesScreen extends Screen {
     private double scroll;
     private int maxScroll;
     // recomputed each layout pass, shared by render + click
-    private int cols, startX, contentTop, contentBottom;
+    private int cols, contentTop, contentBottom;
 
     public ModsTilesScreen(Screen parent, @Nullable ResourceLocation background) {
         super(Component.translatable("gui.moonlight.config.mods_title"));
@@ -125,21 +125,26 @@ public class ModsTilesScreen extends Screen {
 
     private void computeLayout() {
         int availWidth = this.width - 2 * SIDE_MARGIN;
-        this.cols = Math.max(1, (availWidth + CARD_GAP) / (CARD_W + CARD_GAP));
-        int gridWidth = this.cols * (CARD_W + CARD_GAP) - CARD_GAP;
-        this.startX = (this.width - gridWidth) / 2;
+        int maxCols = Math.max(1, (availWidth + CARD_GAP) / (CARD_W + CARD_GAP));
+        int count = this.entries.size();
+        int rows = (count + maxCols - 1) / maxCols;
+        // spread over as few columns as that row count allows instead of always filling the width: 7 mods in a 6 wide
+        // grid lay out as 4 + 3 rather than 6 + 1, so the grid stays a centered block instead of a left aligned one
+        this.cols = rows == 0 ? maxCols : Math.min(maxCols, (count + rows - 1) / rows);
         // the content panel spans header→footer, matching the config list screens (their list occupies the same band)
         this.contentTop = HEADER;
         this.contentBottom = this.height - FOOTER;
 
-        int rows = (this.entries.size() + this.cols - 1) / this.cols;
         int totalHeight = Math.max(0, rows * (CARD_H + CARD_GAP) - CARD_GAP) + 2 * GRID_PAD;
         this.maxScroll = Math.max(0, totalHeight - (this.contentBottom - this.contentTop));
         this.scroll = Mth.clamp(this.scroll, 0, this.maxScroll);
     }
 
     private int cardX(int i) {
-        return this.startX + (i % this.cols) * (CARD_W + CARD_GAP);
+        // each row is centered on its own, so a short last row sits under the middle of the one above it
+        int cardsInRow = Math.min(this.cols, this.entries.size() - (i / this.cols) * this.cols);
+        int rowWidth = cardsInRow * (CARD_W + CARD_GAP) - CARD_GAP;
+        return (this.width - rowWidth) / 2 + (i % this.cols) * (CARD_W + CARD_GAP);
     }
 
     private int cardY(int i) {

@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.platform;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -220,12 +219,6 @@ public class ClientHelperImpl {
         });
     }
 
-
-    public static void addClientCommandRegistration(ClientHelper.ClientCommandRegistration eventListener) {
-        Moonlight.assertInitPhase();
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> eventListener.register(dispatcher));
-    }
 
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         return ((ITextureAtlasSpriteExtension) sprite).getPixelRGBA(frameIndex, x, y);

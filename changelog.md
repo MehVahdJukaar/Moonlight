@@ -2,4 +2,6 @@
 - added client side /moonlight config command. opens the mods list, or a specific mod config screen
 - other mods config screens can now alos be shown
 - fixed object and json configs showing their raw translation key instead of a readable name on (neo)forge
-- codec configs that are lists are now edited entry by entry instead of as raw json. tag ids get a proper field too
+- codec configs that are lists are now edited entry by entry instead of as raw json
+- registry ids and tags inside codec configs are now picked from a searchable dropdown instead of being typed by hand
+- number config fields now have - and + steppers on each side. hold shift to step by 10

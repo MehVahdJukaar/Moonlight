@@ -21,6 +21,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
@@ -100,23 +102,19 @@ public final class ConfigControllers {
             return new ConfigVisuals<Integer>(w, w::setColor);
         });
 
-        // plain numbers -> validated text field; slider subtypes -> slider. The value's own class is the
+        // plain numbers -> stepper field; slider subtypes -> slider. The value's own class is the
         // "draw me as X" signal, so there is no style flag to branch on.
         register(ConfigOption.IntValue.class, (o, s, onChange) ->
-                textField(String.valueOf(s.current(o)), String::valueOf, str -> {
-                    int parsed = Integer.parseInt(str.trim());
-                    if (parsed < o.min || parsed > o.max) throw new NumberFormatException();
-                    s.put(o, parsed);
+                numberField(s.current(o), o.min, o.max, true, v -> {
+                    s.put(o, (int) Math.round(v));
                     onChange.run();
                 }));
         register(ConfigOption.IntSliderValue.class, (o, s, onChange) ->
                 slider(o.min, o.max, s.current(o), true, v -> s.put(o, (int) Math.round(v)), onChange));
 
         register(ConfigOption.DoubleValue.class, (o, s, onChange) ->
-                textField(String.valueOf(s.current(o)), String::valueOf, str -> {
-                    double parsed = Double.parseDouble(str.trim());
-                    if (parsed < o.min || parsed > o.max) throw new NumberFormatException();
-                    s.put(o, parsed);
+                numberField(s.current(o), o.min, o.max, false, v -> {
+                    s.put(o, v);
                     onChange.run();
                 }));
         register(ConfigOption.DoubleSliderValue.class, (o, s, onChange) ->
@@ -126,10 +124,8 @@ public final class ConfigControllers {
                 slider(0, 1, s.current(o), false, true, v -> s.put(o, v), onChange));
 
         register(ConfigOption.FloatValue.class, (o, s, onChange) ->
-                textField(String.valueOf(s.current(o)), String::valueOf, str -> {
-                    float parsed = Float.parseFloat(str.trim());
-                    if (parsed < o.min || parsed > o.max) throw new NumberFormatException();
-                    s.put(o, parsed);
+                numberField(s.current(o), o.min, o.max, false, v -> {
+                    s.put(o, (float) v);
                     onChange.run();
                 }));
         register(ConfigOption.FloatSliderValue.class, (o, s, onChange) ->
@@ -252,17 +248,24 @@ public final class ConfigControllers {
     }
 
     private static ConfigVisuals<Number> slider(double min, double max, double current, boolean integer,
-                                                java.util.function.Consumer<Double> store, Runnable onChange) {
+                                                Consumer<Double> store, Runnable onChange) {
         return slider(min, max, current, integer, false, store, onChange);
     }
 
     private static ConfigVisuals<Number> slider(double min, double max, double current, boolean integer, boolean percent,
-                                                java.util.function.Consumer<Double> store, Runnable onChange) {
+                                                Consumer<Double> store, Runnable onChange) {
         RangedSlider slider = new RangedSlider(CONTROL_WIDTH, CONTROL_HEIGHT, min, max, current, integer, percent, v -> {
             store.accept(v);
             onChange.run();
         });
         return new ConfigVisuals<>(slider, n -> slider.setActualValue(n.doubleValue()));
+    }
+
+    private static ConfigVisuals<Number> numberField(Number initial, double min, double max, boolean integer,
+                                                     DoubleConsumer store) {
+        NumberFieldWidget w = new NumberFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, initial.doubleValue(),
+                min, max, integer, store);
+        return new ConfigVisuals<>(w, n -> w.setValue(n.doubleValue()));
     }
 
     private static ConfigVisuals<Object> textField(String initial, Function<Object, String> display, TextCommit commit) {
@@ -280,7 +283,7 @@ public final class ConfigControllers {
         return new ConfigVisuals<Object>(box, v -> box.setValue(display.apply(v)));
     }
 
-    private static Component listLabel(java.util.List<String> list) {
+    private static Component listLabel(List<String> list) {
         return Component.translatable("gui.moonlight.config.list_entries", list.size());
     }
 

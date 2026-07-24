@@ -98,6 +98,11 @@ public final class GuiHelper {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
     }
 
+    /** A number as a text field shows it: no trailing {@code .0} when it happens to be whole. */
+    public static String formatNumber(double v) {
+        return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
+    }
+
     /**
      * Left aligned text that scrolls back and forth when it doesn't fit its box, mirroring vanilla's
      * {@code AbstractWidget.renderScrollingString} (which isn't publicly accessible). Handy for any label/value

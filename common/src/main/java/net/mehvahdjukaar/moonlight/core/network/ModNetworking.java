@@ -13,6 +13,7 @@ public class ModNetworking {
     private static void registerMessages(NetworkHelper.RegisterMessagesEvent event) {
         event.registerClientBound(ClientBoundFinalizeFluidsMessage.TYPE);
         event.registerClientBound(ClientBoundOpenScreenMessage.TYPE);
+        event.registerClientBound(ClientBoundOpenConfigScreenMessage.TYPE);
         event.registerClientBound(ClientBoundSendLoginMessage.TYPE);
         event.registerClientBound(ClientBoundOnPistonMovedBlockMessage.TYPE);
         event.registerClientBound(ClientBoundParticleAroundBlockMessage.TYPE);

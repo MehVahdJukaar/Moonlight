@@ -1,6 +1,6 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.CompositeWidget;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,11 +12,12 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper.formatNumber;
 
-class Vec3ControlWidget extends CompositeWidget {
+public class Vec3ControlWidget extends CompositeWidget {
 
     @FunctionalInterface
-    interface Sink {
+    public interface Sink {
         void accept(double x, double y, double z);
     }
 
@@ -31,7 +32,7 @@ class Vec3ControlWidget extends CompositeWidget {
     private final boolean integer;
     private final Sink onChange;
 
-    Vec3ControlWidget(int width, int height, double x, double y, double z,
+    public Vec3ControlWidget(int width, int height, double x, double y, double z,
                       double boundLo, double boundHi, boolean integer, Sink onChange) {
         super(0, 0, width, height, Component.empty());
         this.boundLo = boundLo;
@@ -57,7 +58,7 @@ class Vec3ControlWidget extends CompositeWidget {
     }
 
     /** Pushes the given triple into the fields (used by the row's reset button). */
-    void setValues(double x, double y, double z) {
+    public void setValues(double x, double y, double z) {
         this.xBox.setValue(format(x));
         this.yBox.setValue(format(y));
         this.zBox.setValue(format(z));
@@ -87,8 +88,7 @@ class Vec3ControlWidget extends CompositeWidget {
     }
 
     private String format(double v) {
-        if (integer) return String.valueOf((long) v);
-        return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
+        return integer ? String.valueOf((long) v) : formatNumber(v);
     }
 
     @Override

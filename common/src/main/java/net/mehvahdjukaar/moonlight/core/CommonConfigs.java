@@ -12,10 +12,17 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class CommonConfigs {
@@ -32,7 +39,8 @@ public class CommonConfigs {
     // build a real form for it instead of the "edit file" placeholder. Declared before the static block that uses it.
     private static final SchemaCodec<Nested> NESTED_SCHEMA = SchemaRecord.create(Nested.class, i -> i.group(
             i.field("x", SchemaCodecs.intRange(-16, 16), Nested::x),
-            i.field("weight", SchemaCodecs.doubleRange(0, 1), Nested::weight)
+            i.field("weight", SchemaCodecs.doubleRange(0, 1), Nested::weight),
+            i.field("speed", SchemaCodecs.floatRange(0, 10), Nested::speed)
     ).apply(i, Nested::new));
 
     private static final SchemaCodec<SchemaTest> SCHEMA_TEST = SchemaRecord.create(SchemaTest.class, i -> i.group(
@@ -41,8 +49,12 @@ public class CommonConfigs {
             i.field("level", SchemaCodecs.intRange(0, 100), SchemaTest::level),
             i.field("facing", SchemaCodecs.enumeration(Direction.CODEC, List.of(Direction.values()), Direction::getSerializedName), SchemaTest::facing),
             i.field("color", SchemaCodecs.colorArgb(Codec.INT), SchemaTest::color),
+            i.field("item", SchemaCodecs.registryEntry(Registries.ITEM, BuiltInRegistries.ITEM.byNameCodec()), SchemaTest::item),
+            i.field("tag", SchemaCodecs.tag(Registries.ITEM), SchemaTest::tag),
             i.field("tags", SchemaCodecs.list(SchemaCodecs.STRING), SchemaTest::tags),
-            i.field("nested", NESTED_SCHEMA, SchemaTest::nested)
+            i.field("nested", NESTED_SCHEMA, SchemaTest::nested),
+            i.field("entries", SchemaCodecs.list(NESTED_SCHEMA), SchemaTest::entries),
+            i.field("extra", SchemaCodecs.map(SchemaCodecs.STRING, SchemaCodecs.STRING), SchemaTest::extra)
     ).apply(i, SchemaTest::new));
 
     static {
@@ -105,9 +117,13 @@ public class CommonConfigs {
             builder.comment("A raw JSON value, edited in a text box with syntax highlighting").defineJson("test_json", json);
             builder.comment("A plain Java bean (no codec needed), stored and edited as JSON").defineBean("test_bean", new TestBean());
             builder.comment("A record bean, also round-tripped through Gson").defineBean("test_record_bean", new TestRecordBean("world", 7));
-            builder.comment("A codec object with a declared CodecUI schema, edited via a generated form: records become navigable sub categories, the string list falls back to the JSON editor")
+            builder.comment("A codec object with a declared CodecUI schema, edited via a generated form: records and lists become navigable sub pages, ids and tags get registry dropdowns, and the map falls back to the JSON editor")
                     .defineObject("test_schema", () -> new SchemaTest("hello", true, 5, Direction.NORTH, 0xFFFF5555,
-                            List.of("alpha", "beta"), new Nested(1, 0.5)), SCHEMA_TEST);
+                            Items.DIAMOND, ItemTags.LOGS, List.of("alpha", "beta"), new Nested(1, 0.5, 1),
+                            List.of(new Nested(2, 0.25, 2), new Nested(3, 0.75, 4)),
+                            Map.of("first", "one", "second", "two")), SCHEMA_TEST);
+            builder.comment("A codec object LIST: the config's own page is the list, so entries are added and removed right there")
+                    .defineObjectList("test_schema_list", () -> List.of(new Nested(4, 0.5, 1)), NESTED_SCHEMA);
 
             builder.icon("minecraft:oak_log").push("nested");
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
@@ -148,10 +164,11 @@ public class CommonConfigs {
 
     /** Dev-only sample for {@code defineObject}: a codec object whose fields drive a generated form. */
     public record SchemaTest(String name, boolean enabled, int level, Direction facing, int color,
-                             List<String> tags, Nested nested) {
+                             Item item, TagKey<Item> tag, List<String> tags, Nested nested,
+                             List<Nested> entries, Map<String, String> extra) {
     }
 
     /** Nested record inside {@link SchemaTest}: rendered as its own navigable sub category. */
-    public record Nested(int x, double weight) {
+    public record Nested(int x, double weight, float speed) {
     }
 }

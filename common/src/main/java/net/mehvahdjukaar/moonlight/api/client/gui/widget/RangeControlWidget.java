@@ -1,6 +1,6 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.CompositeWidget;
+
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -14,8 +14,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
+import static net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper.formatNumber;
 
-class RangeControlWidget extends CompositeWidget {
+public class RangeControlWidget extends CompositeWidget {
 
     private static final int INNER_GAP = 8;
     private static final String SEPARATOR = "<";
@@ -27,7 +28,7 @@ class RangeControlWidget extends CompositeWidget {
     private final Consumer<Range> onChange;
     private final List<EditBox> boxes;
 
-    RangeControlWidget(int width, int height, Range initial, double boundLo, double boundHi, Consumer<Range> onChange) {
+    public RangeControlWidget(int width, int height, Range initial, double boundLo, double boundHi, Consumer<Range> onChange) {
         super(0, 0, width, height, Component.empty());
         this.boundLo = boundLo;
         this.boundHi = boundHi;
@@ -39,17 +40,17 @@ class RangeControlWidget extends CompositeWidget {
         this.maxBox = new EditBox(font, 0, 0, half, height, Component.empty());
         this.minBox.setMaxLength(Short.MAX_VALUE);
         this.maxBox.setMaxLength(Short.MAX_VALUE);
-        this.minBox.setValue(format(initial.min()));
-        this.maxBox.setValue(format(initial.max()));
+        this.minBox.setValue(formatNumber(initial.min()));
+        this.maxBox.setValue(formatNumber(initial.max()));
         this.minBox.setResponder(s -> onEdited());
         this.maxBox.setResponder(s -> onEdited());
         this.boxes = List.of(minBox, maxBox);
     }
 
     /** Pushes the given range into the fields (used by the row's reset button). */
-    void setRange(Range range) {
-        this.minBox.setValue(format(range.min()));
-        this.maxBox.setValue(format(range.max()));
+    public void setRange(Range range) {
+        this.minBox.setValue(formatNumber(range.min()));
+        this.maxBox.setValue(formatNumber(range.max()));
     }
 
     private void onEdited() {
@@ -70,10 +71,6 @@ class RangeControlWidget extends CompositeWidget {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private static String format(double v) {
-        return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
     }
 
     @Override

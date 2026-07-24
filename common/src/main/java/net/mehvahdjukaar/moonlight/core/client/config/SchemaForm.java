@@ -7,18 +7,30 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import net.mehvahdjukaar.codecui.Schema;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * Turns a CodecUI {@link Schema} into the very same {@link ConfigCategory}/{@link ConfigOption} tree the native config
@@ -47,6 +59,10 @@ final class SchemaForm {
     interface Reader {
         JsonElement read(ConfigEditSession session);
     }
+
+    // one sorted id list per built-in registry, shared by every field naming it: a list config with many entries would
+    // otherwise re-enumerate and re-sort a whole registry once per row. Dynamic ones aren't cached, they follow the world
+    private static final Map<ResourceKey<? extends Registry<?>>, List<String>> ID_CACHE = new HashMap<>();
 
     final ConfigCategory root;
     final Reader reader;
@@ -84,25 +100,25 @@ final class SchemaForm {
                 boolean v = asBool(seed, false);
                 var opt = new ConfigOption.BooleanValue(title, null, new MemoryConfigValue<>(v), v);
                 parent.add(opt);
-                yield s -> new JsonPrimitive((Boolean) s.current(opt));
+                yield s -> new JsonPrimitive(s.current(opt));
             }
             case Schema.IntRange r -> {
                 int v = Math.clamp(asInt(seed, neutralInt(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.IntValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive((Integer) s.current(opt));
+                yield s -> new JsonPrimitive(s.current(opt));
             }
             case Schema.FloatRange r -> {
                 float v = Math.clamp(asFloat(seed, neutralFloat(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.FloatValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive((Float) s.current(opt));
+                yield s -> new JsonPrimitive(s.current(opt));
             }
             case Schema.DoubleRange r -> {
                 double v = Math.clamp(asDouble(seed, neutralDouble(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.DoubleValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive((Double) s.current(opt));
+                yield s -> new JsonPrimitive(s.current(opt));
             }
             case Schema.LongRange r -> {
                 // no dedicated long control: a numeric text field whose reader parses back to a JSON long
@@ -111,14 +127,14 @@ final class SchemaForm {
                 Predicate<Object> valid = o -> o instanceof String str && isLongInRange(str, r.min(), r.max());
                 var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(sv), sv, valid);
                 parent.add(opt);
-                yield s -> new JsonPrimitive(parseLongOr( s.current(opt), v));
+                yield s -> new JsonPrimitive(parseLongOr(s.current(opt), v));
             }
             case Schema.Color c -> {
                 int rgb = asColor(seed, 0xFFFFFFFF);
                 var opt = new ConfigOption.ColorValue(title, null, new MemoryConfigValue<>(rgb), rgb);
                 parent.add(opt);
                 yield s -> {
-                    int col = (Integer) s.current(opt);
+                    int col = s.current(opt);
                     return c.hexString() ? new JsonPrimitive(ColorUtils.toHexString(col, c.hasAlpha())) : new JsonPrimitive(col);
                 };
             }
@@ -129,22 +145,18 @@ final class SchemaForm {
                         && (str.pattern() == null || str.pattern().matcher(x).matches());
                 var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(v), v, valid);
                 parent.add(opt);
-                yield s -> new JsonPrimitive((String) s.current(opt));
+                yield s -> new JsonPrimitive(s.current(opt));
             }
-            case Schema.ResourceId ignored -> {
-                String v = asString(seed, "");
-                Predicate<Object> valid = o -> o instanceof String x && ResourceLocation.tryParse(x) != null;
-                var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(v), v, valid);
-                parent.add(opt);
-                yield s -> new JsonPrimitive((String) s.current(opt));
-            }
+            case Schema.ResourceId id -> idField(parent, title, registryIds(id.registry()), asString(seed, ""),
+                    o -> o instanceof String x && ResourceLocation.tryParse(x) != null, UnaryOperator.identity(),
+                    iconsFor(id.registry()));
             case Schema.TagId tag -> {
                 // "#namespace:path" when hashed, a bare id otherwise; accept either so a pasted id still works
-                String v = asString(seed, "");
-                Predicate<Object> valid = o -> o instanceof String x && isTagId(x);
-                var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(v), v, valid);
-                parent.add(opt);
-                yield s -> new JsonPrimitive(normalizeTagId((String) s.current(opt), tag.hashed()));
+                List<String> tags = SchemaCodecs.availableTagIds(tag.registry()).stream()
+                        .map(t -> normalizeTagId(t.toString(), tag.hashed())).toList();
+                // no icons: a tag id names a set, never a single item
+                yield idField(parent, title, tags, asString(seed, ""),
+                        o -> o instanceof String x && isTagId(x), s -> normalizeTagId(s, tag.hashed()), null);
             }
             case Schema.Enum<?> en -> enumField(parent, title, en, seed);
             case Schema.Record<?> rec -> {
@@ -262,6 +274,64 @@ final class SchemaForm {
         return cat;
     }
 
+    /**
+     * A registry id or tag id: a searchable dropdown over the ids we can enumerate, degrading to a validated text
+     * field when we can't (an unknown registry, or tags/dynamic registries with no world loaded). A current value
+     * that isn't among them is kept as an option rather than dropped, so opening the screen while the mod that
+     * defines it is absent can't silently rewrite the config.
+     */
+    private static Reader idField(ConfigCategory parent, Component title, List<String> known, String current,
+                                  Predicate<Object> valid, UnaryOperator<String> normalize,
+                                  @Nullable Function<String, ItemStack> icon) {
+        if (known.isEmpty()) {
+            var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(current), current, valid);
+            parent.add(opt);
+            return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
+        }
+        // the current value stays selectable even when it isn't one we can enumerate, empty included: picking the
+        // first id for an absent field would quietly commit a real, wrong id where the old text box left it invalid
+        List<String> options = known.contains(current) ? known
+                : Stream.concat(Stream.of(current), known.stream()).toList();
+        var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(current), current,
+                () -> options, icon);
+        parent.add(opt);
+        return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
+    }
+
+    /**
+     * The icon column, only for the two registries whose ids <em>are</em> the icon. Anything else (entity types,
+     * effects, tags) would leave most rows blank while still paying for the taller row.
+     */
+    @Nullable
+    private static Function<String, ItemStack> iconsFor(@Nullable ResourceKey<? extends Registry<?>> registry) {
+        if (!Registries.ITEM.equals(registry) && !Registries.BLOCK.equals(registry)) return null;
+        return id -> ConfigScreenIcons.resolve(ResourceLocation.tryParse(id));
+    }
+
+    /** Every id in a registry, sorted. Empty when it can't be reached (unknown, or dynamic with no world loaded). */
+    private static List<String> registryIds(@Nullable ResourceKey<? extends Registry<?>> key) {
+        if (key == null) return List.of();
+        List<String> cached = ID_CACHE.get(key);
+        if (cached != null) return cached;
+        Registry<?> builtIn = BuiltInRegistries.REGISTRY.get(key.location());
+        Registry<?> registry = builtIn != null ? builtIn : dynamicRegistry(key);
+        if (registry == null) return List.of();
+        List<String> ids = registry.keySet().stream().map(ResourceLocation::toString).sorted().toList();
+        if (builtIn != null) ID_CACHE.put(key, ids);
+        return ids;
+    }
+
+    @Nullable
+    private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
+        // biomes, structures, ... only reachable with a world loaded, and the accessor throws outright when there
+        // isn't one: a config screen opened from the main menu must survive that
+        try {
+            return Utils.hackyGetRegistryAccess().<Object>registry(key).orElse(null);
+        } catch (Exception noWorld) {
+            return null;
+        }
+    }
+
     private static Reader enumField(ConfigCategory parent, Component title, Schema.Enum<?> en, @Nullable JsonElement seed) {
         List<String> labels = labelsOf(en);
         String initial = asString(seed, labels.isEmpty() ? "" : labels.getFirst());
@@ -355,15 +425,18 @@ final class SchemaForm {
         return fallback;
     }
 
+    private static String stripHash(String s) {
+        return s.startsWith("#") ? s.substring(1) : s;
+    }
+
     private static boolean isTagId(String s) {
-        return ResourceLocation.tryParse(s.startsWith("#") ? s.substring(1) : s) != null;
+        return ResourceLocation.tryParse(stripHash(s)) != null;
     }
 
     // The on-disk form is fixed by the codec (hashedCodec writes "#ns:path", codec writes "ns:path"), so whichever
     // way it was typed, write back the one the codec will accept.
     private static String normalizeTagId(String s, boolean hashed) {
-        String bare = s.startsWith("#") ? s.substring(1) : s;
-        return hashed ? "#" + bare : bare;
+        return hashed ? "#" + stripHash(s) : stripHash(s);
     }
 
     private static boolean isPrim(@Nullable JsonElement e) {
