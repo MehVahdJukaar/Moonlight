@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -311,6 +312,7 @@ public class ClientHelper {
      * on Fabric) rather than through Moonlight's config system. Returns null when that mod exposes no such screen
      * (which on Fabric includes the case where Mod Menu is not installed).
      */
+    @Contract
     @PlatformImpl
     @Nullable
     public static Screen getModConfigScreen(String modId, Screen parent) {

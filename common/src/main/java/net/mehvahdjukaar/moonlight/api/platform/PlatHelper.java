@@ -261,6 +261,32 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    /**
+     * A path inside the mod's jar (or its classes directory in dev), or null when the mod has nothing there. Works for
+     * directories too, so it can answer "does this mod ship the {@code net/mehvahdjukaar} package".
+     */
+    @Nullable
+    @PlatformImpl
+    public static Path findModResource(String modId, String path) {
+        throw new AssertionError();
+    }
+
+    /**
+     * The mod's declared authors, empty when it declares none. Fabric returns one entry per author; NeoForge has a
+     * single free-form {@code authors} string, which is returned as is (usually already comma separated).
+     */
+    @PlatformImpl
+    public static List<String> getModAuthors(String modId) {
+        throw new AssertionError();
+    }
+
+    /** The mod's declared license, or null when unset. */
+    @Nullable
+    @PlatformImpl
+    public static String getModLicense(String modId) {
+        throw new AssertionError();
+    }
+
     @Nullable
     @PlatformImpl
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {

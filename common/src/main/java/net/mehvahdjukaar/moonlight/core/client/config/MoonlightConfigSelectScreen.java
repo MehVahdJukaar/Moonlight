@@ -2,11 +2,12 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
-import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
-import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
@@ -15,6 +16,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -23,26 +26,38 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
+/**
+ * The screen listing one mod's config files. Laid out as two panes: the mod's identity on the left (icon, authors,
+ * license) and the config list on the right, with an item carousel band above the footer.
+ */
 public class MoonlightConfigSelectScreen extends Screen {
 
-    private static final int BAND = 30; // 29px item strip + its 1px bottom divider
+    private static final int STRIP = 20;       // carousel strip under the mod icon
+    private static final int PAD = 8;
+    private static final int ICON_MAX = 64;
 
     private final String modId;
     private final Screen parent;
     @Nullable
     private final ResourceLocation background;
     private final List<ModConfigHolder> holders;
+    @Nullable
+    private final Component version;
+    private final List<String> authors;
 
     private ConfigOptionList list;
-    /** Height of the item carousel band under the header, 0 when the mod has no items to show off. */
-    private int bandHeight;
+    private int leftPaneWidth;
+    private int stripHeight;   // 0 when there's no carousel to show under the icon
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
-        super(Component.literal(LangBuilder.getReadableName(modId)));
+        super(Component.literal(ModsTilesScreen.safe(() -> PlatHelper.getModName(modId), LangBuilder.getReadableName(modId))));
         this.modId = modId;
         this.parent = parent;
         this.background = background;
         this.holders = holders;
+        String v = ModsTilesScreen.safe(() -> PlatHelper.getModVersion(modId), null);
+        this.version = v == null ? null : Component.literal("v" + v);
+        this.authors = ModsTilesScreen.safe(() -> PlatHelper.getModAuthors(modId), List.<String>of());
     }
 
     private static List<ModConfigHolder> configsOf(String modId) {
@@ -70,14 +85,24 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        // full width band of the mod's items slowly panning by, tucked between the header and the config list
-        ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
-                ItemCarouselWidget.forMod(this.modId, 0, HEADER, this.width, BAND - 1) : null;
-        this.bandHeight = carousel == null ? 0 : BAND;
-        if (carousel != null) this.addRenderableWidget(carousel);
+        // a third of the screen for the mod's identity, clamped so the config rows keep a usable width either way
+        this.leftPaneWidth = Mth.clamp(this.width / 3, 104, 170);
 
-        int listTop = HEADER + this.bandHeight;
-        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - listTop - FOOTER, listTop, SELECT_ITEM_HEIGHT);
+        // the mod's items panning by, right under its icon, dissolving into the pane background at both ends
+        ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
+                ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, this.leftPaneWidth - 2 * PAD, STRIP) : null;
+        this.stripHeight = carousel == null ? 0 : STRIP + 4;
+        if (carousel != null) {
+            this.addRenderableWidget(carousel.withOutline(ConfigGuiColors.TILE_OUTLINE));
+        }
+
+        int paneWidth = this.width - this.leftPaneWidth;
+        this.list = new ConfigOptionList(this.minecraft, paneWidth, this.contentBottom() - HEADER, HEADER, SELECT_ITEM_HEIGHT);
+        this.list.setX(this.leftPaneWidth);
+        this.list.setRowWidth(Math.min(ROW_WIDTH, paneWidth - 28)); // room for the scrollbar and a margin
+        this.list.setDrawFooterSeparator(false); // this screen draws one across both panes instead
+        // with only a handful of configs the rows read better centered in the pane than pinned under the header
+        this.list.setTopPadding((this.contentBottom() - HEADER - this.holders.size() * SELECT_ITEM_HEIGHT) / 2 - 4);
         List<ConfigListRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
@@ -98,6 +123,19 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.addRenderableWidget(modsButton);
     }
 
+    /** Bottom of the two panes. */
+    private int contentBottom() {
+        return this.height - FOOTER;
+    }
+
+    private int iconTop() {
+        return HEADER + 10;
+    }
+
+    private int iconBottom() {
+        return this.iconTop() + Math.min(ICON_MAX, this.leftPaneWidth - 2 * PAD);
+    }
+
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
@@ -106,25 +144,55 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        // header chrome in the background layer, behind the widgets (the list draws only its footer separator)
-        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
+        // header chrome in the background layer, behind the widgets (the list draws its own tiling background)
+        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.version, this.width, HEADER);
+        renderLeftPane(graphics);
+    }
 
-        // the mod's own icon, tucked just left of the centered title
-        ModIcons.Icon icon = ModIcons.get(modId);
+    /** The mod's identity pane: icon on top, authors under it, on the same flat background as the header. */
+    private void renderLeftPane(GuiGraphics graphics) {
+        int bottom = this.contentBottom();
+        GuiHelper.renderMenuBand(graphics, 0, HEADER, this.leftPaneWidth, bottom - HEADER);
+
+        int textWidth = this.leftPaneWidth - 2 * PAD;
+        int iconHeight = Math.min(ICON_MAX, textWidth);
+
+        ModIcons.Icon icon = ModIcons.get(this.modId);
         if (icon != null) {
-            int size = 16;
-            int iconX = this.width / 2 - this.font.width(this.title) / 2 - size - 4;
-            int iconY = (HEADER - size) / 2;
-            graphics.blit(icon.texture(), iconX, iconY, size, size, 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
+            GuiHelper.renderModIcon(graphics, icon, PAD, this.iconTop(), textWidth, iconHeight);
+        } else {
+            GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
+                    PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
+                    ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, CONFIG_ICON);
+        }
+        // the carousel is a widget, so it draws itself into the gap this leaves under the icon
+        int y = this.iconBottom() + this.stripHeight + 8;
+
+        if (this.authors.isEmpty()) return;
+        GuiHelper.renderSeparator(graphics, PAD, y, textWidth);
+        y += 8;
+
+        // the author list gets the whole rest of the pane: it can be long and comma separated, so it wraps
+        int line = this.font.lineHeight;
+        graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
+                ConfigGuiColors.DESCRIPTION);
+        y += line + 1;
+        for (FormattedCharSequence row : this.font.split(Component.literal(String.join(", ", this.authors)), textWidth)) {
+            if (y + line > bottom - 2) break;
+            graphics.drawString(this.font, row, PAD, y, ConfigGuiColors.LABEL);
+            y += line;
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        if (this.bandHeight > 0) {
-            graphics.fill(0, HEADER + this.bandHeight - 1, this.width, HEADER + this.bandHeight, ConfigGuiColors.HEADER_SEPARATOR);
-        }
+
+        // dividers on top of the widget layer, else the list's own background paints over them
+        int bottom = this.contentBottom();
+        GuiHelper.renderVerticalSeparator(graphics, this.leftPaneWidth, HEADER, bottom);
+        GuiHelper.renderFooterSeparator(graphics, bottom, this.width);
+
         ConfigScreenExtensions.Panel panel = overlayPanel();
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
             overlay.render(graphics, panel, mouseX, mouseY, partialTick);
@@ -149,6 +217,6 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     private ConfigScreenExtensions.Panel overlayPanel() {
-        return new ConfigScreenExtensions.Panel(this, 0, HEADER + this.bandHeight, this.width, this.height - FOOTER);
+        return new ConfigScreenExtensions.Panel(this, 0, HEADER, this.width, this.contentBottom());
     }
 }

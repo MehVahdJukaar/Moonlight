@@ -9,6 +9,7 @@
   "gui.moonlight.config.discover_title": "More Mods by Supplementaries Team",
   "gui.moonlight.config.discover_loading": "Fetching mod list",
   "gui.moonlight.config.discover_offline": "Couldn't reach the mod list. Check your connection.",
+  "gui.moonlight.config.authors": "Authors",
   "gui.moonlight.config.edit_manually": "Edit file",
   "gui.moonlight.config.save": "Save",
   "gui.moonlight.config.save_count": "Save %s",

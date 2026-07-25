@@ -64,6 +64,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         this(root, null, new ConfigEditSession(holder, returnScreen), background);
     }
 
+    public static Screen create(ModConfigHolder holder, ConfigCategory root, Screen returnScreen,
+                                @Nullable ResourceLocation background) {
+        return new MoonlightConfigScreen(holder, root, returnScreen, background);
+    }
+
     private MoonlightConfigScreen(ConfigCategory category, @Nullable MoonlightConfigScreen parentConfig, ConfigEditSession session, @Nullable ResourceLocation background) {
         // the header keeps the config's own name on every sub-screen; the breadcrumb is what tracks the category
         super(session.holder().getReadableName());

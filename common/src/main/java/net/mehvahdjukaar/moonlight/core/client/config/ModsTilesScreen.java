@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -88,6 +89,18 @@ public class ModsTilesScreen extends Screen {
             }
         }
         return modIds;
+    }
+
+    public static boolean openModScreenOrModsScreen(String modId) {
+        Screen screen = modId.isEmpty()
+                ? new ModsTilesScreen(null, null)
+                : ModsTilesScreen.configScreenFor(modId, null, null);
+        if (screen == null) return false;
+        // tell() and not execute(): the packet is handled on the client thread, where execute() runs inline, and
+        // ChatScreen closes itself right after the command is sent, which would wipe the screen we just set
+        Minecraft mc = Minecraft.getInstance();
+        mc.tell(() -> mc.setScreen(screen));
+        return true;
     }
 
     /**
@@ -189,19 +202,7 @@ public class ModsTilesScreen extends Screen {
         int iconY = y + CARD_PAD;
         ModIcons.Icon icon = ModIcons.get(entry.modId());
         if (icon != null) {
-            // draw at the real aspect ratio: height fills the icon slot, width grows for wider logos. If that would
-            // spill past the tile's side padding, scale the whole thing down instead so it always fits.
-            int maxW = CARD_W - 2 * ICON_SIDE_PAD;
-            int h = ICON_SIZE;
-            int w = Math.round(ICON_SIZE * (icon.width() / (float) icon.height()));
-            if (w > maxW) {
-                w = maxW;
-                h = Math.round(maxW * (icon.height() / (float) icon.width()));
-            }
-            int dx = x + (CARD_W - w) / 2;                 // centered horizontally in the tile
-            int dy = iconY + (ICON_SIZE - h) / 2;          // centered within the square icon slot
-            graphics.blit(icon.texture(), dx, dy, w, h, 0f, 0f,
-                    icon.width(), icon.height(), icon.width(), icon.height());
+            GuiHelper.renderModIcon(graphics, icon, x + ICON_SIDE_PAD, iconY, CARD_W - 2 * ICON_SIDE_PAD, ICON_SIZE);
         } else {
             renderFallbackIcon(graphics, entry, iconX, iconY);
         }
@@ -261,9 +262,10 @@ public class ModsTilesScreen extends Screen {
         this.minecraft.setScreen(parent);
     }
 
-    private static String safe(ThrowingSupplier<String> supplier, String fallback) {
+    /** Mod metadata lookups throw on loaders that don't know the mod id, so every call goes through here. */
+    static <T> T safe(ThrowingSupplier<T> supplier, T fallback) {
         try {
-            String v = supplier.get();
+            T v = supplier.get();
             return v == null ? fallback : v;
         } catch (Exception e) {
             return fallback;

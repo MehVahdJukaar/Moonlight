@@ -37,10 +37,10 @@ import java.util.Map;
 public class ItemCarouselWidget extends AbstractWidget {
 
     private static final int ICON = 16;
-    private static final int GAP = 10;             // empty space between two icons
+    private static final int GAP = 6;              // empty space between two icons
     private static final int CELL = ICON + GAP;
     private static final float SPEED = 14f;        // px per second
-    private static final int FADE = 32;            // width of each edge fade
+    private static final int FADE = 24;            // width of each edge fade
     private static final int MAX_ITEMS = 256;      // sanity cap for content-heavy mods
 
     private static final Map<String, List<ItemStack>> MOD_ITEMS = new HashMap<>();
@@ -106,7 +106,7 @@ public class ItemCarouselWidget extends AbstractWidget {
         return this;
     }
 
-    /** Frames the strip as a card. Off by default, for bands that span the whole screen width. */
+    /** Frames the strip with a 1px outline. Off by default. */
     public ItemCarouselWidget withOutline(int argb) {
         this.outline = argb;
         return this;
@@ -122,6 +122,7 @@ public class ItemCarouselWidget extends AbstractWidget {
 
         advance(this.isHovered);
 
+        int fade = Math.min(FADE, this.width / 3);
         int firstCell = Mth.floor(this.offset / CELL);
         int shift = (int) Math.round(this.offset - firstCell * (double) CELL);
         int iconY = this.getY() + (this.height - ICON) / 2;
@@ -133,7 +134,7 @@ public class ItemCarouselWidget extends AbstractWidget {
             int index = Math.floorMod(firstCell + i, this.items.size());
             graphics.renderFakeItem(this.items.get(index), x, iconY);
             // only the fully lit middle band gets a tooltip; items dissolving into the edges aren't really readable
-            if (this.isHovered && mouseX >= x && mouseX < x + ICON && mouseX >= this.getX() + FADE && mouseX < right - FADE) {
+            if (this.isHovered && mouseX >= x && mouseX < x + ICON && mouseX >= this.getX() + fade && mouseX < right - fade) {
                 hovered = index;
             }
         }
@@ -142,8 +143,8 @@ public class ItemCarouselWidget extends AbstractWidget {
         // guiOverlay skips the depth test, so the fade actually covers the items instead of being clipped by them
         int transparent = FastColor.ARGB32.color(0, this.background);
         RenderType overItems = RenderType.guiOverlay();
-        GuiHelper.fillGradientHorizontal(graphics, overItems, this.getX(), this.getY(), this.getX() + FADE, bottom, this.background, transparent);
-        GuiHelper.fillGradientHorizontal(graphics, overItems, right - FADE, this.getY(), right, bottom, transparent, this.background);
+        GuiHelper.fillGradientHorizontal(graphics, overItems, this.getX(), this.getY(), this.getX() + fade, bottom, this.background, transparent);
+        GuiHelper.fillGradientHorizontal(graphics, overItems, right - fade, this.getY(), right, bottom, transparent, this.background);
 
         if (hovered != this.hoveredIndex) {
             this.hoveredIndex = hovered;

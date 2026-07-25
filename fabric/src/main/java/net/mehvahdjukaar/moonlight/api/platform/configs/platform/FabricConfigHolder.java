@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -19,6 +21,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
+import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -195,11 +199,11 @@ public final class FabricConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    @ClientOnly
+    @Environment(value = EnvType.CLIENT)
     public Screen makeScreen(Screen parent, ResourceLocation background) {
         if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
             ConfigCategory root = getConfigRoot();
-            return root == null ? null : new net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen(this, root, parent, background);
+            return root == null ? null : MoonlightConfigScreen.create(this, root, parent, background);
         }
         // custom screen disabled: fall back to the old Cloth Config / YACL screens if those mods are present
         if (CompatHandler.YACL) {

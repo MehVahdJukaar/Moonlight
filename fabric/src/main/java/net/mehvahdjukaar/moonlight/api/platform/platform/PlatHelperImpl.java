@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.Person;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
@@ -211,6 +212,25 @@ public class PlatHelperImpl {
         String iconPath = container.getMetadata().getIconPath(128).orElse(null);
         if (iconPath == null) return null;
         return container.findPath(iconPath).orElse(null);
+    }
+
+    @Nullable
+    public static Path findModResource(String modId, String path) {
+        return FabricLoader.getInstance().getModContainer(modId).flatMap(c -> c.findPath(path)).orElse(null);
+    }
+
+    public static List<String> getModAuthors(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId)
+                .map(c -> c.getMetadata().getAuthors().stream().map(Person::getName).toList())
+                .orElse(List.of());
+    }
+
+    @Nullable
+    public static String getModLicense(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId)
+                .map(c -> String.join(", ", c.getMetadata().getLicense()))
+                .filter(l -> !l.isBlank())
+                .orElse(null);
     }
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {

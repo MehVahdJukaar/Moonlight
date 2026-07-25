@@ -17,7 +17,9 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class MediaButton {
@@ -82,6 +84,17 @@ public class MediaButton {
     /** @return true if the hub allow-list currently permits this button type. */
     private static boolean enabled(ButtonType type) {
         return MoonlightHubInfo.INSTANCE.isButtonEnabled(type);
+    }
+
+    private static final String OWN_PACKAGE = "net/mehvahdjukaar";
+    private static final Map<String, Boolean> OWN_MODS = new HashMap<>();
+
+    /**
+     * Whether {@code modId} is one of ours, by looking for our package in its jar. The social buttons all point at our
+     * own pages, so on somebody else's mod they'd be advertising the wrong author.
+     */
+    public static boolean isOwnMod(String modId) {
+        return OWN_MODS.computeIfAbsent(modId, id -> PlatHelper.findModResource(id, OWN_PACKAGE) != null);
     }
 
     public static final ResourceLocation YOUTUBE = MediaIcon.YOUTUBE.sprite();
@@ -287,18 +300,23 @@ public class MediaButton {
         if (modrinthUrl == null)   modrinthUrl   = PlatHelper.getModModrinthUrl(modId);
         if (modSourceUrl == null)  modSourceUrl  = PlatHelper.getModSourcesUrl(modId);
         MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
+        // our socials only belong on our own mods; the per-mod pages (CF/MR/sources) are fine on anyone's
+        boolean ours = isOwnMod(modId);
 
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
         // Left side (going leftward from the back button)
         int left = centerX - 45 - spacing;
-        adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
-        adder.accept(koFi(parent, left, y, hub.koFi()));       left -= spacing;
+        if (ours) {
+            adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
+            adder.accept(koFi(parent, left, y, hub.koFi()));       left -= spacing;
+        }
         if (curseforgeUrl != null) { adder.accept(curseForge(parent, left, y, curseforgeUrl)); left -= spacing; }
         if (modrinthUrl != null)   { adder.accept(modrinth(parent, left, y, modrinthUrl));     left -= spacing; }
         if (modSourceUrl != null)  { adder.accept(github(parent, left, y, modSourceUrl));      left -= spacing; }
 
+        if (!ours) return;
         // Right side (going rightward from the back button)
         int right = centerX + 45 + 2;
         adder.accept(discord(parent, right, y, hub.discord()));         right += spacing;

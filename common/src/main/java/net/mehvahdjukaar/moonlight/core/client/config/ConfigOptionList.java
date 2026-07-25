@@ -14,6 +14,9 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
 
+    private boolean drawFooterSeparator = true;
+    private int rowWidth = ROW_WIDTH;
+
     ConfigOptionList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
     }
@@ -31,17 +34,36 @@ class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
 
     @Override
     public int getRowWidth() {
-        return ROW_WIDTH;
+        return this.rowWidth;
+    }
+
+    /** Narrows the rows below {@link ConfigScreenLayout#ROW_WIDTH}, for lists that live in a pane instead of the screen. */
+    void setRowWidth(int rowWidth) {
+        this.rowWidth = rowWidth;
     }
 
     @Override
     protected int getScrollbarPosition() {
-        return this.width / 2 + ROW_WIDTH / 2 + 6;
+        return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
+    }
+
+    /**
+     * Blank space above the first row, which is how the rows get vertically centered in a pane taller than they need.
+     * Uses the (unused) list header, so row hit-testing and scrolling stay in sync with it for free.
+     */
+    void setTopPadding(int padding) {
+        this.setRenderHeader(padding > 0, Math.max(0, padding));
+    }
+
+    /** Off when the screen draws its own full-width separator instead (the split layout). */
+    void setDrawFooterSeparator(boolean draw) {
+        this.drawFooterSeparator = draw;
     }
 
     @Override
     protected void renderListSeparators(GuiGraphics graphics) {
         // the top separator is owned by the screen's header bar (drawn in renderBackground); only draw the footer one
+        if (!this.drawFooterSeparator) return;
         ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
         RenderSystem.enableBlend();
         graphics.blit(footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);

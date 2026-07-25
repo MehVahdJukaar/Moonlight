@@ -66,12 +66,14 @@ import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforgespi.language.IModFileInfo;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -212,6 +214,29 @@ public class PlatHelperImpl {
         if (logo == null || logo.isBlank()) return null;
         Path path = info.getOwningFile().getFile().findResource(logo);
         return path != null && java.nio.file.Files.exists(path) ? path : null;
+    }
+
+    @Nullable
+    public static Path findModResource(String modId, String path) {
+        IModFileInfo file = ModList.get().getModFileById(modId);
+        if (file == null) return null;
+        Path found = file.getFile().findResource(path);
+        return found != null && Files.exists(found) ? found : null;
+    }
+
+    public static List<String> getModAuthors(String modId) {
+        // one free-form string on this loader, already comma separated by convention
+        String authors = readModString(modId, "authors");
+        return authors == null || authors.isBlank() ? List.of() : List.of(authors);
+    }
+
+    @Nullable
+    public static String getModLicense(String modId) {
+        // declared per mod FILE, not per mod
+        return ModList.get().getModContainerById(modId)
+                .map(c -> c.getModInfo().getOwningFile().getLicense())
+                .filter(l -> !l.isBlank())
+                .orElse(null);
     }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {

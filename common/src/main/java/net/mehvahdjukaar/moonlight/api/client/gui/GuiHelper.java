@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 public final class GuiHelper {
 
@@ -45,6 +46,74 @@ public final class GuiHelper {
         graphics.drawCenteredString(font, title, width / 2, (headerHeight - font.lineHeight) / 2, ConfigGuiColors.TITLE);
     }
 
+    /** The header bar with a gold title and a gray second line under it (version, subtitle, ...). */
+    public static void renderHeaderBar(GuiGraphics graphics, Font font, Component title, @Nullable Component subtitle,
+                                       int width, int headerHeight) {
+        if (subtitle == null) {
+            renderHeaderBar(graphics, font, title, width, headerHeight);
+            return;
+        }
+        renderHeaderBar(graphics, width, headerHeight);
+        int gap = 2;
+        // centered as one block within the bar, separator excluded
+        int top = (headerHeight - 2 - (2 * font.lineHeight + gap)) / 2;
+        graphics.drawCenteredString(font, title, width / 2, top, ConfigGuiColors.TITLE);
+        graphics.drawCenteredString(font, subtitle, width / 2, top + font.lineHeight + gap, ConfigGuiColors.DESCRIPTION);
+    }
+
+    /**
+     * A left-to-right gradient, which {@code GuiGraphics#fillGradient} can't do (it only goes top to bottom). Drawn as
+     * 1px columns, so keep the span narrow (edge fades, highlights) rather than filling whole screens with it.
+     */
+    public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+        fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
+    }
+
+    /**
+     * As above, over an explicit render type. Pass {@link RenderType#guiOverlay()} to fade over rendered items: they
+     * write depth at z≈150, so the default depth-tested {@link RenderType#gui()} would be punched out by them.
+     */
+    public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+        int steps = maxX - minX;
+        if (steps <= 0) return;
+        for (int i = 0; i < steps; i++) {
+            int color = FastColor.ARGB32.lerp(steps == 1 ? 0f : i / (float) (steps - 1), colorFrom, colorTo);
+            graphics.fill(renderType, minX + i, minY, minX + i + 1, maxY, color);
+        }
+    }
+
+    /** The plain menu background the header bar uses, over an arbitrary rect. Keeps its tiling aligned to the screen. */
+    public static void renderMenuBand(GuiGraphics graphics, int x, int y, int width, int height) {
+        ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND;
+        Screen.renderMenuBackgroundTexture(graphics, bg, x, y, x, y, width, height);
+    }
+
+    /** The 2px separator sprite of the header/footer bands, usable as a divider anywhere. */
+    public static void renderSeparator(GuiGraphics graphics, int x, int y, int width) {
+        ResourceLocation sprite = Minecraft.getInstance().level != null ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
+        RenderSystem.enableBlend();
+        graphics.blit(sprite, x, y, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.disableBlend();
+    }
+
+    /** Vertical counterpart to {@link #renderSeparator}. The vanilla sprites are horizontal, so this is a drawn groove. */
+    public static void renderVerticalSeparator(GuiGraphics graphics, int x, int top, int bottom) {
+        graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.fill(x + 1, top, x + 2, bottom, 0x18FFFFFF);
+    }
+
+    /** A mod icon at its real aspect ratio, scaled to fit and centered inside the given box. */
+    public static void renderModIcon(GuiGraphics graphics, ModIcons.Icon icon, int x, int y, int maxWidth, int maxHeight) {
+        int h = maxHeight;
+        int w = Math.round(maxHeight * (icon.width() / (float) icon.height()));
+        if (w > maxWidth) {
+            w = maxWidth;
+            h = Math.round(maxWidth * (icon.height() / (float) icon.width()));
+        }
+        graphics.blit(icon.texture(), x + (maxWidth - w) / 2, y + (maxHeight - h) / 2, w, h,
+                0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
+    }
+
     /** The 32×32 tiling list background over a scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
     public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
         ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
@@ -70,27 +139,6 @@ public final class GuiHelper {
         int thumbY = top + (int) ((trackH - thumbH) * (scroll / maxScroll));
         graphics.fill(trackX, top, trackX + 3, top + trackH, 0x40000000);
         graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, 0xFFB0B0B0);
-    }
-
-    /**
-     * A left-to-right gradient, which {@code GuiGraphics#fillGradient} can't do (it only goes top to bottom). Drawn as
-     * 1px columns, so keep the span narrow (edge fades, highlights) rather than filling whole screens with it.
-     */
-    public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
-        fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
-    }
-
-    /**
-     * As above, over an explicit render type. Pass {@link RenderType#guiOverlay()} to fade over rendered items: they
-     * write depth at z≈150, so the default depth-tested {@link RenderType#gui()} would be punched out by them.
-     */
-    public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
-        int steps = maxX - minX;
-        if (steps <= 0) return;
-        for (int i = 0; i < steps; i++) {
-            int color = FastColor.ARGB32.lerp(steps == 1 ? 0f : i / (float) (steps - 1), colorFrom, colorTo);
-            graphics.fill(renderType, minX + i, minY, minX + i + 1, maxY, color);
-        }
     }
 
     /**
