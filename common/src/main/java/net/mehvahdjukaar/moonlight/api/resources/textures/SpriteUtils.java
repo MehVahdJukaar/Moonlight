@@ -8,13 +8,22 @@ import net.mehvahdjukaar.moonlight.api.util.math.kmeans.KMeans;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.IntUnaryOperator;
 
 public final class SpriteUtils {
+
+    private static final byte[] PNG_SIGNATURE = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
 
     /**
      * Shorthand method to read a NativeImage
@@ -24,6 +33,52 @@ public final class SpriteUtils {
             return NativeImage.read(res);
         } catch (Exception e) {
             throw new IOException(e);
+        }
+    }
+
+    /**
+     * Decodes raw image bytes. Unlike {@link NativeImage#read}, which rejects anything that isn't a PNG, this accepts
+     * every format stb can read (gif, jpeg, bmp, tga, ...). Animated gifs decode to their first frame.
+     */
+    public static NativeImage readImage(byte[] imageBytes) throws IOException {
+        if (isPng(imageBytes)) {
+            try (InputStream in = new ByteArrayInputStream(imageBytes)) {
+                return NativeImage.read(in);
+            }
+        }
+        return readImageWithStb(imageBytes);
+    }
+
+    private static boolean isPng(byte[] bytes) {
+        if (bytes.length < PNG_SIGNATURE.length) return false;
+        for (int i = 0; i < PNG_SIGNATURE.length; i++) {
+            if (bytes[i] != PNG_SIGNATURE[i]) return false;
+        }
+        return true;
+    }
+
+    // stb hands us its own rgba buffer, so we copy it into a NativeImage-owned one and free it right away
+    private static NativeImage readImageWithStb(byte[] imageBytes) throws IOException {
+        ByteBuffer encoded = MemoryUtil.memAlloc(imageBytes.length);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            encoded.put(imageBytes).flip();
+            IntBuffer width = stack.mallocInt(1);
+            IntBuffer height = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+            ByteBuffer pixels = STBImage.stbi_load_from_memory(encoded, width, height, channels, 4);
+            if (pixels == null) {
+                throw new IOException("Could not load image: " + STBImage.stbi_failure_reason());
+            }
+            try {
+                NativeImage image = new NativeImage(NativeImage.Format.RGBA, width.get(0), height.get(0), false);
+                MemoryUtil.memCopy(MemoryUtil.memAddress(pixels), image.pixels,
+                        (long) width.get(0) * height.get(0) * 4);
+                return image;
+            } finally {
+                STBImage.stbi_image_free(pixels);
+            }
+        } finally {
+            MemoryUtil.memFree(encoded);
         }
     }
 

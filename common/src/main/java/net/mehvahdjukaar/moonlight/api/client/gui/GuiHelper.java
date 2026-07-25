@@ -7,10 +7,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 public final class GuiHelper {
@@ -68,6 +70,27 @@ public final class GuiHelper {
         int thumbY = top + (int) ((trackH - thumbH) * (scroll / maxScroll));
         graphics.fill(trackX, top, trackX + 3, top + trackH, 0x40000000);
         graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, 0xFFB0B0B0);
+    }
+
+    /**
+     * A left-to-right gradient, which {@code GuiGraphics#fillGradient} can't do (it only goes top to bottom). Drawn as
+     * 1px columns, so keep the span narrow (edge fades, highlights) rather than filling whole screens with it.
+     */
+    public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+        fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
+    }
+
+    /**
+     * As above, over an explicit render type. Pass {@link RenderType#guiOverlay()} to fade over rendered items: they
+     * write depth at z≈150, so the default depth-tested {@link RenderType#gui()} would be punched out by them.
+     */
+    public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+        int steps = maxX - minX;
+        if (steps <= 0) return;
+        for (int i = 0; i < steps; i++) {
+            int color = FastColor.ARGB32.lerp(steps == 1 ? 0f : i / (float) (steps - 1), colorFrom, colorTo);
+            graphics.fill(renderType, minX + i, minY, minX + i + 1, maxY, color);
+        }
     }
 
     /**

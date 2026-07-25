@@ -3,10 +3,13 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,6 +25,8 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class MoonlightConfigSelectScreen extends Screen {
 
+    private static final int BAND = 30; // 29px item strip + its 1px bottom divider
+
     private final String modId;
     private final Screen parent;
     @Nullable
@@ -29,6 +34,8 @@ public class MoonlightConfigSelectScreen extends Screen {
     private final List<ModConfigHolder> holders;
 
     private ConfigOptionList list;
+    /** Height of the item carousel band under the header, 0 when the mod has no items to show off. */
+    private int bandHeight;
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         super(Component.literal(LangBuilder.getReadableName(modId)));
@@ -54,13 +61,23 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
-        if (holders.size() == 1) return holders.getFirst().makeScreen(parent, background);
+        // a lone config doesn't need a list to pick from, unless someone registered an overlay that would be lost with it
+        if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()) {
+            return holders.getFirst().makeScreen(parent, background);
+        }
         return new MoonlightConfigSelectScreen(modId, holders, parent, background);
     }
 
     @Override
     protected void init() {
-        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, SELECT_ITEM_HEIGHT);
+        // full width band of the mod's items slowly panning by, tucked between the header and the config list
+        ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
+                ItemCarouselWidget.forMod(this.modId, 0, HEADER, this.width, BAND - 1) : null;
+        this.bandHeight = carousel == null ? 0 : BAND;
+        if (carousel != null) this.addRenderableWidget(carousel);
+
+        int listTop = HEADER + this.bandHeight;
+        this.list = new ConfigOptionList(this.minecraft, this.width, this.height - listTop - FOOTER, listTop, SELECT_ITEM_HEIGHT);
         List<ConfigListRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
@@ -105,6 +122,9 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
+        if (this.bandHeight > 0) {
+            graphics.fill(0, HEADER + this.bandHeight - 1, this.width, HEADER + this.bandHeight, ConfigGuiColors.HEADER_SEPARATOR);
+        }
         ConfigScreenExtensions.Panel panel = overlayPanel();
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
             overlay.render(graphics, panel, mouseX, mouseY, partialTick);
@@ -129,6 +149,6 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     private ConfigScreenExtensions.Panel overlayPanel() {
-        return new ConfigScreenExtensions.Panel(this, 0, HEADER, this.width, this.height - FOOTER);
+        return new ConfigScreenExtensions.Panel(this, 0, HEADER + this.bandHeight, this.width, this.height - FOOTER);
     }
 }

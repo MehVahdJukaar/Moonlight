@@ -2,13 +2,13 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -38,10 +38,7 @@ public final class ModIcons {
         try {
             Path path = PlatHelper.getModIcon(modId);
             if (path == null) return Optional.empty();
-            NativeImage image;
-            try (InputStream in = Files.newInputStream(path)) {
-                image = NativeImage.read(in);
-            }
+            NativeImage image = SpriteUtils.readImage(Files.readAllBytes(path));
             ResourceLocation id = Moonlight.res("mod_icon/" + modId.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
             Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(image));
             return Optional.of(new Icon(id, image.getWidth(), image.getHeight()));

@@ -19,6 +19,7 @@ public class ClientConfigs {
     public static final Supplier<Boolean> CUSTOM_CONFIG_SCREEN;
     public static final Supplier<Boolean> SHOW_ALL_MOD_CONFIGS;
     public static final Supplier<Boolean> CONVERT_FOREIGN_CONFIGS;
+    public static final Supplier<Boolean> CONFIG_ITEM_CAROUSEL;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
@@ -53,6 +54,8 @@ public class ClientConfigs {
                 .define("show_all_mod_configs", false);
         CONVERT_FOREIGN_CONFIGS = builder.comment("Also show tiles for other mods that don't use Moonlight and render their config directly in Moonlight's own screen (NeoForge only). Best-effort: options Moonlight can't represent are left to the mod's own screen. Implies show_all_mod_configs for the tile grid")
                 .define("convert_foreign_configs", false);
+        CONFIG_ITEM_CAROUSEL = builder.comment("Show a slowly panning strip of a mod's items on its config screen")
+                .define("config_item_carousel", true);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

@@ -318,7 +318,7 @@ public class SoftFluid {
     // use REFERENCE_CODEC instead
     @ApiStatus.Internal
     public static final Codec<Holder<SoftFluid>> HOLDER_CODEC =
-            RegistryFileCodec.create(SoftFluidRegistry.KEY, Codec.lazyInitialized(() -> CODEC));
+            RegistryFileCodec.create(SoftFluidRegistry.KEY, Codec.lazyInitialized(() -> SoftFluid.CODEC));
 
     // reference only. Unlike HOLDER_CODEC this never writes a fluid definition inline, so it errors out cleanly
     // when it's given ops without our registry instead of saving something that can't be read back

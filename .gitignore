@@ -31,3 +31,5 @@ classes/
 /build/tmp/publishMavenPublicationToMavenLocalRepository/module-maven-metadata.xml
 /build/publications/maven/pom-default.xml
 /build/reports/problems/problems-report.html
+/wiki/
+/research/

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.client;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.util.FileDownloadUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -9,7 +10,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Loads and caches mod icons fetched from a URL (for mods that aren't installed, so their jar isn't around to pull an
  * icon from like {@link ModIcons} does). The bytes are downloaded off-thread; the {@link DynamicTexture} is created and
  * registered on the render thread. Callers get {@code null} until the icon is ready (or forever, if it failed) and
- * should draw a fallback in the meantime. Only PNGs decode - anything else just falls back.
+ * should draw a fallback in the meantime. Any format stb reads works (png, gif, jpeg, ...); animated gifs show their
+ * first frame.
  */
 public final class RemoteIconCache {
 
@@ -46,7 +47,7 @@ public final class RemoteIconCache {
         Thread t = new Thread(() -> {
             try {
                 byte[] bytes = FileDownloadUtils.readBytes(url);
-                NativeImage image = NativeImage.read(new ByteArrayInputStream(bytes));
+                NativeImage image = SpriteUtils.readImage(bytes);
                 Minecraft mc = Minecraft.getInstance();
                 mc.execute(() -> {
                     try {

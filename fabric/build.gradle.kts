@@ -23,7 +23,7 @@ dependencies {
 
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${cloth_version}")
     modCompileOnly("curse.maven:yacl-667299:5424169")
-    modCompileOnly("curse.maven:modmenu-308702:5810603")
+    modImplementation("curse.maven:modmenu-308702:7808443")
     //modCompileOnly("curse.maven:super-better-grass-911433:4744836")
     modCompileOnly("curse.maven:map-atlases-436298:6345966")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
