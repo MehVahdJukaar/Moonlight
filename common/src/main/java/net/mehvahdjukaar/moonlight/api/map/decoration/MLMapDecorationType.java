@@ -14,6 +14,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -42,8 +43,17 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
                     }));
 
 
-    // registry reference codec
+    // don't use to save anything: allowInline=false only guards decode, and only when given RegistryOps that
+    // actually have our registry. Encoding always inlines the whole type definition when it can't see it.
+    // use REFERENCE_CODEC instead
+    @ApiStatus.Internal
     public static final Codec<Holder<MLMapDecorationType<?, ?>>> CODEC = RegistryFileCodec.create(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY, DIRECT_CODEC, false);
+
+    // reference only. Unlike CODEC this never writes a type definition inline, so it errors out cleanly
+    // when it's given ops without our registry instead of saving something that can't be read back
+    public static final Codec<Holder<MLMapDecorationType<?, ?>>> REFERENCE_CODEC =
+            RegistryFixedCodec.create(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY);
+
     // registry reference network codec
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<MLMapDecorationType<?, ?>>> STREAM_CODEC =
             ByteBufCodecs.holderRegistry(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY);

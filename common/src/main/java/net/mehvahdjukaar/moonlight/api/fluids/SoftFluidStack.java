@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
 import net.minecraft.core.*;
@@ -48,7 +49,7 @@ import java.util.Objects;
 public class SoftFluidStack implements DataComponentHolder {
 
     public static final Codec<SoftFluidStack> CODEC = RecordCodecBuilder.create(i -> i.group(
-            SoftFluid.HOLDER_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
+            SoftFluid.REFERENCE_CODEC.fieldOf("id").forGetter(SoftFluidStack::getHolder),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("count", 1).forGetter(SoftFluidStack::getCount),
             DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
                     .forGetter(stack -> stack.components.asPatch())
@@ -175,7 +176,12 @@ public class SoftFluidStack implements DataComponentHolder {
         return this.fluid().getTranslatedName();
     }
 
+    public static void assertCanSerialize(HolderLookup.Provider lookupProvider) {
+        CodecUtils.assertHasRegistry(lookupProvider, SoftFluidRegistry.KEY);
+    }
+
     public Tag save(HolderLookup.Provider lookupProvider) {
+        assertCanSerialize(lookupProvider);
         var a = CODEC.encodeStart(lookupProvider.createSerializationContext(NbtOps.INSTANCE), this);
         if (a.isSuccess()) return a.getOrThrow();
         else {
@@ -187,6 +193,7 @@ public class SoftFluidStack implements DataComponentHolder {
 
     public static SoftFluidStack load(HolderLookup.Provider lookupProvider, Tag tag) {
         //TODO: add components backwards compat
+        assertCanSerialize(lookupProvider);
         return CODEC.parse(lookupProvider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
     }
 

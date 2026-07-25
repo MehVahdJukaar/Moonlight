@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
@@ -312,7 +313,16 @@ public class SoftFluid {
         }
     }
 
-    public static final Codec<Holder<SoftFluid>> HOLDER_CODEC = RegistryFileCodec.create(SoftFluidRegistry.KEY, SoftFluid.CODEC);
+    // lazy because CODEC is declared below this: initializing it eagerly would capture a null element codec.
+    // don't use to save anything: it inlines the whole fluid definition when it can't see our registry.
+    // use REFERENCE_CODEC instead
+    @ApiStatus.Internal
+    public static final Codec<Holder<SoftFluid>> HOLDER_CODEC =
+            RegistryFileCodec.create(SoftFluidRegistry.KEY, Codec.lazyInitialized(() -> CODEC));
+
+    // reference only. Unlike HOLDER_CODEC this never writes a fluid definition inline, so it errors out cleanly
+    // when it's given ops without our registry instead of saving something that can't be read back
+    public static final Codec<Holder<SoftFluid>> REFERENCE_CODEC = RegistryFixedCodec.create(SoftFluidRegistry.KEY);
 
     //dynamic holder impl is dumb... we must encode the key directly
     public static final StreamCodec<RegistryFriendlyByteBuf, Holder<SoftFluid>> STREAM_CODEC =

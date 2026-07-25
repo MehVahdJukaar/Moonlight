@@ -3,8 +3,11 @@ package net.mehvahdjukaar.moonlight.api.map.decoration;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.map.MapDataRegistry;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -34,15 +37,24 @@ public abstract class MLMapMarker<D extends MLMapDecoration> {
     protected final boolean shouldSave;
 
     public static final Codec<MLMapMarker<?>> CODEC =
-            MLMapDecorationType.CODEC.dispatch("type", MLMapMarker::getType,
+            MLMapDecorationType.REFERENCE_CODEC.dispatch("type", MLMapMarker::getType,
                     mapWorldMarker -> mapWorldMarker.value().getMarkerCodec());
     @Deprecated(forRemoval = true)
     public static final Codec<MLMapMarker<?>> REFERENCE_CODEC =CODEC;
 
+    /**
+     * Map decoration types live in a data pack registry, so serializing a marker needs a provider that actually has
+     * that registry. Callers that hand us an empty or partial one would otherwise silently lose their markers,
+     * so fail loudly and point at whoever called us.
+     */
+    public static void assertCanSerialize(HolderLookup.Provider lookupProvider) {
+        CodecUtils.assertHasRegistry(lookupProvider, MapDataRegistry.MAP_DECORATION_REGISTRY_KEY);
+    }
+
     public static <T extends MLMapMarker<?>> Products.P7<RecordCodecBuilder.Mu<T>, Holder<MLMapDecorationType<?, ?>>, BlockPos, Float, Optional<Component>, Optional<Boolean>, Optional<Boolean>, Boolean> baseCodecGroup(
             RecordCodecBuilder.Instance<T> instance) {
         return instance.group(
-                MLMapDecorationType.CODEC.fieldOf("type").forGetter(m -> m.getType()),
+                MLMapDecorationType.REFERENCE_CODEC.fieldOf("type").forGetter(m -> m.getType()),
                 BlockPos.CODEC.fieldOf("pos").forGetter(m -> m.getPos()),
                 Codec.FLOAT.optionalFieldOf("rot", 0f).forGetter(m -> m.getRotation()),
                 ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(m -> m.getDisplayName()),

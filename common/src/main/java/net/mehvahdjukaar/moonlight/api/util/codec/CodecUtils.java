@@ -13,6 +13,7 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
@@ -225,6 +226,23 @@ public class CodecUtils {
 
     static <A,B> StreamCodec<A,B> lazyInitializedStreamCodec(final Supplier<StreamCodec<A,B>> delegate) {
         return StreamCodec.recursive(self -> delegate.get());
+    }
+
+    public static <T> void assertHasRegistry(HolderLookup.Provider lookupProvider, ResourceKey<? extends Registry<T>> registryKey) {
+        if (lookupProvider.lookup(registryKey).isEmpty()) {
+            throw new BrokenCallerException("""
+                    Tried to serialize a %s entry with a registry access that has no such registry (was given %s).
+                    Some mod higher up in this stack trace called us with an empty or partial HolderLookup.Provider,
+                    such as RegistryAccess.EMPTY, instead of the one from the level. That is a bug in THAT mod,
+                    not in Moonlight nor in the mod that owns the object being saved.""".formatted(
+                    registryKey.location(), lookupProvider));
+        }
+    }
+
+    public static class BrokenCallerException extends RuntimeException {
+        public BrokenCallerException(String message) {
+            super(message);
+        }
     }
 
 }

@@ -246,10 +246,11 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         if (compound.contains("customMarkers") && data instanceof ExpandedMapData mapData) {
             ListTag listNBT = compound.getList("customMarkers", 10);
 
+            MLMapMarker.assertCanSerialize(registries);
             RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
 
             for (int j = 0; j < listNBT.size(); ++j) {
-                MLMapMarker.REFERENCE_CODEC.parse(registryOps, listNBT.getCompound(j))
+                MLMapMarker.CODEC.parse(registryOps, listNBT.getCompound(j))
                         .resultOrPartial(string -> Moonlight.LOGGER.warn("Failed to parse moonlight map marker: '{}'", string))
                         .ifPresent(marker -> {
                             mapData.ml$getCustomMarkers().put(marker.getMarkerUniqueId(), marker);
@@ -267,11 +268,14 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
         ListTag listNBT = new ListTag();
 
+        if (!this.moonlight$customMapMarkers.isEmpty()) {
+            MLMapMarker.assertCanSerialize(registries);
+        }
         RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
 
         for (MLMapMarker<?> marker : this.moonlight$customMapMarkers.values()) {
             if (marker.shouldSave()) {
-                listNBT.add(MLMapMarker.REFERENCE_CODEC.encodeStart(registryOps, marker).getOrThrow());
+                listNBT.add(MLMapMarker.CODEC.encodeStart(registryOps, marker).getOrThrow());
             }
         }
         com.put("customMarkers", listNBT);

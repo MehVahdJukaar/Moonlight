@@ -9,7 +9,7 @@ import java.util.Set;
 
 public record MLMapDecorationsComponent(Map<String, MLMapMarker<?>> decorations) {
 
-    public static final Codec<MLMapDecorationsComponent> CODEC = Codec.unboundedMap(Codec.STRING, MLMapMarker.REFERENCE_CODEC)
+    public static final Codec<MLMapDecorationsComponent> CODEC = Codec.unboundedMap(Codec.STRING, MLMapMarker.CODEC)
             .xmap(MLMapDecorationsComponent::new, d -> d.decorations);
 
     public static final MLMapDecorationsComponent EMPTY = new MLMapDecorationsComponent(Map.of());
