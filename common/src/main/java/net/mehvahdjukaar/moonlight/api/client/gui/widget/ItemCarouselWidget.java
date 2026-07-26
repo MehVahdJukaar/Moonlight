@@ -31,8 +31,8 @@ import java.util.Map;
  * A decorative strip of items panning slowly sideways and fading out into its own background at both edges. Meant to
  * show off what a mod adds on its config screens.
  * <p>
- * Not clickable (it never eats input), but hovering it names the item under the cursor and eases the panning to a
- * stop so there's time to actually read it.
+ * Not clickable (clicks fall straight through), but hovering it names the item under the cursor and eases the panning
+ * to a stop so there's time to actually read it, and the mouse wheel flicks the strip along.
  */
 public class ItemCarouselWidget extends AbstractWidget {
 
@@ -40,6 +40,9 @@ public class ItemCarouselWidget extends AbstractWidget {
     private static final int GAP = 6;              // empty space between two icons
     private static final int CELL = ICON + GAP;
     private static final float SPEED = 14f;        // px per second
+    private static final float SCROLL_IMPULSE = 220f;  // px per second added by one wheel notch
+    private static final float MAX_FLING = 900f;
+    private static final float FLING_DECAY = 4f;   // fraction of the fling shed per second
     private static final int FADE = 24;            // width of each edge fade
     private static final int MAX_ITEMS = 256;      // sanity cap for content-heavy mods
 
@@ -52,6 +55,7 @@ public class ItemCarouselWidget extends AbstractWidget {
 
     private double offset;
     private float speed = SPEED;
+    private float fling;
     private long lastMs = -1;
     private int hoveredIndex = -1;
 
@@ -60,7 +64,7 @@ public class ItemCarouselWidget extends AbstractWidget {
         this.items = items;
         this.span = items.size() * (double) CELL;
         // inactive purely so it stays out of the tab order and lets clicks fall through to whatever is underneath;
-        // rendering and the hover tooltip don't look at this flag
+        // rendering, the hover tooltip and the scroll handler don't look at this flag
         this.active = false;
     }
 
@@ -124,20 +128,29 @@ public class ItemCarouselWidget extends AbstractWidget {
 
         int fade = Math.min(FADE, this.width / 3);
         int firstCell = Mth.floor(this.offset / CELL);
-        int shift = (int) Math.round(this.offset - firstCell * (double) CELL);
+        double shift = this.offset - firstCell * (double) CELL; // [0, CELL)
+        // renderFakeItem only takes whole pixels, so the sub-pixel remainder rides on the pose instead: without it
+        // the strip would jump a full pixel at a time, which at this speed reads as a stutter
+        int wholeShift = (int) shift;
+        float subShift = (float) (shift - wholeShift);
         int iconY = this.getY() + (this.height - ICON) / 2;
         int hovered = -1;
 
         graphics.enableScissor(this.getX(), this.getY(), right, bottom);
+        graphics.pose().pushPose();
+        graphics.pose().translate(-subShift, 0, 0);
         for (int i = 0, cells = this.width / CELL + 2; i <= cells; i++) {
-            int x = this.getX() + i * CELL + GAP / 2 - shift;
+            int x = this.getX() + i * CELL + GAP / 2 - wholeShift;
             int index = Math.floorMod(firstCell + i, this.items.size());
             graphics.renderFakeItem(this.items.get(index), x, iconY);
             // only the fully lit middle band gets a tooltip; items dissolving into the edges aren't really readable
-            if (this.isHovered && mouseX >= x && mouseX < x + ICON && mouseX >= this.getX() + fade && mouseX < right - fade) {
+            float drawnX = x - subShift;
+            if (this.isHovered && mouseX >= drawnX && mouseX < drawnX + ICON
+                    && mouseX >= this.getX() + fade && mouseX < right - fade) {
                 hovered = index;
             }
         }
+        graphics.pose().popPose();
         graphics.disableScissor();
 
         // guiOverlay skips the depth test, so the fade actually covers the items instead of being clipped by them
@@ -157,7 +170,31 @@ public class ItemCarouselWidget extends AbstractWidget {
         float dt = this.lastMs < 0 ? 0 : Math.min((now - this.lastMs) / 1000f, 0.1f); // clamp screen-reopen gaps
         this.lastMs = now;
         this.speed = Mth.lerp(Math.min(1f, dt * 6f), this.speed, hovered ? 0f : SPEED);
-        this.offset = (this.offset + this.speed * dt) % this.span;
+        this.fling = Mth.lerp(Math.min(1f, dt * FLING_DECAY), this.fling, 0f);
+        // the fling can run backwards, so wrap both ways instead of relying on a positive remainder
+        double moved = (this.offset + (this.speed + this.fling) * dt) % this.span;
+        this.offset = moved < 0 ? moved + this.span : moved;
+    }
+
+    /** Spinning the wheel over the strip flicks it along, decaying back to the idle pan. */
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (this.items.isEmpty()) return false;
+        this.fling = Mth.clamp(this.fling - (float) scrollY * SCROLL_IMPULSE, -MAX_FLING, MAX_FLING);
+        return true;
+    }
+
+    // AbstractWidget gates both of these on active, which is off here so clicks fall through. Scrolling still has to
+    // reach us though, and getChildAt only asks isMouseOver, so open that up and mute the click buttons instead.
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
+        return this.visible && mouseX >= this.getX() && mouseY >= this.getY()
+                && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
+    }
+
+    @Override
+    protected boolean isValidClickButton(int button) {
+        return false;
     }
 
     @Override

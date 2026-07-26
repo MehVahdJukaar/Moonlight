@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.texture_renderer;
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.GL30;
 
 import java.util.function.Consumer;
 
@@ -88,11 +90,14 @@ public class RenderableDynamicTexture extends DynamicTexture implements Tickable
 
     // Call after finish drawing
     public void swapBackToFront() {
-        readTarget.bindWrite(true);
-        writeTarget.bindRead();
-        writeTarget.blitToScreen(readTarget.width, readTarget.height);
-        readTarget.unbindWrite();
-        writeTarget.unbindRead();
+        //a plain framebuffer copy rather than RenderTarget.blitToScreen: that one masks off the
+        //alpha channel, so the front buffer's transparency would stay stuck at its clear value
+        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, writeTarget.frameBufferId);
+        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, readTarget.frameBufferId);
+        GlStateManager._glBlitFrameBuffer(0, 0, writeTarget.width, writeTarget.height,
+                0, 0, readTarget.width, readTarget.height,
+                GL30.GL_COLOR_BUFFER_BIT, GL30.GL_NEAREST);
+        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
     }
 
     public RenderTarget getRenderTarget() {
@@ -156,15 +161,35 @@ public class RenderableDynamicTexture extends DynamicTexture implements Tickable
     }
 
     /**
-     * Downloads the GPU texture to CPU for edit
+     * Downloads the GPU texture to CPU for edit.
+     * Works on the back buffer, the one the drawing function renders onto, so this is meant to be
+     * called from within it. Anything written back with upload() shows up once it's swapped to front
      */
     public void download() {
         if (closed) {
             Moonlight.LOGGER.error("download id on closed");
             return;
         }
-        this.bind();
+        bindBackBuffer();
         getPixels().downloadTexture(0, false);
+    }
+
+    /**
+     * Uploads the CPU image back onto the back buffer. Counterpart of download()
+     */
+    @Override
+    public void upload() {
+        if (closed) {
+            Moonlight.LOGGER.error("upload on closed");
+            return;
+        }
+        bindBackBuffer();
+        getPixels().upload(0, 0, 0, false);
+    }
+
+    private void bindBackBuffer() {
+        this.getId(); //lazily creates the targets if we got here before any bind
+        RenderSystem.bindTexture(writeTarget.getColorTextureId());
     }
 
     public void setUpdateNextTick(boolean shouldTick) {

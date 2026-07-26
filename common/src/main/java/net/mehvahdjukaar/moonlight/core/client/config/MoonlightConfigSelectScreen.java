@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -47,7 +48,8 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     private ConfigOptionList list;
     private int leftPaneWidth;
-    private int stripHeight;   // 0 when there's no carousel to show under the icon
+    private int identityBottom;    // bottom of the icon + carousel block, or of a mod's own showcase widget
+    private boolean customShowcase;
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         super(Component.literal(ModsTilesScreen.safe(() -> PlatHelper.getModName(modId), LangBuilder.getReadableName(modId))));
@@ -88,12 +90,23 @@ public class MoonlightConfigSelectScreen extends Screen {
         // a third of the screen for the mod's identity, clamped so the config rows keep a usable width either way
         this.leftPaneWidth = Mth.clamp(this.width / 3, 104, 170);
 
-        // the mod's items panning by, right under its icon, dissolving into the pane background at both ends
-        ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
-                ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, this.leftPaneWidth - 2 * PAD, STRIP) : null;
-        this.stripHeight = carousel == null ? 0 : STRIP + 4;
-        if (carousel != null) {
-            this.addRenderableWidget(carousel.withOutline(ConfigGuiColors.TILE_OUTLINE));
+        int blockWidth = this.leftPaneWidth - 2 * PAD;
+        ConfigScreenExtensions.Showcase showcase = ConfigScreenExtensions.showcaseFor(this.modId);
+        this.customShowcase = showcase != null;
+        if (showcase != null) {
+            // the mod brought its own thing to put here, so neither the icon nor the carousel is drawn
+            AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
+                    this.iconBottom() - this.iconTop() + STRIP + 4);
+            this.addRenderableWidget(widget);
+            this.identityBottom = widget.getY() + widget.getHeight();
+        } else {
+            // the mod's items panning by, right under its icon, dissolving into the pane background at both ends
+            ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
+                    ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, blockWidth, STRIP) : null;
+            this.identityBottom = this.iconBottom() + (carousel == null ? 0 : STRIP + 4);
+            if (carousel != null) {
+                this.addRenderableWidget(carousel.withOutline(ConfigGuiColors.TILE_OUTLINE));
+            }
         }
 
         int paneWidth = this.width - this.leftPaneWidth;
@@ -117,10 +130,8 @@ public class MoonlightConfigSelectScreen extends Screen {
         MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
                 this.width / 2, this.height - 28, 22, modId, this::onClose);
         // bottom-left: icon-only jump to the mods hub grid
-        IconButton modsButton = new IconButton(8, this.height - 28, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
-                b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))).borderless();
-        modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
-        this.addRenderableWidget(modsButton);
+        this.addRenderableWidget(new GearButton(8, this.height - 28, 20,
+                b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))));
     }
 
     /** Bottom of the two panes. */
@@ -157,16 +168,19 @@ public class MoonlightConfigSelectScreen extends Screen {
         int textWidth = this.leftPaneWidth - 2 * PAD;
         int iconHeight = Math.min(ICON_MAX, textWidth);
 
-        ModIcons.Icon icon = ModIcons.get(this.modId);
-        if (icon != null) {
-            GuiHelper.renderModIcon(graphics, icon, PAD, this.iconTop(), textWidth, iconHeight);
-        } else {
-            GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
-                    PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
-                    ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, CONFIG_ICON);
+        if (!this.customShowcase) {
+            ModIcons.Icon icon = ModIcons.get(this.modId);
+            if (icon != null) {
+                GuiHelper.renderModIcon(graphics, icon, PAD, this.iconTop(), textWidth, iconHeight);
+            } else {
+                GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
+                        PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
+                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, CONFIG_ICON);
+            }
         }
-        // the carousel is a widget, so it draws itself into the gap this leaves under the icon
-        int y = this.iconBottom() + this.stripHeight + 8;
+        // whatever fills the block above (the carousel, or a mod's showcase) is a widget, so it draws itself into the
+        // gap this leaves
+        int y = this.identityBottom + 8;
 
         if (this.authors.isEmpty()) return;
         GuiHelper.renderSeparator(graphics, PAD, y, textWidth);

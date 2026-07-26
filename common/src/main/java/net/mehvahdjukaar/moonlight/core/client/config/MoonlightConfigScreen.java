@@ -51,7 +51,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     private static final int CRUMB_Y = 25;
     private static final int SEARCH_WIDTH = 110;
     private static final int SEARCH_HEIGHT = 14;
-    private static final int SEARCH_ICON_SIZE = 10;
+    private static final int SEARCH_ICON_SIZE = 12;
 
     private ConfigOptionList list;
     private Button saveButton;
@@ -176,10 +176,8 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                     .bounds(this.width / 2 + 4, y, bw, 20).build());
         }
-        IconButton modsButton = new IconButton(8, y, 20, 20, Component.empty(), CONFIG_ICON, 16, 16,
-                b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))).borderless();
-        modsButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.mods_button")));
-        this.addRenderableWidget(modsButton);
+        this.addRenderableWidget(new GearButton(8, y, 20,
+                b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))));
         refreshSave();
     }
 

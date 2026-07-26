@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -16,11 +17,6 @@ import java.util.function.Supplier;
 /**
  * The public hook for mods to extend Moonlight's native config UI for their own mod. Everything here is keyed by mod
  * id and meant to be called once from client setup.
- * <ul>
- *     <li>{@link #registerOverlay} draws over that mod's config-list screen (a banner, links, an extra tile, ...).</li>
- *     <li>{@link #registerIcon} maps a config {@code icon(...)} id to a custom {@link ItemStack} the default
- *     item/block lookup can't produce (a stack with data components, a made-up key, ...).</li>
- * </ul>
  */
 public final class ConfigScreenExtensions {
 
@@ -50,6 +46,26 @@ public final class ConfigScreenExtensions {
     @ApiStatus.Internal
     public static List<Overlay> overlaysFor(String modId) {
         return OVERLAYS.getOrDefault(modId, List.of());
+    }
+
+    // ── per-mod showcase on the config-list screen ──
+
+    @FunctionalInterface
+    public interface Showcase {
+        AbstractWidget create(String modId, int x, int y, int width, int maxHeight);
+    }
+
+    private static final Map<String, Showcase> SHOWCASES = new HashMap<>();
+
+    /** Replaces the mod icon + item carousel on {@code modId}'s config-list screen. Call from client setup. */
+    public static void registerShowcase(String modId, Showcase showcase) {
+        SHOWCASES.put(modId, showcase);
+    }
+
+    @ApiStatus.Internal
+    @Nullable
+    public static Showcase showcaseFor(String modId) {
+        return SHOWCASES.get(modId);
     }
 
     // ── config icon overrides (formerly ConfigScreenIcons#registerOverride) ──

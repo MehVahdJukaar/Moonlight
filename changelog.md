@@ -1,7 +1,6 @@
-- more improvements to the config screen system
-- added client side /moonlight config command. opens the mods list, or a specific mod config screen
-- other mods config screens can now alos be shown
-- fixed object and json configs showing their raw translation key instead of a readable name on (neo)forge
-- codec configs that are lists are now edited entry by entry instead of as raw json
-- registry ids and tags inside codec configs are now picked from a searchable dropdown instead of being typed by hand
-- number config fields now have - and + steppers on each side. hold shift to step by 10
+- added ConfigScreenExtensions.registerShowcase, letting a mod replace the icon + item carousel block on its config screen with a widget of its own
+- added a small screen particle system (ScreenParticle + ScreenParticleEngine): 2d sprites or quads with lifetime, gravity, spin, size and alpha fades
+- config screen mods button now grows on hover and slowly turns instead of taking a hover highlight
+- item carousel now pans sub pixel smooth and can be flicked with the scroll wheel
+- fixed dynamic rendered textures reading back the wrong buffer, which made cpu side post processing run on a blank image
+- fixed dynamic rendered textures losing their alpha channel when swapped to front
