@@ -22,11 +22,9 @@ public final class ConfigScreenExtensions {
 
     // ── per-mod overlays on the mod's config-list screen ──
 
-    /** Something a mod paints over its config-list screen, with optional click handling. */
     public interface Overlay {
         void render(GuiGraphics graphics, Panel panel, int mouseX, int mouseY, float partialTick);
 
-        /** Return true to consume the click (e.g. your own widget was hit). Default does nothing. */
         default boolean mouseClicked(Panel panel, double mouseX, double mouseY, int button) {
             return false;
         }
@@ -53,6 +51,10 @@ public final class ConfigScreenExtensions {
     @FunctionalInterface
     public interface Showcase {
         AbstractWidget create(String modId, int x, int y, int width, int maxHeight);
+
+        default boolean replacesCarousel() {
+            return true;
+        }
     }
 
     private static final Map<String, Showcase> SHOWCASES = new HashMap<>();

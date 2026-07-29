@@ -75,6 +75,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -225,9 +226,13 @@ public class PlatHelperImpl {
     }
 
     public static List<String> getModAuthors(String modId) {
-        // one free-form string on this loader, already comma separated by convention
+        // one free-form string on this loader, comma separated by convention, so it's split back into names
         String authors = readModString(modId, "authors");
-        return authors == null || authors.isBlank() ? List.of() : List.of(authors);
+        if (authors == null || authors.isBlank()) return List.of();
+        return Arrays.stream(authors.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 
     @Nullable

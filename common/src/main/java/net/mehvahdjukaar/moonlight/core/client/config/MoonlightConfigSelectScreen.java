@@ -78,8 +78,10 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
-        // a lone config doesn't need a list to pick from, unless someone registered an overlay that would be lost with it
-        if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()) {
+        // a lone config doesn't need a list to pick from, unless someone registered an overlay or a showcase that
+        // would be lost along with it
+        if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
+                && ConfigScreenExtensions.showcaseFor(modId) == null) {
             return holders.getFirst().makeScreen(parent, background);
         }
         return new MoonlightConfigSelectScreen(modId, holders, parent, background);
@@ -93,13 +95,16 @@ public class MoonlightConfigSelectScreen extends Screen {
         int blockWidth = this.leftPaneWidth - 2 * PAD;
         ConfigScreenExtensions.Showcase showcase = ConfigScreenExtensions.showcaseFor(this.modId);
         this.customShowcase = showcase != null;
+        boolean showcaseTakesCarousel = showcase != null && showcase.replacesCarousel();
         if (showcase != null) {
-            // the mod brought its own thing to put here, so neither the icon nor the carousel is drawn
+            // the mod brought its own thing to put here, so the icon isn't drawn. the carousel goes too unless the
+            // showcase asked to only fill the icon square
             AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
-                    this.iconBottom() - this.iconTop() + STRIP + 4);
+                    this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? STRIP + 4 : 0));
             this.addRenderableWidget(widget);
             this.identityBottom = widget.getY() + widget.getHeight();
-        } else {
+        }
+        if (!showcaseTakesCarousel) {
             // the mod's items panning by, right under its icon, dissolving into the pane background at both ends
             ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
                     ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, blockWidth, STRIP) : null;
@@ -186,15 +191,17 @@ public class MoonlightConfigSelectScreen extends Screen {
         GuiHelper.renderSeparator(graphics, PAD, y, textWidth);
         y += 8;
 
-        // the author list gets the whole rest of the pane: it can be long and comma separated, so it wraps
+        // the author list gets the whole rest of the pane: one name per line, wrapped if a name is too long for it
         int line = this.font.lineHeight;
         graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
                 ConfigGuiColors.DESCRIPTION);
         y += line + 1;
-        for (FormattedCharSequence row : this.font.split(Component.literal(String.join(", ", this.authors)), textWidth)) {
-            if (y + line > bottom - 2) break;
-            graphics.drawString(this.font, row, PAD, y, ConfigGuiColors.LABEL);
-            y += line;
+        for (String author : this.authors) {
+            for (FormattedCharSequence row : this.font.split(Component.literal(author), textWidth)) {
+                if (y + line > bottom - 2) return;
+                graphics.drawString(this.font, row, PAD, y, ConfigGuiColors.LABEL);
+                y += line;
+            }
         }
     }
 

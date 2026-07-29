@@ -6,11 +6,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ScreenParticle {
 
-    private final @Nullable ResourceLocation sprite;
+    private final List<ResourceLocation> sprites;
 
     private float x;
     private float y;
@@ -23,25 +26,37 @@ public class ScreenParticle {
     private float startSize = 4;
     private float endSize = 4;
     private float startAlpha = 1;
-    private float endAlpha = 0;
+    private float endAlpha = 1;
+    private float fadeOutStart = 1;  // life fraction at which the fade to fully transparent begins
     private int tint = 0xFFFFFF;
     private float lifetime = 1;
     private float age;
 
-    protected ScreenParticle(@Nullable ResourceLocation sprite, float x, float y) {
-        this.sprite = sprite;
+    protected ScreenParticle(List<ResourceLocation> sprites, float x, float y) {
+        this.sprites = sprites;
         this.x = x;
         this.y = y;
     }
 
     /** A particle drawing the given GUI sprite, stretched to its current size. */
     public static ScreenParticle sprite(ResourceLocation sprite, float x, float y) {
-        return new ScreenParticle(sprite, x, y);
+        return new ScreenParticle(List.of(sprite), x, y);
+    }
+
+    /** A particle playing the given GUI sprites as an animation, spread evenly over its lifetime. */
+    public static ScreenParticle animated(List<ResourceLocation> frames, float x, float y) {
+        if (frames.isEmpty()) throw new IllegalArgumentException("Animated screen particle needs at least one frame");
+        return new ScreenParticle(List.copyOf(frames), x, y);
+    }
+
+    /** A particle drawing one sprite picked at random out of the given ones. */
+    public static ScreenParticle randomSprite(List<ResourceLocation> choices, RandomSource random, float x, float y) {
+        return sprite(choices.get(random.nextInt(choices.size())), x, y);
     }
 
     /** A particle drawing a plain square. Cheap, and needs no assets. */
     public static ScreenParticle square(float x, float y) {
-        return new ScreenParticle(null, x, y);
+        return new ScreenParticle(List.of(), x, y);
     }
 
     public ScreenParticle velocity(float x, float y) {
@@ -56,9 +71,9 @@ public class ScreenParticle {
         return this;
     }
 
-    /** Air resistance, as the fraction of the current speed lost per second. 0 keeps the particle coasting. */
+    /** Deceleration rate: the speed decays exponentially, shedding roughly this fraction of it per second. 0 keeps the particle coasting. */
     public ScreenParticle drag(float drag) {
-        this.drag = drag;
+        this.drag = Math.max(0, drag);
         return this;
     }
 
@@ -72,7 +87,6 @@ public class ScreenParticle {
         return this;
     }
 
-    /** Side length in px, eased from birth to death. Pass the same value twice to keep it constant. */
     public ScreenParticle size(float start, float end) {
         this.startSize = start;
         this.endSize = end;
@@ -86,6 +100,15 @@ public class ScreenParticle {
     public ScreenParticle alpha(float start, float end) {
         this.startAlpha = start;
         this.endAlpha = end;
+        return this;
+    }
+
+    public ScreenParticle alpha(float alpha) {
+        return alpha(alpha, alpha);
+    }
+
+    public ScreenParticle fadeOut(float lifeFraction) {
+        this.fadeOutStart = Mth.clamp(lifeFraction, 0, 1);
         return this;
     }
 
@@ -113,7 +136,8 @@ public class ScreenParticle {
         if (this.age >= this.lifetime) return false;
         this.velocityY += this.gravity * dt;
         if (this.drag > 0) {
-            float kept = Math.max(0, 1 - this.drag * dt);
+            // exponential decay so the same drag decelerates the same amount regardless of frame rate
+            float kept = (float) Math.exp(-this.drag * dt);
             this.velocityX *= kept;
             this.velocityY *= kept;
         }
@@ -128,6 +152,9 @@ public class ScreenParticle {
         float size = Mth.lerp(t, this.startSize, this.endSize);
         if (size <= 0) return;
         float alpha = Mth.clamp(Mth.lerp(t, this.startAlpha, this.endAlpha), 0, 1);
+        if (t > this.fadeOutStart) {
+            alpha *= 1 - Mth.inverseLerp(t, this.fadeOutStart, 1);
+        }
         if (alpha <= 0) return;
 
         PoseStack pose = graphics.pose();
@@ -138,14 +165,20 @@ public class ScreenParticle {
         // nothing has to be rounded to whole pixels
         pose.scale(size, size, 1);
         pose.translate(-0.5f, -0.5f, 0);
-        if (this.sprite == null) {
+        if (this.sprites.isEmpty()) {
             graphics.fill(0, 0, 1, 1, FastColor.ARGB32.color(Mth.floor(alpha * 255), this.tint));
         } else {
             graphics.setColor(FastColor.ARGB32.red(this.tint) / 255f, FastColor.ARGB32.green(this.tint) / 255f,
                     FastColor.ARGB32.blue(this.tint) / 255f, alpha);
-            graphics.blitSprite(this.sprite, 0, 0, 1, 1);
+            graphics.blitSprite(this.currentFrame(t), 0, 0, 1, 1);
             graphics.setColor(1, 1, 1, 1);
         }
         pose.popPose();
+    }
+
+    private ResourceLocation currentFrame(float lifeFraction) {
+        int frames = this.sprites.size();
+        if (frames == 1) return this.sprites.getFirst();
+        return this.sprites.get(Mth.clamp(Mth.floor(lifeFraction * frames), 0, frames - 1));
     }
 }

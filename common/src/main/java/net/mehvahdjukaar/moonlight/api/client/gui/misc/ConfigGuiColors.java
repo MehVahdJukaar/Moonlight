@@ -17,7 +17,7 @@ public final class ConfigGuiColors {
     public static final int LABEL = chat(ChatFormatting.WHITE);        // primary label — MC white
     public static final int TEXT = chat(ChatFormatting.WHITE);         // editable field text
     public static final int TEXT_SECONDARY = chat(ChatFormatting.GRAY);         // editable field text
-    public static final int DESCRIPTION = 0xA8B0C0;                    // subtitles / secondary text — custom muted blue-gray (softer than MC gray)
+    public static final int DESCRIPTION =chat(ChatFormatting.GRAY);// 0xA8B0C0;                    // subtitles / secondary text — custom muted blue-gray (softer than MC gray)
     public static final int ERROR = chat(ChatFormatting.RED);          // invalid value — MC red
     public static final int TITLE = chat(ChatFormatting.GOLD);         // screen title — MC gold
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);    // unsaved edit — MC yellow, pops against the gold title
@@ -32,10 +32,10 @@ public final class ConfigGuiColors {
     public static final int TILE_ICON_BG = 0xFF303038;                  // backdrop of the letter tile standing in for a missing icon
 
     // ── breadcrumb / navigation ──
-    public static final int CRUMB = 0x8B93A5;                          // custom muted blue-gray
+    public static final int CRUMB = chat(ChatFormatting.GRAY);//0x8B93A5;                          // custom muted blue-gray
     public static final int CRUMB_HOVER = chat(ChatFormatting.WHITE);
     public static final int CRUMB_CURRENT = chat(ChatFormatting.YELLOW); // MC yellow — the page you're on
-    public static final int CRUMB_SEPARATOR = 0x565F70;                // custom faint separator
+    public static final int CRUMB_SEPARATOR = chat(ChatFormatting.DARK_GRAY);// 0x565F70;                // custom faint separator
 
     // ── syntax highlighting (JSON / SNBT editors) ──
     public static final int SYNTAX_DEFAULT = chat(ChatFormatting.WHITE);

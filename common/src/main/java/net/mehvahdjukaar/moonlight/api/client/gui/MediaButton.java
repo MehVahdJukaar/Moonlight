@@ -8,13 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-/**
- * @deprecated moved to {@link net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton}. Kept only as a
- * compatibility alias and scheduled for removal — use the {@code widget} class directly. It {@code extends} the new
- * class so the public sprite constants ({@code YOUTUBE}, {@code AKLIZ}, …) and the nested {@code MediaIcon}/
- * {@code ButtonType} enums stay accessible here, and every public factory method is re-declared below as a
- * deprecated delegator so existing source and compiled (binary) call sites against this class keep resolving.
- */
 @Deprecated(forRemoval = true)
 public class MediaButton extends net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton {
 

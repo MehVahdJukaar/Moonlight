@@ -9,12 +9,6 @@ import net.minecraft.network.chat.Component;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-/**
- * Renders a {@link ChatBubbleWidget} above a target widget each frame, without participating in layout or input.
- * <p>
- * Add to a screen via {@code screen::addRenderableOnly} when the bubble should follow another widget
- * and disappear when the supplied message is {@code null}.
- */
 public class PointingChatBubbleOverlay implements Renderable {
 
     private final AbstractWidget target;
