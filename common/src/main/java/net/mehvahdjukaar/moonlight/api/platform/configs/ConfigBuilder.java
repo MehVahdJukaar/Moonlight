@@ -146,7 +146,15 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Integer> define(String name, int defaultValue, int min, int max);
 
-    public abstract Supplier<Integer> defineColor(String name, int defaultValue);
+    public Supplier<Integer> defineColor(String name, int defaultValue) {
+        return defineColor(name, defaultValue, true);
+    }
+
+    /**
+     * Defines an integer color, edited as a hex field. With {@code hasAlpha} the value is an ARGB color
+     * ({@code #AARRGGBB}); without it alpha is dropped and the value is a plain RGB color ({@code #2A77EA}).
+     */
+    public abstract Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha);
 
     public abstract Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max);
 

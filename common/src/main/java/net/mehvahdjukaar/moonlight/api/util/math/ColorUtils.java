@@ -16,12 +16,24 @@ public final class ColorUtils {
 
     //utility codec that serializes either a string or an integer.
     //wrapped as an ARGB color SchemaCodec so codecui-driven editors render a color picker (serialization is unchanged)
-    public static final Codec<Integer> CODEC = SchemaCodecs.colorArgb(Codec.either(Codec.INT,
-            Codec.STRING.flatXmap(ColorUtils::isValidStringOrError, s -> isValidStringOrError(s)
-                    .map(ColorUtils::formatString))).xmap(
-            either -> either.map(integer -> integer, s -> Integer.parseUnsignedInt(s, 16)),
-            integer -> Either.right("#" + String.format("%08X", integer))
-    ));
+    public static final Codec<Integer> CODEC = SchemaCodecs.colorArgb(hexOrIntCodec(true));
+
+    /** RGB variant of {@link #CODEC}: alpha bits are dropped and colors serialize as {@code #RRGGBB}. */
+    public static final Codec<Integer> RGB_CODEC = SchemaCodecs.colorRgb(
+            hexOrIntCodec(false).xmap(i -> i & 0xFFFFFF, i -> i & 0xFFFFFF));
+
+    public static Codec<Integer> codec(boolean hasAlpha) {
+        return hasAlpha ? CODEC : RGB_CODEC;
+    }
+
+    private static Codec<Integer> hexOrIntCodec(boolean hasAlpha) {
+        return Codec.either(Codec.INT,
+                Codec.STRING.flatXmap(ColorUtils::isValidStringOrError, s -> isValidStringOrError(s)
+                        .map(ColorUtils::formatString))).xmap(
+                either -> either.map(integer -> integer, s -> Integer.parseUnsignedInt(s, 16)),
+                integer -> Either.right(toHexString(integer, hasAlpha))
+        );
+    }
 
     private static String formatString(String s) {
         return "#" + s.toUpperCase(Locale.ROOT);

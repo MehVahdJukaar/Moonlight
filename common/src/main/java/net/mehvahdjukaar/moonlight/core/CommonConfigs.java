@@ -99,6 +99,7 @@ public class CommonConfigs {
             builder.comment("A string field").define("test_string", "hello");
             builder.comment("A regex pattern with live syntax highlighting").defineRegex("test_regex", "\\d+(foo|bar)?");
             builder.comment("An ARGB color, edited as a hex field").defineColor("test_color", 0xFFFF5555);
+            builder.comment("An RGB color with no alpha channel").defineColor("test_color_no_alpha", 0x2A77EA, false);
 
             // comment declared AFTER its define: still ends up on the row (lenient ordering)
             builder.define("test_after_comment", false);

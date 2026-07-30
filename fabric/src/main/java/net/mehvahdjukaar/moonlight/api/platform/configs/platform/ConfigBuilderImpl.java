@@ -128,7 +128,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         boolean slider = v.isSlider();
         // ColorConfigValue extends IntConfigValue, so it must be checked first
         if (v instanceof ColorConfigValue c) {
-            return new ConfigOption.ColorValue(title, null, c, c.getDefaultValue());
+            return new ConfigOption.ColorValue(title, null, c, c.getDefaultValue(), c.hasAlpha());
         } else if (v instanceof IntConfigValue i) {
             return slider
                     ? new ConfigOption.IntSliderValue(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax())
@@ -235,8 +235,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<Integer> defineColor(String name, int defaultValue) {
-        var config = new ColorConfigValue(name, defaultValue, pendingMeta());
+    public Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha) {
+        var config = new ColorConfigValue(name, defaultValue, hasAlpha, pendingMeta());
         doAddConfig(name, config);
         return config;
     }

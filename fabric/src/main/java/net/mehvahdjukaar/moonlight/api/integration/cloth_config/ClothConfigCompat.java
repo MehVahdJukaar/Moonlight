@@ -69,8 +69,10 @@ public class ClothConfigCompat {
     private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, ConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
-            var e = builder.entryBuilder()
-                    .startAlphaColorField(col.getTranslation(), col.get())
+            var eb = builder.entryBuilder();
+            var e = (col.hasAlpha()
+                    ? eb.startAlphaColorField(col.getTranslation(), col.get())
+                    : eb.startColorField(col.getTranslation(), col.get()))
                     .setDefaultValue(col.getDefaultValue()) // Recommended: Used when user click "Reset"
                     .setSaveConsumer(col::set);// Recommended: Called when user save the config
             var description = col.getCommentComponent();

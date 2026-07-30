@@ -131,7 +131,7 @@ final class SchemaForm {
             }
             case Schema.Color c -> {
                 int rgb = asColor(seed, 0xFFFFFFFF);
-                var opt = new ConfigOption.ColorValue(title, null, new MemoryConfigValue<>(rgb), rgb);
+                var opt = new ConfigOption.ColorValue(title, null, new MemoryConfigValue<>(rgb), rgb, c.hasAlpha());
                 parent.add(opt);
                 yield s -> {
                     int col = s.current(opt);

@@ -88,14 +88,14 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.ColorValue.class, (o, s, onChange) -> {
-            ColorFieldWidget w = new ColorFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o),
+            ColorFieldWidget w = new ColorFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o), o.hasAlpha,
                     c -> {
                         s.put(o, c);
                         onChange.run();
                     },
                     // clicking the swatch opens the color picker page; on Done it writes the picked color back
                     currentColor -> Minecraft.getInstance().setScreen(
-                            new ColorPickerScreen(currentColor, Minecraft.getInstance().screen, picked -> {
+                            new ColorPickerScreen(currentColor, o.hasAlpha, Minecraft.getInstance().screen, picked -> {
                                 s.put(o, picked);
                                 onChange.run();
                             })));

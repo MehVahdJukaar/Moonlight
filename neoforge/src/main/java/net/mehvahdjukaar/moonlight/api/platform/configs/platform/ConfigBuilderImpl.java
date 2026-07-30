@@ -214,13 +214,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<Integer> defineColor(String name, int defaultValue) {
+    public Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha) {
         addTranslationsAndComments(name);
-        String def = (String) ColorUtils.CODEC.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
+        Codec<Integer> codec = ColorUtils.codec(hasAlpha);
+        String def = (String) codec.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
-        var w = track(ValueWrapper.fromString(value, ColorUtils.CODEC, pendingMeta()));
-        ui(name, new ConfigOption.ColorValue(uiTitle(name), uiDescription(name), w, defaultValue));
+        var w = track(ValueWrapper.fromString(value, codec, pendingMeta()));
+        ui(name, new ConfigOption.ColorValue(uiTitle(name), uiDescription(name), w, defaultValue, hasAlpha));
         return w;
     }
 

@@ -75,10 +75,12 @@ public class YACLCompat {
     private static Option<?> buildEntry(ConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
+            boolean hasAlpha = col.hasAlpha();
             var e = Option.<Color>createBuilder()
                     .name(col.getTranslation())
-                    .binding(new Color(col.getDefaultValue()), () -> new Color(col.get()), v -> col.set(v.getRGB()))
-                    .controller(ColorControllerBuilder::create);
+                    .binding(new Color(col.getDefaultValue(), hasAlpha), () -> new Color(col.get(), hasAlpha),
+                            v -> col.set(hasAlpha ? v.getRGB() : v.getRGB() & 0xFFFFFF))
+                    .controller(o -> ColorControllerBuilder.create(o).allowAlpha(hasAlpha));
             var description = col.getCommentComponent();
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option

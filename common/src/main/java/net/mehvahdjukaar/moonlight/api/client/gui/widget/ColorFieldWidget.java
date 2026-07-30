@@ -19,7 +19,8 @@ import java.util.function.Consumer;
 /**
  * A color input control: a hex field ({@code #AARRGGBB}) plus a {@link ColorSwatchWidget}. Editing the hex reports
  * the new ARGB color through {@code onChange}; if an {@code onSwatchClick} action is given the swatch becomes a
- * button (typically opening a {@link ColorPickerScreen}), otherwise it is a passive preview. Colors are ARGB ints.
+ * button (typically opening a {@link ColorPickerScreen}), otherwise it is a passive preview. Colors are ARGB ints,
+ * unless {@code hasAlpha} is false: then alpha is dropped and colors are plain RGB ({@code #RRGGBB}).
  */
 public class ColorFieldWidget extends CompositeWidget {
 
@@ -27,24 +28,31 @@ public class ColorFieldWidget extends CompositeWidget {
 
     private final EditBox hexBox;
     private final ColorSwatchWidget swatch;
+    private final boolean hasAlpha;
     private int color;
     private final List<AbstractWidget> children;
 
     public ColorFieldWidget(int width, int height, int initial, Consumer<Integer> onChange, @Nullable Consumer<Integer> onSwatchClick) {
+        this(width, height, initial, true, onChange, onSwatchClick);
+    }
+
+    public ColorFieldWidget(int width, int height, int initial, boolean hasAlpha,
+                            Consumer<Integer> onChange, @Nullable Consumer<Integer> onSwatchClick) {
         super(0, 0, width, height, Component.empty());
-        this.color = initial;
+        this.hasAlpha = hasAlpha;
+        this.color = sanitize(initial);
 
         Font font = Minecraft.getInstance().font;
         int swatchSize = height;
         this.hexBox = new EditBox(font, 0, 0, width - swatchSize - GAP, height, Component.empty());
-        this.hexBox.setMaxLength(9);
-        this.hexBox.setValue(ColorUtils.toHexString(initial));
-        this.swatch = new ColorSwatchWidget(swatchSize, height, initial, onSwatchClick);
+        this.hexBox.setMaxLength(hasAlpha ? 9 : 7);
+        this.hexBox.setValue(ColorUtils.toHexString(color, hasAlpha));
+        this.swatch = new ColorSwatchWidget(swatchSize, height, opaqueIfNeeded(color), onSwatchClick);
         this.hexBox.setResponder(str -> {
             try {
-                int c = ColorUtils.parseHex(str);
+                int c = sanitize(ColorUtils.parseHex(str));
                 this.color = c;
-                this.swatch.setColor(c);
+                this.swatch.setColor(opaqueIfNeeded(c));
                 this.hexBox.setTextColor(ConfigGuiColors.TEXT);
                 onChange.accept(c);
             } catch (Exception e) {
@@ -54,11 +62,20 @@ public class ColorFieldWidget extends CompositeWidget {
         this.children = List.of(hexBox, swatch);
     }
 
+    private int sanitize(int c) {
+        return hasAlpha ? c : c & 0xFFFFFF;
+    }
+
+    // an alpha-less color has zeroed alpha bits, so the preview has to force it opaque to show anything
+    private int opaqueIfNeeded(int c) {
+        return hasAlpha ? c : c | 0xFF000000;
+    }
+
     /** Pushes a color into the field and swatch (e.g. from an external reset). */
     public void setColor(int c) {
-        this.color = c;
-        this.hexBox.setValue(ColorUtils.toHexString(c));
-        this.swatch.setColor(c);
+        this.color = sanitize(c);
+        this.hexBox.setValue(ColorUtils.toHexString(color, hasAlpha));
+        this.swatch.setColor(opaqueIfNeeded(color));
     }
 
     public int getColor() {

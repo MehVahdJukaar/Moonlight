@@ -18,7 +18,8 @@ import java.util.function.Consumer;
  * A standalone color picker screen: a saturation/value square with a hue slider beside it and an alpha slider
  * below, plus a hex field and live preview underneath (a {@link ColorFieldWidget} whose swatch is a passive preview).
  * On Done it hands the chosen ARGB color back through {@code onApply} and returns to {@code parent}; on Cancel it
- * just returns to {@code parent}. Colors are ARGB ints.
+ * just returns to {@code parent}. Colors are ARGB ints; with {@code hasAlpha} false the alpha slider is hidden and
+ * colors are plain RGB.
  */
 public class ColorPickerScreen extends Screen {
 
@@ -28,6 +29,7 @@ public class ColorPickerScreen extends Screen {
 
     private final Screen parent;
     private final Consumer<Integer> onApply;
+    private final boolean hasAlpha;
 
     private float hue, sat, val, alpha; // all 0..1
 
@@ -41,14 +43,19 @@ public class ColorPickerScreen extends Screen {
     private static final int DRAG_NONE = 0, DRAG_SV = 1, DRAG_HUE = 2, DRAG_ALPHA = 3;
 
     public ColorPickerScreen(int color, Screen parent, Consumer<Integer> onApply) {
+        this(color, true, parent, onApply);
+    }
+
+    public ColorPickerScreen(int color, boolean hasAlpha, Screen parent, Consumer<Integer> onApply) {
         super(Component.translatable("gui.moonlight.config.color_picker"));
         this.parent = parent;
         this.onApply = onApply;
+        this.hasAlpha = hasAlpha;
         float[] hsv = ColorUtils.argbToHsv(color);
         this.hue = hsv[0];
         this.sat = hsv[1];
         this.val = hsv[2];
-        this.alpha = FastColor.ARGB32.alpha(color) / 255f;
+        this.alpha = hasAlpha ? FastColor.ARGB32.alpha(color) / 255f : 1;
     }
 
     @Override
@@ -56,7 +63,7 @@ public class ColorPickerScreen extends Screen {
         int cx = this.width / 2;
         this.svSize = 120;
         this.hueW = 14;
-        this.alphaH = 12;
+        this.alphaH = hasAlpha ? 12 : 0;
 
         // one centered block: [SV square | hue bar] with the alpha bar and the hex+preview control stacked under it
         int blockW = svSize + GAP + hueW;
@@ -75,7 +82,7 @@ public class ColorPickerScreen extends Screen {
         this.alphaY = svY + svSize + 10;
         this.alphaW = blockW;
 
-        this.control = new ColorFieldWidget(blockW, CONTROL_HEIGHT, currentColor(), this::onControlColorChanged, null);
+        this.control = new ColorFieldWidget(blockW, CONTROL_HEIGHT, currentColor(), hasAlpha, this::onControlColorChanged, null);
         this.control.setPosition(blockX, alphaY + alphaH + 12);
         this.addRenderableWidget(this.control);
 
@@ -95,7 +102,8 @@ public class ColorPickerScreen extends Screen {
     // ===== value helpers =====
 
     private int currentColor() {
-        return ColorUtils.hsvToArgb(hue, sat, val, Math.round(alpha * 255));
+        int argb = ColorUtils.hsvToArgb(hue, sat, val, Math.round(alpha * 255));
+        return hasAlpha ? argb : argb & 0xFFFFFF;
     }
 
     /** Pushes the current color into the hex+preview control (after a drag). */
@@ -112,7 +120,7 @@ public class ColorPickerScreen extends Screen {
         this.hue = hsv[0];
         this.sat = hsv[1];
         this.val = hsv[2];
-        this.alpha = FastColor.ARGB32.alpha(c) / 255f;
+        if (hasAlpha) this.alpha = FastColor.ARGB32.alpha(c) / 255f;
     }
 
     // ===== input =====
@@ -177,7 +185,7 @@ public class ColorPickerScreen extends Screen {
 
         renderSvSquare(graphics);
         renderHueBar(graphics);
-        renderAlphaBar(graphics);
+        if (hasAlpha) renderAlphaBar(graphics);
     }
 
     private void renderSvSquare(GuiGraphics graphics) {

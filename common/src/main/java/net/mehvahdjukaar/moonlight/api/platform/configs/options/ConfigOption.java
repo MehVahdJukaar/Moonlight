@@ -250,8 +250,17 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class ColorValue extends SimpleConfigOption<Integer> {
+        /** When false the color has no alpha channel: it's edited and stored as plain RGB. */
+        public final boolean hasAlpha;
+
         public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {
+            this(title, description, handle, defaultValue, true);
+        }
+
+        public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle,
+                          Integer defaultValue, boolean hasAlpha) {
             super(title, description, handle, defaultValue);
+            this.hasAlpha = hasAlpha;
         }
     }
 
