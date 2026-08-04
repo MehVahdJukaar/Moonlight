@@ -4,7 +4,7 @@ plugins {
     id("com.possible-triangle.fabric") apply false
     id("com.possible-triangle.neoforge") apply false
     id("net.mehvahdjukaar.candlelight") version "1.2.6" apply false
-    id("dev.mixinmcp.decompile") version "1.3.0" apply false
+    id("dev.mixinmcp.decompile") version "1.4.0" apply false
 }
 
 mod {

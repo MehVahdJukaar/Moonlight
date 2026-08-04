@@ -16,6 +16,11 @@ public class NetworkHelperImplClient {
                 (message, context) -> message.handle(new ContextWrapper(context)));
     }
 
+    public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
+        // The marker is the only half of an optional payload the server advertises; see PresenceMarker.
+        return ClientPlayNetworking.canSend(PresenceMarker.idOf(type));
+    }
+
     public record ContextWrapper(ClientPlayNetworking.Context c) implements Message.Context {
 
         @Override

@@ -8,11 +8,8 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -32,8 +29,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -44,12 +39,13 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
 import org.jetbrains.annotations.Nullable;
@@ -330,7 +326,7 @@ public class ClientHelperImpl {
                                         false
                                 ));
                     } catch (Exception ee) {
-                        if (!DatagenModLoader.isRunningDataGen()){
+                        if (!DatagenModLoader.isRunningDataGen()) {
                             Moonlight.LOGGER.error("Failed to load optional texture pack: {}", folderName, ee);
                         }
                     }
@@ -383,6 +379,16 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
         Consumer<RegisterMenuScreensEvent> eventConsumer = event -> {
             eventListener.accept(event::register);
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void addClientLoginCallback(Runnable callback) {
+        Moonlight.assertInitPhase();
+        Consumer<PlayerEvent.PlayerLoggedInEvent> eventConsumer = event -> {
+            if (event.getEntity().level().isClientSide()) {
+                callback.run();
+            }
         };
         getCurrentBus().addListener(eventConsumer);
     }

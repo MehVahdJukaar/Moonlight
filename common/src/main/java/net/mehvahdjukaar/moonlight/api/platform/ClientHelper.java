@@ -105,11 +105,6 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /**
-     * Runs each time the client finishes joining a world or server. The connection is live by then, so this is
-     * where to look at anything that depends on the server, such as
-     * {@link net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper#serverHasChannel}.
-     */
     @PlatformImpl
     public static void addClientLoginCallback(Runnable callback) {
         throw new AssertionError();

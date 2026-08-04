@@ -50,6 +50,16 @@ public class NetworkHelperImpl {
             }
 
             @Override
+            public <M extends Message> void registerClientBoundOptional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
+                this.registerClientBound(messageType);
+
+                NetworkHelper.markOptional(messageType.type());
+                // Fabric never denies a connection over a missing channel, so nothing else is needed to make
+                // the payload optional. This is only so clients can see that the server has it.
+                PresenceMarker.register(messageType.type());
+            }
+
+            @Override
             public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                 this.registerServerBound(messageType);
                 this.registerClientBound(messageType);
@@ -82,7 +92,20 @@ public class NetworkHelperImpl {
     }
 
 
+    public static boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return ServerPlayNetworking.canSend(player, type);
+    }
+
+    public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
+        if (!PlatHelper.getPhysicalSide().isClient()) return false;
+        return NetworkHelperImplClient.serverHasChannel(type);
+    }
+
     public static void sendToClientPlayer(ServerPlayer serverPlayer, CustomPacketPayload message) {
+        // An optional payload is one the receiver is allowed not to have; only then is the check worth its
+        // cost, and only then can it be false for a player who is properly connected.
+        if (NetworkHelper.isOptional(message.type()) && !canSendToPlayer(serverPlayer, message.type())) return;
+
         ServerPlayNetworking.send(serverPlayer, message);
     }
 
