@@ -271,6 +271,12 @@ public class ClientHelperImpl {
         addClientSetup(clientSetup);
     }
 
+    public static void addClientLoginCallback(Runnable callback) {
+        Moonlight.assertInitPhase();
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> callback.run());
+    }
+
 
     public static void registerFluidRenderType(Fluid fluid, RenderType type) {
         BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);
