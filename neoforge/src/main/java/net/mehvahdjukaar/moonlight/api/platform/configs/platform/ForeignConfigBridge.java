@@ -45,9 +45,7 @@ public final class ForeignConfigBridge {
         return MoonlightConfigSelectScreen.create(modId, holders, parent, background);
     }
 
-    /**
-     * Cheap check (no tree building) for whether this mod exposes at least one loaded, non-Moonlight {@link ModConfigSpec}.
-     */
+    // cheap check, no tree building: does this mod expose a loaded, non-Moonlight spec?
     public static boolean hasConfig(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
@@ -134,7 +132,7 @@ public final class ForeignConfigBridge {
             return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
         }
         if (sample instanceof Long l) {
-            // Moonlight has no long control: present it as an int when the range fits, else leave it uneditable
+            // no long control: present it as an int when the range fits, else leave it uneditable
             long[] r = longRange(vs);
             if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
                 return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
@@ -159,7 +157,7 @@ public final class ForeignConfigBridge {
         return ValueWrapper.simple((ModConfigSpec.ConfigValue) cv, meta);
     }
 
-    // adapts a long-backed value to the int control, clamping is the caller's job (range already checked to fit int)
+    // adapts a long-backed value to the int control; the range was already checked to fit
     private static IConfigValue<Integer> longAsInt(ModConfigSpec.ConfigValue<?> cvRaw, ConfigMetadata meta) {
         ModConfigSpec.ConfigValue<Long> cv = (ModConfigSpec.ConfigValue<Long>) cvRaw;
         return new IConfigValue<>() {

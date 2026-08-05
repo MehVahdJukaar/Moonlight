@@ -202,9 +202,7 @@ public class DiscoverModsScreen extends Screen {
         }
     }
 
-    /**
-     * No icon yet (missing, still downloading, or failed): a dark tile with the mod's initial, dimmed if not installed.
-     */
+    // no icon yet (missing, downloading or failed): a dark tile with the mod's initial, dimmed if not installed
     private void renderFallbackIcon(GuiGraphics graphics, Row row, int iconX, int iconY, boolean installed) {
         GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, ICON_SIZE,
                 installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B, installed ? ConfigGuiColors.CATEGORY : DESC_MISSING, GEAR_ICON);

@@ -37,7 +37,7 @@ class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
         return this.rowWidth;
     }
 
-    /** Narrows the rows below {@link ConfigScreenLayout#ROW_WIDTH}, for lists that live in a pane instead of the screen. */
+    // narrows the rows, for lists that live in a pane instead of the whole screen
     void setRowWidth(int rowWidth) {
         this.rowWidth = rowWidth;
     }
@@ -47,22 +47,20 @@ class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
         return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
     }
 
-    /**
-     * Blank space above the first row, which is how the rows get vertically centered in a pane taller than they need.
-     * Uses the (unused) list header, so row hit-testing and scrolling stay in sync with it for free.
-     */
+    // Blank space above the first row, used to vertically center them in a taller pane. Rides on the otherwise unused
+    // list header, so hit-testing and scrolling stay in sync for free
     void setTopPadding(int padding) {
         this.setRenderHeader(padding > 0, Math.max(0, padding));
     }
 
-    /** Off when the screen draws its own full-width separator instead (the split layout). */
+    // off when the screen draws its own full-width separator instead (the split layout)
     void setDrawFooterSeparator(boolean draw) {
         this.drawFooterSeparator = draw;
     }
 
     @Override
     protected void renderListSeparators(GuiGraphics graphics) {
-        // the top separator is owned by the screen's header bar (drawn in renderBackground); only draw the footer one
+        // the top separator is owned by the screen's header bar, so only draw the footer one
         if (!this.drawFooterSeparator) return;
         ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
         RenderSystem.enableBlend();

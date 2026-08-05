@@ -13,6 +13,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -26,11 +27,8 @@ import java.util.stream.Stream;
 
 /**
  * An editable leaf config value in the loader independent screen model. Most kinds are backed by a single writable
- * value of the same type {@code T} and so extend {@link SimpleConfigOption}; the compound kinds (range/vec3/json) sit on
- * top of several backing leaves and extend this class directly, implementing {@link #get()}/{@link #apply}/
- * {@link #backingMeta()} from those leaves. This is the single loader independent bridge the whole screen is built on.
- *
- * @param <T> the value type
+ * value of the same type and extend {@link SimpleConfigOption}; the compound kinds (range/vec3/json) sit on top of
+ * several backing leaves and extend this class directly.
  */
 public abstract class ConfigOption<T> extends ConfigNode {
 
@@ -42,9 +40,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     /**
-     * How a change to this value takes effect (drives the reload/restart icon on its screen row). Derived from the
-     * backing leaf value(s), which are the source of truth: a grouped row (range/vec3) reports the highest-severity
-     * reload among its members — the aggregate of the bunch wins.
+     * How a change to this value takes effect. A grouped row (range/vec3) reports the highest severity among its
+     * backing leaves.
      */
     public ConfigReloadType reloadType() {
         return backingMeta()
@@ -53,35 +50,30 @@ public abstract class ConfigOption<T> extends ConfigNode {
                 .orElse(ConfigReloadType.NONE);
     }
 
-    /** The backing leaf value(s), read for their change metadata: one for a leaf row, several for a grouped one. */
+    /** The backing leaf value(s): one for a leaf row, several for a grouped one. */
     protected abstract Stream<IConfigValue<?>> backingMeta();
 
-    /** Picks the {@link IConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
+    // handles may be synthetic suppliers, so only the real leaves are kept
     protected static Stream<IConfigValue<?>> metaOf(Supplier<?>... handles) {
         return Arrays.stream(handles)
                 .filter(h -> h instanceof IConfigValue)
                 .map(h -> (IConfigValue<?>) h);
     }
 
-    /**
-     * The currently saved value.
-     */
+    /** The currently saved value. */
     public abstract T get();
 
     public T defaultValue() {
         return defaultValue;
     }
 
-    /**
-     * Writes the given (already validated) value back to the underlying config and saves it.
-     */
+    /** Writes the given (already validated) value back to the underlying config and saves it. */
     public abstract void apply(ModConfigHolder holder, Object value);
 
     /**
-     * The common case: an option backed by a single writable leaf of the same type {@code T}. Reading, writing and
-     * change metadata all go straight through that one {@link IConfigValue} — the very object {@code define(...)}
-     * returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge). The compound kinds instead sit on
-     * top of several leaves and extend {@link ConfigOption} directly.
+     * An option backed by a single writable leaf of the same type. Reading, writing and change metadata all go
+     * straight through the object {@code define(...)} returned (a {@code ConfigValue} on Fabric, a
+     * {@code ValueWrapper} on NeoForge).
      */
     public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
@@ -97,9 +89,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
             return handle.get();
         }
 
-        /**
-         * The cast is safe because {@code value} always originates from a control bound to this entry.
-         */
+        // cast is safe: value always originates from a control bound to this entry
         @Override
         @SuppressWarnings("unchecked")
         public void apply(ModConfigHolder holder, Object value) {
@@ -115,9 +105,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
     // ===== concrete value kinds =====
 
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // a "feature" boolean renders as the ✓/✗ toggle (with its icon drawn next to the symbol) instead of the
-        // plain ON/OFF button; set by ConfigBuilder.feature(...). A category's enabled gate is also drawn this way,
-        // but keyed off the owning category's gate() rather than this flag.
+        // a "feature" boolean renders as the ✓/✗ toggle instead of the plain ON/OFF button. A category gate is drawn
+        // the same way but keyed off the owning category's gate() rather than this flag
         private boolean feature;
 
         public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
@@ -128,7 +117,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
             return feature;
         }
 
-        @org.jetbrains.annotations.ApiStatus.Internal
+        @ApiStatus.Internal
         public void setFeature(boolean feature) {
             this.feature = feature;
         }
@@ -145,10 +134,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * An int drawn as a slider instead of a text field. The type itself is the "draw me as a slider" signal:
-     * the control registry keys on the exact class, so no separate style flag is needed.
-     */
+    /** An int drawn as a slider instead of a text field. The control registry keys on the exact class. */
     public static class IntSliderValue extends IntValue {
         public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
@@ -297,11 +283,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A {@link Vec3} value: three backing double config values ({@code x}/{@code y}/{@code z}) presented and edited
-     * as one row of number fields. {@code min}/{@code max} are the shared accepted bounds of each component.
-     * Like {@link RangeValue}, writing goes through all three handles at once.
-     */
+    /** Three backing double values presented as one row of number fields. Bounds are shared by all components. */
     public static class Vec3Value extends ConfigOption<Vec3> {
         public final Supplier<Double> xHandle;
         public final Supplier<Double> yHandle;
@@ -338,10 +320,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A {@link Vec3i} value: three backing int config values ({@code x}/{@code y}/{@code z}) presented and edited as
-     * one row of number fields. The integer counterpart of {@link Vec3Value}.
-     */
+    /** Integer counterpart of {@link Vec3Value}. */
     public static class Vec3iValue extends ConfigOption<Vec3i> {
         public final Supplier<Integer> xHandle;
         public final Supplier<Integer> yHandle;
@@ -379,9 +358,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     /**
-     * A list of strings, edited on a dedicated add/remove page. {@code entryValidator}, when present, marks
-     * individual entries valid/invalid in the editor. When {@code options} is present each entry is picked with a
-     * dropdown (with an optional {@code icon}, as in {@link DropdownValue}) instead of typed as free text.
+     * A list of strings, edited on a dedicated add/remove page. With {@code options} present each entry is picked
+     * from a dropdown instead of typed as free text.
      */
     public static class ListValue extends SimpleConfigOption<List<String>> {
         @Nullable
@@ -411,17 +389,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     /**
-     * A JSON-backed value (raw json or a reflection-serialized bean), edited as pretty-printed JSON text on a
-     * dedicated page. The screen edits it as a {@code String}; {@link #apply} parses that string back into a
-     * {@link JsonElement} and writes it through the underlying {@code Supplier<JsonElement>} handle. Both loaders
-     * expose such a handle, so this stays loader independent.
+     * A JSON-backed value (raw json or a reflection-serialized bean), edited as pretty-printed text on a dedicated
+     * page. The screen sees a {@code String}; {@link #apply} parses it back into a {@link JsonElement}.
      */
     public static class JsonValue extends ConfigOption<String> {
         public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
         private final Supplier<JsonElement> json;
 
-        // handle/default stay lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
+        // stays lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
             super(title, description, null);
             this.json = json;
@@ -444,18 +420,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         @Override
         protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
+            return metaOf(json);
         }
     }
 
     /**
-     * A codec-backed object value that <em>can</em> be edited, because it carries a {@link SchemaCodec}: its screen row
-     * opens a form generated from the schema (see {@code SchemaEditScreen}) instead of the "edit manually" placeholder.
-     * Reading/writing/change-metadata go straight through the one object leaf {@code define} returned (an
-     * {@code ObjectConfigValue} on Fabric, a codec {@code ValueWrapper}/{@code ConfigObject} on NeoForge), so the wire
-     * format is unchanged. The default is kept lazy: the object may reference things not registered when the config is built.
-     *
-     * @param <T> the object type
+     * A codec-backed object value that can be edited, since it carries a {@link SchemaCodec}: its row opens a form
+     * generated from the schema instead of the "edit manually" placeholder. The wire format is unchanged.
      */
     public static class SchemaValue<T> extends ConfigOption<T> {
         private final IConfigValue<T> handle;
@@ -470,7 +441,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
             this.codec = codec;
         }
 
-        /** The declared edit surface the form is generated from. */
         public Schema<T> schema() {
             return codec.schema();
         }
@@ -497,10 +467,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A value the screen can't yet edit (codec objects). Shown as a disabled placeholder row telling the user to
-     * edit the file manually.
-     */
+    /** A value the screen can't edit. Shown as a disabled row telling the user to edit the file manually. */
     public static class UnsupportedValue extends ConfigOption<Object> {
         private final Supplier<Object> handle;
 

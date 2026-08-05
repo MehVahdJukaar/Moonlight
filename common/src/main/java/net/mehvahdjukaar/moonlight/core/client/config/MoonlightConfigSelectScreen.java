@@ -27,10 +27,8 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * The screen listing one mod's config files. Laid out as two panes: the mod's identity on the left (icon, authors,
- * license) and the config list on the right, with an item carousel band above the footer.
- */
+// The screen listing one mod's config files. Two panes: the mod's identity on the left (icon, authors, license) and
+// the config list on the right, with an item carousel band above the footer.
 public class MoonlightConfigSelectScreen extends Screen {
 
     private static final int STRIP = 20;       // carousel strip under the mod icon
@@ -74,12 +72,11 @@ public class MoonlightConfigSelectScreen extends Screen {
         return create(modId, configsOf(modId), parent, background);
     }
 
-    /** Same as {@link #create(String, Screen, ResourceLocation)} but over an explicit holder list (e.g. the foreign-config bridge, whose holders aren't globally tracked). */
+    // over an explicit holder list, for holders that aren't globally tracked (the foreign-config bridge)
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
-        // a lone config doesn't need a list to pick from, unless someone registered an overlay or a showcase that
-        // would be lost along with it
+        // a lone config doesn't need a list to pick from, unless an overlay or showcase would be lost along with it
         if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
                 && ConfigScreenExtensions.showcaseFor(modId) == null) {
             return holders.getFirst().makeScreen(parent, background);
@@ -97,7 +94,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.customShowcase = showcase != null;
         boolean showcaseTakesCarousel = showcase != null && showcase.replacesCarousel();
         if (showcase != null) {
-            // the mod brought its own thing to put here, so the icon isn't drawn. the carousel goes too unless the
+            // the mod brought its own thing to put here, so the icon isn't drawn. The carousel goes too unless the
             // showcase asked to only fill the icon square
             AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
                     this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? STRIP + 4 : 0));
@@ -131,7 +128,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.list.setRows(rows);
         this.addRenderableWidget(this.list);
 
-        // bottom bar: Back flanked by the author's media links (matches the Configured integration screen)
+        // Back flanked by the author's media links, matching the Configured integration screen
         MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
                 this.width / 2, this.height - 28, 22, modId, this::onClose);
         // bottom-left: icon-only jump to the mods hub grid
@@ -139,7 +136,7 @@ public class MoonlightConfigSelectScreen extends Screen {
                 b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))));
     }
 
-    /** Bottom of the two panes. */
+    // bottom of the two panes
     private int contentBottom() {
         return this.height - FOOTER;
     }
@@ -165,7 +162,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         renderLeftPane(graphics);
     }
 
-    /** The mod's identity pane: icon on top, authors under it, on the same flat background as the header. */
+    // the mod's identity pane: icon on top, authors under it, on the same flat background as the header
     private void renderLeftPane(GuiGraphics graphics) {
         int bottom = this.contentBottom();
         GuiHelper.renderMenuBand(graphics, 0, HEADER, this.leftPaneWidth, bottom - HEADER);
@@ -183,8 +180,7 @@ public class MoonlightConfigSelectScreen extends Screen {
                         ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, CONFIG_ICON);
             }
         }
-        // whatever fills the block above (the carousel, or a mod's showcase) is a widget, so it draws itself into the
-        // gap this leaves
+        // whatever fills the block above (carousel or mod showcase) is a widget, so it draws itself into this gap
         int y = this.identityBottom + 8;
 
         if (this.authors.isEmpty()) return;

@@ -31,21 +31,16 @@ import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-/**
- * A schema-driven form editor for a single codec-backed config value ({@link ConfigOption.SchemaValue}). A CodecUI
- * {@link net.mehvahdjukaar.codecui.Schema} is converted (by {@link SchemaForm}) into the same
- * {@link ConfigCategory}/{@link ConfigOption} tree the main config screen renders, and this screen drives it with the
- * exact same rows ({@code OptionRow}/{@code CategoryRow}), controls ({@link ConfigControllers}) and edit session — so a
- * generated form looks and behaves identically to a hand-written config page, with no bespoke widget code.
- *
- * <p>All working edits live in a private {@link ConfigEditSession} (holder-less: nothing here writes to disk) shared
- * across the sub-category navigation stack. Only the root page commits: on <em>Done</em> the form's JSON is reassembled
- * from the session, decoded through the codec, and — if valid — handed back to the outer config screen; sub-record
- * pages just navigate. Follows the "edit on a sub page, hand the result back on Done" shape of {@code JsonEditScreen}.</p>
- */
+// A schema-driven form editor for a single codec-backed config value. SchemaForm converts the schema into the same
+// category/option tree the main config screen renders, and this drives it with the exact same rows, controls and edit
+// session, so a generated form behaves identically to a hand-written config page.
+//
+// Working edits live in a private holder-less ConfigEditSession shared across the sub-category navigation stack;
+// nothing here writes to disk. Only the root page commits: on Done the form's JSON is reassembled from the session,
+// decoded through the codec and, if valid, handed back to the outer config screen. Sub-record pages just navigate.
 public class SchemaEditScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
-    /** Shared state across the whole sub-category navigation stack of one editing visit. */
+    // shared across the whole sub-category navigation stack of one editing visit
     private record State(ConfigEditSession session, SchemaForm.Reader reader, Codec<?> codec, Consumer<Object> onDone) {}
 
     private final State state;
@@ -60,10 +55,7 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     @Nullable
     private Component error;
 
-    /**
-     * Opens the editor for a schema-backed config value. The current working value comes from {@code outerSession}; on
-     * Done the decoded object is staged back into it (and {@code onChange} fired), exactly like any other control.
-     */
+    // the current working value comes from outerSession; on Done the decoded object is staged back into it
     public static <T> Screen create(ConfigOption.SchemaValue<T> option, ConfigEditSession outerSession, Runnable onChange) {
         Screen parent = Minecraft.getInstance().screen;
         SchemaCodec<T> codec = option.codec;
@@ -149,8 +141,8 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
     protected void init() {
         this.overlay.clear();
         SchemaForm.ListCategory listCategory = listCategory();
-        // a list page needs a second button row above the usual one for "add entry". +24 keeps the gap between the
-        // list and the topmost button identical to every other config screen (8px)
+        // a list page needs a second button row for "add entry". +24 keeps the gap between the list and the topmost
+        // button at the usual 8px
         int footer = listCategory != null ? FOOTER + 24 : FOOTER;
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
         populate();
@@ -226,11 +218,8 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         rebuild(cat, values);
     }
 
-    /**
-     * Adding or removing an entry changes the page's row set, so the list node is rebuilt from the JSON its entries
-     * currently hold and the rows regenerated in place. The rows own no state the node doesn't (each was seeded from,
-     * and reads back to, that JSON), so a rebuild round-trips every edit made so far.
-     */
+    // Adding or removing an entry changes the page's row set, so the node is rebuilt from the JSON its entries hold
+    // and the rows regenerated. Rows own no state the node doesn't, so this round-trips every edit made so far
     private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
         double scroll = this.list.getScrollAmount();
         cat.setEntries(values);
@@ -241,7 +230,7 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         onValueEdited();
     }
 
-    /** Reassembles the form's JSON, decodes it through the codec and, if valid, hands the value back and closes. */
+    // reassembles the form's JSON, decodes it and, if valid, hands the value back and closes
     private void commit() {
         JsonElement json = state.reader.read(state.session);
         DataResult<?> result = state.codec.parse(JsonOps.INSTANCE, json);
@@ -257,7 +246,7 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
 
     @Override
     public void onClose() {
-        // sub-page: go back up (edits stay in the shared session). root: leave without committing (cancel).
+        // sub-page: go back up, edits stay in the shared session. Root: leave without committing
         this.minecraft.setScreen(isRoot() ? state.session.returnScreen() : parentPage);
     }
 

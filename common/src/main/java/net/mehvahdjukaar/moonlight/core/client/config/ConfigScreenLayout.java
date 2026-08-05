@@ -9,13 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Shared sizing/color constants and small drawing helpers for the config screen widgets. Kept in one place so the
- * screen, list, rows and control providers all agree on the grid.
- */
+// Shared sizing constants and drawing helpers for the config screen widgets, in one place so the screen, list, rows
+// and control providers all agree on the grid.
 final class ConfigScreenLayout {
 
-    /** Left-aligned single-line text hard-clipped (scissored) to {@code [minX, maxX]} — used for row subtitles. */
+    // left-aligned single-line text hard-clipped to [minX, maxX], for row subtitles
     static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
         graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
         graphics.drawString(font, text, minX, y, color);
@@ -41,7 +39,7 @@ final class ConfigScreenLayout {
     static final ResourceLocation SECTION_COLLAPSED_ICON = Moonlight.res("widget/section_collapsed");
     static final ResourceLocation SECTION_EXPANDED_ICON = Moonlight.res("widget/section_expanded");
 
-    /** The reload/restart hint sprite for a value, or null when it applies immediately. */
+    // the reload/restart hint sprite for a value, or null when it applies immediately
     @Nullable
     static ResourceLocation reloadIcon(ConfigReloadType type) {
         return switch (type) {
@@ -51,7 +49,7 @@ final class ConfigScreenLayout {
         };
     }
 
-    /** The paper "config file" sprite for a config's type, distinguishing client / server-synced / common. */
+    // the paper "config file" sprite for a config's type: client, server-synced or common
     static ResourceLocation configFileIcon(ConfigType type) {
         return switch (type) {
             case CLIENT -> CLIENT_CONFIG_ICON;
@@ -75,5 +73,5 @@ final class ConfigScreenLayout {
 
     static final int DESC_LINES_PER_ROW = 2;
 
-    // Colors are NOT redeclared here: reference net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors directly.
+    // colors live in ConfigGuiColors, not here
 }

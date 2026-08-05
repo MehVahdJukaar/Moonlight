@@ -32,36 +32,28 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-/**
- * Turns a CodecUI {@link Schema} into the very same {@link ConfigCategory}/{@link ConfigOption} tree the native config
- * screen already renders, so {@link SchemaEditScreen} can reuse every existing widget (booleans, sliders, colour
- * pickers, dropdowns, the JSON editor) with no new UI code.
- *
- * <p>Each generated leaf is backed by a throwaway {@link MemoryConfigValue}, and every leaf also contributes a
- * {@link Reader} that reads its current working value back out of the {@link ConfigEditSession} and re-serialises it to
- * JSON. The {@link Reader}s compose up the record tree, so the root reader reproduces the whole value's JSON on Done,
- * which is then decoded through the codec.</p>
- *
- * <p>Structural kinds map to rich rows: records become navigable sub-categories, lists become sub-categories with one
- * entry per element and add/remove controls, primitives/enums/colours/ids become their matching controls. Anything the
- * form can't render structurally — maps, pairs, alternatives, opaque or recursive codecs — degrades to a raw-JSON row
- * (the existing {@link ConfigOption.JsonValue} editor) for that node, so the form never fails to represent a value; at
- * worst a sub-tree is edited as JSON text.</p>
- *
- * <p>Seeding always prefers the current value, then the encoded default (so an <em>absent</em> optional field is
- * seeded with its real default rather than a neutral zero — writing it back can't silently change the value), then a
- * neutral fallback.</p>
- */
+// Turns a CodecUI Schema into the same ConfigCategory/ConfigOption tree the native config screen already renders, so
+// SchemaEditScreen can reuse every existing widget with no new UI code.
+//
+// Each generated leaf is backed by a throwaway MemoryConfigValue and contributes a Reader that reads its working value
+// back out of the ConfigEditSession and re-serialises it to JSON. Readers compose up the record tree, so the root one
+// reproduces the whole value's JSON on Done, which is then decoded through the codec.
+//
+// Anything not renderable structurally (maps, pairs, alternatives, opaque or recursive codecs) degrades to a raw-JSON
+// row, so a form is never a dead end: at worst a sub-tree is edited as JSON text.
+//
+// Seeding prefers the current value, then the encoded default, then a neutral fallback. Using the real default for an
+// absent optional field means writing it back can't silently change the value.
 final class SchemaForm {
 
-    /** Reconstructs a node's JSON from the editor session's working values. */
+    // reconstructs a node's JSON from the editor session's working values
     @FunctionalInterface
     interface Reader {
         JsonElement read(ConfigEditSession session);
     }
 
-    // one sorted id list per built-in registry, shared by every field naming it: a list config with many entries would
-    // otherwise re-enumerate and re-sort a whole registry once per row. Dynamic ones aren't cached, they follow the world
+    // shared by every field naming the registry: a list config with many entries would otherwise re-enumerate and
+    // re-sort a whole registry once per row. Dynamic ones aren't cached, they follow the world
     private static final Map<ResourceKey<? extends Registry<?>>, List<String>> ID_CACHE = new HashMap<>();
 
     final ConfigCategory root;
@@ -72,11 +64,7 @@ final class SchemaForm {
         this.reader = reader;
     }
 
-    /**
-     * Builds the form for a whole config value. {@code current} is the value's JSON, {@code defaults} the encoded
-     * default value's JSON (used to seed absent optional fields). A top-level record or list <em>is</em> the root
-     * category; any other kind becomes a single row named "value" on an otherwise empty one.
-     */
+    // current is the value's JSON, defaults the encoded default's (used to seed absent optional fields)
     static SchemaForm build(Component title, Schema<?> schema, JsonElement current, @Nullable JsonElement defaults) {
         // a record or a list becomes the root page itself; anything else gets a single "value" row on an empty page
         if (schema instanceof Schema.Record<?> rec) {
@@ -91,7 +79,7 @@ final class SchemaForm {
         return new SchemaForm(root, buildField(root, "value", readable("value"), schema, current, defaults));
     }
 
-    /** Adds one row (or a sub-category) for a field to {@code parent} and returns the reader producing its JSON. */
+    // adds one row (or sub-category) for a field and returns the reader producing its JSON
     private static Reader buildField(ConfigCategory parent, String name, Component title, Schema<?> schema,
                                      @Nullable JsonElement current, @Nullable JsonElement def) {
         JsonElement seed = current != null && !current.isJsonNull() ? current : def;
@@ -169,13 +157,12 @@ final class SchemaForm {
                 parent.add(sub);
                 yield sub.reader();
             }
-            // everything structural we don't render natively (maps, pairs, alternatives, opaque/custom/recursive)
-            // degrades to a raw-JSON editor for that node — the form is always representable, never a dead end
+            // maps, pairs, alternatives, opaque/custom/recursive: edited as raw JSON
             default -> rawJsonField(parent, title, schema, seed);
         };
     }
 
-    /** Populates {@code cat} with one entry per record field and returns a reader assembling their JSON object. */
+    // one entry per record field; the returned reader assembles their JSON object
     private static Reader populateRecord(ConfigCategory cat, Schema.Record<?> rec,
                                          @Nullable JsonElement current, @Nullable JsonElement def) {
         JsonObject cur = current instanceof JsonObject o ? o : null;
@@ -199,12 +186,9 @@ final class SchemaForm {
 
     private record FieldReader(String name, Reader reader) {}
 
-    /**
-     * A list node: a sub page holding one entry per element, each built through {@link #buildField} (so a record
-     * element becomes its own page and a scalar element an inline row). Unlike a record the entry set is mutable, so
-     * the page owns its readers and is rebuilt wholesale from a list of JSON values whenever an entry is added or
-     * removed — {@link SchemaEditScreen} drives that and re-populates its rows.
-     */
+    // A sub page holding one entry per element. Unlike a record the entry set is mutable, so the page owns its readers
+    // and is rebuilt wholesale from a list of JSON values whenever an entry is added or removed; SchemaEditScreen
+    // drives that and re-populates its rows
     static final class ListCategory extends ConfigCategory {
 
         private final Schema<?> element;
@@ -229,14 +213,14 @@ final class SchemaForm {
             };
         }
 
-        /** Current JSON of every entry, as edited so far. The basis for any structural change. */
+        // current JSON of every entry, as edited so far. The basis for any structural change
         List<JsonElement> snapshot(ConfigEditSession session) {
             List<JsonElement> out = new ArrayList<>(readers.size());
             for (Reader r : readers) out.add(r.read(session));
             return out;
         }
 
-        /** Discards the existing entry rows and rebuilds them (and their readers) from {@code values}. */
+        // discards the existing entry rows and rebuilds them (and their readers) from the given values
         void setEntries(List<JsonElement> values) {
             clear();
             readers.clear();
@@ -264,8 +248,8 @@ final class SchemaForm {
 
     private static ListCategory listCategory(Component title, Schema.ListOf<?> list,
                                              @Nullable JsonElement current, @Nullable JsonElement def) {
-        // a new entry is seeded from the default list's first element when there is one: far more useful than a
-        // blank object, since it already has every required field filled in with something the codec accepts
+        // seeded from the default list's first element when there is one: it already has every required field filled
+        // in with something the codec accepts
         JsonElement template = def instanceof JsonArray a && !a.isEmpty() ? a.get(0) : emptyFor(list.element());
         ListCategory cat = new ListCategory(title, list.element(), template, list.min(), list.max());
         List<JsonElement> values = new ArrayList<>();
@@ -274,12 +258,8 @@ final class SchemaForm {
         return cat;
     }
 
-    /**
-     * A registry id or tag id: a searchable dropdown over the ids we can enumerate, degrading to a validated text
-     * field when we can't (an unknown registry, or tags/dynamic registries with no world loaded). A current value
-     * that isn't among them is kept as an option rather than dropped, so opening the screen while the mod that
-     * defines it is absent can't silently rewrite the config.
-     */
+    // A searchable dropdown over the ids we can enumerate, degrading to a validated text field when we can't (unknown
+    // registry, or tags/dynamic registries with no world loaded)
     private static Reader idField(ConfigCategory parent, Component title, List<String> known, String current,
                                   Predicate<Object> valid, UnaryOperator<String> normalize,
                                   @Nullable Function<String, ItemStack> icon) {
@@ -288,8 +268,8 @@ final class SchemaForm {
             parent.add(opt);
             return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
         }
-        // the current value stays selectable even when it isn't one we can enumerate, empty included: picking the
-        // first id for an absent field would quietly commit a real, wrong id where the old text box left it invalid
+        // the current value stays selectable even when we can't enumerate it, empty included: picking the first id
+        // for an absent field would quietly commit a real, wrong id
         List<String> options = known.contains(current) ? known
                 : Stream.concat(Stream.of(current), known.stream()).toList();
         var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(current), current,
@@ -298,17 +278,15 @@ final class SchemaForm {
         return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
     }
 
-    /**
-     * The icon column, only for the two registries whose ids <em>are</em> the icon. Anything else (entity types,
-     * effects, tags) would leave most rows blank while still paying for the taller row.
-     */
+    // only for the two registries whose ids are the icon. Anything else (entity types, effects, tags) would leave most
+    // rows blank while still paying for the taller row
     @Nullable
     private static Function<String, ItemStack> iconsFor(@Nullable ResourceKey<? extends Registry<?>> registry) {
         if (!Registries.ITEM.equals(registry) && !Registries.BLOCK.equals(registry)) return null;
         return id -> ConfigScreenIcons.resolve(ResourceLocation.tryParse(id));
     }
 
-    /** Every id in a registry, sorted. Empty when it can't be reached (unknown, or dynamic with no world loaded). */
+    // empty when the registry can't be reached (unknown, or dynamic with no world loaded)
     private static List<String> registryIds(@Nullable ResourceKey<? extends Registry<?>> key) {
         if (key == null) return List.of();
         List<String> cached = ID_CACHE.get(key);
@@ -323,8 +301,8 @@ final class SchemaForm {
 
     @Nullable
     private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
-        // biomes, structures, ... only reachable with a world loaded, and the accessor throws outright when there
-        // isn't one: a config screen opened from the main menu must survive that
+        // biomes, structures... are only reachable with a world loaded and the accessor throws outright otherwise.
+        // A config screen opened from the main menu must survive that
         try {
             return Utils.hackyGetRegistryAccess().<Object>registry(key).orElse(null);
         } catch (Exception noWorld) {
@@ -353,7 +331,7 @@ final class SchemaForm {
         JsonElement node = seed != null ? seed : emptyFor(schema);
         var opt = new ConfigOption.JsonValue(title, null, () -> node);
         parent.add(opt);
-        // JsonValue is edited as a pretty-printed JSON string; parse it back, falling back to the seed if somehow invalid
+        // JsonValue is edited as a pretty-printed string, so parse it back and fall back to the seed if invalid
         return s -> {
             Object cur = s.current(opt);
             if (!(cur instanceof String str)) return node;
@@ -433,8 +411,8 @@ final class SchemaForm {
         return ResourceLocation.tryParse(stripHash(s)) != null;
     }
 
-    // The on-disk form is fixed by the codec (hashedCodec writes "#ns:path", codec writes "ns:path"), so whichever
-    // way it was typed, write back the one the codec will accept.
+    // the on-disk form is fixed by the codec (hashedCodec writes "#ns:path", codec writes "ns:path"), so whichever
+    // way it was typed, write back the one the codec accepts
     private static String normalizeTagId(String s, boolean hashed) {
         return hashed ? "#" + stripHash(s) : stripHash(s);
     }

@@ -58,8 +58,8 @@ public class MediaButton {
 
     /**
      * A logical button slot the remote allow-list can toggle. Mostly 1:1 with a {@link MediaIcon}, except
-     * {@link #SERVER}, which is a single slot whose icon is chosen per host (akliz, bisect, generic...).
-     * If a {@code ButtonType} is missing from the hub config's allow-list, that button isn't shown.
+     * {@link #SERVER}, a single slot whose icon is chosen per host. A type missing from the hub config's allow-list
+     * isn't shown.
      */
     public enum ButtonType implements StringRepresentable {
         YOUTUBE,
@@ -89,10 +89,8 @@ public class MediaButton {
     private static final String OWN_PACKAGE = "net/mehvahdjukaar";
     private static final Map<String, Boolean> OWN_MODS = new HashMap<>();
 
-    /**
-     * Whether {@code modId} is one of ours, by looking for our package in its jar. The social buttons all point at our
-     * own pages, so on somebody else's mod they'd be advertising the wrong author.
-     */
+    // whether a mod is one of ours, by looking for our package in its jar. The social buttons point at our own pages,
+    // so on somebody else's mod they'd advertise the wrong author
     public static boolean isOwnMod(String modId) {
         return OWN_MODS.computeIfAbsent(modId, id -> PlatHelper.findModResource(id, OWN_PACKAGE) != null);
     }
@@ -158,7 +156,7 @@ public class MediaButton {
         LOL = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DATE) == 1;
     }
 
-    /** Redirects {@code url} to {@code fetched} if it matches the previously-shipped canonical url. */
+    // redirects to the fetched url if the given one is the canonical url we used to ship
     private static String swap(String url, String old, String fetched) {
         return old.equals(url) ? fetched : url;
     }
@@ -228,12 +226,9 @@ public class MediaButton {
     }
 
     /**
-     * Legacy Akliz button. When the passed {@code url} matches the canonical
-     * old akliz signature it delegates to {@link #serverProvider(Screen, int, int)};
-     * if no partner is currently configured, returns an invisible placeholder
-     * widget of the same dimensions so existing layouts stay intact. When the
-     * url does not match the legacy signature, renders a plain akliz-branded
-     * button with the url passed in.
+     * Legacy Akliz button. A url matching the old canonical akliz signature delegates to
+     * {@link #serverProvider(Screen, int, int)}, or to an invisible placeholder of the same size when no partner is
+     * configured, so existing layouts stay intact. Any other url renders a plain akliz-branded button.
      */
     public static Button akliz(Screen parent, int x, int y, String url) {
         MoonlightHubInfo.PartnerServerProvider oldInfo = MoonlightHubInfo.OLD_SIGNATURE.partnerServer();
@@ -247,7 +242,7 @@ public class MediaButton {
                 Component.translatable("tooltip.moonlight.media.akliz"));
     }
 
-    /** Invisible, inactive button of the same footprint as a sprite button. */
+    /** Invisible, inactive button with the same footprint as a sprite button. */
     private static Button placeholderButton(int x, int y) {
         Button b = Button.builder(CommonComponents.EMPTY, op -> {}).bounds(x, y, 20, 20).build();
         b.visible = false;
@@ -256,11 +251,8 @@ public class MediaButton {
     }
 
     /**
-     * Dynamic partner-server button. Icon, provider name and url come from the
-     * hub config fetched on startup. Returns {@code null} when no partner is
-     * currently configured; callers should skip the slot in that case (or use
-     * {@link #akliz(Screen, int, int, String)} which falls back to a plain
-     * akliz button).
+     * Dynamic partner-server button, its icon, name and url coming from the hub config fetched on startup. Null when
+     * no partner is configured, in which case callers skip the slot or fall back to {@link #akliz}.
      */
     @Nullable
     public static Button serverProvider(Screen parent, int x, int y) {
@@ -273,21 +265,11 @@ public class MediaButton {
     }
 
     /**
-     * Adds a centered Back button at {@code centerX, y} flanked by the author's
-     * media buttons (patreon/ko-fi/curseforge/modrinth/github on the LEFT going
-     * leftward; discord/youtube/twitter/marketplace/partner-server on the RIGHT
-     * going rightward). Replicates the classic Moonlight screen bottom bar.
-     * <p>Per-mod urls (CF, MR, mod page) fall back to loader metadata
-     * ({@code fabric.mod.json} / {@code neoforge.mods.toml}) when {@code null};
-     * buttons that stay unresolved are silently skipped. The partner-server
-     * slot is skipped when no partner is currently configured in the hub.
+     * The classic Moonlight bottom bar: a centered Back button flanked by the author's media buttons, support and
+     * mod pages going leftward, socials going rightward. Per-mod urls passed as null fall back to loader metadata,
+     * and buttons that stay unresolved are skipped.
      *
-     * @param adder         typically {@code screen::addRenderableWidget}
-     * @param modId         mod id used to resolve metadata fallbacks
-     * @param curseforgeUrl explicit CF page, or {@code null} to use metadata
-     * @param modrinthUrl   explicit Modrinth page, or {@code null} to use metadata
-     * @param modSourceUrl  explicit mod home/wiki url, or {@code null} to use metadata
-     * @param onBack        runnable invoked when the Back button is pressed
+     * @param adder typically {@code screen::addRenderableWidget}
      */
     public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
                                              int centerX, int y, int spacing,
@@ -300,13 +282,13 @@ public class MediaButton {
         if (modrinthUrl == null)   modrinthUrl   = PlatHelper.getModModrinthUrl(modId);
         if (modSourceUrl == null)  modSourceUrl  = PlatHelper.getModSourcesUrl(modId);
         MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
-        // our socials only belong on our own mods; the per-mod pages (CF/MR/sources) are fine on anyone's
+        // our socials only belong on our own mods; the per-mod pages are fine on anyone's
         boolean ours = isOwnMod(modId);
 
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
-        // Left side (going leftward from the back button)
+        // going leftward from the back button
         int left = centerX - 45 - spacing;
         if (ours) {
             adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
@@ -317,7 +299,7 @@ public class MediaButton {
         if (modSourceUrl != null)  { adder.accept(github(parent, left, y, modSourceUrl));      left -= spacing; }
 
         if (!ours) return;
-        // Right side (going rightward from the back button)
+        // going rightward from the back button
         int right = centerX + 45 + 2;
         adder.accept(discord(parent, right, y, hub.discord()));         right += spacing;
         adder.accept(youtube(parent, right, y, hub.youtube()));         right += spacing;

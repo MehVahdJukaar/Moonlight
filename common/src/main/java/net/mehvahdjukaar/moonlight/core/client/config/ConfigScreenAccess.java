@@ -15,18 +15,13 @@ interface ConfigScreenAccess {
 
     void toggleExpanded(ConfigOption<?> value);
 
-    /**
-     * Called when a value's working copy changed, so the screen can refresh the Save counter.
-     */
+    // called when a value's working copy changed, so the screen can refresh the Save counter
     void onValueEdited();
 
-    /**
-     * Whether {@code category} is effectively enabled given the current (unsaved) edits: its own feature toggle, if
-     * any, and every ancestor's. Rows use this to grey out content whose owning category is switched off.
-     */
+    // whether a category is enabled given the current unsaved edits: its own feature toggle and every ancestor's
     boolean isCategoryEnabled(ConfigCategory category);
 
-    /** Whether every ancestor of {@code category} is enabled (ignoring the category's own feature toggle). */
+    // as above, but ignoring the category's own feature toggle
     default boolean areAncestorsEnabled(ConfigCategory category) {
         ConfigCategory parent = category.parent();
         return parent == null || isCategoryEnabled(parent);

@@ -6,12 +6,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Loader independent description of a single row in a config screen.
- * Both Fabric and NeoForge config holders translate their internal config representation into a tree
- * of these so that the actual screen ({@code MoonlightConfigScreen}) can stay completely platform agnostic.
- * <p>
- * An entry is either a {@link ConfigCategory} (navigable, opens a sub screen) or a
- * {@link ConfigOption} (an editable leaf value).
+ * Loader independent description of a single row in a config screen. Both config holders translate their internal
+ * representation into a tree of these, so the screen stays platform agnostic. A node is either a
+ * {@link ConfigCategory} (navigable, opens a sub screen) or a {@link ConfigOption} (an editable leaf value).
  */
 public abstract class ConfigNode {
 

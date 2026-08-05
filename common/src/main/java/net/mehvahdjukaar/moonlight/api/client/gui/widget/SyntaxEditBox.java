@@ -12,10 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 
 /**
- * A {@link MultiLineEditBox} that renders its text through a per-line {@link SyntaxHighlighter} (vanilla only draws
- * each line as a flat-colored plain string). Supply any highlighter — e.g. {@link JsonHighlighter#INSTANCE} — and
- * this re-renders each display line highlighted; the text model, cursor, selection and scrolling all stay in the
- * inherited {@link MultilineTextField} (reached via the {@code textField} access widener). Only rendering changes.
+ * A {@link MultiLineEditBox} that renders its text through a per-line {@link SyntaxHighlighter}, where vanilla only
+ * draws each line as a flat-colored plain string. Only rendering changes: the text model, cursor, selection and
+ * scrolling all stay in the inherited {@link MultilineTextField}.
  */
 public class SyntaxEditBox extends MultiLineEditBox {
 
@@ -23,7 +22,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
     private static final int TEXT_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
     private static final int PLACEHOLDER_COLOR = 0xFF000000 | ConfigGuiColors.DESCRIPTION;
     private static final int CURSOR_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
-    private static final int SELECTION_COLOR = 0xFF2A4A80; // text-selection highlight — structural, not themed
+    private static final int SELECTION_COLOR = 0xFF2A4A80; // structural, not themed
 
     private final Font font;
     private final Component placeholder;

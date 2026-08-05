@@ -85,11 +85,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
-    /**
-     * Snapshot of the builder's pending change-effect flags, passed into each leaf's constructor as it is defined.
-     * The flags stay set across a compound value's suppressed inner defines (recordOption no-ops while suppressed),
-     * so every leaf of a range/vec3 gets the same meta; they are cleared at the compound boundary in recordOption.
-     */
+    // Snapshot of the builder's pending change-effect flags, taken as each leaf is defined. The flags stay set across
+    // a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the same meta
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -98,11 +95,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         doAddConfig(name, config, ConfigBuilderImpl::toOption);
     }
 
-    /**
-     * As {@link #doAddConfig(String, ConfigValue)} but with an explicit screen-row factory, so codec-backed values that
-     * want a richer row than the default {@link #toOption} mapping (e.g. {@link #defineObject} → an editable
-     * {@link ConfigOption.SchemaValue} instead of an {@link ConfigOption.UnsupportedValue}) can supply their own.
-     */
+    // with an explicit screen-row factory, for values wanting a richer row than the default toOption mapping
     private void doAddConfig(String name, ConfigValue<?> config, Function<ConfigValue<?>, ConfigOption<?>> optionFactory) {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
@@ -110,7 +103,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
-        // build the matching screen row; the comment (before or after) fills in its description and file comment
+        // the comment, before or after, fills in the row's description and file comment
         if (!suppressUi) {
             ConfigOption<?> option = optionFactory.apply(config);
             recordOption(option);
@@ -121,8 +114,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         }
     }
 
-    /** Translates a stored value into the matching loader independent screen row. Description is left empty here;
-     * {@code comment(...)} fills it in later (before or after the define) via {@code noteDefined}. */
+    // Translates a stored value into the matching loader independent screen row. Description is left empty here,
+    // comment(...) fills it in later through noteDefined
     private static ConfigOption<?> toOption(ConfigValue<?> v) {
         Component title = v.getTranslation();
         boolean slider = v.isSlider();

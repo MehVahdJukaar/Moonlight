@@ -1,3 +1,1 @@
-- added ConfigScreenExtensions.registerShowcase, letting a mod replace the icon + item carousel block on its config screen with a widget of its own
-- added a small screen particle system 
-- more improvements to configs visuals
+- improved network api

@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  */
 public final class ConfigScreenExtensions {
 
-    // ── per-mod overlays on the mod's config-list screen ──
+    // ===== per-mod overlays on the mod's config-list screen =====
 
     public interface Overlay {
         void render(GuiGraphics graphics, Panel panel, int mouseX, int mouseY, float partialTick);
@@ -30,7 +30,7 @@ public final class ConfigScreenExtensions {
         }
     }
 
-    /** The content band of the config-list screen (between the header and footer bars), in screen pixels. */
+    /** The content band of the config-list screen, between the header and footer bars, in screen pixels. */
     public record Panel(Screen screen, int left, int top, int right, int bottom) {
     }
 
@@ -46,7 +46,7 @@ public final class ConfigScreenExtensions {
         return OVERLAYS.getOrDefault(modId, List.of());
     }
 
-    // ── per-mod showcase on the config-list screen ──
+    // ===== per-mod showcase on the config-list screen =====
 
     @FunctionalInterface
     public interface Showcase {
@@ -70,13 +70,13 @@ public final class ConfigScreenExtensions {
         return SHOWCASES.get(modId);
     }
 
-    // ── config icon overrides (formerly ConfigScreenIcons#registerOverride) ──
+    // ===== config icon overrides =====
 
     private static final Map<ResourceLocation, Supplier<ItemStack>> ICON_OVERRIDES = new HashMap<>();
 
     /**
      * Binds a config {@code icon(...)} id to a custom stack, overriding the default item/block lookup. Call from
-     * client setup (after registries are frozen). The {@code id} is whatever was passed to {@code icon(...)}.
+     * client setup, after registries are frozen.
      */
     public static void registerIcon(ResourceLocation id, Supplier<ItemStack> stack) {
         ICON_OVERRIDES.put(id, stack);

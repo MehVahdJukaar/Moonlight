@@ -24,15 +24,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * A combo box / picker styled like a text field: a box holding the current value, with the right edge split off by
- * a vertical line into a small box holding a downward arrow. Clicking it expands a scrollable list of the options
- * below (or above, if there's no room), and the value area turns into a search box that filters the list. An
- * optional {@code icon} draws an item beside each option (item/block pickers).
+ * A combo box styled like a text field, its right edge split off by a vertical line into a small box holding a
+ * downward arrow. Clicking expands a scrollable list of the options below (or above, if there's no room) and turns
+ * the value area into a search box filtering it. An optional icon draws an item beside each option.
  * <p>
- * Because a widget can live inside a scissored list (which clips by rectangle, not depth, so a Z offset alone can't
- * escape it), the expanded list is a {@link Popup} drawn and click/scroll/key tested by the {@link PopupHost} screen
- * (through its {@link OverlayLayer}) so it can float above everything. Any screen that hosts a dropdown just has to
- * be a {@link PopupHost}; the widget opens itself through the host's layer on click.
+ * The expanded list is a {@link Popup} so it can float above a scissored parent (see {@link OverlayLayer}). Any
+ * screen hosting a dropdown just has to be a {@link PopupHost}; the widget opens itself through its layer on click.
  */
 public class DropdownWidget extends AbstractWidget implements Popup {
 
@@ -167,9 +164,8 @@ public class DropdownWidget extends AbstractWidget implements Popup {
         return Math.max(0, filtered.size() - visibleCount());
     }
 
-    /** {x, y, w, h, visible} of the open popup. Opens downward when it fits (the natural direction), else toward the
-     * side with more room; and caps the visible-row count to whatever the chosen side can hold so a dropdown opened
-     * mid-screen shrinks instead of running off the top or bottom. */
+    // {x, y, w, h, visible} of the open popup. Opens downward when it fits, else toward the side with more room, and
+    // caps the visible row count to what that side holds so a dropdown opened mid-screen shrinks instead of running off
     private int[] popupRect() {
         int w = getWidth();
         int x = getX();
@@ -189,7 +185,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
         return new int[]{x, y, w, h, visible};
     }
 
-    // ===== popup + input (driven by the host so it floats above the list) =====
+    // ===== popup + input, driven by the host so it floats above the list =====
 
     @Override
     public void renderPopup(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -198,7 +194,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
         int x = r[0], y = r[1], w = r[2], h = r[3];
         Font font = font();
 
-        // float the whole popup above the list rows and their item icons (which render at z 150)
+        // float the whole popup above the list rows and their item icons, which render at z 150
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 200);
 
@@ -225,7 +221,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
                 textX = x + 2 + 18;
             }
             int color = opt.equals(value) ? ConfigGuiColors.SELECTED : ConfigGuiColors.TEXT;
-            // scroll the hovered entry when it overflows; clip the rest so nothing bleeds under the scrollbar
+            // scroll the hovered entry when it overflows, and clip the rest so nothing bleeds under the scrollbar
             if (hover) {
                 GuiHelper.renderScrollingText(graphics, font, Component.literal(opt), textX, textRight, iy, itemHeight, color);
             } else {
@@ -247,11 +243,11 @@ public class DropdownWidget extends AbstractWidget implements Popup {
         graphics.pose().popPose();
     }
 
-    /** Called by the host on any click while open. Returns true (always consumes). */
+    // called by the host on any click while open. Always consumes
     @Override
     public boolean popupMouseClicked(double mouseX, double mouseY, int button) {
         if (!open) return false;
-        // clicking in the value/search area just moves the caret, keep the popup open
+        // clicking in the value/search area just moves the caret, so keep the popup open
         if (mouseX >= getX() && mouseX < getX() + valueAreaWidth() && mouseY >= getY() && mouseY < getY() + getHeight()) {
             this.searchBox.mouseClicked(mouseX, mouseY, button);
             return true;

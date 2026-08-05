@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Allows one to add and remove Post Shader effects in an ordered, grouped, and non-destructive way
+ * Allows one to add and remove post shader effects in an ordered, grouped and non-destructive way.
  */
 public class PostShadersHelper {
 
@@ -28,11 +28,10 @@ public class PostShadersHelper {
     }
 
     /**
-     * Use instead of loadEffect.
-     * This allows adding a post-effect in a non-destructive manner, allowing multiple mods to work together.
+     * Use instead of loadEffect: adds a post-effect non-destructively, so multiple mods can work together.
      *
      * @param newPost post-effect. Null to remove it
-     * @param group      effect group. Used for priority and mutual exclusivity.
+     * @param group   effect group, used for priority and mutual exclusivity
      */
     public static void toggleEffect(@Nullable ResourceLocation newPost, Group group) {
         GameRenderer gr = Minecraft.getInstance().gameRenderer;
@@ -59,14 +58,13 @@ public class PostShadersHelper {
         } else if (currentChain instanceof ComposedPostChain cpc) {
             newChain = cpc.with(newPost, group);
         } else {
-            // Another mod set gr.postEffect directly to a non-ComposedPostChain.
-            // If passes are empty the chain was already closed (e.g. by checkEntityPostEffect before the mixin
-            // intercepted the null assignment) — treat it the same as a null chain so we don't wrap dead GL state.
+            // another mod set gr.postEffect directly. Empty passes mean the chain was already closed, so treat it
+            // like a null one instead of wrapping dead GL state
             if (currentChain.passes.isEmpty()) {
                 if (newPost == null) return null;
                 newChain = ComposedPostChain.create(newPost, group, mainTarget);
             } else {
-                // Actively rendering external chain: absorb it as DEFAULT and apply our change on top.
+                // actively rendering external chain: absorb it as DEFAULT and apply our change on top
                 ComposedPostChain wrapped = ComposedPostChain.wrap(currentChain, Group.DEFAULT);
                 newChain = (newPost == null) ? wrapped : wrapped.with(newPost, group);
                 if (newChain == null) newChain = wrapped;
@@ -91,7 +89,7 @@ public class PostShadersHelper {
                 sub.close();
             }
             chainsPerGroup.clear();
-            passes.clear();             // references are now dead; clear so nothing else touches them
+            passes.clear(); // references are now dead
             customRenderTargets.clear();
             fullSizedTargets.clear();
         }
@@ -144,7 +142,7 @@ public class PostShadersHelper {
             } else {
                 PostChain newChain = new PostChain(tm, rm, this.screenTarget, newEffect);
                 newChain.resize(this.screenTarget.width, this.screenTarget.height);
-                // Close the old sub-chain for this group if one existed, so its GL programs are freed.
+                // close the old sub-chain for this group so its GL programs are freed
                 PostChain old = newGroups.put(group, newChain);
                 if (old != null) old.close();
             }
@@ -167,7 +165,7 @@ public class PostShadersHelper {
             ComposedPostChain result = new ComposedPostChain(
                     tm, rm,
                     this.screenTarget,
-                    newName // reuse same name
+                    newName
             );
             // rebuild passes + targets in order
             for (var entry : ordered) {

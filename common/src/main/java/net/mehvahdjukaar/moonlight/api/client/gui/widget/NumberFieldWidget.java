@@ -49,10 +49,10 @@ public class NumberFieldWidget extends CompositeWidget {
         this.step = integer ? 1 : 0.1;
 
         Font font = Minecraft.getInstance().font;
-        // built at its final width so a short number doesn't start scrolled out of view. A plain edit box, not the
+        // Built at its final width so a short number doesn't start scrolled out of view. A plain edit box and not the
         // panning one: numbers are short, and its marquee centers text by its own rule, which would fight textY().
-        // The height runs from the text down to the widget's bottom edge, so clicking the number focuses it without
-        // the box reaching past the frame
+        // The height runs from the text down to the bottom edge, so clicking the number focuses it without the box
+        // reaching past the frame
         this.box = new EditBox(font, 0, 0, innerWidth(width), height - (height - GLYPH_H) / 2, Component.empty());
         this.box.setBordered(false); // this widget draws the frame, spanning the step zones too
         this.box.setMaxLength(Short.MAX_VALUE);
@@ -69,17 +69,17 @@ public class NumberFieldWidget extends CompositeWidget {
         return width - 2 * (STEP_W + 1 + TEXT_PAD);
     }
 
-    /** Drawn width of a glyph: {@link Font#width} counts the trailing spacing column, which would bias the centering. */
+    // drawn width of a glyph. Font#width counts the trailing spacing column, which would bias the centering
     private static int glyphWidth(Font font, String glyph) {
         return font.width(glyph) - 1;
     }
 
-    /** Top of every glyph in the widget, arrows and number alike, so they sit on one line. */
+    // top of every glyph in the widget, arrows and number alike, so they sit on one line
     private static int textY(int y, int height) {
         return y + (height - GLYPH_H) / 2;
     }
 
-    /** Pushes a value into the field (the row's reset button). */
+    // pushes a value into the field, for the row's reset button
     public void setValue(double v) {
         this.box.setValue(format(v));
     }
@@ -99,7 +99,7 @@ public class NumberFieldWidget extends CompositeWidget {
         return formatNumber(Math.round(v * 10000d) / 10000d);
     }
 
-    /** The value a step starts from: whatever is typed if it's valid, else the nearest bound of the range. */
+    // the value a step starts from: whatever is typed if valid, else the nearest bound of the range
     private double currentOrNearest() {
         Double parsed = parse(box.getValue());
         if (parsed != null) return parsed;
@@ -159,8 +159,8 @@ public class NumberFieldWidget extends CompositeWidget {
 
         Font font = Minecraft.getInstance().font;
         int textY = textY(y, h);
-        // each arrow is inset from its own outer edge by the same amount, mirrored, so an odd leftover pixel lands
-        // on the same side of both and they read as a pair. No shadow: these are chrome, not label text
+        // each arrow is inset from its own outer edge by the same mirrored amount, so an odd leftover pixel lands on
+        // the same side of both and they read as a pair. No shadow: these are chrome, not label text
         int minusW = glyphWidth(font, MINUS);
         int plusW = glyphWidth(font, PLUS);
         graphics.drawString(font, MINUS, x + 1 + (STEP_W - 1 - minusW) / 2, textY,
@@ -168,8 +168,8 @@ public class NumberFieldWidget extends CompositeWidget {
         graphics.drawString(font, PLUS, x + w - 1 - (STEP_W - 1 - plusW) / 2 - plusW, textY,
                 arrowColor(mouseX, mouseY, 1), false);
 
-        // the number is centered in the band between the dividers, falling back to left aligned once it no longer
-        // fits. An unbordered edit box draws its text at its own y (only a bordered one centers), hence textY here
+        // the number is centered between the dividers, falling back to left aligned once it no longer fits. An
+        // unbordered edit box draws its text at its own y, only a bordered one centers, hence textY here
         int fieldStart = leftDivider + 1 + TEXT_PAD;
         int fieldWidth = rightDivider - TEXT_PAD - fieldStart;
         int slack = Math.max(0, fieldWidth - font.width(this.box.getValue()));

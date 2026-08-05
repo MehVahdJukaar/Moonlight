@@ -8,9 +8,9 @@ import net.minecraft.client.gui.screens.Screen;
 import java.util.*;
 
 /**
- * Mutable editing state for one config screen visit, shared across the whole navigation stack (so edits and
- * expanded rows made in a subcategory survive going back and are persisted by a single Save). Holds only a
- * working copy; nothing is written to the underlying config until {@link #apply()}.
+ * Mutable editing state for one config screen visit, shared across the whole navigation stack so edits made in a
+ * subcategory survive going back and are persisted by a single Save. Nothing reaches the underlying config until
+ * {@link #apply()}.
  */
 public final class ConfigEditSession {
 
@@ -35,9 +35,7 @@ public final class ConfigEditSession {
         return returnScreen;
     }
 
-    /**
-     * The value to display: the pending edit if there is one, otherwise the saved value.
-     */
+    /** The value to display: the pending edit if there is one, otherwise the saved value. */
     @SuppressWarnings("unchecked")
     public <T> T current(ConfigOption<T> v) {
         return pending.containsKey(v) ? (T) pending.get(v) : v.get();
@@ -69,9 +67,7 @@ public final class ConfigEditSession {
         });
     }
 
-    /**
-     * Most severe reload a saved change has required this visit ({@link ConfigReloadType#NONE} if none).
-     */
+    /** Most severe reload a saved change has required this visit. */
     public ConfigReloadType appliedReload() {
         return appliedReload;
     }

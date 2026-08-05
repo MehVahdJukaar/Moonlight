@@ -13,9 +13,8 @@ import java.util.function.Consumer;
 public record ConfigVisuals<T>(AbstractWidget widget, Consumer<T> valueSetter) {
 
     /**
-     * Pushes a value into the widget when {@code T} isn't known statically — the config option row holds these as
-     * {@code WidgetAndSetter<?>} (its registry is keyed by option class), so it can't call {@link #valueSetter()}
-     * directly. The value is trusted to match the widget, which the registry guarantees.
+     * Pushes a value into the widget when {@code T} isn't known statically, as config rows hold these wildcarded.
+     * The value is trusted to match the widget, which the control registry guarantees.
      */
     @SuppressWarnings("unchecked")
     public void set(Object value) {
@@ -27,13 +26,7 @@ public record ConfigVisuals<T>(AbstractWidget widget, Consumer<T> valueSetter) {
         ConfigVisuals<?> create(O option, ConfigEditSession session, Runnable onChange);
     }
 
-    /**
-     * Registers a configuration control provider for a specific type of configuration option.
-     *
-     * @param <O>       the type of configuration option this provider applies to, extending {@code ConfigOption<?>}.
-     * @param type      the class type of the configuration option that this provider supports.
-     * @param provider  the implementation of the {@code ConfigControl.Provider} for the specified type.
-     */
+    /** Registers the control provider used to edit a given kind of config option. */
     public static <O extends ConfigOption<?>> void register(Class<O> type, ConfigVisuals.Provider<O> provider) {
         ConfigControllers.register(type, provider);
     }

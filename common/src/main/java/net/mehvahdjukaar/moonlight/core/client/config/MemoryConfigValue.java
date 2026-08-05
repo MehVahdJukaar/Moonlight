@@ -5,13 +5,9 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType
 
 import java.util.Objects;
 
-/**
- * A transient, in-memory {@link IConfigValue} used only by the schema-driven editor ({@link SchemaEditScreen}):
- * it backs each generated form leaf so the whole reused config-row/control machinery ({@code OptionRow},
- * {@link ConfigControllers}) can drive it exactly like a real config value, without touching any on-disk config. Nothing
- * is persisted through here — the editor reads the working values straight out of its {@code ConfigEditSession} and
- * re-encodes them through the codec on Done. Carries no change metadata (it never triggers a reload / pack refresh).
- */
+// Transient in-memory value backing each leaf of a schema-generated form, so the reused row/control machinery can
+// drive it like a real config value. Nothing is persisted through here: the editor reads working values straight out
+// of its ConfigEditSession and re-encodes them through the codec on Done.
 class MemoryConfigValue<T> implements IConfigValue<T> {
 
     private T value;

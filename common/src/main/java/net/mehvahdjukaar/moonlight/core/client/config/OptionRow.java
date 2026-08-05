@@ -23,12 +23,9 @@ import java.util.Objects;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-/**
- * A single editable config value on the main config screen: a single-line name with the editing control from
- * {@link ConfigControllers} pinned to the right and an icon reset button. Values that have a description show a
- * disclosure triangle in the left gutter; clicking the label area toggles it, dropping the wrapped description
- * beneath the row as read-only {@link DescriptionRow}s. A reload/restart hint sprite sits in the far-left gutter.
- */
+// A single editable config value: a one-line name with its control pinned to the right and a reset button. Values with
+// a description show a disclosure triangle in the left gutter, and clicking the label drops the wrapped description
+// beneath the row as read-only DescriptionRows. A reload/restart hint sprite sits in the far-left gutter.
 class OptionRow extends ConfigListRow {
 
     private final ConfigScreenAccess view;
@@ -61,7 +58,7 @@ class OptionRow extends ConfigListRow {
         this.title = value.title();
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
-        // both the category "enabled" gate and a named feature leaf render as the ✓/✗ toggle (icon beside the symbol)
+        // both the category "enabled" gate and a named feature leaf render as the ✓/✗ toggle
         this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
         this.control = asToggle
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
@@ -101,8 +98,8 @@ class OptionRow extends ConfigListRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        // greyed while the owning category's feature toggle (or an ancestor's) is off; the gate row itself only
-        // dims when an ANCESTOR is off, so turning it off doesn't grey out (and lock away) its own switch
+        // greyed while the owning category's feature toggle (or an ancestor's) is off. The gate row itself only dims
+        // when an ancestor is off, so turning it off doesn't lock away its own switch
         boolean contextEnabled = owner == null || (isGate ? view.areAncestorsEnabled(owner) : view.isCategoryEnabled(owner));
 
         int resetX = left + width - resetButton.getWidth();
@@ -128,8 +125,7 @@ class OptionRow extends ConfigListRow {
             if (!contextEnabled) graphics.setColor(1f, 1f, 1f, 1f);
             textLeft = left + ARROW_WIDTH;
         }
-        // decorative, hover-animated item/block icon just before the label, if this value declares one. Feature
-        // toggles draw their icon inside the control (next to the ✓/✗ symbol) instead, so skip it here for them.
+        // decorative hover-animated icon before the label. Feature toggles draw theirs inside the control instead
         if (!asToggle && ConfigScreenIcons.has(value.icon())) {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, value.icon(), textLeft, top + (height - ROW_ICON) / 2,
@@ -138,7 +134,7 @@ class OptionRow extends ConfigListRow {
         }
         int textRight = controlX - GAP;
 
-        // reload/restart hint icon: pure decoration in the far-left gutter, never shifts the row content
+        // pure decoration in the far-left gutter, never shifts the row content
         this.reloadIconX0 = this.reloadIconX1 = -1;
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
