@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -30,6 +31,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 public class ModsTilesScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
+    private static final Identifier DISCOVER_ICON = Moonlight.res("discover_mods");
     // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
     // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
@@ -126,9 +128,9 @@ public class ModsTilesScreen extends Screen {
         }
         this.entries.sort(Comparator.comparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER));
 
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.moonlight.config.discover_mods"),
-                        b -> this.minecraft.setScreen(new DiscoverModsScreen(this)))
-                .bounds(this.width / 2 - 154, this.height - 28, 150, 20).build());
+        this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 150, 20,
+                Component.translatable("gui.moonlight.config.discover_mods"), DISCOVER_ICON, 12, 12,
+                b -> this.minecraft.setScreen(new DiscoverModsScreen(this))));
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                 .bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
     }
