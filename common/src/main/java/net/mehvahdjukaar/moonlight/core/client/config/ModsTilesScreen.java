@@ -31,7 +31,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 public class ModsTilesScreen extends Screen {
 
     private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
-    private static final Identifier DISCOVER_ICON = Moonlight.res("discover_mods");
+    private static final ResourceLocation DISCOVER_ICON = Moonlight.res("discover_mods");
     // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
     // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
