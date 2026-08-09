@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.fake_player;
 
+import com.google.common.collect.MapMaker;
 import com.mojang.authlib.GameProfile;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,31 +14,26 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public class FakeLocalPlayer extends AbstractClientPlayer {
 
-    private static final boolean HAS_CACHE = PlatHelper.getPlatform().isForge(); //fabric doesnt have world unload event
-
-    // Map of all active fake player usernames to their entities
-    // automatically gets cleaned when level is unloaded as key won't be in use anymore
-    private static final WeakHashMap<ClientLevel, Map<GameProfile, FakeLocalPlayer>> FAKE_PLAYERS = new WeakHashMap<>();
+    // see FakeGenericPlayer: weak values as well as weak keys, or the cached player would keep its own
+    // level key alive forever
+    private static final Map<ClientLevel, Map<GameProfile, FakeLocalPlayer>> FAKE_PLAYERS =
+            new MapMaker().weakKeys().makeMap();
 
     /**
-     * Get a fake player with a given username,
-     * Mods should either hold weak references to the return value, or listen for a
-     * WorldEvent.Unload and kill all references to prevent worlds staying in memory.
+     * Get a fake player with a given username. The returned player is only cached for as long as the caller
+     * keeps a reference to it, so holding onto it also keeps its level in memory: don't store it in a static.
      */
     static FakeLocalPlayer get(ClientLevel level, GameProfile username) {
-        if (!HAS_CACHE) return new FakeLocalPlayer(level, username);
-        return FAKE_PLAYERS.computeIfAbsent(level, l -> new HashMap<>())
+        return FAKE_PLAYERS.computeIfAbsent(level, l -> new MapMaker().weakValues().makeMap())
                 .computeIfAbsent(username, u -> new FakeLocalPlayer(level, username));
     }
 
     static void unloadLevel(LevelAccessor level) {
-        FAKE_PLAYERS.entrySet().removeIf(e -> e.getKey() == level);
+        FAKE_PLAYERS.keySet().removeIf(l -> l == level);
     }
 
     private final EntityDimensions dimensions = EntityDimensions.fixed(0, 0);

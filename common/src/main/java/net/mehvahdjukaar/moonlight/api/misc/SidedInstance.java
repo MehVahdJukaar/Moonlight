@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -15,8 +16,13 @@ import java.util.function.Function;
 // how to do that tho? we need a way we can then retrieve with a RegistryAccess or Level
 // Weak HashMap using HolderLookup.Provider as key? nope those can be subclasses and are very often, leading to more undeded instances
 // so we use a dummy object from one of the registries datapack registires...
-// map has weak keys so this is reload safe
+// Weak keys are NOT enough to make this reload safe on their own: almost every instance we store keeps the
+// provider it was built from, and that provider owns the registry that owns our dummy key, so the value
+// resurrects its own key and the entry can never be collected. That's why clearAll() exists and is called
+// on server stop and client disconnect.
 public class SidedInstance<T> {
+
+    private static final WeakHashSet<SidedInstance<?>> ALL = new WeakHashSet<>();
 
     //hack so we can have essentially an identity map
     private final Cache<ChatType, T> instances = CacheBuilder.newBuilder()
@@ -30,7 +36,30 @@ public class SidedInstance<T> {
     }
 
     public static <T> SidedInstance<T> of(Function<HolderLookup.Provider, T> factory) {
-        return new SidedInstance<>(factory);
+        SidedInstance<T> instance = new SidedInstance<>(factory);
+        ALL.add(instance);
+        return instance;
+    }
+
+    // dropped instances are rebuilt by the factory on the next get(), so this is only ever a cache flush
+    @ApiStatus.Internal
+    public static void clearAll() {
+        for (var i : ALL) i.instances.invalidateAll();
+    }
+
+    /**
+     * Drops every instance belonging to one logical side. Use this over {@link #clearAll()} when the other side
+     * is still running, e.g. a client disconnecting from an integrated server that hasn't stopped yet.
+     */
+    @ApiStatus.Internal
+    public static void clearAll(HolderLookup.Provider ra) {
+        ChatType key;
+        try {
+            key = getDummyKey(ra);
+        } catch (Exception e) {
+            return; //registries already gone, nothing we could match anyway
+        }
+        for (var i : ALL) i.instances.invalidate(key);
     }
 
     public T get(HolderLookup.Provider ra) {
@@ -54,7 +83,7 @@ public class SidedInstance<T> {
         instances.put(getDummyKey(ra), instance);
     }
 
-    private ChatType getDummyKey(HolderLookup.Provider ra) {
+    private static ChatType getDummyKey(HolderLookup.Provider ra) {
         try {
             return ra.lookupOrThrow(Registries.CHAT_TYPE)
                     .getOrThrow(ChatType.CHAT).value();

@@ -10,6 +10,7 @@ import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.mehvahdjukaar.moonlight.api.block.IFlammable;
+import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
@@ -53,6 +54,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
             currentServer = null;
             FakeLevelManager.invalidateAll();
+            SidedInstance.clearAll();
         });
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {

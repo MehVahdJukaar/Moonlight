@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.platform;
 
 import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
+import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
@@ -10,6 +11,7 @@ import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTy
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
+import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.platform.ModLootModifiers;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
 import net.minecraft.core.BlockPos;
@@ -146,6 +148,7 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onServerShuttingDown(ServerStoppingEvent event) {
         FakeLevelManager.invalidateAll();
+        SidedInstance.clearAll();
     }
 
     @SubscribeEvent
@@ -173,6 +176,7 @@ public class MoonlightForge {
     public static void onDimensionUnload(LevelEvent.Unload event) {
         var level = event.getLevel();
         try {
+            FakeGenericPlayer.unloadLevel(level);
             if (level.isClientSide()) {
                 //got to be careful with classloading
                 FPClientAccess.unloadLevel(level);
