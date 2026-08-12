@@ -40,11 +40,4 @@ public class ColorConfigValue extends IntConfigValue {
     private Codec<Integer> codec() {
         return ColorUtils.codec(hasAlpha);
     }
-
-    @Override
-    public String getExtraInfo() {
-        return hasAlpha
-                ? "Accepted format: Hexadecimal color code (e.g., #RRGGBB or #AARRGGBB)"
-                : "Accepted format: Hexadecimal color code (e.g., #RRGGBB)";
-    }
 }

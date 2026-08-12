@@ -22,7 +22,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue
     private final ConfigMetadata meta;
     private String translationKey = "";
     private String commentKey = "";
-    private String rawComment = "";
     private boolean slider = false;
     private boolean percent = false;
 
@@ -114,18 +113,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue
     public Component getCommentComponent() {
         if (this.commentKey.isEmpty()) return null;
         return Component.translatable(commentKey);
-    }
-
-    public String getRawComment() {
-        return rawComment;
-    }
-
-    public void setRawComment(String rawDescription) {
-        this.rawComment = rawDescription;
-    }
-
-    public String getExtraInfo() {
-        return "";
     }
 
     public boolean isSlider() {

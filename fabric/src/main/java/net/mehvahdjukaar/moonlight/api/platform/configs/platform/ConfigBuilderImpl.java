@@ -103,14 +103,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
-        // the comment, before or after, fills in the row's description and file comment
+        // the comment, before or after, fills in the row's description
         if (!suppressUi) {
             ConfigOption<?> option = optionFactory.apply(config);
             recordOption(option);
-            noteDefined(name, option, raw -> {
-                config.setRawComment(raw);
-                config.setCommentKey(this.tooltipKey(name));
-            });
+            noteDefined(name, option, raw -> config.setCommentKey(this.tooltipKey(name)));
         }
     }
 
