@@ -102,7 +102,6 @@ public class MoonlightConfigSelectScreen extends Screen {
             this.identityBottom = widget.getY() + widget.getHeight();
         }
         if (!showcaseTakesCarousel) {
-            // the mod's items panning by, right under its icon, dissolving into the pane background at both ends
             ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
                     ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, blockWidth, STRIP) : null;
             this.identityBottom = this.iconBottom() + (carousel == null ? 0 : STRIP + 4);
@@ -131,7 +130,6 @@ public class MoonlightConfigSelectScreen extends Screen {
         // Back flanked by the author's media links, matching the Configured integration screen
         MediaButton.addAuthorMediaButtons(this, this::addRenderableWidget,
                 this.width / 2, this.height - 28, 22, modId, this::onClose);
-        // bottom-left: icon-only jump to the mods hub grid
         this.addRenderableWidget(new GearButton(8, this.height - 28, 20,
                 b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))));
     }
@@ -187,7 +185,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         GuiHelper.renderSeparator(graphics, PAD, y, textWidth);
         y += 8;
 
-        // the author list gets the whole rest of the pane: one name per line, wrapped if a name is too long for it
+        // one name per line, wrapping long ones, filling whatever is left of the pane
         int line = this.font.lineHeight;
         graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
                 ConfigGuiColors.DESCRIPTION);

@@ -15,11 +15,9 @@ import net.minecraft.util.Mth;
 import java.util.function.Consumer;
 
 /**
- * A standalone color picker screen: a saturation/value square with a hue slider beside it and an alpha slider
- * below, plus a hex field and live preview underneath (a {@link ColorFieldWidget} whose swatch is a passive preview).
- * On Done it hands the chosen ARGB color back through {@code onApply} and returns to {@code parent}; on Cancel it
- * just returns to {@code parent}. Colors are ARGB ints; with {@code hasAlpha} false the alpha slider is hidden and
- * colors are plain RGB.
+ * A saturation/value square with a hue slider beside it and an alpha slider below, plus a hex field and live preview
+ * underneath. Colors are ARGB ints; with {@code hasAlpha} false the alpha slider is hidden and colors are plain RGB.
+ * Done hands the chosen color back through {@code onApply}.
  */
 public class ColorPickerScreen extends Screen {
 
@@ -99,8 +97,6 @@ public class ColorPickerScreen extends Screen {
         this.minecraft.setScreen(parent);
     }
 
-    // ===== value helpers =====
-
     private int currentColor() {
         int argb = ColorUtils.hsvToArgb(hue, sat, val, Math.round(alpha * 255));
         return hasAlpha ? argb : argb & 0xFFFFFF;
@@ -122,8 +118,6 @@ public class ColorPickerScreen extends Screen {
         this.val = hsv[2];
         if (hasAlpha) this.alpha = FastColor.ARGB32.alpha(c) / 255f;
     }
-
-    // ===== input =====
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -175,8 +169,6 @@ public class ColorPickerScreen extends Screen {
     private static boolean inside(double mx, double my, int x, int y, int w, int h) {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
-
-    // ===== render =====
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {

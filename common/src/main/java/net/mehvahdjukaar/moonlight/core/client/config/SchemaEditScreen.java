@@ -31,13 +31,6 @@ import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-// A schema-driven form editor for a single codec-backed config value. SchemaForm converts the schema into the same
-// category/option tree the main config screen renders, and this drives it with the exact same rows, controls and edit
-// session, so a generated form behaves identically to a hand-written config page.
-//
-// Working edits live in a private holder-less ConfigEditSession shared across the sub-category navigation stack;
-// nothing here writes to disk. Only the root page commits: on Done the form's JSON is reassembled from the session,
-// decoded through the codec and, if valid, handed back to the outer config screen. Sub-record pages just navigate.
 public class SchemaEditScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
     // shared across the whole sub-category navigation stack of one editing visit
@@ -92,8 +85,6 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         return parentPage == null;
     }
 
-    // ===== ConfigScreenAccess =====
-
     @Override
     public Font font() {
         return this.font;
@@ -128,21 +119,16 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         return own && (parent == null || isCategoryEnabled(parent));
     }
 
-    // ===== PopupHost =====
-
     @Override
     public OverlayLayer getOverlayLayer() {
         return this.overlay;
     }
 
-    // ===== screen =====
-
     @Override
     protected void init() {
         this.overlay.clear();
         SchemaForm.ListCategory listCategory = listCategory();
-        // a list page needs a second button row for "add entry". +24 keeps the gap between the list and the topmost
-        // button at the usual 8px
+
         int footer = listCategory != null ? FOOTER + 24 : FOOTER;
         this.list = new ConfigOptionList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
         populate();
@@ -218,8 +204,6 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         rebuild(cat, values);
     }
 
-    // Adding or removing an entry changes the page's row set, so the node is rebuilt from the JSON its entries hold
-    // and the rows regenerated. Rows own no state the node doesn't, so this round-trips every edit made so far
     private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
         double scroll = this.list.getScrollAmount();
         cat.setEntries(values);
@@ -230,7 +214,6 @@ public class SchemaEditScreen extends Screen implements ConfigScreenAccess, Popu
         onValueEdited();
     }
 
-    // reassembles the form's JSON, decodes it and, if valid, hands the value back and closes
     private void commit() {
         JsonElement json = state.reader.read(state.session);
         DataResult<?> result = state.codec.parse(JsonOps.INSTANCE, json);

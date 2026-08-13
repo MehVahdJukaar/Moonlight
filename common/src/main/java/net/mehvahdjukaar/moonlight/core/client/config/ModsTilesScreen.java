@@ -73,10 +73,8 @@ public class ModsTilesScreen extends Screen {
 
     // every mod id we can show a config screen for, in no particular order
     public static Set<String> collectConfigurableMods() {
-        // distinct mod ids that registered a config
         Set<String> modIds = new LinkedHashSet<>();
         for (ModConfigHolder h : ModConfigHolder.getTrackedSpecs()) modIds.add(h.getModId());
-        // extra mods (and, if enabled, every installed mod) that expose a loader/Mod Menu config screen
         for (String modId : EXTRA_MODS) {
             if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
         }
@@ -208,7 +206,6 @@ public class ModsTilesScreen extends Screen {
 
         int textCenter = x + CARD_W / 2;
         int nameY = iconY + ICON_SIZE + ICON_TEXT_GAP;
-        // name is centered but marquees when it's too long for the card
         GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.LABEL);
         if (entry.version() != null) {
             drawClippedCentered(graphics, entry.version(), textCenter, nameY + LINE + NAME_VER_GAP, x + 4, x + CARD_W - 4, VERSION_COLOR);

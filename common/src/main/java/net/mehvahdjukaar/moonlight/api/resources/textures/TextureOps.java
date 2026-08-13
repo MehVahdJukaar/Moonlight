@@ -76,7 +76,6 @@ public final class TextureOps {
             int oldValue = pixel.getValue();
             int alpha = FastColor.ABGR32.alpha(oldValue);
             if (alpha == 0) {
-                // Fully transparent — replace with background color
                 pixel.setValue(backgroundColor);
             } else {
                 // Keep color, but set alpha fully opaque (255)

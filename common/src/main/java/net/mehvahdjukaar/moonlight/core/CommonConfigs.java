@@ -130,9 +130,9 @@ public class CommonConfigs {
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
             builder.pop();
 
-            // Feature gating demo: a category with an enable toggle (shown inline on its row). Its children grey out
-            // when it's off, and the returned supplier reads false whenever an ancestor feature is off — via supplier
-            // composition, without ever rewriting the stored child values. (Suppliers unused here, just demonstrating.)
+            // Feature gating demo: a category with an enable toggle, shown inline on its row. Its children grey out
+            // when it's off, and the returned supplier reads false whenever an ancestor feature is off, composed at
+            // read time without ever rewriting the stored child values
             builder.icon("minecraft:redstone").pushFeature("test_feature", true);
             builder.comment("Only meaningful while the feature is on").define("feature_speed", 1.0, 0, 10);
             builder.pushFeature("test_sub_feature", true);

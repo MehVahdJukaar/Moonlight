@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +16,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
-
 
 class ConfigHolderRow extends ConfigListRow {
 
@@ -55,12 +53,11 @@ class ConfigHolderRow extends ConfigListRow {
         int textRight = editX - GAP;
 
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
-        Component boldLabel = label.copy();//.withStyle(ChatFormatting.BOLD);
         if (subtitle != null) {
-            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
             drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT);
         } else {
-            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top, height, CATEGORY);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY);
         }
         graphics.blitSprite(EDIT_ICON, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
     }

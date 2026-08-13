@@ -23,14 +23,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-/**
- * A combo box styled like a text field, its right edge split off by a vertical line into a small box holding a
- * downward arrow. Clicking expands a scrollable list of the options below (or above, if there's no room) and turns
- * the value area into a search box filtering it. An optional icon draws an item beside each option.
- * <p>
- * The expanded list is a {@link Popup} so it can float above a scissored parent (see {@link OverlayLayer}). Any
- * screen hosting a dropdown just has to be a {@link PopupHost}; the widget opens itself through its layer on click.
- */
 public class DropdownWidget extends AbstractWidget implements Popup {
 
     private static final int MAX_VISIBLE = 8;
@@ -90,8 +82,6 @@ public class DropdownWidget extends AbstractWidget implements Popup {
     private int valueAreaWidth() {
         return getWidth() - getHeight(); // the right square is the arrow box
     }
-
-    // ===== closed box (rendered in the row) =====
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -184,8 +174,6 @@ public class DropdownWidget extends AbstractWidget implements Popup {
         int y = down ? below : getY() - h;
         return new int[]{x, y, w, h, visible};
     }
-
-    // ===== popup + input, driven by the host so it floats above the list =====
 
     @Override
     public void renderPopup(GuiGraphics graphics, int mouseX, int mouseY) {

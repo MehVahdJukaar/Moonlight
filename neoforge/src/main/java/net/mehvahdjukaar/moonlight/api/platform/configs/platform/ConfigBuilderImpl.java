@@ -49,8 +49,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private void ui(String name, ConfigOption<?> value) {
-        recordOption(value); // add the screen row
-        noteDefined(name, value, null); // Forge .toml comments are handled in comment(); this wires the row's description
+        recordOption(value);
+        noteDefined(name, value, null); // .toml comments are handled in comment(); this only wires the row description
     }
 
     private Component uiTitle(String name) {
@@ -68,8 +68,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigOption.UnsupportedValue(uiTitle(name), uiDescription(name), (Supplier<Object>) handle);
     }
 
-    // Snapshot of the builder's pending change-effect flags, taken as each leaf is defined. The flags stay set across
-    // a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the same meta
+    // The flags stay set across a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the
+    // same meta
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -364,9 +364,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     // Forge attaches a .toml comment to the NEXT defined value, so hand it the pending before-comment right before
-    // that define runs, once per comment. After-comments never reach a define this way so they miss the .toml file,
-    // but they still reach the lang file and the screen row. Must run before every builder.define(...), which is why
-    // every define path goes through addTranslationsAndComments
+    // that define runs, once per comment. After-comments never reach a define this way, so they miss the .toml file
+    // but still reach the lang file and the screen row
     private void forwardPendingComment() {
         String toForward = pollCommentToForward();
         if (toForward != null) builder.comment(toForward);

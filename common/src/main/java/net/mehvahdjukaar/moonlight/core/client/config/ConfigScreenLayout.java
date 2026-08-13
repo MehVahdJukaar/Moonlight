@@ -65,13 +65,11 @@ final class ConfigScreenLayout {
     static final int ROW_WIDTH = 280;
     static final int ROW_ICON = 16; // leading category/config icon
 
-    static final int CONTROL_WIDTH = 96; // narrower than the old 110px so labels get room, wide enough to breathe
+    static final int CONTROL_WIDTH = 96; // kept narrow so row labels get more room
     static final int CONTROL_HEIGHT = 20;
     static final int ARROW_WIDTH = 12;
     static final int RESET_WIDTH = CONTROL_HEIGHT;
     static final int GAP = 4;
 
     static final int DESC_LINES_PER_ROW = 2;
-
-    // colors live in ConfigGuiColors, not here
 }

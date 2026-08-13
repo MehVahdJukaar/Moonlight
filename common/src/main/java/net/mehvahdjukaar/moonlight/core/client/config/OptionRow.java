@@ -23,9 +23,6 @@ import java.util.Objects;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-// A single editable config value: a one-line name with its control pinned to the right and a reset button. Values with
-// a description show a disclosure triangle in the left gutter, and clicking the label drops the wrapped description
-// beneath the row as read-only DescriptionRows. A reload/restart hint sprite sits in the far-left gutter.
 class OptionRow extends ConfigListRow {
 
     private final ConfigScreenAccess view;
@@ -58,7 +55,6 @@ class OptionRow extends ConfigListRow {
         this.title = value.title();
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
-        // both the category "enabled" gate and a named feature leaf render as the ✓/✗ toggle
         this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
         this.control = asToggle
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
@@ -138,7 +134,7 @@ class OptionRow extends ConfigListRow {
         this.reloadIconX0 = this.reloadIconX1 = -1;
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
-            int iconSize = 8; // native size of the world_reload / game_restart sprites (pixel-perfect)
+            int iconSize = 8; // native size of the world_reload / game_restart sprites
             int iconX = left - iconSize - 3;
             graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
             this.reloadIconX0 = iconX;

@@ -11,7 +11,6 @@ val codecui_version: String by extra
 
 dependencies {
 
-    // Declarative codec schema API — compile against the common (named-mappings) artifact; bundled (JiJ) per loader.
     compileOnly("net.mehvahdjukaar:codecui-common:${codecui_version}")
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")

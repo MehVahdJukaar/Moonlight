@@ -118,7 +118,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         // --- Hard sanity checks ---
         if (fw <= 0 || fh <= 0) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' has invalid metadata frame size {}x{} — using full image size {}x{} instead",
+                    "Texture '{}' has invalid metadata frame size {}x{}, using full image size {}x{} instead",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             fw = imgWidth;
@@ -127,7 +127,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
         if (fw > imgWidth || fh > imgHeight) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' frame size {}x{} is larger than image {}x{} — using full image size instead",
+                    "Texture '{}' frame size {}x{} is larger than image {}x{}, using full image size instead",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             fw = imgWidth;
@@ -142,7 +142,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
         if (gridW == 0 || gridH == 0) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' frame size {}x{} cannot fit in image {}x{} — defaulting to 1x1 grid",
+                    "Texture '{}' frame size {}x{} cannot fit in image {}x{}, defaulting to 1x1 grid",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             gridW = 1;

@@ -32,21 +32,8 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-// Turns a CodecUI Schema into the same ConfigCategory/ConfigOption tree the native config screen already renders, so
-// SchemaEditScreen can reuse every existing widget with no new UI code.
-//
-// Each generated leaf is backed by a throwaway MemoryConfigValue and contributes a Reader that reads its working value
-// back out of the ConfigEditSession and re-serialises it to JSON. Readers compose up the record tree, so the root one
-// reproduces the whole value's JSON on Done, which is then decoded through the codec.
-//
-// Anything not renderable structurally (maps, pairs, alternatives, opaque or recursive codecs) degrades to a raw-JSON
-// row, so a form is never a dead end: at worst a sub-tree is edited as JSON text.
-//
-// Seeding prefers the current value, then the encoded default, then a neutral fallback. Using the real default for an
-// absent optional field means writing it back can't silently change the value.
 final class SchemaForm {
 
-    // reconstructs a node's JSON from the editor session's working values
     @FunctionalInterface
     interface Reader {
         JsonElement read(ConfigEditSession session);
@@ -187,8 +174,7 @@ final class SchemaForm {
     private record FieldReader(String name, Reader reader) {}
 
     // A sub page holding one entry per element. Unlike a record the entry set is mutable, so the page owns its readers
-    // and is rebuilt wholesale from a list of JSON values whenever an entry is added or removed; SchemaEditScreen
-    // drives that and re-populates its rows
+    // and is rebuilt wholesale whenever an entry is added or removed. SchemaEditScreen drives that
     static final class ListCategory extends ConfigCategory {
 
         private final Schema<?> element;
@@ -342,8 +328,6 @@ final class SchemaForm {
             }
         };
     }
-
-    // ===== seeding / conversion helpers =====
 
     private static Component readable(String name) {
         return Component.literal(LangBuilder.getReadableName(name));

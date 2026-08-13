@@ -20,7 +20,7 @@ public final class ConfigGuiColors {
     public static final int DESCRIPTION = chat(ChatFormatting.GRAY);
     public static final int ERROR = chat(ChatFormatting.RED);
     public static final int TITLE = chat(ChatFormatting.GOLD);
-    public static final int MODIFIED = chat(ChatFormatting.YELLOW); // pops against the gold title
+    public static final int MODIFIED = chat(ChatFormatting.YELLOW);
     public static final int CATEGORY = chat(ChatFormatting.GREEN);
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE);
 
@@ -34,7 +34,7 @@ public final class ConfigGuiColors {
     // breadcrumb
     public static final int CRUMB = chat(ChatFormatting.GRAY);
     public static final int CRUMB_HOVER = chat(ChatFormatting.WHITE);
-    public static final int CRUMB_CURRENT = chat(ChatFormatting.YELLOW); // the page you're on
+    public static final int CRUMB_CURRENT = chat(ChatFormatting.YELLOW);
     public static final int CRUMB_SEPARATOR = chat(ChatFormatting.DARK_GRAY);
 
     // syntax highlighting (JSON / SNBT editors)

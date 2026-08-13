@@ -6,16 +6,8 @@ import net.minecraft.client.gui.components.AbstractWidget;
 
 import java.util.function.Consumer;
 
-/**
- * A bound editing widget: the widget itself plus a delegate that pushes a value into it (used, for example, to
- * redisplay a default without going through user input). Produced by a config control provider.
- */
 public record ConfigVisuals<T>(AbstractWidget widget, Consumer<T> valueSetter) {
 
-    /**
-     * Pushes a value into the widget when {@code T} isn't known statically, as config rows hold these wildcarded.
-     * The value is trusted to match the widget, which the control registry guarantees.
-     */
     @SuppressWarnings("unchecked")
     public void set(Object value) {
         valueSetter.accept((T) value);

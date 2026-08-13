@@ -134,7 +134,6 @@ public abstract class ModConfigHolder {
         this.saveToDisk();
     }
 
-    /** Flushes the whole config to disk (spec save on NeoForge, json write on Fabric). */
     protected abstract void saveToDisk();
 
     public String getFileName() {

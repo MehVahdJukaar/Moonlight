@@ -60,8 +60,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             return null;
         }
         var it = categoryStack.descendingIterator();
-        it.next(); // current category
-        return it.next().getName(); // parent category
+        it.next();
+        return it.next().getName();
     }
 
     @Override
@@ -69,12 +69,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var cat = new ConfigSubCategory(translation);
         Objects.requireNonNull(categoryStack.peek()).addEntry(cat);
         categoryStack.push(cat);
-        // register a readable name for the category so the native config screen button isn't a raw key
         translations.put(translationKey(""), LangBuilder.getReadableName(translation));
         uiPush(Component.translatable(translationKey("")));
         return this;
     }
-
 
     @Override
     public ConfigBuilderImpl pop() {
@@ -85,8 +83,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
-    // Snapshot of the builder's pending change-effect flags, taken as each leaf is defined. The flags stay set across
-    // a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the same meta
+    // The flags stay set across a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the
+    // same meta
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -111,8 +109,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         }
     }
 
-    // Translates a stored value into the matching loader independent screen row. Description is left empty here,
-    // comment(...) fills it in later through noteDefined
+    // Description is left empty here: comment(...) fills it in later through noteDefined
     private static ConfigOption<?> toOption(ConfigValue<?> v) {
         Component title = v.getTranslation();
         boolean slider = v.isSlider();

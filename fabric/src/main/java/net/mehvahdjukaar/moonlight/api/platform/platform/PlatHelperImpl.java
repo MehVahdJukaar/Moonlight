@@ -179,7 +179,7 @@ public class PlatHelperImpl {
     }
 
     public static String getModModrinthUrl(String modId) {
-        // no conventional fallback for modrinth — only return if explicitly set
+        // no conventional fallback for modrinth: only return if explicitly set
         return contact(modId, "modrinth");
     }
 
