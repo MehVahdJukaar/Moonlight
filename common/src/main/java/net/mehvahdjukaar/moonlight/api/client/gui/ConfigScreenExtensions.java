@@ -15,12 +15,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * The public hook for mods to extend Moonlight's native config UI for their own mod. Everything here is keyed by mod
- * id and meant to be called once from client setup.
+ * Hook for mods to extend Moonlight's native config UI. Everything here is keyed by mod id and meant to be called
+ * once from client setup.
  */
 public final class ConfigScreenExtensions {
-
-    // ===== per-mod overlays on the mod's config-list screen =====
 
     public interface Overlay {
         void render(GuiGraphics graphics, Panel panel, int mouseX, int mouseY, float partialTick);
@@ -36,7 +34,7 @@ public final class ConfigScreenExtensions {
 
     private static final Map<String, List<Overlay>> OVERLAYS = new HashMap<>();
 
-    /** Adds an overlay to the config-list screen of {@code modId}. Call from client setup. */
+    /** Adds an overlay to the config-list screen of {@code modId}. */
     public static void registerOverlay(String modId, Overlay overlay) {
         OVERLAYS.computeIfAbsent(modId, k -> new ArrayList<>()).add(overlay);
     }
@@ -45,8 +43,6 @@ public final class ConfigScreenExtensions {
     public static List<Overlay> overlaysFor(String modId) {
         return OVERLAYS.getOrDefault(modId, List.of());
     }
-
-    // ===== per-mod showcase on the config-list screen =====
 
     @FunctionalInterface
     public interface Showcase {
@@ -59,7 +55,7 @@ public final class ConfigScreenExtensions {
 
     private static final Map<String, Showcase> SHOWCASES = new HashMap<>();
 
-    /** Replaces the mod icon + item carousel on {@code modId}'s config-list screen. Call from client setup. */
+    /** Replaces the mod icon + item carousel on {@code modId}'s config-list screen. */
     public static void registerShowcase(String modId, Showcase showcase) {
         SHOWCASES.put(modId, showcase);
     }
@@ -70,13 +66,11 @@ public final class ConfigScreenExtensions {
         return SHOWCASES.get(modId);
     }
 
-    // ===== config icon overrides =====
-
     private static final Map<ResourceLocation, Supplier<ItemStack>> ICON_OVERRIDES = new HashMap<>();
 
     /**
-     * Binds a config {@code icon(...)} id to a custom stack, overriding the default item/block lookup. Call from
-     * client setup, after registries are frozen.
+     * Binds a config {@code icon(...)} id to a custom stack, overriding the default item/block lookup. Call after
+     * registries are frozen.
      */
     public static void registerIcon(ResourceLocation id, Supplier<ItemStack> stack) {
         ICON_OVERRIDES.put(id, stack);

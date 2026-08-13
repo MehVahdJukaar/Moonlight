@@ -54,7 +54,7 @@ public abstract class ModConfigHolder {
     private final ConfigType type;
     @Nullable
     private final Runnable changeCallback;
-    // feature (short name and full path) -> effective enabled supplier, stamped in by the builder at build()
+    // short name and full dotted path -> effective enabled supplier, filled in by the builder at build()
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
 
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
@@ -78,23 +78,16 @@ public abstract class ModConfigHolder {
         return readableName;
     }
 
-    // the builder hands over its collected feature registry at build time
     @ApiStatus.Internal
     public void setFeatureToggles(Map<String, Supplier<Boolean>> featureToggles) {
         this.featureToggles = Map.copyOf(featureToggles);
     }
 
-    /**
-     * Whether the {@code feature(...)} toggle with the given name is on. Accepts either the short name or the full
-     * dotted path ({@code "speaker_block"} or {@code "redstone.speaker_block"}), and returns true for an unknown one
-     * so ungated content stays enabled. Composes ancestor gates, so it reads false when a parent feature is off.
-     */
     public boolean isFeatureEnabled(String nameOrPath) {
         Supplier<Boolean> toggle = this.featureToggles.get(nameOrPath);
         return toggle == null || Boolean.TRUE.equals(toggle.get());
     }
 
-    /** Short name and full path keys -> effective enabled supplier. */
     public Map<String, Supplier<Boolean>> getFeatureToggles() {
         return this.featureToggles;
     }
@@ -127,15 +120,10 @@ public abstract class ModConfigHolder {
         return this.type.isSynced();
     }
 
-    /** The pack kind whose cache a dynamic-pack-affecting value of this config should invalidate. */
     protected PackType getPackType() {
         return this.type == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
     }
 
-    /**
-     * Writes a new (already validated) value to a handle a {@code define(...)} returned and saves it. Such a handle is
-     * exposed to mods as a read-only {@link Supplier} but is always really an {@link IConfigValue}, hence the cast.
-     */
     public <T> void manuallySetValue(Supplier<T> config, T value) {
         if (!(config instanceof IConfigValue<T> handle)) {
             throw new IllegalArgumentException("Config value is not settable: " + config);
@@ -143,11 +131,11 @@ public abstract class ModConfigHolder {
         if (handle.setValue(value) && handle.affectsDynamicPacks()) {
             GlobalCachedStrategy.forceInvalidateState(this.getPackType());
         }
-        this.persist();
+        this.saveToDisk();
     }
 
     /** Flushes the whole config to disk (spec save on NeoForge, json write on Fabric). */
-    protected abstract void persist();
+    protected abstract void saveToDisk();
 
     public String getFileName() {
         return fileName;
@@ -169,10 +157,6 @@ public abstract class ModConfigHolder {
     @ClientOnly
     public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
 
-    /**
-     * Loader independent, server safe description of this config as a navigable tree, consumed by the client side
-     * config screen. Null if this holder doesn't expose one.
-     */
     @Nullable
     public ConfigCategory getConfigRoot() {
         return null;

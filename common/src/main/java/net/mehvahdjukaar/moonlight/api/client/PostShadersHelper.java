@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client;
 
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
@@ -39,11 +40,11 @@ public class PostShadersHelper {
             RenderTarget target = gr.postEffect != null ? gr.postEffect.screenTarget : Minecraft.getInstance().getMainRenderTarget();
             gr.postEffect = refreshComposite(gr.postEffect, newPost, group, target);
             gr.effectActive = gr.postEffect != null;
-        } catch (IOException ioexception) {
-            //  LOGGER.warn("Failed to load shader: {}", resourceLocation, ioexception);
+        } catch (IOException e) {
+            Moonlight.LOGGER.warn("Failed to load shader: {}", newPost, e);
             gr.effectActive = false;
-        } catch (JsonSyntaxException jsonsyntaxexception) {
-            //   LOGGER.warn("Failed to parse shader: {}", resourceLocation, jsonsyntaxexception);
+        } catch (JsonSyntaxException e) {
+            Moonlight.LOGGER.warn("Failed to parse shader: {}", newPost, e);
             gr.effectActive = false;
         }
     }
@@ -82,7 +83,6 @@ public class PostShadersHelper {
             super(textureManager, resourceProvider, screenTarget, resourceLocation);
         }
 
-
         @Override
         public void close() {
             for (PostChain sub : chainsPerGroup.values()) {
@@ -93,7 +93,6 @@ public class PostShadersHelper {
             customRenderTargets.clear();
             fullSizedTargets.clear();
         }
-
 
         //prevent it from loading normally
         public void load(@NotNull TextureManager textureManager, @NotNull ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
@@ -130,14 +129,12 @@ public class PostShadersHelper {
                     return this;
                 }
             }
-            // copy existing groups
             Map<Group, PostChain> newGroups = new HashMap<>(this.chainsPerGroup);
             if (newEffect == null) {
                 PostChain removed = newGroups.remove(group);
                 if (removed != null) removed.close();
                 if (newGroups.isEmpty()) {
-                    // if no groups left, return null to indicate no post-chain needed
-                    return null;
+                    return null; // no groups left, so no post-chain is needed
                 }
             } else {
                 PostChain newChain = new PostChain(tm, rm, this.screenTarget, newEffect);
@@ -147,7 +144,6 @@ public class PostShadersHelper {
                 if (old != null) old.close();
             }
 
-            // sort groups by priority
             List<Map.Entry<Group, PostChain>> ordered =
                     newGroups.entrySet().stream()
                             .sorted((a, b) -> Float.compare(a.getKey().priority(), b.getKey().priority()))
@@ -161,37 +157,27 @@ public class PostShadersHelper {
                                       .replace(":", "_"))
                             .reduce((a, b) -> a + "_" + b).orElse("empty"));
 
-            // create new composed chain (empty base)
             ComposedPostChain result = new ComposedPostChain(
                     tm, rm,
                     this.screenTarget,
                     newName
             );
-            // rebuild passes + targets in order
             for (var entry : ordered) {
                 PostChain pc = entry.getValue();
                 result.addSubChain(pc, entry.getKey());
             }
 
             result.resize(this.screenTarget.width, this.screenTarget.height);
-
             return result;
-
         }
 
         private void addSubChain(PostChain chain, Group group) {
             this.chainsPerGroup.put(group, chain);
-
             this.passes.addAll(chain.passes);
             this.customRenderTargets.putAll(chain.customRenderTargets);
             this.fullSizedTargets.addAll(chain.fullSizedTargets);
-
             this.time = chain.time;
             this.lastStamp = chain.lastStamp;
-
-
         }
     }
-
-
 }

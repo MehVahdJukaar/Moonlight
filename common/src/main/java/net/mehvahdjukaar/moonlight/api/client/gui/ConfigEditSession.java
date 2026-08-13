@@ -35,7 +35,6 @@ public final class ConfigEditSession {
         return returnScreen;
     }
 
-    /** The value to display: the pending edit if there is one, otherwise the saved value. */
     @SuppressWarnings("unchecked")
     public <T> T current(ConfigOption<T> v) {
         return pending.containsKey(v) ? (T) pending.get(v) : v.get();
@@ -61,13 +60,11 @@ public final class ConfigEditSession {
         pending.forEach((v, value) -> {
             if (!Objects.equals(value, v.get())) {
                 v.apply(holder, value);
-                // remember the heaviest reload a saved change needs, so the exit can prompt for it
                 if (v.reloadType().ordinal() > appliedReload.ordinal()) appliedReload = v.reloadType();
             }
         });
     }
 
-    /** Most severe reload a saved change has required this visit. */
     public ConfigReloadType appliedReload() {
         return appliedReload;
     }

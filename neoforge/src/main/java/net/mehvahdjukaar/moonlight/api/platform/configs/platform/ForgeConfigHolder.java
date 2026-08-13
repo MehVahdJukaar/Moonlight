@@ -123,7 +123,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    protected void persist() {
+    protected void saveToDisk() {
         spec.save();
     }
 

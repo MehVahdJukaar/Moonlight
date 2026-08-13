@@ -26,9 +26,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * An editable leaf config value in the loader independent screen model. Most kinds are backed by a single writable
- * value of the same type and extend {@link SimpleConfigOption}; the compound kinds (range/vec3/json) sit on top of
- * several backing leaves and extend this class directly.
+ * An editable leaf config value in the loader independent screen model. Most kinds extend {@link SimpleConfigOption},
+ * backed by a single writable value of the same type; the compound kinds (range/vec3/json) sit on top of several
+ * backing leaves and extend this class directly.
  */
 public abstract class ConfigOption<T> extends ConfigNode {
 
@@ -39,10 +39,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         this.defaultValue = defaultValue;
     }
 
-    /**
-     * How a change to this value takes effect. A grouped row (range/vec3) reports the highest severity among its
-     * backing leaves.
-     */
+    /** How a change takes effect. A grouped row reports the highest severity among its backing leaves. */
     public ConfigReloadType reloadType() {
         return backingMeta()
                 .map(IConfigValue::reloadType)
@@ -50,7 +47,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
                 .orElse(ConfigReloadType.NONE);
     }
 
-    /** The backing leaf value(s): one for a leaf row, several for a grouped one. */
+    // one leaf for a simple row, several for a grouped one
     protected abstract Stream<IConfigValue<?>> backingMeta();
 
     // handles may be synthetic suppliers, so only the real leaves are kept
@@ -60,20 +57,18 @@ public abstract class ConfigOption<T> extends ConfigNode {
                 .map(h -> (IConfigValue<?>) h);
     }
 
-    /** The currently saved value. */
     public abstract T get();
 
     public T defaultValue() {
         return defaultValue;
     }
 
-    /** Writes the given (already validated) value back to the underlying config and saves it. */
+    /** Writes an already validated value back to the underlying config and saves it. */
     public abstract void apply(ModConfigHolder holder, Object value);
 
     /**
-     * An option backed by a single writable leaf of the same type. Reading, writing and change metadata all go
-     * straight through the object {@code define(...)} returned (a {@code ConfigValue} on Fabric, a
-     * {@code ValueWrapper} on NeoForge).
+     * An option backed by a single writable leaf of the same type. Reads, writes and metadata all go straight through
+     * the object {@code define(...)} returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge).
      */
     public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
@@ -102,11 +97,9 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    // ===== concrete value kinds =====
-
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // a "feature" boolean renders as the ✓/✗ toggle instead of the plain ON/OFF button. A category gate is drawn
-        // the same way but keyed off the owning category's gate() rather than this flag
+        // renders as the ✓/✗ toggle instead of the plain ON/OFF button. A category gate looks the same but is keyed
+        // off the owning category's gate() rather than this flag
         private boolean feature;
 
         public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
@@ -134,7 +127,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** An int drawn as a slider instead of a text field. The control registry keys on the exact class. */
+    // the control registry keys on the exact class, hence the marker subclasses
     public static class IntSliderValue extends IntValue {
         public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
@@ -152,14 +145,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** A double drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class DoubleSliderValue extends DoubleValue {
         public DoubleSliderValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    /** A {@code [0, 1]} double drawn as a slider that displays a percentage. */
+    /** A {@code [0, 1]} double shown as a percentage slider. */
     public static class PercentValue extends DoubleValue {
         public PercentValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
@@ -283,7 +275,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** Three backing double values presented as one row of number fields. Bounds are shared by all components. */
     public static class Vec3Value extends ConfigOption<Vec3> {
         public final Supplier<Double> xHandle;
         public final Supplier<Double> yHandle;
@@ -320,7 +311,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** Integer counterpart of {@link Vec3Value}. */
     public static class Vec3iValue extends ConfigOption<Vec3i> {
         public final Supplier<Integer> xHandle;
         public final Supplier<Integer> yHandle;
@@ -357,10 +347,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A list of strings, edited on a dedicated add/remove page. With {@code options} present each entry is picked
-     * from a dropdown instead of typed as free text.
-     */
     public static class ListValue extends SimpleConfigOption<List<String>> {
         @Nullable
         public final Predicate<String> entryValidator;
@@ -388,10 +374,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A JSON-backed value (raw json or a reflection-serialized bean), edited as pretty-printed text on a dedicated
-     * page. The screen sees a {@code String}; {@link #apply} parses it back into a {@link JsonElement}.
-     */
     public static class JsonValue extends ConfigOption<String> {
         public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -424,10 +406,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A codec-backed object value that can be edited, since it carries a {@link SchemaCodec}: its row opens a form
-     * generated from the schema instead of the "edit manually" placeholder. The wire format is unchanged.
-     */
     public static class SchemaValue<T> extends ConfigOption<T> {
         private final IConfigValue<T> handle;
         private final Supplier<T> lazyDefault;
@@ -467,7 +445,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** A value the screen can't edit. Shown as a disabled row telling the user to edit the file manually. */
     public static class UnsupportedValue extends ConfigOption<Object> {
         private final Supplier<Object> handle;
 
@@ -483,7 +460,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         @Override
         public void apply(ModConfigHolder holder, Object value) {
-            // not editable
         }
 
         @Override

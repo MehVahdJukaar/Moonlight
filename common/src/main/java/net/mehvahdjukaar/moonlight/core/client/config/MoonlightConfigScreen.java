@@ -82,8 +82,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         return parentConfig == null;
     }
 
-    // ===== ConfigScreenView =====
-
     @Override
     public Font font() {
         return this.font;
@@ -143,7 +141,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
 
         List<BreadcrumbWidget.Crumb> crumbs = new ArrayList<>();
         for (MoonlightConfigScreen s = this; s != null; s = s.parentConfig) {
-            Component label = s.isRoot() ? Component.literal("⌂") : s.category.title(); // ⌂ home
+            Component label = s.isRoot() ? Component.literal("⌂") : s.category.title();
             crumbs.addFirst(new BreadcrumbWidget.Crumb(label, s, s == this));
         }
         int trailRight = this.searchBox.getX() - SEARCH_ICON_SIZE - 6; // leave room for the magnifier glyph + a gap
@@ -180,12 +178,11 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         refreshSave();
     }
 
-    // asks for confirmation, then resets every value in the config to its default and saves immediately
     private void confirmResetAll() {
         this.minecraft.setScreen(new ConfirmScreen(confirmed -> {
             if (confirmed) {
                 resetAllToDefaults(this.category);
-                session.apply();        // reset writes straight through, like the per-row reset + Save
+                session.apply(); // writes straight through, like the per-row reset + Save
                 session.clearPending();
             }
             this.minecraft.setScreen(this); // re-inits, so rows re-read the (now saved) values
@@ -193,7 +190,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
                 Component.translatable("gui.moonlight.config.reset_all.message")));
     }
 
-    // recursively stages the default value of every editable option in a category and its sub-categories
     private void resetAllToDefaults(ConfigCategory cat) {
         for (ConfigNode e : cat.entries()) {
             if (e instanceof ConfigCategory sub) {
@@ -219,7 +215,7 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
                 }
             }
         } else {
-            // flat, recursive search across this category's whole subtree
+            // flat search across the whole subtree
             List<ConfigOption<?>> matches = new ArrayList<>();
             collectMatches(category, query, matches);
             for (ConfigOption<?> v : matches) {
@@ -259,7 +255,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     private void refreshSave() {
         if (this.saveButton == null) return;
         int unsaved = session.unsavedCount();
-        // the "(N)" unsaved counter is tinted amber to draw the eye when there are pending edits
         Component count = Component.literal("(" + unsaved + ")")
                 .withStyle(s -> s.withColor(TextColor.fromRgb(ConfigGuiColors.MODIFIED)));
         this.saveButton.setMessage(unsaved > 0
@@ -286,7 +281,6 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
         else this.minecraft.setScreen(parentConfig);
     }
 
-    // returns to the screen the config was opened from, toasting if any saved change needs a reload
     private void leaveConfig() {
         ConfigReloadType reload = session.appliedReload();
         if (reload != ConfigReloadType.NONE) {
@@ -335,9 +329,8 @@ public class MoonlightConfigScreen extends Screen implements ConfigScreenAccess,
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        // header chrome sits in the background layer, drawn before the widgets by super.render. The row list is
-        // scissored below HEADER so rows slide under the bar cleanly, and the breadcrumb and search box are
-        // renderable widgets drawn on top of it
+        // header chrome belongs in the background layer, drawn before the widgets by super.render. The row list is
+        // scissored below HEADER so rows slide under the bar cleanly
         GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
         graphics.blitSprite(SEARCH_ICON, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,

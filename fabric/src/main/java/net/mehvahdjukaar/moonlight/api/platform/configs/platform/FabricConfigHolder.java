@@ -147,7 +147,7 @@ public final class FabricConfigHolder extends ModConfigHolder {
     }
 
     @Override
-    protected void persist() {
+    protected void saveToDisk() {
         this.saveConfig();
     }
 

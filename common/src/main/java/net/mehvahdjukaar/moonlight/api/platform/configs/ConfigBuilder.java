@@ -40,22 +40,22 @@ public abstract class ConfigBuilder {
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
-    // comment(...) may come before or after its define(...). It binds forward to the next define; if none claims it,
-    // it falls back onto the last one. Forward-first stops an un-commented define (a feature() toggle for instance)
-    // from stealing the before-comment of the value that follows it
+    // comment(...) may come before or after its define(...). It binds forward to the next define, falling back on the
+    // last one if nothing claims it. Forward-first stops an un-commented define (a feature() toggle) from stealing
+    // the before-comment of the value that follows it
     @Nullable
     private String pendingComment;
-    // forwarded only once, so it doesn't re-emit for each suppressed backing value of a compound define
+    // forwarded once only, so it doesn't re-emit for each suppressed backing value of a compound define
     private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
     @Nullable
     private String lastCommentKey;
 
-    // loader independent UI tree consumed by the native config screen, built as values are defined
+    // loader independent UI tree consumed by the native config screen
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
-    // effective "enabled" supplier of the current category (parallel to uiStack); a feature() ANDs its own value with
+    // effective "enabled" supplier of the current category, parallel to uiStack. A feature() ANDs its own value with
     // the ancestor beneath it, so nested features compose at read time without touching stored child values
     private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
     // while set, define(...)/push(...) skip UI emission, so a compound value (e.g. defineRange) shows one combined row
@@ -63,21 +63,19 @@ public abstract class ConfigBuilder {
 
     // every feature()'s effective supplier, keyed by both short name and full dotted path
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
-    // raw category-name stack (root first), parallel to uiStack, so a feature's full path can be built
+    // raw category names, root first, so a feature's full path can be built
     private final Deque<String> categoryPath = new ArrayDeque<>();
 
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
-    protected boolean usesDataBuddy = true; // on by default; setWriteJsons() disables it
+    protected boolean usesDataBuddy = true;
 
-    // set by worldReload()/gameRestart(), applied to and cleared by the next recorded option
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
     // set by icon(...), applied to and cleared by the next category push or defined option
     @Nullable
     private ResourceLocation pendingIcon;
 
-    // applies a pending/late comment to its value (on-disk comment + screen row)
     @FunctionalInterface
     protected interface CommentTarget {
         void applyComment(String rawComment);
@@ -99,7 +97,7 @@ public abstract class ConfigBuilder {
         this.name = name;
         this.type = type;
         this.uiStack.push(this.uiRoot);
-        this.gateStack.push(() -> true); // root is always enabled
+        this.gateStack.push(() -> true);
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
@@ -171,10 +169,8 @@ public abstract class ConfigBuilder {
         return new RegexPatternValue(defineRegexInternal(name, defaultValue));
     }
 
-    // stores the regex as a string and records the RegexValue row
     protected abstract Supplier<String> defineRegexInternal(String name, String defaultValue);
 
-    // stores a validated string and records a DropdownValue row
     protected abstract Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
                                                              Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon);
 
@@ -248,7 +244,6 @@ public abstract class ConfigBuilder {
         return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
     }
 
-    /** {@link #defineRegistryList} preset to the block registry, previewing each block's item icon. */
     public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
@@ -392,7 +387,6 @@ public abstract class ConfigBuilder {
 
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
-        // stored and screen-edited as a validated string; the returned supplier just parses it
         Supplier<String> handle = define(name, defaultValue.toString(), REGISTRY_ID_CHECK);
         return () -> ResourceLocation.parse(handle.get());
     }
@@ -446,8 +440,7 @@ public abstract class ConfigBuilder {
         }
     }
 
-    // Forge attaches a comment to the NEXT define, so hand out the pending before-comment once. Null when there's
-    // nothing new to forward
+    // Forge attaches a comment to the NEXT define, so hand out the pending before-comment once
     @Nullable
     protected String pollCommentToForward() {
         if (this.pendingComment != null && !this.pendingCommentForwarded) {
@@ -474,7 +467,6 @@ public abstract class ConfigBuilder {
         this.lastCommentKey = null;
     }
 
-    // wires the comment target so a before- or after-comment reaches this value
     protected void noteDefined(String name, @Nullable ConfigNode uiNode, @Nullable Consumer<String> rawCommentSink) {
         if (this.suppressUi) return;
         String key = this.tooltipKey(name);
@@ -495,19 +487,19 @@ public abstract class ConfigBuilder {
     }
 
     protected void uiPush(Component title) {
-        // a comment(...) right before a push belongs to the category itself, not to its first value. We don't show
-        // category descriptions yet, so drop it instead of letting the first child claim it
+        // a comment(...) right before a push belongs to the category itself, not to its first value. Category
+        // descriptions aren't shown yet, so drop it instead of letting the first child claim it
         this.pendingComment = null;
         this.pendingCommentForwarded = false;
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
-        if (this.pendingIcon != null) { // an icon(...) right before this push decorates the category row
+        if (this.pendingIcon != null) {
             cat.setIcon(this.pendingIcon);
             this.pendingIcon = null;
         }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
-        this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it
+        this.gateStack.push(this.gateStack.peek()); // inherited until a feature() narrows it
         this.categoryPath.addLast(currentCategory());
     }
 
@@ -540,13 +532,13 @@ public abstract class ConfigBuilder {
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
             // explicit icon(...) wins, else infer from the category name. Mirrored so the category button and the
-            // enable-gate row share one icon
+            // gate row share one icon
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
             if (cat.icon() == null) cat.setIcon(bv.icon());
         }
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
-        this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
+        this.gateStack.pop(); // replace the inherited gate with this category's own
         this.gateStack.push(effective);
         registerFeature(currentCategory(), currentCategoryPath(), effective);
         return effective;
@@ -593,7 +585,7 @@ public abstract class ConfigBuilder {
         return ResourceLocation.tryBuild(this.name.getNamespace(), name);
     }
 
-    // registered under both short name and full dotted path, so a feature can be queried either way
+    // keyed by both short name and full dotted path, so a feature can be queried either way
     private void registerFeature(String name, String path, Supplier<Boolean> effective) {
         this.featureToggles.put(name, effective);
         this.featureToggles.put(path, effective);
@@ -609,8 +601,8 @@ public abstract class ConfigBuilder {
 
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
-        // the flags were already stamped onto each backing leaf as it was defined. This no-ops while suppressed, so
-        // every leaf of a group gets stamped before we clear them here
+        // the flags were already stamped onto each backing leaf as it was defined. Suppressed groups no-op here, so
+        // every leaf gets stamped before we clear them
         this.pendingReload = ConfigReloadType.NONE;
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);

@@ -28,9 +28,8 @@ import java.util.function.Function;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-// Client side registry turning a server safe ConfigOption into an editing ConfigVisuals. The one place that knows
-// about widgets: the screen just asks create() and never branches on value type, so a new control means registering a
-// provider here (or, for add-ons, register() from their own client init) rather than touching the screen.
+// Client side registry turning a server safe ConfigOption into an editing ConfigVisuals. The screen just calls
+// create() and never branches on value type, so a new control means registering a provider here instead
 public final class ConfigControllers {
 
     private static final Map<Class<?>, ConfigVisuals. Provider<?>> PROVIDERS = new HashMap<>();
@@ -47,7 +46,6 @@ public final class ConfigControllers {
     }
 
 
-    // ===== built-in providers =====
     static {
         // the ✓/✗ sprite toggle is reserved for feature() switches, plain booleans get an ON/OFF text button
         register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
@@ -89,7 +87,6 @@ public final class ConfigControllers {
                         s.put(o, c);
                         onChange.run();
                     },
-                    // clicking the swatch opens the color picker page; on Done it writes the picked color back
                     currentColor -> Minecraft.getInstance().setScreen(
                             new ColorPickerScreen(currentColor, o.hasAlpha, Minecraft.getInstance().screen, picked -> {
                                 s.put(o, picked);
@@ -98,7 +95,7 @@ public final class ConfigControllers {
             return new ConfigVisuals<Integer>(w, w::setColor);
         });
 
-        // plain numbers -> stepper field, slider subtypes -> slider. The value's own class is the signal
+        // plain numbers get a stepper field, slider subtypes get a slider
         register(ConfigOption.IntValue.class, (o, s, onChange) ->
                 numberField(s.current(o), o.min, o.max, true, v -> {
                     s.put(o, (int) Math.round(v));
@@ -183,7 +180,7 @@ public final class ConfigControllers {
             });
         });
 
-        // codec objects that declare a CodecUI schema get a real, schema-generated form instead of the placeholder
+        // codec objects declaring a CodecUI schema get a generated form instead of the placeholder
         @SuppressWarnings("unchecked")
         Class<ConfigOption.SchemaValue<?>> schemaClass =
                 (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
@@ -199,11 +196,11 @@ public final class ConfigControllers {
     }
 
 
-    // A category's feature() gate shown as a row inside its own category: like the plain boolean control but drawing
-    // ✓/✗ sprites, matching the inline toggle the parent screen shows next to the category button
+    // A category's feature() gate, drawn as ✓/✗ sprites to match the inline toggle the parent screen shows next to
+    // the category button
     static ConfigVisuals<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
         ResourceLocation icon = o.icon();
-        // draw the feature's decorative item just left of the ✓/✗ symbol, when it resolves to something
+        // decorative item drawn left of the ✓/✗ symbol, when the id resolves to something
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
 
@@ -225,7 +222,6 @@ public final class ConfigControllers {
         }, iconRenderer);
         return new ConfigVisuals<Boolean>(w, w::set);
     }
-    // ===== widget builders =====
 
     private static <E extends Enum<E>> ConfigVisuals<E> enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {
         CycleButton<E> w = CycleButton.<E>builder(x -> Component.literal(x.name()))
