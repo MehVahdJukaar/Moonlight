@@ -47,7 +47,7 @@ public final class ConfigControllers {
 
 
     static {
-        // the ✓/✗ sprite toggle is reserved for feature() switches, plain booleans get an ON/OFF text button
+        // the check/cross sprite toggle is reserved for feature() switches, plain booleans get an ON/OFF text button
         register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
             CycleButton<Boolean> w = CycleButton.onOffBuilder(s.current(o))
                     .displayOnlyValue()
@@ -196,11 +196,11 @@ public final class ConfigControllers {
     }
 
 
-    // A category's feature() gate, drawn as ✓/✗ sprites to match the inline toggle the parent screen shows next to
+    // A category's feature() gate, drawn as check/cross sprites to match the inline toggle the parent screen shows next to
     // the category button
     static ConfigVisuals<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
         ResourceLocation icon = o.icon();
-        // decorative item drawn left of the ✓/✗ symbol, when the id resolves to something
+        // decorative item drawn left of the check/cross symbol, when the id resolves to something
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
 

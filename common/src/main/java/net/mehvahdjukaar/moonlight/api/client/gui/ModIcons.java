@@ -17,9 +17,9 @@ import java.util.Optional;
 import java.util.Locale;
 
 /**
- * Lazily loads and caches mod icons (from each mod's jar, via {@link PlatHelper#getModIcon}) as GUI textures, so
- * screens can show a mod's logo. Returns {@code null} for mods that declare no icon (callers draw a fallback).
- * Load happens once per mod id on the render thread and the {@link DynamicTexture} lives for the game session.
+ * Loads mod icons out of each mod's jar (through PlatHelper.getModIcon) and keeps them around as GUI textures, so
+ * screens can draw a mod's logo. Returns null for mods that don't declare one, and callers draw something else.
+ * Each mod id is loaded once, on the render thread, and its texture stays until the game closes.
  */
 public final class ModIcons {
 

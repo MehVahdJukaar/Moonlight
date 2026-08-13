@@ -65,7 +65,7 @@ public class ScreenParticle {
         return this;
     }
 
-    /** Downward acceleration in px/s². Negative floats the particle up. */
+    /** Downward acceleration in px/s^2. Negative floats the particle up. */
     public ScreenParticle gravity(float gravity) {
         this.gravity = gravity;
         return this;

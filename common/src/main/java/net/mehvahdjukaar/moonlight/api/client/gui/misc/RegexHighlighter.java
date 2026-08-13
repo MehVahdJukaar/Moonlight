@@ -6,10 +6,9 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
- * Lightweight regex syntax highlighter. Classifies each character of the pattern (escapes, character classes,
- * groups, quantifiers, anchors) into a color; a pattern that doesn't compile is drawn entirely in red. This is a
- * coloring scan, not a full parser. Typically bound to a single-line {@link EditBox} via
- * {@code box.setFormatter(RegexHighlighter.INSTANCE.formatter(box))}.
+ * Small regex colorer. Picks a color per character of the pattern (escapes, character classes, groups, quantifiers,
+ * anchors), and paints the whole thing red when the pattern doesn't compile. It only colors text, it doesn't parse
+ * it. Usually hooked to a one line EditBox with box.setFormatter(RegexHighlighter.INSTANCE.formatter(box)).
  */
 public final class RegexHighlighter implements SyntaxHighlighter {
 

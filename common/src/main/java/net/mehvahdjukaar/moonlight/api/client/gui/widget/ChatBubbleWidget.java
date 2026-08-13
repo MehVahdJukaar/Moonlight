@@ -10,10 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * A rounded chat-bubble widget: white interior, black outline, fixed height, variable width.
- * <p>
- * Can be added to a screen like any other {@link AbstractWidget}, or positioned dynamically
- * above another widget via {@link #renderPointingAt(GuiGraphics, AbstractWidget, int, int, int, float)}.
+ * A rounded chat bubble: white inside, black outline, fixed height, width follows the text. Add it to a screen like
+ * any other widget, or place it above another one with renderPointingAt().
  */
 public class ChatBubbleWidget extends AbstractWidget {
 
@@ -73,9 +71,7 @@ public class ChatBubbleWidget extends AbstractWidget {
         graphics.drawString(this.font, this.getMessage(), textX, textY, this.textColor, false);
     }
 
-    /**
-     * Renders this bubble above {@code target}, clamped to the screen width and with an optional bob animation.
-     */
+    /** Draws the bubble above the target widget, kept inside the screen, with an optional bob animation. */
     public void renderPointingAt(GuiGraphics graphics, AbstractWidget target, int screenWidth,
                                  int mouseX, int mouseY, float partialTick) {
         int bubbleW = this.getWidth();

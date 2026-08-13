@@ -68,8 +68,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigOption.UnsupportedValue(uiTitle(name), uiDescription(name), (Supplier<Object>) handle);
     }
 
-    // The flags stay set across a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the
-    // same meta
+    // The flags stay set while a grouped value defines its hidden parts, so every piece of a range or vec3 gets the
+    // same reload info
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }

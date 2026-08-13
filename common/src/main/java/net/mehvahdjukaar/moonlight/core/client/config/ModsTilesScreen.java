@@ -40,8 +40,8 @@ public class ModsTilesScreen extends Screen {
 
     private static final int CARD_W = 88;
     private static final int CARD_PAD = 9;        // equal padding above the icon and below the last text line
-    private static final int ICON_TEXT_GAP = 6;   // icon → name
-    private static final int NAME_VER_GAP = 2;    // name → version
+    private static final int ICON_TEXT_GAP = 6;   // icon to name
+    private static final int NAME_VER_GAP = 2;    // name to version
     private static final int ICON_SIZE = 32;      // icon slot height; square icons render at this, wider ones expand
     private static final int ICON_SIDE_PAD = 8;   // min horizontal padding kept between a wide icon and the tile edge
     private static final int LINE = 9;            // vanilla font line height

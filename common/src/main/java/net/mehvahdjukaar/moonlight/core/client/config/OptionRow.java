@@ -31,7 +31,7 @@ class OptionRow extends ConfigListRow {
     @Nullable
     private final ConfigCategory owner; // the category this value lives under, for feature-gating greyout
     private final boolean isGate; // this value IS its category's feature() toggle (the "enabled" switch)
-    private final boolean asToggle; // drawn as the ✓/✗ feature toggle (a category gate, or a named feature leaf)
+    private final boolean asToggle; // drawn as the check/cross feature toggle (a category gate, or a named feature leaf)
     private final Component title;
     @Nullable
     private final Component description;

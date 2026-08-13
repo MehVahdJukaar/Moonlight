@@ -57,9 +57,8 @@ public class MediaButton {
     }
 
     /**
-     * A logical button slot the remote allow-list can toggle. Mostly 1:1 with a {@link MediaIcon}, except
-     * {@link #SERVER}, a single slot whose icon is chosen per host. A type missing from the hub config's allow-list
-     * isn't shown.
+     * A button slot the remote allow-list can turn on and off. One per MediaIcon, except SERVER, which is a single
+     * slot whose icon depends on the host. A type not in the hub config's allow-list isn't drawn.
      */
     public enum ButtonType implements StringRepresentable {
         YOUTUBE,
@@ -226,9 +225,9 @@ public class MediaButton {
     }
 
     /**
-     * Legacy Akliz button. A url matching the old canonical akliz signature delegates to
-     * {@link #serverProvider(Screen, int, int)}, or to an invisible placeholder of the same size when no partner is
-     * configured, so existing layouts stay intact. Any other url renders a plain akliz-branded button.
+     * Old Akliz button. If the url is the old canonical akliz one it hands off to serverProvider(), or to an
+     * invisible button of the same size when no partner is set, so old layouts don't shift around. Any other url
+     * just gets a plain akliz button.
      */
     public static Button akliz(Screen parent, int x, int y, String url) {
         MoonlightHubInfo.PartnerServerProvider oldInfo = MoonlightHubInfo.OLD_SIGNATURE.partnerServer();
@@ -251,8 +250,8 @@ public class MediaButton {
     }
 
     /**
-     * Dynamic partner-server button, its icon, name and url coming from the hub config fetched on startup. Null when
-     * no partner is configured, in which case callers skip the slot or fall back to {@link #akliz}.
+     * Partner server button. Its icon, name and url come from the hub config fetched at startup. Null when no
+     * partner is set, in which case callers skip the slot or fall back to akliz().
      */
     @Nullable
     public static Button serverProvider(Screen parent, int x, int y) {
@@ -265,11 +264,11 @@ public class MediaButton {
     }
 
     /**
-     * The classic Moonlight bottom bar: a centered Back button flanked by the author's media buttons, support and
-     * mod pages going leftward, socials going rightward. Per-mod urls passed as null fall back to loader metadata,
-     * and buttons that stay unresolved are skipped.
+     * The usual Moonlight bottom bar: a centered Back button with the author's media buttons on either side, support
+     * and mod pages going left, socials going right. Per mod urls left null are read from the loader metadata
+     * instead, and buttons with no url are skipped.
      *
-     * @param adder typically {@code screen::addRenderableWidget}
+     * @param adder usually screen::addRenderableWidget
      */
     public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
                                              int centerX, int y, int spacing,

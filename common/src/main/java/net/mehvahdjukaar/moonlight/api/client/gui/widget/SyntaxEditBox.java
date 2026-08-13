@@ -12,9 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 
 /**
- * A {@link MultiLineEditBox} that renders its text through a per-line {@link SyntaxHighlighter}, where vanilla only
- * draws each line as a flat-colored plain string. Only rendering changes: the text model, cursor, selection and
- * scrolling all stay in the inherited {@link MultilineTextField}.
+ * A MultiLineEditBox that draws its text through a SyntaxHighlighter, one line at a time, where vanilla just draws
+ * each line in a single color. Only the drawing changes: the text itself, the cursor, the selection and the
+ * scrolling all stay in the inherited MultilineTextField.
  */
 public class SyntaxEditBox extends MultiLineEditBox {
 

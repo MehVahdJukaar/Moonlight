@@ -79,7 +79,7 @@ public class CommonConfigs {
             builder.push("test_category");
             builder.comment("A dev only section used to test the config screen. It doesn't ship to players.");
 
-            builder.icon("minecraft:lever").comment("A boolean feature: drawn as a ✓/✗ toggle with its icon next to the symbol").feature("test_bool", true);
+            builder.icon("minecraft:lever").comment("A boolean feature, drawn as a check/cross toggle with its icon next to the symbol").feature("test_bool", true);
             builder.comment("A plain boolean, drawn as an ON/OFF button").define("test_plain_bool", true);
             builder.comment("A value that needs a world reload (shows a globe icon)").worldReload().define("test_world_reload", true);
             builder.comment("A value that needs a game restart (shows a power icon)").gameRestart().define("test_game_restart", true);

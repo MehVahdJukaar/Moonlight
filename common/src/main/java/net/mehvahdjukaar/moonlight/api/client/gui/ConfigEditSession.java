@@ -9,8 +9,7 @@ import java.util.*;
 
 /**
  * Mutable editing state for one config screen visit, shared across the whole navigation stack so edits made in a
- * subcategory survive going back and are persisted by a single Save. Nothing reaches the underlying config until
- * {@link #apply()}.
+ * subcategory survive going back and are written by a single Save. Nothing touches the real config until apply().
  */
 public final class ConfigEditSession {
 

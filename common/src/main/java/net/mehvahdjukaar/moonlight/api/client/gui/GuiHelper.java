@@ -58,16 +58,16 @@ public final class GuiHelper {
     }
 
     /**
-     * A left-to-right gradient, which {@code GuiGraphics#fillGradient} can't do. Drawn as 1px columns, so keep the
-     * span narrow (edge fades, highlights) rather than filling whole screens with it.
+     * A left to right gradient, which GuiGraphics.fillGradient can't do. Drawn as 1px columns, so keep the span
+     * narrow (edge fades, highlights) instead of filling whole screens with it.
      */
     public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
     }
 
     /**
-     * As above, over an explicit render type. Pass {@link RenderType#guiOverlay()} to fade over rendered items: they
-     * write depth at z 150, so the default depth-tested {@link RenderType#gui()} would be punched out by them.
+     * As above, over a given render type. Pass RenderType.guiOverlay() to fade over rendered items: they write depth
+     * at z 150, so the default RenderType.gui() is depth tested and gets punched out by them.
      */
     public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         int steps = maxX - minX;
@@ -92,7 +92,7 @@ public final class GuiHelper {
         RenderSystem.disableBlend();
     }
 
-    /** Vertical counterpart to {@link #renderSeparator}. Vanilla's sprites are horizontal, so this one is drawn. */
+    /** Same as renderSeparator but vertical. Vanilla's sprites are horizontal, so this one is drawn by hand. */
     public static void renderVerticalSeparator(GuiGraphics graphics, int x, int top, int bottom) {
         graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.HEADER_SEPARATOR);
         graphics.fill(x + 1, top, x + 2, bottom, 0x18FFFFFF);
@@ -110,7 +110,7 @@ public final class GuiHelper {
                 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
     }
 
-    /** The tiling list background over a scroll panel, as {@code AbstractSelectionList} draws it. */
+    /** The tiling list background over a scroll panel, the way AbstractSelectionList draws it. */
     public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
         ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
         RenderSystem.enableBlend();
@@ -118,7 +118,7 @@ public final class GuiHelper {
         RenderSystem.disableBlend();
     }
 
-    /** The bottom inner-shadow strip, as {@code AbstractSelectionList} draws it. */
+    /** The bottom inner shadow strip, the way AbstractSelectionList draws it. */
     public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
         ResourceLocation footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
         RenderSystem.enableBlend();
@@ -138,8 +138,8 @@ public final class GuiHelper {
     }
 
     /**
-     * The placeholder mod icon: a dark square with the mod's capital initial, or {@code gearIcon} when the name is
-     * blank. Colors are passed in so callers can dim it.
+     * The placeholder mod icon: a dark square with the mod's capital initial, or gearIcon when the name is blank.
+     * Colors are passed in so callers can dim it.
      */
     public static void renderInitialTile(GuiGraphics graphics, Font font, String name, int x, int y, int size,
                                          int tileColor, int letterColor, ResourceLocation gearIcon) {
@@ -162,14 +162,14 @@ public final class GuiHelper {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
     }
 
-    /** A number as a text field shows it: no trailing {@code .0} when it happens to be whole. */
+    /** A number the way a text field shows it, with no trailing .0 when it happens to be whole. */
     public static String formatNumber(double v) {
         return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
     }
 
     /**
-     * Left aligned text that scrolls back and forth when it doesn't fit its box, as vanilla's
-     * {@code AbstractWidget.renderScrollingString} does, which isn't publicly accessible.
+     * Left aligned text that scrolls back and forth when it doesn't fit its box, like vanilla's
+     * AbstractWidget.renderScrollingString, which we can't call.
      */
     public static void renderScrollingText(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
@@ -178,7 +178,7 @@ public final class GuiHelper {
         }
     }
 
-    /** Like {@link #renderScrollingText} but centered while the text fits, only marqueeing once it overflows. */
+    /** Like renderScrollingText, but centered while the text fits and only scrolling once it doesn't. */
     public static void renderScrollingTextCentered(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {

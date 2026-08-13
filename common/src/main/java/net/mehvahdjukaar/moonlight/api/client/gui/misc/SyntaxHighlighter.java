@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * A per-line syntax colorer. An implementation only has to classify each character of a line into an RGB color;
- * {@link #highlightLine} (multi-line, for {@link SyntaxEditBox}) and {@link #formatter} (single-line, for
- * {@link EditBox#setFormatter}) are derived from that. Built-in implementations are singletons, and being a
- * functional interface an ad-hoc {@code line -> int[]} lambda works too.
+ * Colors one line of text at a time. All an implementation does is give a color per character of the line, and both
+ * highlightLine (for SyntaxEditBox) and formatter (for EditBox.setFormatter) are built on top of that. The built-in
+ * ones are singletons, and since this is a functional interface a plain line -> int[] lambda works too.
  */
 @FunctionalInterface
 public interface SyntaxHighlighter {
@@ -41,7 +40,7 @@ public interface SyntaxHighlighter {
     }
 
     /**
-     * A formatter for {@link EditBox#setFormatter}: colors the box's whole value and hands back the requested chunk.
+     * A formatter for EditBox.setFormatter. Colors the box's whole value, then hands back the piece it asked for.
      * The scan is cached per source string so it isn't redone for every rendered chunk.
      */
     default BiFunction<String, Integer, FormattedCharSequence> formatter(EditBox box) {

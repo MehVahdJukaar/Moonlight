@@ -26,9 +26,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * An editable leaf config value in the loader independent screen model. Most kinds extend {@link SimpleConfigOption},
- * backed by a single writable value of the same type; the compound kinds (range/vec3/json) sit on top of several
- * backing leaves and extend this class directly.
+ * One editable value on a config screen. Most kinds extend SimpleConfigOption and sit on a single stored value of the
+ * same type. The grouped ones (range, vec3, json) sit on several stored values and extend this class directly.
  */
 public abstract class ConfigOption<T> extends ConfigNode {
 
@@ -39,7 +38,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         this.defaultValue = defaultValue;
     }
 
-    /** How a change takes effect. A grouped row reports the highest severity among its backing leaves. */
+    /** When a change takes effect. A grouped row reports the heaviest of the values behind it. */
     public ConfigReloadType reloadType() {
         return backingMeta()
                 .map(IConfigValue::reloadType)
@@ -47,10 +46,10 @@ public abstract class ConfigOption<T> extends ConfigNode {
                 .orElse(ConfigReloadType.NONE);
     }
 
-    // one leaf for a simple row, several for a grouped one
+    // one stored value for a simple row, several for a grouped one
     protected abstract Stream<IConfigValue<?>> backingMeta();
 
-    // handles may be synthetic suppliers, so only the real leaves are kept
+    // some handles are plain suppliers we made up, so keep only the real stored values
     protected static Stream<IConfigValue<?>> metaOf(Supplier<?>... handles) {
         return Arrays.stream(handles)
                 .filter(h -> h instanceof IConfigValue)
@@ -63,12 +62,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         return defaultValue;
     }
 
-    /** Writes an already validated value back to the underlying config and saves it. */
+    /** Writes an already checked value back to the config and saves it. */
     public abstract void apply(ModConfigHolder holder, Object value);
 
     /**
-     * An option backed by a single writable leaf of the same type. Reads, writes and metadata all go straight through
-     * the object {@code define(...)} returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge).
+     * An option sitting on a single stored value of the same type. Reads and writes go straight through the object
+     * define(...) returned: a ConfigValue on Fabric, a ValueWrapper on NeoForge.
      */
     public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
@@ -84,7 +83,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
             return handle.get();
         }
 
-        // cast is safe: value always originates from a control bound to this entry
+        // cast is safe, the value always comes from the widget bound to this row
         @Override
         @SuppressWarnings("unchecked")
         public void apply(ModConfigHolder holder, Object value) {
@@ -98,7 +97,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // renders as the ✓/✗ toggle instead of the plain ON/OFF button. A category gate looks the same but is keyed
+        // renders as the check/cross toggle instead of the plain ON/OFF button. A category gate looks the same but is keyed
         // off the owning category's gate() rather than this flag
         private boolean feature;
 
@@ -151,7 +150,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** A {@code [0, 1]} double shown as a percentage slider. */
+    /** A 0 to 1 double shown as a percentage slider. */
     public static class PercentValue extends DoubleValue {
         public PercentValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
@@ -379,7 +378,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         private final Supplier<JsonElement> json;
 
-        // stays lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
+        // stays lazy. On NeoForge the spec can't be read while defining, so never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
             super(title, description, null);
             this.json = json;

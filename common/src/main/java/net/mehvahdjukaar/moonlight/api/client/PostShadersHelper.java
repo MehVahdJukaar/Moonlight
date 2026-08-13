@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Allows one to add and remove post shader effects in an ordered, grouped and non-destructive way.
+ * Lets you add and remove post shader effects in a set order, in groups, without wiping out the ones other mods
+ * already put there.
  */
 public class PostShadersHelper {
 
@@ -29,7 +30,8 @@ public class PostShadersHelper {
     }
 
     /**
-     * Use instead of loadEffect: adds a post-effect non-destructively, so multiple mods can work together.
+     * Use this instead of loadEffect. It adds a post effect without throwing away the ones already active, so
+     * several mods can add their own at the same time.
      *
      * @param newPost post-effect. Null to remove it
      * @param group   effect group, used for priority and mutual exclusivity

@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A color input control: a hex field ({@code #AARRGGBB}) plus a {@link ColorSwatchWidget}. Editing the hex reports
- * the new ARGB color through {@code onChange}; if an {@code onSwatchClick} action is given the swatch becomes a
- * button (typically opening a {@link ColorPickerScreen}), otherwise it is a passive preview. Colors are ARGB ints,
- * unless {@code hasAlpha} is false: then alpha is dropped and colors are plain RGB ({@code #RRGGBB}).
+ * A hex field (#AARRGGBB) with a ColorSwatchWidget next to it. Typing in the field sends the new ARGB color to
+ * onChange. If an onSwatchClick action is given the swatch acts as a button, usually opening the ColorPickerScreen,
+ * otherwise it just shows the color. With hasAlpha false the alpha is dropped and colors are plain RGB (#RRGGBB).
  */
 public class ColorFieldWidget extends CompositeWidget {
 

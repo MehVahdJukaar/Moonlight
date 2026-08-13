@@ -83,8 +83,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
-    // The flags stay set across a compound value's suppressed inner defines, so every leaf of a range/vec3 gets the
-    // same meta
+    // The flags stay set while a grouped value defines its hidden parts, so every piece of a range or vec3 gets the
+    // same reload info
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -288,7 +288,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> rawCodec) {
-        // SchemaCodec IS a Codec (identical wire format), so this gives an editable schema-driven row for free
+        // a SchemaCodec IS a Codec and writes the same thing, so wrapping it costs nothing and gets us a real form
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(

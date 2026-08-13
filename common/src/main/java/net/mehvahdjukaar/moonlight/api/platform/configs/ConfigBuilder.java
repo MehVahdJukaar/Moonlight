@@ -45,23 +45,20 @@ public abstract class ConfigBuilder {
     // the before-comment of the value that follows it
     @Nullable
     private String pendingComment;
-    // forwarded once only, so it doesn't re-emit for each suppressed backing value of a compound define
+    // handed out once only, so a grouped define like defineRange doesn't repeat it for each hidden value it makes
     private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
     @Nullable
     private String lastCommentKey;
 
-    // loader independent UI tree consumed by the native config screen
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
-    // effective "enabled" supplier of the current category, parallel to uiStack. A feature() ANDs its own value with
-    // the ancestor beneath it, so nested features compose at read time without touching stored child values
     private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
-    // while set, define(...)/push(...) skip UI emission, so a compound value (e.g. defineRange) shows one combined row
+    // while set, define(...) and push(...) add nothing to the screen, so defineRange and friends show a single row
     protected boolean suppressUi = false;
 
-    // every feature()'s effective supplier, keyed by both short name and full dotted path
+    // every feature()'s supplier, keyed by both short name and full dotted path
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
     // raw category names, root first, so a feature's full path can be built
     private final Deque<String> categoryPath = new ArrayDeque<>();
@@ -127,7 +124,7 @@ public abstract class ConfigBuilder {
         return (T) this;
     }
 
-    /** Marks the next defined value as affecting dynamic resource/data packs. Sticky until the next value, like {@link #worldReload()}. */
+    /** Marks the next defined value as one that affects dynamic resource/data packs. Sticky until then, like worldReload(). */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
         return (T) this;
@@ -146,8 +143,8 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * Defines an integer color, edited as a hex field. With {@code hasAlpha} the value is an ARGB color
-     * ({@code #AARRGGBB}); without it alpha is dropped and the value is a plain RGB color ({@code #2A77EA}).
+     * An int color, edited as a hex field. With hasAlpha it's an ARGB color (#AARRGGBB), without it the alpha is
+     * dropped and it's a plain RGB color (#2A77EA).
      */
     public abstract Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha);
 
@@ -220,9 +217,9 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * Like {@link #defineList} but the suggestions are resolved lazily, so options that only exist later (after
-     * registration for instance) are still offered. Entries are not restricted to them: anything passing
-     * {@code entryValidator} is kept, so regex patterns or not-yet-loaded ids are never dropped.
+     * Like defineList, but the suggestions are read lazily, so options that only exist later (after registration for
+     * instance) still show up. Entries aren't limited to them: anything entryValidator accepts is kept, so regex
+     * patterns or ids that aren't loaded yet don't get dropped.
      */
     public Supplier<List<String>> defineSuggestionList(String name, List<String> defaultValue,
                                                        Supplier<List<String>> suggestions,
@@ -515,8 +512,8 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * Declares the current category's single feature toggle and returns its effective supplier (own value AND every
-     * ancestor feature). Composition is read-time only, so toggling a parent never rewrites stored child values.
+     * Adds the current category's on/off toggle. The returned supplier is true only when this toggle and every parent
+     * one are on. Nothing is rewritten on disk: turning a parent off just makes the children read false.
      */
     public Supplier<Boolean> mainFeature(boolean defaultEnabled) {
         ConfigCategory cat = this.uiStack.peek();
@@ -550,13 +547,12 @@ public abstract class ConfigBuilder {
 
 
     /**
-     * A named boolean feature leaf: draws as a ✓/✗ switch instead of an ON/OFF button and returns an effective
-     * supplier (own value AND every ancestor feature). Combine with {@link #icon}:
-     * {@code builder.icon("lever").feature("test_bool", true)}.
+     * A named on/off feature. Draws as a check/cross switch instead of an ON/OFF button, and the supplier reads false if this
+     * one or any parent feature is off. Pair it with icon(), like builder.icon("lever").feature("test_bool", true).
      */
     public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
         Supplier<Boolean> raw = define(name, defaultEnabled);
-        // adopt the just-recorded BooleanValue so the client draws it as a ✓/✗ toggle
+        // adopt the just-recorded BooleanValue so the client draws it as a check/cross toggle
         List<ConfigNode> entries = this.uiStack.peek().entries();
         if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
             bv.setFeature(true);
@@ -608,7 +604,7 @@ public abstract class ConfigBuilder {
         this.uiStack.peek().add(option);
     }
 
-    /** Root of the loader independent screen model, ready after {@link #build()}. */
+    /** Root of the screen tree. Ready once build() has run. */
     public ConfigCategory getUiRoot() {
         return this.uiRoot;
     }
@@ -635,7 +631,7 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
-    /** A {@link Vec3} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
+    /** A Vec3 shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);
@@ -653,7 +649,7 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
-    /** A {@link Vec3i} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
+    /** A Vec3i shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);

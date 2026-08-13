@@ -4,10 +4,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A screen-level layer hosting a single floating {@link Popup} above the screen's normal content. A popup's source
- * widget can live inside a scissored list, which clips by rectangle rather than depth, so a Z offset alone can't
- * escape it and the popup has to be drawn and input-tested at the screen level instead. See {@link PopupHost} for
- * the routing a screen owes it. Opening a new popup closes any previous one.
+ * Holds one floating Popup drawn above the screen's normal content. The widget that opened it often lives inside a
+ * scissored list, and scissor clips by rectangle and not by depth, so a Z offset isn't enough to get out of it: the
+ * popup has to be drawn and clicked at screen level. PopupHost is what a screen has to implement for that to work.
+ * Opening a new popup closes the previous one.
  */
 public class OverlayLayer {
 

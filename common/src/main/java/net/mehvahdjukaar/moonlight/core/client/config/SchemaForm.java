@@ -39,8 +39,8 @@ final class SchemaForm {
         JsonElement read(ConfigEditSession session);
     }
 
-    // shared by every field naming the registry: a list config with many entries would otherwise re-enumerate and
-    // re-sort a whole registry once per row. Dynamic ones aren't cached, they follow the world
+    // shared by every field using the same registry, else a long list would read and sort the whole registry once
+    // per row. Dynamic registries aren't cached, they change with the world
     private static final Map<ResourceKey<? extends Registry<?>>, List<String>> ID_CACHE = new HashMap<>();
 
     final ConfigCategory root;
@@ -199,7 +199,7 @@ final class SchemaForm {
             };
         }
 
-        // current JSON of every entry, as edited so far. The basis for any structural change
+        // the JSON of every entry as edited so far. Adding or removing an entry starts from this
         List<JsonElement> snapshot(ConfigEditSession session) {
             List<JsonElement> out = new ArrayList<>(readers.size());
             for (Reader r : readers) out.add(r.read(session));
@@ -244,8 +244,8 @@ final class SchemaForm {
         return cat;
     }
 
-    // A searchable dropdown over the ids we can enumerate, degrading to a validated text field when we can't (unknown
-    // registry, or tags/dynamic registries with no world loaded)
+    // A searchable dropdown of the ids we can list. When we can't list them (unknown registry, or tags and dynamic
+    // registries with no world loaded) it becomes a text field that still checks what you type
     private static Reader idField(ConfigCategory parent, Component title, List<String> known, String current,
                                   Predicate<Object> valid, UnaryOperator<String> normalize,
                                   @Nullable Function<String, ItemStack> icon) {
@@ -254,8 +254,8 @@ final class SchemaForm {
             parent.add(opt);
             return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
         }
-        // the current value stays selectable even when we can't enumerate it, empty included: picking the first id
-        // for an absent field would quietly commit a real, wrong id
+        // keep the current value in the list even when it isn't a known id, empty included. Picking the first id for
+        // a field that has none would silently write a real but wrong id
         List<String> options = known.contains(current) ? known
                 : Stream.concat(Stream.of(current), known.stream()).toList();
         var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(current), current,
@@ -264,8 +264,8 @@ final class SchemaForm {
         return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
     }
 
-    // only for the two registries whose ids are the icon. Anything else (entity types, effects, tags) would leave most
-    // rows blank while still paying for the taller row
+    // only for the two registries where the id IS the icon. For anything else (entity types, effects, tags) most
+    // rows would be blank and we'd still get the taller row
     @Nullable
     private static Function<String, ItemStack> iconsFor(@Nullable ResourceKey<? extends Registry<?>> registry) {
         if (!Registries.ITEM.equals(registry) && !Registries.BLOCK.equals(registry)) return null;
@@ -287,8 +287,8 @@ final class SchemaForm {
 
     @Nullable
     private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
-        // biomes, structures... are only reachable with a world loaded and the accessor throws outright otherwise.
-        // A config screen opened from the main menu must survive that
+        // biomes, structures and the like only exist with a world loaded, and the getter just throws otherwise. The
+        // config screen can be opened from the main menu, so it has to survive that
         try {
             return Utils.hackyGetRegistryAccess().<Object>registry(key).orElse(null);
         } catch (Exception noWorld) {

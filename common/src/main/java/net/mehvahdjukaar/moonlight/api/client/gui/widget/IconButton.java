@@ -8,10 +8,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * A {@link Button} that draws a GUI sprite just to the LEFT of its label. The label is rendered exactly like a
- * vanilla button (centered, scrolling when too long); the icon is simply placed to the left of that centered text,
- * or centered on its own when there is no label. Vanilla's {@link net.minecraft.client.gui.components.SpriteIconButton}
- * only offers icon-on-the-right ({@code TextAndIcon}) or icon-only ({@code CenteredIcon}), so this covers "[icon] Label".
+ * A button with a sprite drawn to the LEFT of its label. The label works exactly like a vanilla button's, centered
+ * and scrolling when too long, and the icon goes just left of it, or in the middle when there is no label. Vanilla's
+ * SpriteIconButton only does icon on the right or icon alone, so this covers "[icon] Label".
  */
 public class IconButton extends Button {
 

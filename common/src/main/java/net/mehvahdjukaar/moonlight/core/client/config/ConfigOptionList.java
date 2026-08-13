@@ -47,8 +47,8 @@ class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
         return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
     }
 
-    // Blank space above the first row, used to vertically center them in a taller pane. Rides on the otherwise unused
-    // list header, so hit-testing and scrolling stay in sync for free
+    // Blank space above the first row, to center them in a taller pane. Uses the list header, which we don't need
+    // otherwise, so clicks and scrolling stay lined up on their own
     void setTopPadding(int padding) {
         this.setRenderHeader(padding > 0, Math.max(0, padding));
     }

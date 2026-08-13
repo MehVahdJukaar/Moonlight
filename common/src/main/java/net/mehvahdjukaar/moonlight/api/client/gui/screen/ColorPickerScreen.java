@@ -15,9 +15,9 @@ import net.minecraft.util.Mth;
 import java.util.function.Consumer;
 
 /**
- * A saturation/value square with a hue slider beside it and an alpha slider below, plus a hex field and live preview
- * underneath. Colors are ARGB ints; with {@code hasAlpha} false the alpha slider is hidden and colors are plain RGB.
- * Done hands the chosen color back through {@code onApply}.
+ * A saturation/value square with a hue slider next to it and an alpha slider below, plus a hex field and a preview
+ * underneath. Colors are ARGB ints. With hasAlpha false the alpha slider is hidden and colors are plain RGB. Done
+ * sends the picked color to onApply.
  */
 public class ColorPickerScreen extends Screen {
 
