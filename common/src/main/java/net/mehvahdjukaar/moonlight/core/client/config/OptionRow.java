@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.ConfigVisuals;
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigControl;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
@@ -35,7 +35,7 @@ class OptionRow extends ConfigListRow {
     private final Component title;
     @Nullable
     private final Component description;
-    private final ConfigVisuals<?> control;
+    private final ConfigControl<?> control;
     private final IconButton resetButton;
     private final boolean editable;
     private final List<AbstractWidget> children;

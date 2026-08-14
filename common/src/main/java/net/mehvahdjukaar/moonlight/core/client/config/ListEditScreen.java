@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
@@ -10,18 +9,15 @@ import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,7 +36,7 @@ class ListEditScreen extends Screen implements PopupHost {
     private final List<String> options; // non-null -> entries are picked with a dropdown
     private final OverlayLayer overlay = new OverlayLayer();
 
-    private EntryList list;
+    private ConfigRowList list;
 
     ListEditScreen(ConfigOption.ListValue option, List<String> initial, Screen parent, Consumer<List<String>> onApply) {
         super(option.title());
@@ -59,7 +55,7 @@ class ListEditScreen extends Screen implements PopupHost {
     @Override
     protected void init() {
         this.overlay.clear();
-        this.list = new EntryList(this.minecraft, this.width, this.height - HEADER - 58, HEADER, 24);
+        this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - 58, HEADER, 24);
         rebuildRows();
         this.addRenderableWidget(this.list);
 
@@ -82,11 +78,11 @@ class ListEditScreen extends Screen implements PopupHost {
 
     private void rebuildRows() {
         this.overlay.clear(); // rows (and their dropdowns) are recreated here
-        List<EntryRow> rows = new ArrayList<>();
+        List<ConfigListRow> rows = new ArrayList<>();
         for (int i = 0; i < working.size(); i++) {
             rows.add(new EntryRow(i));
         }
-        this.list.replaceEntries(rows);
+        this.list.setRows(rows);
     }
 
     @Override
@@ -131,38 +127,7 @@ class ListEditScreen extends Screen implements PopupHost {
         this.overlay.render(graphics, mouseX, mouseY); // open dropdown popup floats on top
     }
 
-    private class EntryList extends ContainerObjectSelectionList<EntryRow> {
-        EntryList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
-            super(minecraft, width, height, y, itemHeight);
-        }
-
-        void replaceEntries(List<EntryRow> rows) {
-            this.clearEntries();
-            rows.forEach(this::addEntry);
-            this.clampScrollAmount();
-        }
-
-        @Override
-        public int getRowWidth() {
-            return ROW_WIDTH;
-        }
-
-        @Override
-        protected int getScrollbarPosition() {
-            return this.width / 2 + ROW_WIDTH / 2 + 6;
-        }
-
-        @Override
-        protected void renderListSeparators(GuiGraphics graphics) {
-            // the top separator is owned by the screen's header bar (drawn in renderBackground); only draw the footer
-            ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-            RenderSystem.enableBlend();
-            graphics.blit(footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
-            RenderSystem.disableBlend();
-        }
-    }
-
-    private class EntryRow extends ContainerObjectSelectionList.Entry<EntryRow> {
+    private class EntryRow extends ConfigListRow {
         private final AbstractWidget editor;
         @Nullable
         private final EditBox box; // set only for free-text entries, for validity coloring
@@ -217,6 +182,12 @@ class ListEditScreen extends Screen implements PopupHost {
         @Override
         public List<? extends NarratableEntry> narratables() {
             return children;
+        }
+
+        @Nullable
+        @Override
+        Component getTooltip(int mouseX, int mouseY) {
+            return null;
         }
     }
 }

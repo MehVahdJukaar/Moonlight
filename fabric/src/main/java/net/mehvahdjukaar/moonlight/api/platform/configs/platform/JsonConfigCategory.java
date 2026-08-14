@@ -7,19 +7,19 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigSubCategory extends ConfigEntry {
+public class JsonConfigCategory extends JsonConfigEntry {
 
-    private final List<ConfigEntry> entries = new ArrayList<>();
+    private final List<JsonConfigEntry> entries = new ArrayList<>();
 
-    public ConfigSubCategory(String name) {
+    public JsonConfigCategory(String name) {
         super(name);
     }
 
-    public void addEntry(ConfigEntry entry){
+    public void addEntry(JsonConfigEntry entry){
         this.entries.add(entry);
     }
 
-    public List<ConfigEntry> getEntries() {
+    public List<JsonConfigEntry> getEntries() {
         return entries;
     }
 
@@ -29,7 +29,7 @@ public class ConfigSubCategory extends ConfigEntry {
             JsonElement o = object.get(this.name);
             if (o instanceof JsonObject jo) {
                 boolean changed = false;
-                for (ConfigEntry entry : entries) {
+                for (JsonConfigEntry entry : entries) {
                     changed |= entry.loadFromJson(jo);
                 }
                 return changed;

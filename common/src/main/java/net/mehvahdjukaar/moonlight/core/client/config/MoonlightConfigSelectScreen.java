@@ -4,7 +4,6 @@ import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -13,7 +12,6 @@ import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -44,7 +42,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     private final Component version;
     private final List<String> authors;
 
-    private ConfigOptionList list;
+    private ConfigRowList list;
     private int leftPaneWidth;
     private int identityBottom;    // bottom of the icon + carousel block, or of a mod's own showcase widget
     private boolean customShowcase;
@@ -61,7 +59,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     private static List<ModConfigHolder> configsOf(String modId) {
-        return ModConfigHolder.getTrackedSpecs().stream()
+        return ModConfigHolder.getTrackedHolders().stream()
                 .filter(h -> h.getModId().equals(modId))
                 .sorted(Comparator.comparingInt(h -> h.getConfigType().ordinal()))
                 .toList();
@@ -111,7 +109,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         }
 
         int paneWidth = this.width - this.leftPaneWidth;
-        this.list = new ConfigOptionList(this.minecraft, paneWidth, this.contentBottom() - HEADER, HEADER, SELECT_ITEM_HEIGHT);
+        this.list = new ConfigRowList(this.minecraft, paneWidth, this.contentBottom() - HEADER, HEADER, SELECT_ITEM_HEIGHT);
         this.list.setX(this.leftPaneWidth);
         this.list.setRowWidth(Math.min(ROW_WIDTH, paneWidth - 28)); // room for the scrollbar and a margin
         this.list.setDrawFooterSeparator(false); // this screen draws one across both panes instead
@@ -120,8 +118,8 @@ public class MoonlightConfigSelectScreen extends Screen {
         List<ConfigListRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
-            Component tooltip = Component.literal(h.getFileName());
-            rows.add(new ConfigHolderRow(label, tooltip, configFileIcon(h.getConfigType()),
+            Component subtitle = Component.literal(h.getFileName());
+            rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()),
                     () -> this.minecraft.setScreen(h.makeScreen(this, background))));
         }
         this.list.setRows(rows);

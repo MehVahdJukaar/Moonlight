@@ -57,7 +57,7 @@ public class MoonlightForgeClient {
         // Otherwise route each mod's config button to the native Moonlight screen (one extension point per mod
         // container; the vanilla ConfigurationScreen is kept as a fallback).
         Set<String> registered = new HashSet<>();
-        for (var config : ModConfigHolder.getTrackedSpecs()) {
+        for (var config : ModConfigHolder.getTrackedHolders()) {
             String modId = config.getModId();
             if (!registered.add(modId)) continue;
             ModList.get().getModContainerById(modId).ifPresent(c ->

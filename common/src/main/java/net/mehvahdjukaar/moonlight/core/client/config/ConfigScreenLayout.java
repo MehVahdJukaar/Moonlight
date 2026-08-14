@@ -9,18 +9,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-// Shared sizing constants and drawing helpers for the config screen widgets, in one place so the screen, list, rows
-// and control providers all agree on the grid.
+// Shared sizing constants, gui sprites and drawing helpers for the config screen widgets, in one place so the screen,
+// list, rows and control providers all agree on the grid.
 final class ConfigScreenLayout {
 
-    // left-aligned single-line text hard-clipped to [minX, maxX], for row subtitles
-    static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
-        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
-        graphics.drawString(font, text, minX, y, color);
-        graphics.disableScissor();
-    }
+    static final int HEADER = 44;
+    static final int FOOTER = 36;
+    static final int ITEM_HEIGHT = 24; // compact single-line rows on the main config screen (button ~ on/off height)
+    static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
+    static final int ROW_WIDTH = 280;
+    static final int ROW_ICON = 16; // leading category/config icon
 
-    // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no,save}.png)
+    static final int CONTROL_WIDTH = 96; // kept narrow so row labels get more room
+    static final int CONTROL_HEIGHT = 20;
+    static final int ARROW_WIDTH = 12;
+    static final int RESET_WIDTH = CONTROL_HEIGHT;
+    static final int GAP = 4;
+
+    static final int DESC_LINES_PER_ROW = 2;
+
+    // gui sprites (assets/moonlight/textures/gui/sprites/{yes,no,save}.png). Not to be confused with
+    // ConfigScreenIcons, which resolves an icon(...) id to an item stack
     static final ResourceLocation ON_ICON = Moonlight.res("yes");
     static final ResourceLocation OFF_ICON = Moonlight.res("no");
     static final ResourceLocation SAVE_ICON = Moonlight.res("save");
@@ -58,18 +67,10 @@ final class ConfigScreenLayout {
         };
     }
 
-    static final int HEADER = 44;
-    static final int FOOTER = 36;
-    static final int ITEM_HEIGHT = 24; // compact single-line rows on the main config screen (button ~ on/off height)
-    static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
-    static final int ROW_WIDTH = 280;
-    static final int ROW_ICON = 16; // leading category/config icon
-
-    static final int CONTROL_WIDTH = 96; // kept narrow so row labels get more room
-    static final int CONTROL_HEIGHT = 20;
-    static final int ARROW_WIDTH = 12;
-    static final int RESET_WIDTH = CONTROL_HEIGHT;
-    static final int GAP = 4;
-
-    static final int DESC_LINES_PER_ROW = 2;
+    // left-aligned single-line text hard-clipped to [minX, maxX], for row subtitles
+    static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
+        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
+        graphics.drawString(font, text, minX, y, color);
+        graphics.disableScissor();
+    }
 }

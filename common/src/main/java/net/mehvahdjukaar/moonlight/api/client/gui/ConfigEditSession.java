@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.screens.Screen;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -13,6 +14,8 @@ import java.util.*;
  */
 public final class ConfigEditSession {
 
+    // null for a scratch session, which only holds working values and never writes anything back
+    @Nullable
     private final ModConfigHolder holder;
     private final Screen returnScreen;
 
@@ -24,6 +27,19 @@ public final class ConfigEditSession {
     public ConfigEditSession(ModConfigHolder holder, Screen returnScreen) {
         this.holder = holder;
         this.returnScreen = returnScreen;
+    }
+
+    private ConfigEditSession(Screen returnScreen) {
+        this.holder = null;
+        this.returnScreen = returnScreen;
+    }
+
+    /**
+     * A session with no config behind it, for screens that edit a value in memory and hand it back themselves (the
+     * generated schema form). apply() does nothing on one of these.
+     */
+    public static ConfigEditSession scratch(Screen returnScreen) {
+        return new ConfigEditSession(returnScreen);
     }
 
     public ModConfigHolder holder() {
@@ -56,6 +72,7 @@ public final class ConfigEditSession {
     }
 
     public void apply() {
+        if (holder == null) return;
         pending.forEach((v, value) -> {
             if (!Objects.equals(value, v.get())) {
                 v.apply(holder, value);

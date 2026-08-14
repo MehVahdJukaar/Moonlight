@@ -3,8 +3,8 @@ package net.mehvahdjukaar.moonlight.api.integration.yacl;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.gui.controllers.LabelController;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigSubCategory;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigEntry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,13 +32,13 @@ public class YACLCompat {
 
         for (var en : spec.getMainEntry().getEntries()) {
             //skips stray config values
-            if (!(en instanceof ConfigSubCategory c)) continue;
+            if (!(en instanceof JsonConfigCategory c)) continue;
             var mainCat = ConfigCategory.createBuilder()
                     .name(Component.translatable(c.getName()));
 
 
             for (var entry : c.getEntries()) {
-                if (entry instanceof ConfigSubCategory subCat) {
+                if (entry instanceof JsonConfigCategory subCat) {
                     var subBuilder = OptionGroup.createBuilder()
                             .name(Component.translatable(subCat.getName()))
                             .collapsed(true);
@@ -57,10 +57,10 @@ public class YACLCompat {
         return builder.build().generateScreen(parent);
     }
 
-    private static void addEntriesRecursive(ConfigCategory.Builder builder, OptionGroup.Builder subCategoryBuilder, ConfigSubCategory c) {
+    private static void addEntriesRecursive(ConfigCategory.Builder builder, OptionGroup.Builder subCategoryBuilder, JsonConfigCategory c) {
 
         for (var entry : c.getEntries()) {
-            if (entry instanceof ConfigSubCategory cc) {
+            if (entry instanceof JsonConfigCategory cc) {
                 //not nested subcat not supported. merging
                 var scb = OptionGroup.createBuilder()
                         .name(Component.translatable(entry.getName()))
@@ -72,7 +72,7 @@ public class YACLCompat {
         }
     }
 
-    private static Option<?> buildEntry(ConfigEntry entry) {
+    private static Option<?> buildEntry(JsonConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
             boolean hasAlpha = col.hasAlpha();

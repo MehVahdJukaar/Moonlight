@@ -19,9 +19,6 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-// A full-width button opening a sub category: leading gear icon, category name with an optional one-line subtitle,
-// trailing chevron. A category's feature() toggle is edited inline here, right-aligned; the label dims when the
-// category is off and the toggle itself is disabled when an ancestor is off.
 class CategoryRow extends ConfigListRow {
 
     private final ConfigScreenAccess view;

@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.ConfigLangExporter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,9 +25,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,7 +34,10 @@ import java.util.regex.Pattern;
 
 public abstract class ConfigBuilder {
 
-    protected final Map<String, String> translations = new HashMap<>();
+    protected final Map<String, String> translations = new LinkedHashMap<>();
+    // keys whose name Moonlight made up rather than the mod (see ConfigLangExporter.SHARED_NAMES), mapped to that
+    // name. Moonlight translates those itself, so no mod has to
+    private final Map<String, String> sharedNames = new LinkedHashMap<>();
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
@@ -65,7 +66,8 @@ public abstract class ConfigBuilder {
 
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
-    protected boolean usesDataBuddy = true;
+    // NeoForge only: when set, defineObject stores a json string instead of a native toml object
+    protected boolean writeObjectsAsJson = false;
 
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
@@ -96,6 +98,12 @@ public abstract class ConfigBuilder {
         this.uiStack.push(this.uiRoot);
         this.gateStack.push(() -> true);
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
+            // shared words go in first so a common name like "chance" reads translated in every language even if the
+            // mod ships no lang file. addEntry never overwrites, so a mod's own entry always wins over both
+            definedNames.forEach((key, rawName) -> {
+                String shared = e.getEntry(moonlightNamedKey(rawName));
+                if (shared != null) e.addEntry(key, shared);
+            });
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
@@ -106,7 +114,12 @@ public abstract class ConfigBuilder {
         flushPendingComment(); // a trailing after-comment has no define to claim it
         ModConfigHolder holder = buildHolder();
         holder.setFeatureToggles(getFeatureToggles());
+        ConfigLangExporter.exportInDev(name.getNamespace(), translations, definedNames);
         return holder;
+    }
+
+    private static String moonlightNamedKey(String name) {
+        return "moonlight.config.common." + name;
     }
 
     protected abstract ModConfigHolder buildHolder();
@@ -119,9 +132,15 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
-    public <T extends ConfigBuilder> T setWriteJsons() {
-        this.usesDataBuddy = false;
+    /** Stores defineObject values as a json string rather than a native toml object. NeoForge only. */
+    public <T extends ConfigBuilder> T writeObjectsAsJson() {
+        this.writeObjectsAsJson = true;
         return (T) this;
+    }
+
+    @Deprecated(forRemoval = true)
+    public <T extends ConfigBuilder> T setWriteJsons() {
+        return writeObjectsAsJson();
     }
 
     /** Marks the next defined value as one that affects dynamic resource/data packs. Sticky until then, like worldReload(). */
@@ -308,78 +327,10 @@ public abstract class ConfigBuilder {
         Class<T> type = (Class<T>) defaultValue.getClass();
         this.push(name);
         try {
-            return type.isRecord() ? defineRecordBean(type, defaultValue) : definePojoBean(type, defaultValue);
+            return ConfigBeans.define(this, type, defaultValue);
         } finally {
             this.pop();
         }
-    }
-
-    private <T> Supplier<T> definePojoBean(Class<T> type, T defaultValue) {
-        List<Field> fields = new ArrayList<>();
-        List<Supplier<?>> readers = new ArrayList<>();
-        try {
-            for (Field f : type.getDeclaredFields()) {
-                int mods = f.getModifiers();
-                if (Modifier.isStatic(mods) || Modifier.isTransient(mods)) continue;
-                f.setAccessible(true);
-                fields.add(f);
-                readers.add(defineBeanField(f.getName(), f.getType(), f.get(defaultValue)));
-            }
-            var ctor = type.getDeclaredConstructor();
-            ctor.setAccessible(true);
-            return () -> {
-                try {
-                    T instance = ctor.newInstance();
-                    for (int i = 0; i < fields.size(); i++) fields.get(i).set(instance, readers.get(i).get());
-                    return instance;
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException("Failed to build bean " + type.getName(), e);
-                }
-            };
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("defineBean: " + type.getName() + " needs a no-arg constructor and readable fields", e);
-        }
-    }
-
-    private <T> Supplier<T> defineRecordBean(Class<T> type, T defaultValue) {
-        RecordComponent[] comps = type.getRecordComponents();
-        List<Supplier<?>> readers = new ArrayList<>();
-        Class<?>[] paramTypes = new Class<?>[comps.length];
-        try {
-            for (int i = 0; i < comps.length; i++) {
-                paramTypes[i] = comps[i].getType();
-                readers.add(defineBeanField(comps[i].getName(), comps[i].getType(), comps[i].getAccessor().invoke(defaultValue)));
-            }
-            var ctor = type.getDeclaredConstructor(paramTypes);
-            ctor.setAccessible(true);
-            return () -> {
-                try {
-                    Object[] args = new Object[readers.size()];
-                    for (int i = 0; i < args.length; i++) args[i] = readers.get(i).get();
-                    return ctor.newInstance(args);
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException("Failed to build record " + type.getName(), e);
-                }
-            };
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("defineBean: failed to read record " + type.getName(), e);
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Supplier<?> defineBeanField(String name, Class<?> type, Object current) {
-        if (type == boolean.class || type == Boolean.class) return define(name, (Boolean) current);
-        if (type == int.class || type == Integer.class)
-            return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        if (type == double.class || type == Double.class)
-            return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
-        if (type == float.class || type == Float.class)
-            return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
-        // must reject null: a null-accepting validator makes NeoForge treat a MISSING string field as valid, so it
-        // never writes the default, and then re-corrects the spec every load -> endless "config is not correct" loop
-        if (type == String.class) return define(name, (String) current);
-        if (type.isEnum()) return define(name, (Enum) current);
-        throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");
     }
 
 
@@ -518,10 +469,10 @@ public abstract class ConfigBuilder {
     public Supplier<Boolean> mainFeature(boolean defaultEnabled) {
         ConfigCategory cat = this.uiStack.peek();
         if (cat == this.uiRoot) {
-            throw new IllegalStateException("feature() must be called inside a category (use push/pushFeature first), not at the config root");
+            throw new IllegalStateException("mainFeature() must be called inside a category (use push/pushFeature first), not at the config root");
         }
         if (cat.gate() != null) {
-            throw new IllegalStateException("category '" + currentCategory() + "' already has a feature() toggle");
+            throw new IllegalStateException("category '" + currentCategory() + "' already has a mainFeature() toggle");
         }
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
         // define() just recorded the matching BooleanValue as this category's last entry: adopt it as the gate row
@@ -622,7 +573,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.RangeValue node = new ConfigOption.RangeValue(
                 description(name), null, minHandle, maxHandle,
                 new Range(defaultMin, defaultMax), min, max);
@@ -641,7 +592,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.Vec3Value node = new ConfigOption.Vec3Value(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
@@ -659,7 +610,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.Vec3iValue node = new ConfigOption.Vec3iValue(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
@@ -694,9 +645,19 @@ public abstract class ConfigBuilder {
     }
 
     protected void addTranslationsAndComments(String name) {
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         if (this.currentCategory() == null && PlatHelper.isDev())
             throw new AssertionError("Current config category was null. How?");
+    }
+
+    // called by push() once the category is on the stack, so translationKey("") points at it
+    protected void noteCategoryName(String category) {
+        putName(this.translationKey(""), category);
+    }
+
+    private void putName(String key, String rawName) {
+        this.translations.put(key, LangBuilder.getReadableName(rawName));
+        this.definedNames.put(key, rawName);
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;

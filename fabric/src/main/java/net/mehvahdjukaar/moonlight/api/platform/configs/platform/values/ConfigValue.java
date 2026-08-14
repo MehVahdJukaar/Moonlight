@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigEntry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue<T> {
+public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigValue<T> {
 
     protected final T defaultValue;
     protected T value;

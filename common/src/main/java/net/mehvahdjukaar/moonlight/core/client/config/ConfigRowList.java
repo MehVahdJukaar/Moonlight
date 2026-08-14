@@ -12,12 +12,12 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.ROW_WIDTH;
 
-class ConfigOptionList extends ContainerObjectSelectionList<ConfigListRow> {
+class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
 
     private boolean drawFooterSeparator = true;
     private int rowWidth = ROW_WIDTH;
 
-    ConfigOptionList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
+    ConfigRowList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
     }
 

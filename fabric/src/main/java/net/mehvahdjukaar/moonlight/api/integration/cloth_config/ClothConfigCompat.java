@@ -5,8 +5,8 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigSubCategory;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigEntry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.FabricConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -38,10 +38,10 @@ public class ClothConfigCompat {
 
         for (var en : spec.getMainEntry().getEntries()) {
             //skips stray config values
-            if (!(en instanceof ConfigSubCategory c)) continue;
+            if (!(en instanceof JsonConfigCategory c)) continue;
             ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(LangBuilder.getReadableName(c.getName())));
             for (var entry : c.getEntries()) {
-                if (entry instanceof ConfigSubCategory subCat) {
+                if (entry instanceof JsonConfigCategory subCat) {
                     var subBuilder = builder.entryBuilder().startSubCategory(Component.translatable(subCat.getName()));
                     addEntriesRecursive(builder, subBuilder, subCat);
 
@@ -55,10 +55,10 @@ public class ClothConfigCompat {
         return builder.build();
     }
 
-    private static void addEntriesRecursive(ConfigBuilder builder, SubCategoryBuilder subCategoryBuilder, ConfigSubCategory c) {
+    private static void addEntriesRecursive(ConfigBuilder builder, SubCategoryBuilder subCategoryBuilder, JsonConfigCategory c) {
 
         for (var entry : c.getEntries()) {
-            if (entry instanceof ConfigSubCategory cc) {
+            if (entry instanceof JsonConfigCategory cc) {
                 var scb = builder.entryBuilder().startSubCategory(Component.translatable(entry.getName()));
                 addEntriesRecursive(builder, scb, cc);
                 subCategoryBuilder.add(scb.build());
@@ -66,7 +66,7 @@ public class ClothConfigCompat {
         }
     }
 
-    private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, ConfigEntry entry) {
+    private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, JsonConfigEntry entry) {
 
         if (entry instanceof ColorConfigValue col) {
             var eb = builder.entryBuilder();

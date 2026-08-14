@@ -14,21 +14,21 @@ import java.util.Objects;
 // Wraps a raw ModConfigSpec.ConfigValue so the rest of the code can use it through TrackedConfigValue and not care
 // which loader it's on. map/unmap convert between what's stored and what's handed out, so colours, json and beans
 // look the same as plain values from the outside. The reload flags are passed in once, at construction
-abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
+abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
     private final ConfigMetadata meta;
     private T cachedValue = null;
     private C cachedRaw = null;
     private boolean initialized = false;
 
-    ValueWrapper(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
+    ForgeConfigValue(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
         this.original = original;
         this.meta = meta;
     }
 
     // no conversion, the stored type is the exposed one
-    public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    public static <T> ForgeConfigValue<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(T value) { return value; }
             @Override
@@ -37,8 +37,8 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
     }
 
     // stored as a String, converted with a Codec. Used for colours and the like
-    public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    public static <T> ForgeConfigValue<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(String value) {
                 return codec.parse(JavaOps.INSTANCE, value).getOrThrow();
@@ -51,8 +51,8 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
     }
 
     // stored as a String, handed out as a JsonElement
-    public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    public static ForgeConfigValue<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             JsonElement map(String value) {
                 try {
@@ -70,8 +70,8 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    public static <T> ForgeConfigValue<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(String raw) {
                 // raw is stored with single quotes, restore double quotes and parse

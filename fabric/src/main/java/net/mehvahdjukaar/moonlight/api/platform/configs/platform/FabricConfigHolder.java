@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.integration.cloth_config.ClothConfigCompat;
 import net.mehvahdjukaar.moonlight.api.integration.yacl.YACLCompat;
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
@@ -17,12 +16,10 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
-import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -36,19 +33,19 @@ public final class FabricConfigHolder extends ModConfigHolder {
 
     @ApiStatus.Internal
     public static void loadAllConfigs() {
-        for (var spec : getTrackedSpecs()) {
+        for (var spec : getTrackedHolders()) {
             spec.forceLoad();
         }
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private final ConfigSubCategory mainEntry;
+    private final JsonConfigCategory mainEntry;
     private final File file;
     private boolean initialized = false;
     private final ConfigCategory configRoot;
 
-    public FabricConfigHolder(ResourceLocation name, ConfigSubCategory mainEntry, ConfigType type, Runnable changeCallback,
+    public FabricConfigHolder(ResourceLocation name, JsonConfigCategory mainEntry, ConfigType type, Runnable changeCallback,
                               ConfigCategory configRoot) {
         super(name, "json", FabricLoader.getInstance().getConfigDir(), type, changeCallback);
         this.file = this.getFullPath().toFile();
@@ -59,7 +56,7 @@ public final class FabricConfigHolder extends ModConfigHolder {
         }
     }
 
-    public ConfigSubCategory getMainEntry() {
+    public JsonConfigCategory getMainEntry() {
         return mainEntry;
     }
 

@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +49,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 
-@SuppressWarnings("all")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class ForgeConfigHolder extends ModConfigHolder {
 
     private static final Map<ModConfig, ForgeConfigHolder> BY_FORGE_CONFIG = new HashMap<>();
@@ -67,7 +68,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
                       @Nullable Runnable onChange,
                       List<TrackedConfigValue<?>> trackedValues,
-                      net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory configRoot) {
+                      ConfigCategory configRoot) {
         super(name, "toml", FMLPaths.CONFIGDIR.get(), type, onChange);
         this.spec = spec;
         this.trackedValues = trackedValues;
@@ -138,7 +139,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
         if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
             var root = getConfigRoot();
-            return root == null ? null : new net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen(this, root, parent, background);
+            return root == null ? null : new MoonlightConfigScreen(this, root, parent, background);
         }
         // custom screen disabled: defer to whatever config screen the loader (NeoForge / Configured) registered
         return ModList.get().getModContainerById(this.getModId())

@@ -43,7 +43,7 @@ public class SyncConfigsMessage implements Message {
                 return;
             }
         }
-        ModConfigHolder config = ModConfigHolder.getConfigSpec(this.configId);
+        ModConfigHolder config = ModConfigHolder.getHolder(this.configId);
         if (config != null) {
             try (var stream = new ByteArrayInputStream(this.configData)) {
                 config.loadFromBytes(stream, context.getDirection() == NetworkDir.CLIENT_BOUND);

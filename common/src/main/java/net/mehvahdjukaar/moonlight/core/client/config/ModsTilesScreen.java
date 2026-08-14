@@ -74,7 +74,7 @@ public class ModsTilesScreen extends Screen {
     // every mod id we can show a config screen for, in no particular order
     public static Set<String> collectConfigurableMods() {
         Set<String> modIds = new LinkedHashSet<>();
-        for (ModConfigHolder h : ModConfigHolder.getTrackedSpecs()) modIds.add(h.getModId());
+        for (ModConfigHolder h : ModConfigHolder.getTrackedHolders()) modIds.add(h.getModId());
         for (String modId : EXTRA_MODS) {
             if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
         }

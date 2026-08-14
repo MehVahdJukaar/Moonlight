@@ -29,22 +29,38 @@ import java.util.function.Supplier;
 
 public abstract class ModConfigHolder {
 
-    private static final Map<ResourceLocation, ModConfigHolder> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
+    private static final Map<ResourceLocation, ModConfigHolder> TRACKED_HOLDERS = new ConcurrentHashMap<>(); //wack. multithreading mod loading
 
-    public static void addTrackedSpec(ModConfigHolder spec) {
-        var old = CONFIG_STORAGE.put(spec.getId(), spec);
+    public static void registerHolder(ModConfigHolder holder) {
+        var old = TRACKED_HOLDERS.put(holder.getId(), holder);
         if (old != null) {
-            throw new IllegalStateException("Duplicate config type for with id " + spec.getId());
+            throw new IllegalStateException("Duplicate config id " + holder.getId());
         }
     }
 
-    public static Collection<ModConfigHolder> getTrackedSpecs() {
-        return CONFIG_STORAGE.values();
+    public static Collection<ModConfigHolder> getTrackedHolders() {
+        return TRACKED_HOLDERS.values();
     }
 
     @Nullable
+    public static ModConfigHolder getHolder(ResourceLocation configId) {
+        return TRACKED_HOLDERS.get(configId);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void addTrackedSpec(ModConfigHolder holder) {
+        registerHolder(holder);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Collection<ModConfigHolder> getTrackedSpecs() {
+        return getTrackedHolders();
+    }
+
+    @Deprecated(forRemoval = true)
+    @Nullable
     public static ModConfigHolder getConfigSpec(ResourceLocation configId) {
-        return CONFIG_STORAGE.get(configId);
+        return getHolder(configId);
     }
 
     private final ResourceLocation configId;
@@ -71,7 +87,7 @@ public abstract class ModConfigHolder {
         this.changeCallback = changeCallback;
         this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName() + "_configs"));
 
-        if (tracked) ModConfigHolder.addTrackedSpec(this);
+        if (tracked) ModConfigHolder.registerHolder(this);
     }
 
     public Component getReadableName() {

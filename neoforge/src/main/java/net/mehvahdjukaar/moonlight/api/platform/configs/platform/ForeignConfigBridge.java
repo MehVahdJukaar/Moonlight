@@ -154,7 +154,7 @@ public final class ForeignConfigBridge {
     }
 
     private static IConfigValue wrap(ModConfigSpec.ConfigValue<?> cv, ConfigMetadata meta) {
-        return ValueWrapper.simple((ModConfigSpec.ConfigValue) cv, meta);
+        return ForgeConfigValue.simple((ModConfigSpec.ConfigValue) cv, meta);
     }
 
     // adapts a long-backed value to the int control; the range was already checked to fit

@@ -2,11 +2,11 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
 import com.google.gson.JsonObject;
 
-public abstract class ConfigEntry{
+public abstract class JsonConfigEntry {
 
     protected final String name;
 
-    protected ConfigEntry(String name) {
+    protected JsonConfigEntry(String name) {
         this.name = name;
     }
 
