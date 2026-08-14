@@ -29,21 +29,17 @@ public class ConfigLangExporter {
 
     // names Moonlight makes up on a mod's behalf: a feature toggle, and the hidden parts of a range or a vec3. The
     // mod author never typed these, so Moonlight translates them and they stay out of the mod's lang file
-    public static final Set<String> SHARED_NAMES = Set.of(
+    public static final Set<String> MOONLIGHT_NAMES = Set.of(
             ConfigBuilder.FEATURE_TOGGLE_NAME, "min", "max", "x", "y", "z");
-
-    public static String sharedNameKey(String name) {
-        return "moonlight.config.common." + name;
-    }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final boolean ENABLED = !"false".equals(System.getProperty("moonlight.langExport"));
 
-    public static void exportInDev(String modId, Map<String, String> translations, Map<String, String> sharedNames) {
+    public static void exportInDev(String modId, Map<String, String> translations, Map<String, String> moonlightNames) {
         if (!ENABLED || !PlatHelper.isDev()) return;
         Map<String, String> wanted = new LinkedHashMap<>();
         translations.forEach((key, value) -> {
-            if (!sharedNames.containsKey(key)) wanted.put(key, value);
+            if (!moonlightNames.containsKey(key)) wanted.put(key, value);
         });
         if (wanted.isEmpty()) return;
         try {

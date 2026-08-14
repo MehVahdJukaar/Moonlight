@@ -35,9 +35,9 @@ import java.util.regex.Pattern;
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new LinkedHashMap<>();
-    // keys whose name Moonlight made up rather than the mod (see ConfigLangExporter.SHARED_NAMES), mapped to that
-    // name. Moonlight translates those itself, so no mod has to
-    private final Map<String, String> sharedNames = new LinkedHashMap<>();
+    // keys whose name Moonlight made up rather than the mod, mapped to that name. Moonlight translates those itself,
+    // so no mod has to
+    private final Map<String, String> moonlightNames = new LinkedHashMap<>();
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
@@ -98,9 +98,7 @@ public abstract class ConfigBuilder {
         this.uiStack.push(this.uiRoot);
         this.gateStack.push(() -> true);
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
-            // shared words go in first so a common name like "chance" reads translated in every language even if the
-            // mod ships no lang file. addEntry never overwrites, so a mod's own entry always wins over both
-            definedNames.forEach((key, rawName) -> {
+            moonlightNames.forEach((key, rawName) -> {
                 String shared = e.getEntry(moonlightNamedKey(rawName));
                 if (shared != null) e.addEntry(key, shared);
             });
@@ -114,7 +112,7 @@ public abstract class ConfigBuilder {
         flushPendingComment(); // a trailing after-comment has no define to claim it
         ModConfigHolder holder = buildHolder();
         holder.setFeatureToggles(getFeatureToggles());
-        ConfigLangExporter.exportInDev(name.getNamespace(), translations, definedNames);
+        ConfigLangExporter.exportInDev(name.getNamespace(), translations, moonlightNames);
         return holder;
     }
 
@@ -505,7 +503,7 @@ public abstract class ConfigBuilder {
         Supplier<Boolean> raw = define(name, defaultEnabled);
         // adopt the just-recorded BooleanValue so the client draws it as a check/cross toggle
         List<ConfigNode> entries = this.uiStack.peek().entries();
-        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             bv.setFeature(true);
             if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
         }
@@ -657,7 +655,9 @@ public abstract class ConfigBuilder {
 
     private void putName(String key, String rawName) {
         this.translations.put(key, LangBuilder.getReadableName(rawName));
-        this.definedNames.put(key, rawName);
+        if (ConfigLangExporter.MOONLIGHT_NAMES.contains(rawName)){
+            this.moonlightNames.put(key, rawName);
+        }
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;
