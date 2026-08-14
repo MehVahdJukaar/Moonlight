@@ -475,7 +475,7 @@ public abstract class ConfigBuilder {
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
         // define() just recorded the matching BooleanValue as this category's last entry: adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
-        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
             // explicit icon(...) wins, else infer from the category name. Mirrored so the category button and the
             // gate row share one icon
@@ -655,7 +655,7 @@ public abstract class ConfigBuilder {
 
     private void putName(String key, String rawName) {
         this.translations.put(key, LangBuilder.getReadableName(rawName));
-        if (ConfigLangExporter.MOONLIGHT_NAMES.contains(rawName)){
+        if (ConfigLangExporter.BUILTIN_NAMES.contains(rawName)){
             this.moonlightNames.put(key, rawName);
         }
     }

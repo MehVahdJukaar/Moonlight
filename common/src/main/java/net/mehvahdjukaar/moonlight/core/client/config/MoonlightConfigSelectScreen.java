@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 // The screen listing one mod's config files. Two panes: the mod's identity on the left (icon, authors, license) and
 // the config list on the right, with an item carousel band above the footer.
+// Other mods should go through ClientHelper.getMoonlightConfigScreen instead of touching this directly.
+@ApiStatus.Internal
 public class MoonlightConfigSelectScreen extends Screen {
 
     private static final int STRIP = 20;       // carousel strip under the mod icon
@@ -44,7 +47,7 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     private ConfigRowList list;
     private int leftPaneWidth;
-    private int identityBottom;    // bottom of the icon + carousel block, or of a mod's own showcase widget
+    private int leftPaneBottom;
     private boolean customShowcase;
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
@@ -70,7 +73,6 @@ public class MoonlightConfigSelectScreen extends Screen {
         return create(modId, configsOf(modId), parent, background);
     }
 
-    // over an explicit holder list, for holders that aren't globally tracked (the foreign-config bridge)
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
@@ -97,12 +99,12 @@ public class MoonlightConfigSelectScreen extends Screen {
             AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
                     this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? STRIP + 4 : 0));
             this.addRenderableWidget(widget);
-            this.identityBottom = widget.getY() + widget.getHeight();
+            this.leftPaneBottom = widget.getY() + widget.getHeight();
         }
         if (!showcaseTakesCarousel) {
             ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
                     ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, blockWidth, STRIP) : null;
-            this.identityBottom = this.iconBottom() + (carousel == null ? 0 : STRIP + 4);
+            this.leftPaneBottom = this.iconBottom() + (carousel == null ? 0 : STRIP + 4);
             if (carousel != null) {
                 this.addRenderableWidget(carousel.withOutline(ConfigGuiColors.TILE_OUTLINE));
             }
@@ -177,7 +179,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             }
         }
         // whatever fills the block above (carousel or mod showcase) is a widget, so it draws itself into this gap
-        int y = this.identityBottom + 8;
+        int y = this.leftPaneBottom + 8;
 
         if (this.authors.isEmpty()) return;
         GuiHelper.renderSeparator(graphics, PAD, y, textWidth);

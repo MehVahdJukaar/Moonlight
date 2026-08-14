@@ -23,55 +23,52 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-// Fills a mod's en_us.json with the config keys it doesn't have yet, so options and their comments are visible to
-// translators without anyone typing them out. Dev only, and it never touches a key that is already there.
+// A hack that allows us to automatically populate en_us with config lang names when booting
 public class ConfigLangExporter {
 
-    // names Moonlight makes up on a mod's behalf: a feature toggle, and the hidden parts of a range or a vec3. The
-    // mod author never typed these, so Moonlight translates them and they stay out of the mod's lang file
-    public static final Set<String> MOONLIGHT_NAMES = Set.of(
+    public static final Set<String> BUILTIN_NAMES = Set.of(
             ConfigBuilder.FEATURE_TOGGLE_NAME, "min", "max", "x", "y", "z");
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final boolean ENABLED = !"false".equals(System.getProperty("moonlight.langExport"));
+    private static final String ENABLED_PROPERTY = "moonlight.langExport";
 
-    public static void exportInDev(String modId, Map<String, String> translations, Map<String, String> moonlightNames) {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static final boolean ENABLED = Boolean.parseBoolean(System.getProperty(ENABLED_PROPERTY, "true"));
+
+    public static void exportInDev(String modId, Map<String, String> translations, Map<String, String> alreadyTranslated) {
         if (!ENABLED || !PlatHelper.isDev()) return;
-        Map<String, String> wanted = new LinkedHashMap<>();
-        translations.forEach((key, value) -> {
-            if (!moonlightNames.containsKey(key)) wanted.put(key, value);
+        Map<String, String> missing = new LinkedHashMap<>();
+        translations.forEach((key, name) -> {
+            if (!alreadyTranslated.containsKey(key)) missing.put(key, name);
         });
-        if (wanted.isEmpty()) return;
+        if (missing.isEmpty()) return;
         try {
-            Path file = findLangFile(modId);
-            if (file != null) merge(file, wanted);
+            Path langFile = findLangFile(modId);
+            if (langFile != null) addMissingEntries(langFile, missing);
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to export config lang keys for mod {}", modId, e);
         }
     }
 
-    private static void merge(Path file, Map<String, String> wanted) throws Exception {
+    private static void addMissingEntries(Path langFile, Map<String, String> missing) throws Exception {
         JsonObject json = new JsonObject();
-        if (Files.exists(file)) {
-            try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+        if (Files.exists(langFile)) {
+            try (BufferedReader reader = Files.newBufferedReader(langFile, StandardCharsets.UTF_8)) {
                 JsonElement parsed = JsonParser.parseReader(reader);
                 if (parsed.isJsonObject()) json = parsed.getAsJsonObject();
             }
         }
         int added = 0;
-        for (var e : wanted.entrySet()) {
+        for (var e : missing.entrySet()) {
             if (json.has(e.getKey())) continue;
             json.addProperty(e.getKey(), e.getValue());
             added++;
         }
         if (added == 0) return;
-        Files.createDirectories(file.getParent());
-        Files.writeString(file, GSON.toJson(json) + "\n", StandardCharsets.UTF_8);
-        Moonlight.LOGGER.info("Added {} missing config lang entries to {}", added, file);
+        Files.createDirectories(langFile.getParent());
+        Files.writeString(langFile, GSON.toJson(json) + "\n", StandardCharsets.UTF_8);
+        Moonlight.LOGGER.info("Added {} missing config lang entries to {}", added, langFile);
     }
 
-    // the compiled resources of a mod being developed live in a build folder next to its sources, so the source file
-    // can be walked back to. A mod loaded from a jar has no sources here and is skipped
     @Nullable
     private static Path findLangFile(String modId) {
         String langPath = "assets/" + modId + "/lang/en_us.json";
@@ -86,7 +83,6 @@ public class ConfigLangExporter {
         if (buildDir == null || buildDir.getParent() == null) return null;
         Path module = buildDir.getParent();
 
-        // in a multi loader setup the lang file usually sits in the common module, not in the one that was loaded
         List<Path> candidates = new ArrayList<>();
         candidates.add(module.resolve("src/main/resources"));
         Path parent = module.getParent();
@@ -99,10 +95,12 @@ public class ConfigLangExporter {
             }
         }
         for (Path c : candidates) {
-            if (Files.exists(c.resolve(langPath))) return c.resolve(langPath);
+            if (Files.exists(c.resolve(langPath))) {
+                return c.resolve(langPath);
+            }
         }
-        Path own = candidates.getFirst();
-        return Files.isDirectory(own) ? own.resolve(langPath) : null;
+        Path ownResources = candidates.getFirst();
+        return Files.isDirectory(ownResources) ? ownResources.resolve(langPath) : null;
     }
 
     private static boolean isBuildDirName(String name) {
@@ -115,7 +113,8 @@ public class ConfigLangExporter {
         if (url == null || !"file".equals(url.getProtocol())) return null;
         try {
             Path path = Paths.get(url.toURI());
-            for (int i = resource.split("/").length; i > 0 && path != null; i--) {
+            int segments = resource.split("/").length;
+            for (int i = 0; i < segments && path != null; i++) {
                 path = path.getParent();
             }
             return path;
