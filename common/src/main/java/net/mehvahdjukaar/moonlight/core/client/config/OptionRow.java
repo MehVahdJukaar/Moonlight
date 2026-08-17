@@ -47,12 +47,17 @@ class OptionRow extends ConfigListRow {
     private int reloadIconX0 = -1, reloadIconX1 = -1;
 
     OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
+        this(view, value, null);
+    }
+
+    OptionRow(ConfigScreenAccess view, ConfigOption<?> value, @Nullable Component categoryPath) {
         this.view = view;
         this.session = view.session();
         this.value = value;
         this.owner = value.parent();
         this.isGate = owner != null && owner.gate() == value;
-        this.title = value.title();
+        this.title = categoryPath == null ? value.title()
+                : Component.empty().append(categoryPath).append(value.title());
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
         this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());

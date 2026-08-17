@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -47,6 +48,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     private static final int SEARCH_WIDTH = 110;
     private static final int SEARCH_HEIGHT = 14;
     private static final int SEARCH_ICON_SIZE = 12;
+    private static final String CRUMB_SEPARATOR = " › "; // same trail glyph the breadcrumb uses
 
     private Button saveButton;
     private EditBox searchBox;
@@ -186,9 +188,10 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         } else {
             // flat search across the whole subtree
             List<ConfigOption<?>> matches = new ArrayList<>();
-            collectMatches(category, query, matches);
+            collectMatches(category, query, false, matches);
             for (ConfigOption<?> v : matches) {
-                addOption(rows, v);
+                rows.add(new OptionRow(this, v, categorySearchPathOf(v)));
+                addDescriptionRows(rows, v);
             }
         }
         this.list.setRows(rows);
@@ -199,15 +202,36 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         addDescriptionRows(rows, v);
     }
 
-    private static void collectMatches(ConfigCategory category, String query, List<ConfigOption<?>> out) {
+    // A category name counts as a match for everything under it: searching a feature by its name has to turn up the
+    // options that make it up, not just the rows that happen to repeat the name. A gate is only worth showing once
+    // its category matched, since on its own every one of them is called "Enabled"
+    private static void collectMatches(ConfigCategory category, String query, boolean inMatchedCategory,
+                                       List<ConfigOption<?>> out) {
         for (ConfigNode e : category.entries()) {
-            if (e == category.gate()) continue; // gate is edited via its category's inline toggle
             if (e instanceof ConfigCategory cat) {
-                collectMatches(cat, query, out);
+                collectMatches(cat, query, inMatchedCategory || matches(cat.title(), query), out);
             } else if (e instanceof ConfigOption<?> v) {
-                if (v.title().getString().toLowerCase(Locale.ROOT).contains(query)) out.add(v);
+                if (inMatchedCategory || (v != category.gate() && matches(v.title(), query))) out.add(v);
             }
         }
+    }
+
+    private static boolean matches(Component text, String query) {
+        return text.getString().toLowerCase(Locale.ROOT).contains(query);
+    }
+
+    @Nullable
+    private Component categorySearchPathOf(ConfigOption<?> option) {
+        List<Component> parts = new ArrayList<>();
+        for (ConfigCategory c = option.parent(); c != null && c != this.category; c = c.parent()) {
+            parts.addFirst(c.title());
+        }
+        if (parts.isEmpty()) return null;
+        MutableComponent path = Component.empty();
+        for (Component part : parts) {
+            path.append(part).append(CRUMB_SEPARATOR);
+        }
+        return path.withStyle(s -> s.withColor(TextColor.fromRgb(ConfigGuiColors.CRUMB)));
     }
 
     private void doSave() {

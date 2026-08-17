@@ -1,1 +1,2 @@
-- mist fixes
+- added more utils
+- added ArchiveUtils.detectExtension and OsType.findExecutable
