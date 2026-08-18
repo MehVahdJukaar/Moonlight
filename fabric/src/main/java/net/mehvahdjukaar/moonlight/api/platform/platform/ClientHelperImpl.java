@@ -249,7 +249,6 @@ public class ClientHelperImpl {
 
     @Nullable
     public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
-        // no universal config format on Fabric to convert; callers fall back to the mod's own (Mod Menu) screen
         return null;
     }
 
@@ -261,7 +260,7 @@ public class ClientHelperImpl {
         return false;
     }
 
-    public static boolean hasPerWorldConfig(String modId) {
+    public static boolean hasHiddenPerWorldConfig(String modId) {
         return false;
     }
 

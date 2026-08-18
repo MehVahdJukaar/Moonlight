@@ -139,9 +139,7 @@ public class ModsTilesScreen extends Screen {
         return switch (ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
             case NEVER -> false;
             case ALWAYS -> true;
-            // taking over a stock screen loses the mod nothing. Per world configs stay with it either way, we have
-            // no way to tell the player which world they are editing
-            case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId) && !ClientHelper.hasPerWorldConfig(modId);
+            case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId) && !ClientHelper.hasHiddenPerWorldConfig(modId);
         };
     }
 

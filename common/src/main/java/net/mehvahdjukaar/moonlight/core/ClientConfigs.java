@@ -55,7 +55,7 @@ public class ClientConfigs {
                 .define("custom_config_screen", true);
         SHOW_ALL_MOD_CONFIGS = builder.comment("Give every installed mod with a config screen a tile, not just the ones using Moonlight. Their own screen opens when clicked")
                 .define("show_all_mod_configs", false);
-        CONVERT_FOREIGN_CONFIGS = builder.comment("Draw other mods' configs inside Moonlight's screen instead of theirs (NeoForge only). GENERIC_ONLY covers just the mods that never wrote a screen of their own, ALWAYS covers every mod. Per world server configs are always left to the mod. Best effort: options we can't show are left as they are")
+        CONVERT_FOREIGN_CONFIGS = builder.comment("Draw other mods' configs inside Moonlight's screen instead of theirs (NeoForge only). GENERIC_ONLY covers just the mods that never wrote a screen of their own, ALWAYS covers every mod. Per world server configs are only shown while a world is open. Best effort: options we can't show are left as they are")
                 .define("convert_foreign_configs", ForeignConfigMode.GENERIC_ONLY);
         CONFIG_ITEM_CAROUSEL = builder.comment("Show a slowly panning strip of a mod's items on its config screen")
                 .define("config_item_carousel", true);

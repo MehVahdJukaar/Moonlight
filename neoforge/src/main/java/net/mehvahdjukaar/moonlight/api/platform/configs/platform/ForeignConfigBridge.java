@@ -78,9 +78,10 @@ public final class ForeignConfigBridge {
         }
     }
 
-    public static boolean hasPerWorldConfig(String modId) {
+    public static boolean hasHiddenPerWorldConfig(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
-            if (mc.getType() == ModConfig.Type.SERVER) return true;
+            if (mc.getType() != ModConfig.Type.SERVER) continue;
+            if (!(mc.getSpec() instanceof ModConfigSpec spec) || !spec.isLoaded()) return true;
         }
         return false;
     }

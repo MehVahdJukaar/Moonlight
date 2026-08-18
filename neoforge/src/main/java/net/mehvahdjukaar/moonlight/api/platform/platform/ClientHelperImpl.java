@@ -48,6 +48,7 @@ import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -275,8 +276,9 @@ public class ClientHelperImpl {
         return ForeignConfigBridge.hasOnlyGenericScreen(modId);
     }
 
-    public static boolean hasPerWorldConfig(String modId) {
-        return ForeignConfigBridge.hasPerWorldConfig(modId);
+    @ApiStatus.Internal
+    public static boolean hasHiddenPerWorldConfig(String modId) {
+        return ForeignConfigBridge.hasHiddenPerWorldConfig(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {
