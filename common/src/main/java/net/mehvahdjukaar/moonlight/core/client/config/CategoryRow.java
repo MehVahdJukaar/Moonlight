@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.BooleanToggleWidget;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -41,7 +42,7 @@ class CategoryRow extends ConfigListRow {
         this.button = Button.builder(Component.empty(), b -> view.openCategory(category))
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         if (gate != null) {
-            this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT, ON_ICON, OFF_ICON,
+            this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT, MoonlightIcons.YES, MoonlightIcons.NO,
                     Boolean.TRUE.equals(view.session().current(gate)), val -> {
                 view.session().put(gate, val);
                 view.onValueEdited();
@@ -79,7 +80,7 @@ class CategoryRow extends ConfigListRow {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, category.icon(), iconX, iconY, iconAnim.phase(), enabled);
         } else {
-            graphics.blitSprite(FOLDER_ICON, iconX, iconY, ROW_ICON, ROW_ICON);
+            graphics.blitSprite(MoonlightIcons.FOLDER, iconX, iconY, ROW_ICON, ROW_ICON);
         }
         Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);

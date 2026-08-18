@@ -9,7 +9,7 @@ import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForgeConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -32,8 +32,8 @@ import java.util.function.Function;
 
 public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
 
-    public static final ResourceLocation ON_ICON = Moonlight.res("yes");
-    public static final ResourceLocation OFF_ICON = Moonlight.res("no");
+    public static final ResourceLocation ON_ICON = MoonlightIcons.YES;
+    public static final ResourceLocation OFF_ICON = MoonlightIcons.NO;
 
     private static final Field FILE_ITEM_BUTTON = CustomConfigScreen.findFieldOrNull(FileItem.class, "modifyButton");
     private static final Field FILE_ITEM_CONFIG = CustomConfigScreen.findFieldOrNull(FileItem.class, "config");

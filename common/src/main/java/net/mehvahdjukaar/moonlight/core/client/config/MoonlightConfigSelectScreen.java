@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -175,7 +176,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             } else {
                 GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
                         PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
-                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, CONFIG_ICON);
+                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, MoonlightIcons.CONFIG);
             }
         }
         // whatever fills the block above (carousel or mod showcase) is a widget, so it draws itself into this gap

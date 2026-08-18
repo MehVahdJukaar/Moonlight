@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -155,7 +156,7 @@ class ListEditScreen extends Screen implements PopupHost {
                 this.editor = b;
             }
             this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                    DELETE_ICON, 12, 12, btn -> {
+                    MoonlightIcons.DELETE, 12, 12, btn -> {
                 working.remove(index);
                 rebuildRows();
             });

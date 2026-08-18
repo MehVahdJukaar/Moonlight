@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,8 +15,6 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ChatBubbleWidget extends AbstractWidget {
 
-    private static final ResourceLocation BODY = Moonlight.res("widget/chat_bubble_body");
-    private static final ResourceLocation TAIL = Moonlight.res("widget/chat_bubble_tail");
 
     public static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
@@ -64,7 +62,7 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.blitSprite(BODY, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_BODY, this.getX(), this.getY(), this.getWidth(), this.getHeight());
 
         int textX = this.getX() + PADDING;
         int textY = this.getY() + (this.getHeight() - this.font.lineHeight) / 2 + 1;
@@ -95,7 +93,7 @@ public class ChatBubbleWidget extends AbstractWidget {
         this.setY(bubbleY);
         this.renderWidget(graphics, mouseX, mouseY, partialTick);
 
-        graphics.blitSprite(TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
+        graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
     }
 
     @Override

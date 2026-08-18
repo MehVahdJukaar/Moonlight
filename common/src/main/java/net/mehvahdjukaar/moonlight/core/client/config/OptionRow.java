@@ -7,6 +7,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -66,7 +67,7 @@ class OptionRow extends ConfigListRow {
                 : ConfigControllers.create(value, session, this::onEdited);
 
         this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                RESET_ICON, 12, 12, b -> rollback());
+                MoonlightIcons.RESET, 12, 12, b -> rollback());
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
         this.children = List.of(control.widget(), resetButton);
@@ -119,7 +120,7 @@ class OptionRow extends ConfigListRow {
         int textLeft = left;
         if (hasDescription()) {
             boolean expanded = session.isExpanded(value);
-            ResourceLocation arrow = expanded ? SECTION_EXPANDED_ICON : SECTION_COLLAPSED_ICON;
+            ResourceLocation arrow = expanded ? MoonlightIcons.SECTION_EXPANDED : MoonlightIcons.SECTION_COLLAPSED;
             int arrowSize = 7;
             if (!contextEnabled) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
             graphics.blitSprite(arrow, left + 2, top + (height - arrowSize) / 2, arrowSize, arrowSize);

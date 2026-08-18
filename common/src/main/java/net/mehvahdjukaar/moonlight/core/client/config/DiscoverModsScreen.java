@@ -3,9 +3,9 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.OurModsList;
 import net.mehvahdjukaar.moonlight.core.client.RemoteIconCache;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,8 +28,6 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class DiscoverModsScreen extends Screen {
 
-    private static final ResourceLocation INSTALLED_ICON = Moonlight.res("yes");
-    private static final ResourceLocation GEAR_ICON = Moonlight.res("config");
 
     private static final int SIDE_MARGIN = 24;
     private static final int MAX_CONTENT_W = 320;
@@ -176,7 +174,7 @@ public class DiscoverModsScreen extends Screen {
         }
 
         if (installed) {
-            graphics.blitSprite(INSTALLED_ICON, textRight - 10, y + 7, 10, 10);
+            graphics.blitSprite(MoonlightIcons.YES, textRight - 10, y + 7, 10, 10);
         }
     }
 
@@ -205,7 +203,7 @@ public class DiscoverModsScreen extends Screen {
     // no icon yet (missing, downloading or failed): a dark tile with the mod's initial, dimmed if not installed
     private void renderFallbackIcon(GuiGraphics graphics, Row row, int iconX, int iconY, boolean installed) {
         GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, ICON_SIZE,
-                installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B, installed ? ConfigGuiColors.CATEGORY : DESC_MISSING, GEAR_ICON);
+                installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B, installed ? ConfigGuiColors.CATEGORY : DESC_MISSING, MoonlightIcons.CONFIG);
     }
 
     @Override

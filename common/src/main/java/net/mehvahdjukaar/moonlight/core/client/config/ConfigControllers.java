@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.screen.JsonEditScreen;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.*;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -161,7 +162,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.ListValue.class, (o, s, onChange) -> {
-            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), EDIT_ICON, 12, 12, b ->
+            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), MoonlightIcons.EDIT, 12, 12, b ->
                     Minecraft.getInstance().setScreen(new ListEditScreen(o, s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
@@ -171,7 +172,7 @@ public final class ConfigControllers {
 
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
-                    Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
+                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, 12, 12, b ->
                     Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
@@ -186,7 +187,7 @@ public final class ConfigControllers {
                 (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
         register(schemaClass, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
-                    Component.translatable("gui.moonlight.config.edit"), EDIT_ICON, 12, 12, b ->
+                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, 12, 12, b ->
                     Minecraft.getInstance().setScreen(SchemaEditScreen.create(o, s, onChange)));
             return new ConfigControl<>(button, v -> {
             });
@@ -215,7 +216,7 @@ public final class ConfigControllers {
                 ConfigScreenIcons.renderAnimated(graphics, icon, x, y, anim.phase(), lit);
             }
         };
-        BooleanToggleWidget w = new BooleanToggleWidget(CONTROL_WIDTH, CONTROL_HEIGHT, ON_ICON, OFF_ICON,
+        BooleanToggleWidget w = new BooleanToggleWidget(CONTROL_WIDTH, CONTROL_HEIGHT, MoonlightIcons.YES, MoonlightIcons.NO,
                 Boolean.TRUE.equals(s.current(o)), val -> {
             s.put(o, val);
             onChange.run();

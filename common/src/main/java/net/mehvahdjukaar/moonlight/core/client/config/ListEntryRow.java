@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -25,7 +26,7 @@ class ListEntryRow extends ConfigListRow {
     ListEntryRow(ConfigListRow inner, boolean canRemove, Runnable onRemove) {
         this.inner = inner;
         this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                DELETE_ICON, 12, 12, b -> onRemove.run());
+                MoonlightIcons.DELETE, 12, 12, b -> onRemove.run());
         this.remove.active = canRemove;
         this.remove.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.list_remove")));
 

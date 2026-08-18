@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.BreadcrumbWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.ChatFormatting;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
@@ -134,13 +135,13 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
             int total = 3 * bw + 2 * gap;
             int x0 = (this.width - total) / 2;
             this.addRenderableWidget(new IconButton(x0, y, bw, 20,
-                    Component.translatable("gui.moonlight.config.reset_all"), RESET_ICON, 12, 12, b -> confirmResetAll()));
-            this.saveButton = new IconButton(x0 + bw + gap, y, bw, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
+                    Component.translatable("gui.moonlight.config.reset_all"), MoonlightIcons.RESET, 12, 12, b -> confirmResetAll()));
+            this.saveButton = new IconButton(x0 + bw + gap, y, bw, 20, Component.empty(), MoonlightIcons.SAVE, 12, 12, b -> doSave());
             this.addRenderableWidget(this.saveButton);
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                     .bounds(x0 + 2 * (bw + gap), y, bw, 20).build());
         } else {
-            this.saveButton = new IconButton(this.width / 2 - 104, y, bw, 20, Component.empty(), SAVE_ICON, 12, 12, b -> doSave());
+            this.saveButton = new IconButton(this.width / 2 - 104, y, bw, 20, Component.empty(), MoonlightIcons.SAVE, 12, 12, b -> doSave());
             this.addRenderableWidget(this.saveButton);
             this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                     .bounds(this.width / 2 + 4, y, bw, 20).build());
@@ -287,7 +288,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         // scissored below HEADER so rows slide under the bar cleanly
         GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
-        graphics.blitSprite(SEARCH_ICON, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
+        graphics.blitSprite(MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
                 this.searchBox.getY() + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
     }
 

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -40,7 +41,7 @@ public class GearButton extends Button {
         pose.scale(scale, scale, 1);
         pose.translate(-SPRITE_SIZE / 2f, -SPRITE_SIZE / 2f, 0);
         if (!this.active) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
-        graphics.blitSprite(ConfigScreenLayout.CONFIG_ICON, 0, 0, SPRITE_SIZE, SPRITE_SIZE);
+        graphics.blitSprite(MoonlightIcons.CONFIG, 0, 0, SPRITE_SIZE, SPRITE_SIZE);
         if (!this.active) graphics.setColor(1f, 1f, 1f, 1f);
         pose.popPose();
     }

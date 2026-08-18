@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,7 +60,7 @@ class ConfigHolderRow extends ConfigListRow {
         } else {
             GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY);
         }
-        graphics.blitSprite(EDIT_ICON, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        graphics.blitSprite(MoonlightIcons.EDIT, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
     }
 
     @Override
@@ -75,6 +76,6 @@ class ConfigHolderRow extends ConfigListRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        return null; // file name is shown inline as the subtitle
+        return null;
     }
 }

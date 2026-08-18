@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -106,8 +107,8 @@ public class MediaButton {
     public static final ResourceLocation AKLIZ = MediaIcon.AKLIZ.sprite();
     public static final ResourceLocation BISECT = MediaIcon.BISECT.sprite();
 
-    public static final ResourceLocation YES = Moonlight.res("yes");
-    public static final ResourceLocation NO = Moonlight.res("no");
+    public static final ResourceLocation YES = MoonlightIcons.YES;
+    public static final ResourceLocation NO = MoonlightIcons.NO;
 
     public static Button create(Screen parent, int x, int y, ResourceLocation texture,
                                 String url, String tooltip) {
