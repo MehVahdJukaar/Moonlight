@@ -780,18 +780,23 @@ public class Palette implements Set<PaletteColor> {
     public static List<Palette> fromAnimatedImage(TextureImage textureImage, @Nullable TextureImage textureMask,
                                                   float tolerance) {
 
-        @Nullable Sampler2D maskSampler = textureMask;
         //TODO:not comptible with texture packs that change texture size. soft fail here
-        if (textureMask != null &&
+        @Nullable TextureImage mask = textureMask;
+        if (mask != null &&
                 (
-                        textureMask.frameWidth() < textureImage.frameWidth() ||
-                                textureMask.frameHeight() < textureImage.frameHeight())) {
-            Moonlight.LOGGER.error("fromAnimatedImage - Palette mask {} needs to be at least as large as the target image {} and have the same frame count. You must alter the mask's {}x{} to match the texture size's {}x{}",
-                    textureImage.debugPath, textureMask.debugPath, textureMask.imageWidth(), textureMask.imageHeight(), textureImage.imageWidth(), textureImage.imageHeight());
+                        mask.frameWidth() < textureImage.frameWidth() ||
+                                mask.frameHeight() < textureImage.frameHeight())) {
+            Moonlight.LOGGER.error("fromAnimatedImage - Palette mask {} needs to be at least as large as the target image {}. You must alter the mask's frame size {}x{} to match the texture's frame size {}x{}",
+                    mask.debugPath, textureImage.debugPath, mask.frameWidth(), mask.frameHeight(), textureImage.frameWidth(), textureImage.frameHeight());
             if (PlatHelper.isDev()) {
-                throw new IllegalArgumentException("Palette mask " + textureMask.debugPath + " has invalid size or frame count");
+                throw new IllegalArgumentException("Palette mask " + mask.debugPath + " has invalid frame size");
             }
+            //ignore it instead of sampling out of its bounds
+            mask = null;
         }
+        //a mask with less frames than the target is repeated over it. single frame masks are the common case
+        @Nullable TextureImage maskImage = mask;
+        int maskFrames = mask == null ? 1 : mask.frameCount();
 
         List<Palette> palettes = new ArrayList<>();
 
@@ -804,8 +809,8 @@ public class Palette implements Set<PaletteColor> {
             }
             var builder = paletteBuilders.get(index);
 
-            //TODO: check
-            if (maskSampler == null || FastColor.ABGR32.alpha(maskSampler.sample(pixel.globalX, pixel.globalY)) == 0) {
+            if (maskImage == null || FastColor.ABGR32.alpha(
+                    maskImage.getFramePixel(index % maskFrames, pixel.frameX(), pixel.frameY())) == 0) {
                 int color = pixel.getValue();
                 if (FastColor.ABGR32.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
