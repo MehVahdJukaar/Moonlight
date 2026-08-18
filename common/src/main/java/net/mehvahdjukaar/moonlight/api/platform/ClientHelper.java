@@ -16,6 +16,8 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
+import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -316,6 +318,16 @@ public class ClientHelper {
     @Nullable
     public static Screen getMoonlightConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
         return MoonlightConfigSelectScreen.create(modId, parent, background);
+    }
+
+    /**
+     * Moonlight's mod hub: a grid with a tile for every installed mod that has a config screen. Returns null when the
+     * player turned Moonlight's own config screens off, in which case there is no hub to show.
+     */
+    @Nullable
+    public static Screen getModsListScreen(@Nullable Screen parent, @Nullable ResourceLocation background) {
+        if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) return null;
+        return new ModsTilesScreen(parent, background);
     }
 
     /**

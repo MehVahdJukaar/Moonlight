@@ -53,7 +53,7 @@ public class ClientConfigs {
         SHOW_ALL_MOD_CONFIGS = builder.comment("Show a config tile for every installed mod that exposes a config screen, not just the ones using Moonlight's config system. Clicking one opens the screen the mod itself registered (NeoForge's screen extension, or Mod Menu on Fabric)")
                 .define("show_all_mod_configs", false);
         CONVERT_FOREIGN_CONFIGS = builder.comment("Also show tiles for other mods that don't use Moonlight and render their config directly in Moonlight's own screen (NeoForge only). Best-effort: options Moonlight can't represent are left to the mod's own screen. Implies show_all_mod_configs for the tile grid")
-                .define("convert_foreign_configs", false);
+                .define("convert_foreign_configs", true);
         CONFIG_ITEM_CAROUSEL = builder.comment("Show a slowly panning strip of a mod's items on its config screen")
                 .define("config_item_carousel", true);
         builder.pop();

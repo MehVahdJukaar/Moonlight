@@ -68,7 +68,16 @@ public class ModsTilesScreen extends Screen {
         this.background = background;
     }
 
-    private record Entry(String modId, Component name, @Nullable Component version) {
+    // ours: mods we ship, which get a hand made config screen instead of a converted or loader provided one
+    private record Entry(String modId, Component name, @Nullable Component version, boolean ours) {
+    }
+
+    private static boolean isOurs(String modId) {
+        if (EXTRA_MODS.contains(modId)) return true;
+        for (ModConfigHolder h : ModConfigHolder.getTrackedHolders()) {
+            if (h.getModId().equals(modId)) return true;
+        }
+        return false;
     }
 
     // every mod id we can show a config screen for, in no particular order
@@ -122,9 +131,10 @@ public class ModsTilesScreen extends Screen {
             String name = safe(() -> PlatHelper.getModName(modId), modId);
             String version = safe(() -> PlatHelper.getModVersion(modId), null);
             this.entries.add(new Entry(modId, Component.literal(name),
-                    version == null ? null : Component.literal("v" + version)));
+                    version == null ? null : Component.literal("v" + version), isOurs(modId)));
         }
-        this.entries.sort(Comparator.comparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER));
+        this.entries.sort(Comparator.comparing((Entry e) -> e.ours() ? 0 : 1)
+                .thenComparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER));
 
         this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 150, 20,
                 Component.translatable("gui.moonlight.config.discover_mods"), DISCOVER_ICON, 12, 12,
@@ -193,7 +203,9 @@ public class ModsTilesScreen extends Screen {
 
     private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover) {
         graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? ConfigGuiColors.TILE_BG_HOVER : ConfigGuiColors.TILE_BG);
-        graphics.renderOutline(x, y, CARD_W, CARD_H, hover ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE);
+        int outline = ConfigGuiColors.TILE_OUTLINE;
+        if (hover) outline = entry.ours() ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE_HOVER_FOREIGN;
+        graphics.renderOutline(x, y, CARD_W, CARD_H, outline);
 
         int iconX = x + (CARD_W - ICON_SIZE) / 2;
         int iconY = y + CARD_PAD;

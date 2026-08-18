@@ -29,6 +29,8 @@ public final class ConfigGuiColors {
     public static final int TILE_BG_HOVER = 0xFF2C2C34;
     public static final int TILE_OUTLINE = 0xFF000000;
     public static final int TILE_OUTLINE_HOVER = 0xFF000000 | CATEGORY;
+    // mods that aren't ours: their config is either the loader's own screen or one we converted on the fly
+    public static final int TILE_OUTLINE_HOVER_FOREIGN = 0xFF000000 | chat(ChatFormatting.AQUA);
     public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
 
     // breadcrumb
