@@ -55,8 +55,9 @@ public class BackCommand {
 
     private static void record(ServerPlayer player, GlobalPos pos) {
         CircularList<GlobalPos> list = HISTORY.computeIfAbsent(player, p -> new CircularList<>(MAX_HISTORY));
+        // a cross dimension teleport goes through more than one hook, so the same spot can come in twice
         if (list.isEmpty() || !list.getLast().equals(pos)) {
-            list.add(pos);
+            list.addLast(pos); // plain add() skips the size cap
         }
     }
 
