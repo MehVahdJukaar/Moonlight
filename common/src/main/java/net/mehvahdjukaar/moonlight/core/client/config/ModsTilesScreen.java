@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
-import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
@@ -147,8 +146,8 @@ public class ModsTilesScreen extends Screen {
     protected void init() {
         this.allEntries.clear();
         for (String modId : collectConfigurableMods()) {
-            String name = safe(() -> PlatHelper.getModName(modId), modId);
-            String version = safe(() -> PlatHelper.getModVersion(modId), null);
+            String name = PlatHelper.getModName(modId);
+            String version = PlatHelper.getModVersion(modId);
             this.allEntries.add(new Entry(modId, Component.literal(name),
                     version == null ? null : Component.literal("v" + version), isOurs(modId)));
         }
@@ -206,8 +205,6 @@ public class ModsTilesScreen extends Screen {
         int maxCols = Math.max(1, (availWidth + CARD_GAP) / (CARD_W + CARD_GAP));
         int count = this.entries.size();
         int rows = (count + maxCols - 1) / maxCols;
-        // spread over as few columns as that row count allows instead of filling the width: 7 mods in a 6 wide grid
-        // lay out as 4 + 3 rather than 6 + 1, keeping the grid a centered block
         this.cols = rows == 0 ? maxCols : Math.min(maxCols, (count + rows - 1) / rows);
         this.contentTop = HEADER;
         this.contentBottom = this.height - FOOTER;
@@ -329,13 +326,4 @@ public class ModsTilesScreen extends Screen {
         this.minecraft.setScreen(parent);
     }
 
-    // mod metadata lookups throw on loaders that don't know the mod id, so every call goes through here
-    static <T> T safe(ThrowingSupplier<T> supplier, T fallback) {
-        try {
-            T v = supplier.get();
-            return v == null ? fallback : v;
-        } catch (Exception e) {
-            return fallback;
-        }
-    }
 }

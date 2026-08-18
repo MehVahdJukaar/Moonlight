@@ -49,14 +49,14 @@ public class MoonlightConfigSelectScreen extends Screen {
     private boolean customShowcase;
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
-        super(Component.literal(ModsTilesScreen.safe(() -> PlatHelper.getModName(modId), TextHelper.getReadableName(modId))));
+        super(Component.literal(PlatHelper.getModName(modId)));
         this.modId = modId;
         this.parent = parent;
         this.background = background;
         this.holders = holders;
-        String v = ModsTilesScreen.safe(() -> PlatHelper.getModVersion(modId), null);
+        String v = PlatHelper.getModVersion(modId);
         this.version = v == null ? null : Component.literal("v" + v);
-        this.authors = ModsTilesScreen.safe(() -> PlatHelper.getModAuthors(modId), List.<String>of());
+        this.authors = PlatHelper.getModAuthors(modId);
     }
 
     private static List<ModConfigHolder> configsOf(String modId) {

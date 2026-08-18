@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
@@ -220,7 +221,9 @@ public class PlatHelperImpl {
     }
 
     public static String getModName(String modId) {
-        return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
+        return ModList.get().getModContainerById(modId)
+                .map(c -> c.getModInfo().getDisplayName())
+                .orElseGet(() -> TextHelper.getReadableName(modId));
     }
 
     @Nullable

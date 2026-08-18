@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
@@ -126,7 +127,7 @@ public final class ForeignConfigBridge {
         ConfigCategory root = new ConfigCategory(Component.empty());
         walk(spec, spec.getValues(), List.of(), root);
 
-        Component name = Component.literal(readableModName(modId) + " - " + TextHelper.getReadableName(typeName));
+        Component name = Component.literal(PlatHelper.getModName(modId) + " - " + TextHelper.getReadableName(typeName));
         return new ForeignConfigHolder(id, type, spec, root, name);
     }
 
@@ -269,12 +270,6 @@ public final class ForeignConfigBridge {
             case GAME -> ConfigReloadType.GAME_RESTART;
             default -> ConfigReloadType.NONE;
         };
-    }
-
-    private static String readableModName(String modId) {
-        return ModList.get().getModContainerById(modId)
-                .map(c -> c.getModInfo().getDisplayName())
-                .orElse(TextHelper.getReadableName(modId));
     }
 
     private static List<String> append(List<String> path, String key) {

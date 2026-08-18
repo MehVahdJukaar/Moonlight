@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.Person;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundSpawnCustomEntityMessage;
@@ -202,7 +203,9 @@ public class PlatHelperImpl {
     }
 
     public static String getModName(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getName();
+        return FabricLoader.getInstance().getModContainer(modId)
+                .map(c -> c.getMetadata().getName())
+                .orElseGet(() -> TextHelper.getReadableName(modId));
     }
 
     @Nullable

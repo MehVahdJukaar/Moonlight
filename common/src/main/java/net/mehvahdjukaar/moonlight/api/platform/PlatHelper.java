@@ -268,6 +268,7 @@ public class PlatHelper {
         return TextHelper.urlHost(url);
     }
 
+    /** The mod's display name, or a readable form of the id when the loader doesn't know that mod. */
     @PlatformImpl
     public static String getModName(String modId) {
         throw new AssertionError();
