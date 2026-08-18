@@ -27,7 +27,6 @@ import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -144,9 +143,7 @@ public class Moonlight {
 
     @EventCalled
     public static void onPlayerCloned(Player oldPlayer, Player newPlayer, boolean wasDeath) {
-        BlockPos oldPos = oldPlayer.blockPosition();
-        var oldDim = oldPlayer.level().dimension();
-        BackCommand.onTeleported(newPlayer, oldPos, oldDim);
+        BackCommand.onPlayerCloned(oldPlayer, newPlayer);
         if (wasDeath && !oldPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
             var inv = oldPlayer.getInventory();
             int i = 0;

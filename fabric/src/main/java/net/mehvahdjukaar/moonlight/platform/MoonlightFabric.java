@@ -70,7 +70,9 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         });
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(Moonlight::onDataSyncToPlayer);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(DataMapBridge::onDataSyncToPlayer);
-        ServerPlayerEvents.COPY_FROM.register(Moonlight::onPlayerCloned);
+        // fabric hands us "alive", which is true when they did not die
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
+                Moonlight.onPlayerCloned(oldPlayer, newPlayer, !alive));
 
         ResourceConditionsBridge.init();
         DataMapBridge.init();

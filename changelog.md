@@ -1,1 +1,3 @@
-- texture mask improvements
+- improved back command
+- any big improvements to the config list screen
+- common string helpers

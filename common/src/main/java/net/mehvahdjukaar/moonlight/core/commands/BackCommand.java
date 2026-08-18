@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 
@@ -39,12 +40,23 @@ public class BackCommand {
     // Called when a player is teleported elsewhere, to save their previous location
     public static void onTeleported(Entity entity, BlockPos oldPos, ResourceKey<Level> oldDim) {
         if (!(entity instanceof ServerPlayer player)) return;
+        record(player, GlobalPos.of(oldDim, oldPos));
+    }
 
+    // Dying or leaving the End makes a whole new player object, so the history has to be moved onto it. Where they
+    // died goes in as well, so /back brings you back to your corpse
+    public static void onPlayerCloned(Player oldPlayer, Player newPlayer) {
+        if (!(oldPlayer instanceof ServerPlayer old) || !(newPlayer instanceof ServerPlayer fresh)) return;
+
+        CircularList<GlobalPos> history = HISTORY.remove(old);
+        if (history != null) HISTORY.put(fresh, history);
+        record(fresh, GlobalPos.of(old.level().dimension(), old.blockPosition()));
+    }
+
+    private static void record(ServerPlayer player, GlobalPos pos) {
         CircularList<GlobalPos> list = HISTORY.computeIfAbsent(player, p -> new CircularList<>(MAX_HISTORY));
-        GlobalPos previousPos = GlobalPos.of(oldDim, oldPos);
-
-        if (list.isEmpty() || !list.getLast().equals(previousPos)) {
-            list.add(previousPos);
+        if (list.isEmpty() || !list.getLast().equals(pos)) {
+            list.add(pos);
         }
     }
 
