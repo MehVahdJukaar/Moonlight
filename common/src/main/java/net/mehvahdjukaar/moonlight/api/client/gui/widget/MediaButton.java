@@ -18,7 +18,10 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -39,7 +42,9 @@ public class MediaButton {
         // server-host partners
         AKLIZ(),
         BISECT(),
-        GENERIC_SERVER();
+        GENERIC_SERVER(),
+        // generic link
+        LINK();
 
         public static final Codec<MediaIcon> CODEC = StringRepresentable.fromValues(MediaIcon::values);
 
@@ -106,6 +111,7 @@ public class MediaButton {
     public static final ResourceLocation GITHUB = MediaIcon.GITHUB.sprite();
     public static final ResourceLocation AKLIZ = MediaIcon.AKLIZ.sprite();
     public static final ResourceLocation BISECT = MediaIcon.BISECT.sprite();
+    public static final ResourceLocation LINK = MediaIcon.LINK.sprite();
 
     public static final ResourceLocation YES = MoonlightIcons.YES;
     public static final ResourceLocation NO = MoonlightIcons.NO;
@@ -242,6 +248,49 @@ public class MediaButton {
                 Component.translatable("tooltip.moonlight.media.akliz"));
     }
 
+    private static final List<MediaIcon> MOD_PAGE_ORDER = List.of(MediaIcon.CURSEFORGE, MediaIcon.MODRINTH,
+            MediaIcon.GITHUB, MediaIcon.DISCORD, MediaIcon.YOUTUBE, MediaIcon.TWITTER);
+
+    private static final List<MediaIcon> HUB_ICONS = List.of(MediaIcon.DISCORD, MediaIcon.YOUTUBE, MediaIcon.TWITTER);
+
+    private static final int MAX_UNKNOWN_LINKS = 2;
+
+    private static Button forIcon(Screen parent, int x, int y, MediaIcon icon, String url) {
+        return switch (icon) {
+            case CURSEFORGE -> curseForge(parent, x, y, url);
+            case MODRINTH -> modrinth(parent, x, y, url);
+            case GITHUB -> github(parent, x, y, url);
+            case DISCORD -> discord(parent, x, y, url);
+            case YOUTUBE -> youtube(parent, x, y, url);
+            case TWITTER -> twitter(parent, x, y, url);
+            default -> link(parent, x, y, url);
+        };
+    }
+
+    /** A url whose host we don't recognise: a plain globe that just opens it. */
+    public static Button link(Screen parent, int x, int y, String url) {
+        return create(parent, x, y, LINK, url, Component.translatable("tooltip.moonlight.media.link"));
+    }
+
+    /**
+     * Which media a url belongs to, going by its host. Null when nothing recognises it, in which case it's just a
+     * website and link() is the button for it. Neither loader tags its urls, so this is all we have to go on.
+     */
+    @Nullable
+    public static MediaIcon iconForUrl(String url) {
+        String host = PlatHelper.urlHost(url);
+        if (host == null) return null;
+        if (host.endsWith("curseforge.com")) return MediaIcon.CURSEFORGE;
+        if (host.endsWith("modrinth.com")) return MediaIcon.MODRINTH;
+        if (host.endsWith("github.com")) return MediaIcon.GITHUB;
+        if (host.endsWith("discord.gg") || host.endsWith("discord.com") || host.endsWith("discordapp.com")) return MediaIcon.DISCORD;
+        if (host.endsWith("patreon.com")) return MediaIcon.PATREON;
+        if (host.endsWith("ko-fi.com")) return MediaIcon.KO_FI;
+        if (host.endsWith("youtube.com") || host.equals("youtu.be")) return MediaIcon.YOUTUBE;
+        if (host.endsWith("twitter.com") || host.equals("x.com")) return MediaIcon.TWITTER;
+        return null;
+    }
+
     /** Invisible, inactive button with the same footprint as a sprite button. */
     private static Button placeholderButton(int x, int y) {
         Button b = Button.builder(CommonComponents.EMPTY, op -> {}).bounds(x, y, 20, 20).build();
@@ -278,35 +327,66 @@ public class MediaButton {
                                              @Nullable String modrinthUrl,
                                              @Nullable String modSourceUrl,
                                              Runnable onBack) {
-        if (curseforgeUrl == null) curseforgeUrl = PlatHelper.getModCurseforgeUrl(modId);
-        if (modrinthUrl == null)   modrinthUrl   = PlatHelper.getModModrinthUrl(modId);
-        if (modSourceUrl == null)  modSourceUrl  = PlatHelper.getModSourcesUrl(modId);
         MoonlightHubInfo hub = MoonlightHubInfo.INSTANCE;
         // our socials only belong on our own mods; the per-mod pages are fine on anyone's
         boolean ours = isOwnMod(modId);
 
+        // the loader hands us a pile of untagged urls, so each one is sorted by its host. Explicit arguments win
+        Map<MediaIcon, String> byIcon = new LinkedHashMap<>();
+        List<String> unknownHosts = new ArrayList<>();
+        for (String url : PlatHelper.getModLinks(modId)) {
+            MediaIcon icon = iconForUrl(url);
+            if (icon == null) {
+                if (!unknownHosts.contains(url)) unknownHosts.add(url);
+            } else {
+                byIcon.putIfAbsent(icon, url);
+            }
+        }
+        if (curseforgeUrl != null) byIcon.put(MediaIcon.CURSEFORGE, curseforgeUrl);
+        if (modrinthUrl != null) byIcon.put(MediaIcon.MODRINTH, modrinthUrl);
+        if (modSourceUrl != null) byIcon.put(MediaIcon.GITHUB, modSourceUrl);
+
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
-        // going leftward from the back button
+        // outward from the back button in both directions
         int left = centerX - 45 - spacing;
+        int right = centerX + 45 + 2;
         if (ours) {
             adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
             adder.accept(koFi(parent, left, y, hub.koFi()));       left -= spacing;
         }
-        if (curseforgeUrl != null) { adder.accept(curseForge(parent, left, y, curseforgeUrl)); left -= spacing; }
-        if (modrinthUrl != null)   { adder.accept(modrinth(parent, left, y, modrinthUrl));     left -= spacing; }
-        if (modSourceUrl != null)  { adder.accept(github(parent, left, y, modSourceUrl));      left -= spacing; }
+
+        List<ModLink> pages = new ArrayList<>();
+        for (MediaIcon icon : MOD_PAGE_ORDER) {
+            String url = byIcon.get(icon);
+            // on our own mods the socials are already on the right, no point repeating them
+            if (url == null || (ours && HUB_ICONS.contains(icon))) continue;
+            pages.add(new ModLink(icon, url));
+        }
+        for (String url : unknownHosts.stream().limit(MAX_UNKNOWN_LINKS).toList()) {
+            pages.add(new ModLink(MediaIcon.LINK, url));
+        }
+        for (int i = 0; i < pages.size(); i++) {
+            ModLink page = pages.get(i);
+            // on our own mods the right side is spoken for by the socials below, so everything stacks left there.
+            // On anyone else's both sides are free, and alternating keeps the bar even
+            boolean goLeft = ours || i % 2 == 0;
+            adder.accept(forIcon(parent, goLeft ? left : right, y, page.icon(), page.url()));
+            if (goLeft) left -= spacing;
+            else right += spacing;
+        }
 
         if (!ours) return;
-        // going rightward from the back button
-        int right = centerX + 45 + 2;
         adder.accept(discord(parent, right, y, hub.discord()));         right += spacing;
         adder.accept(youtube(parent, right, y, hub.youtube()));         right += spacing;
         adder.accept(twitter(parent, right, y, hub.twitter()));         right += spacing;
         adder.accept(marketplace(parent, right, y, hub.marketplace())); right += spacing;
         Button sp = serverProvider(parent, right, y);
         if (sp != null) { adder.accept(sp); }
+    }
+
+    private record ModLink(MediaIcon icon, String url) {
     }
 
     /** Auto-resolves all per-mod urls from loader metadata. */

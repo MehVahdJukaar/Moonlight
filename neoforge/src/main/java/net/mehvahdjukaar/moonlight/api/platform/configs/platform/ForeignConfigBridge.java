@@ -15,14 +15,18 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,11 +42,47 @@ public final class ForeignConfigBridge {
     // ConfigTracker exposes no public "configs of mod X" accessor, so read its live registry field once
     private static final Map<String, List<ModConfig>> CONFIGS_BY_MOD = configsByModField();
 
+    // building a screen just to look at its class is not free, so each mod is asked once
+    private static final Map<String, Boolean> GENERIC_SCREEN_CACHE = new HashMap<>();
+
+    private static final String CONFIGURED_PACKAGE = "com.mrcrayfish.configured.";
+
     @Nullable
     public static Screen createScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
         List<ModConfigHolder> holders = holdersFor(modId);
         if (holders.isEmpty()) return null;
         return MoonlightConfigSelectScreen.create(modId, holders, parent, background);
+    }
+
+    /**
+     * The mod either registered no config screen at all, or registered one of the stock ones anybody gets for free:
+     * NeoForge's ConfigurationScreen, or Configured's. Either way there is no hand made screen to override.
+     */
+    public static boolean hasOnlyGenericScreen(String modId) {
+        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, ForeignConfigBridge::readIsGenericScreen);
+    }
+
+    private static boolean readIsGenericScreen(String modId) {
+        ModContainer container = ModList.get().getModContainerById(modId).orElse(null);
+        if (container == null) return false;
+        IConfigScreenFactory factory = container.getCustomExtension(IConfigScreenFactory.class).orElse(null);
+        if (factory == null) return true;
+        try {
+            // the factory is a lambda in the registering mod's class, so the only way to tell them apart is the
+            // screen it hands back. Building one is harmless, it's the init() call that does the work
+            Screen screen = factory.createScreen(container, null);
+            return screen instanceof ConfigurationScreen
+                    || screen.getClass().getName().startsWith(CONFIGURED_PACKAGE);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean hasPerWorldConfig(String modId) {
+        for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
+            if (mc.getType() == ModConfig.Type.SERVER) return true;
+        }
+        return false;
     }
 
     // cheap check, no tree building: does this mod expose a loaded, non-Moonlight spec?
@@ -218,7 +258,7 @@ public final class ForeignConfigBridge {
 
     private static Component categoryTitle(ModConfigSpec spec, List<String> path, String key) {
         String tk = spec.getLevelTranslationKey(path);
-        if (tk != null && I18n.exists(tk)) return Component.translatable(tk);
+        if (I18n.exists(tk)) return Component.translatable(tk);
         return Component.literal(LangBuilder.getReadableName(key));
     }
 

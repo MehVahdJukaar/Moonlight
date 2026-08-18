@@ -214,6 +214,16 @@ public class PlatHelperImpl {
         return container.findPath(iconPath).orElse(null);
     }
 
+    public static List<String> getModLinks(String modId) {
+        var container = FabricLoader.getInstance().getModContainer(modId).orElse(null);
+        if (container == null) return List.of();
+        return container.getMetadata().getContact().asMap().values().stream()
+                .map(String::trim)
+                .filter(u -> u.startsWith("http"))
+                .distinct()
+                .toList();
+    }
+
     @Nullable
     public static Path findModResource(String modId, String path) {
         return FabricLoader.getInstance().getModContainer(modId).flatMap(c -> c.findPath(path)).orElse(null);

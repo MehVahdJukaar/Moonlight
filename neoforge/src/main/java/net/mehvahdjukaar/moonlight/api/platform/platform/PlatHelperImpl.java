@@ -75,6 +75,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -193,6 +194,22 @@ public class PlatHelperImpl {
             return issues.substring(0, issues.length() - "/issues".length());
         }
         return issues;
+    }
+
+    private static final List<String> LINK_KEYS = List.of("displayURL", "curseforge", "modrinth", "sources", "discord");
+
+    public static List<String> getModLinks(String modId) {
+        var container = ModList.get().getModContainerById(modId).orElse(null);
+        if (container == null) return List.of();
+        IModInfo info = container.getModInfo();
+        List<String> out = new ArrayList<>();
+        info.getModURL().map(URL::toString).ifPresent(out::add);
+        for (String key : LINK_KEYS) {
+            String url = readModString(modId, key);
+            if (url != null) out.add(url);
+        }
+        info.getOwningFile().getConfig().<String>getConfigElement("issueTrackerURL").ifPresent(out::add);
+        return out.stream().map(String::trim).filter(u -> u.startsWith("http")).distinct().toList();
     }
 
     @Nullable

@@ -46,6 +46,7 @@
   "tooltip.moonlight.media.modrinth": "Modrinth Page",
   "tooltip.moonlight.media.marketplace": "Check us out on the Marketplace!",
   "tooltip.moonlight.media.github": "Mod Wiki",
+  "tooltip.moonlight.media.link": "Mod Page",
   "tooltip.moonlight.media.partner_server": "Need a server? Get one with %s",
   "tooltip.moonlight.media.akliz": "Need a server? Get one with Akliz",
   "message.moonlight.anti_repost": "You seem to have downloaded %1$s from a malicious site :( Get the real version %2$s.",

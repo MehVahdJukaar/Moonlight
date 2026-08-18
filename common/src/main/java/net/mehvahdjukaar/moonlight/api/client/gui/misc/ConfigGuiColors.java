@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.misc;
 
 import net.minecraft.ChatFormatting;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class ConfigGuiColors {
@@ -32,6 +33,23 @@ public final class ConfigGuiColors {
     // mods that aren't ours: their config is either the loader's own screen or one we converted on the fly
     public static final int TILE_OUTLINE_HOVER_FOREIGN = 0xFF000000 | chat(ChatFormatting.AQUA);
     public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
+
+    // the bright chat colors, picked from the mod id so a mod without a logo always gets the same one
+    private static final ChatFormatting[] INITIAL_COLORS = {
+            ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN,
+            ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE, ChatFormatting.WHITE
+    };
+
+    // mods with no icon but a color everyone knows them by. Quark and Zeta both paint their menu button 0x48DDBC
+    private static final Map<String, Integer> BRAND_COLORS = Map.of(
+            "quark", 0xFF48DDBC,
+            "zeta", 0xFF48DDBC);
+
+    public static int initialLetter(String modId) {
+        Integer brand = BRAND_COLORS.get(modId);
+        if (brand != null) return brand;
+        return chat(INITIAL_COLORS[Math.floorMod(modId.hashCode(), INITIAL_COLORS.length)]);
+    }
 
     // breadcrumb
     public static final int CRUMB = chat(ChatFormatting.GRAY);

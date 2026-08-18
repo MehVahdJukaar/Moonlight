@@ -176,7 +176,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             } else {
                 GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
                         PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
-                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, MoonlightIcons.CONFIG);
+                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.initialLetter(this.modId), MoonlightIcons.CONFIG);
             }
         }
         // whatever fills the block above (carousel or mod showcase) is a widget, so it draws itself into this gap

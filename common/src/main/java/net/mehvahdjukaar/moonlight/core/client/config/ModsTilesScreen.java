@@ -52,10 +52,14 @@ public class ModsTilesScreen extends Screen {
 
     private static final int VERSION_COLOR = ConfigGuiColors.DESCRIPTION;
 
-    private static final int SEARCH_Y = 22;
     private static final int SEARCH_WIDTH = 110;
     private static final int SEARCH_HEIGHT = 14;
     private static final int SEARCH_ICON_SIZE = 12;
+    private static final int SEARCH_ICON_GAP = 2;
+    private static final int TITLE_SEARCH_GAP = 5;
+    // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
+    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (LINE + TITLE_SEARCH_GAP + SEARCH_HEIGHT)) / 2;
+    private static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + LINE + TITLE_SEARCH_GAP;
 
     private final Screen parent;
     @Nullable
@@ -96,7 +100,7 @@ public class ModsTilesScreen extends Screen {
         }
         // converting foreign configs implies showing every mod's tile so they can be reached. In that mode a mod also
         // qualifies if it only has a raw loader config we can convert, without a screen of its own
-        boolean convert = ClientConfigs.CONVERT_FOREIGN_CONFIGS.get();
+        boolean convert = ClientConfigs.CONVERT_FOREIGN_CONFIGS.get().isOn();
         if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get() || convert) {
             for (String modId : PlatHelper.getInstalledMods()) {
                 if (ClientHelper.hasModConfigScreen(modId) || (convert && ClientHelper.hasNativeForeignConfig(modId))) {
@@ -124,11 +128,21 @@ public class ModsTilesScreen extends Screen {
     @Nullable
     public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable ResourceLocation background) {
         Screen s = MoonlightConfigSelectScreen.create(modId, parent, background);
-        if (s == null && ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
+        if (s == null && shouldConvert(modId)) {
             s = ClientHelper.getNativeForeignConfigScreen(modId, parent, background);
         }
         if (s == null) s = ClientHelper.getModConfigScreen(modId, parent);
         return s;
+    }
+
+    private static boolean shouldConvert(String modId) {
+        return switch (ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
+            case NEVER -> false;
+            case ALWAYS -> true;
+            // taking over a stock screen loses the mod nothing. Per world configs stay with it either way, we have
+            // no way to tell the player which world they are editing
+            case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId) && !ClientHelper.hasPerWorldConfig(modId);
+        };
     }
 
     @Override
@@ -159,8 +173,7 @@ public class ModsTilesScreen extends Screen {
 
     private EditBox makeSearchBox() {
         Component label = Component.translatable("gui.moonlight.config.search");
-        EditBox box = new EditBox(this.font, this.width - SIDE_MARGIN - SEARCH_WIDTH, SEARCH_Y,
-                SEARCH_WIDTH, SEARCH_HEIGHT, label);
+        EditBox box = new EditBox(this.font, (this.width - SEARCH_WIDTH) / 2, SEARCH_Y, SEARCH_WIDTH, SEARCH_HEIGHT, label);
         box.setHint(label.copy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY));
         box.setValue(this.searchQuery); // before the responder, so a resize doesn't jump the grid back to the top
         box.setResponder(query -> {
@@ -215,10 +228,9 @@ public class ModsTilesScreen extends Screen {
         if (this.searchBox == null) {
             GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
         } else {
-            // the search row takes the middle of the bar, so the title moves up to make room for it
             GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
-            graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
-            graphics.blitSprite(MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
+            graphics.drawCenteredString(this.font, this.title, this.width / 2, TITLE_Y_WITH_SEARCH, ConfigGuiColors.TITLE);
+            graphics.blitSprite(MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - SEARCH_ICON_GAP,
                     SEARCH_Y + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
         }
     }
@@ -275,7 +287,8 @@ public class ModsTilesScreen extends Screen {
 
     private void renderFallbackIcon(GuiGraphics graphics, Entry entry, int iconX, int iconY) {
         GuiHelper.renderInitialTile(graphics, this.font, entry.name().getString(),
-                iconX, iconY, ICON_SIZE, ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.CATEGORY, MoonlightIcons.CONFIG);
+                iconX, iconY, ICON_SIZE, ConfigGuiColors.TILE_ICON_BG,
+                ConfigGuiColors.initialLetter(entry.modId()), MoonlightIcons.CONFIG);
     }
 
     @Override

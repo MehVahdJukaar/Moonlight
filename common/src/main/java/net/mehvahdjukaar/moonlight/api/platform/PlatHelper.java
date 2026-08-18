@@ -52,8 +52,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -247,6 +249,26 @@ public class PlatHelper {
     @Contract
     public static String getModSourcesUrl(String modId) {
         throw new AssertionError();
+    }
+
+    /**
+     * Every http url the mod declared in its metadata, in no particular order. Neither loader says what any of them
+     * point at, so callers work that out from the host.
+     */
+    @PlatformImpl
+    public static List<String> getModLinks(String modId) {
+        throw new AssertionError();
+    }
+
+    /** Lowercase host of a url, or null when it doesn't parse. */
+    @Nullable
+    public static String urlHost(String url) {
+        try {
+            String host = URI.create(url.trim()).getHost();
+            return host == null ? null : host.toLowerCase(Locale.ROOT);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @PlatformImpl

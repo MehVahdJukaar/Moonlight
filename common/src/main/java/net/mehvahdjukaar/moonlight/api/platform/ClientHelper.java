@@ -371,6 +371,22 @@ public class ClientHelper {
     }
 
     /**
+     * Whether the screen this mod registered is a stock one it got for free (NeoForge's ConfigurationScreen, or
+     * Configured's), or none at all. Either way the mod wrote no screen of its own, so converting its config costs
+     * nothing. Always false on Fabric.
+     */
+    @PlatformImpl
+    public static boolean hasOnlyGenericConfigScreen(String modId) {
+        throw new AssertionError();
+    }
+
+    /** Whether the mod has a per-world server config. Moonlight's screen has no notion of those. */
+    @PlatformImpl
+    public static boolean hasPerWorldConfig(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
      * Pack in /resources/resourcepacks
      */
     @PlatformImpl

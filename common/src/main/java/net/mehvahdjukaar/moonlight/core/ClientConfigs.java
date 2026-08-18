@@ -18,7 +18,7 @@ public class ClientConfigs {
     public static final Supplier<TooltipMode> TAGS_TOOLTIP;
     public static final Supplier<Boolean> CUSTOM_CONFIG_SCREEN;
     public static final Supplier<Boolean> SHOW_ALL_MOD_CONFIGS;
-    public static final Supplier<Boolean> CONVERT_FOREIGN_CONFIGS;
+    public static final Supplier<ForeignConfigMode> CONVERT_FOREIGN_CONFIGS;
     public static final Supplier<Boolean> CONFIG_ITEM_CAROUSEL;
 
     @Deprecated(forRemoval = true)
@@ -48,12 +48,15 @@ public class ClientConfigs {
         TAGS_TOOLTIP = builder.comment("Show Item and Block tags on item tooltip")
                 .define("tags_tooltips", PlatHelper.isDev() ? TooltipMode.ON : TooltipMode.OFF);
 
-        CUSTOM_CONFIG_SCREEN = builder.comment("Use Moonlight's own custom config screen. When disabled, config screens are left to the loader instead: on NeoForge that means NeoForge's own screen (or Configured, if installed), and on Fabric the old Cloth Config / YACL screens")
+        builder.pop();
+
+        builder.push("config_screen");
+        CUSTOM_CONFIG_SCREEN = builder.comment("Use Moonlight's config screen. When off, configs open the loader's screen instead: NeoForge's own (or Configured), Cloth Config or YACL on Fabric")
                 .define("custom_config_screen", true);
-        SHOW_ALL_MOD_CONFIGS = builder.comment("Show a config tile for every installed mod that exposes a config screen, not just the ones using Moonlight's config system. Clicking one opens the screen the mod itself registered (NeoForge's screen extension, or Mod Menu on Fabric)")
+        SHOW_ALL_MOD_CONFIGS = builder.comment("Give every installed mod with a config screen a tile, not just the ones using Moonlight. Their own screen opens when clicked")
                 .define("show_all_mod_configs", false);
-        CONVERT_FOREIGN_CONFIGS = builder.comment("Also show tiles for other mods that don't use Moonlight and render their config directly in Moonlight's own screen (NeoForge only). Best-effort: options Moonlight can't represent are left to the mod's own screen. Implies show_all_mod_configs for the tile grid")
-                .define("convert_foreign_configs", true);
+        CONVERT_FOREIGN_CONFIGS = builder.comment("Draw other mods' configs inside Moonlight's screen instead of theirs (NeoForge only). GENERIC_ONLY covers just the mods that never wrote a screen of their own, ALWAYS covers every mod. Per world server configs are always left to the mod. Best effort: options we can't show are left as they are")
+                .define("convert_foreign_configs", ForeignConfigMode.GENERIC_ONLY);
         CONFIG_ITEM_CAROUSEL = builder.comment("Show a slowly panning strip of a mod's items on its config screen")
                 .define("config_item_carousel", true);
         builder.pop();
@@ -62,6 +65,16 @@ public class ClientConfigs {
     }
 
     public static void init() {
+    }
+
+    public enum ForeignConfigMode {
+        NEVER,
+        GENERIC_ONLY,
+        ALWAYS;
+
+        public boolean isOn() {
+            return this != NEVER;
+        }
     }
 
     public enum ShadeFix {

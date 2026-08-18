@@ -52,6 +52,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -235,19 +236,16 @@ public class ClientHelperImpl {
     @Nullable
     public static Path getModIcon(String modId) {
         var m = ModList.get().getModContainerById(modId);
-        if (m.isPresent()) {
-            IModInfo mod = m.get().getModInfo();
-            IModFile file = mod.getOwningFile().getFile();
-
-            var logo = mod.getLogoFile().orElse(null);
-            if (logo != null && file != null) {
-                Path logoPath = file.findResource(logo);
-                if (Files.exists(logoPath)) {
-                    return logoPath;
-                }
-            }
-        }
-        return null;
+        if (m.isEmpty()) return null;
+        IModInfo mod = m.get().getModInfo();
+        IModFile file = mod.getOwningFile().getFile();
+        String logo = mod.getLogoFile().orElse(null);
+        if (logo == null || file == null) return null;
+        // split the way NeoForge's own mod list does, so a declaration with backslashes or a leading slash still lands
+        String[] parts = Arrays.stream(logo.split("[/\\\\]")).filter(p -> !p.isBlank()).toArray(String[]::new);
+        if (parts.length == 0) return null;
+        Path logoPath = file.findResource(parts);
+        return logoPath != null && Files.exists(logoPath) ? logoPath : null;
     }
 
     @Nullable
@@ -271,6 +269,14 @@ public class ClientHelperImpl {
 
     public static boolean hasNativeForeignConfig(String modId) {
         return ForeignConfigBridge.hasConfig(modId);
+    }
+
+    public static boolean hasOnlyGenericConfigScreen(String modId) {
+        return ForeignConfigBridge.hasOnlyGenericScreen(modId);
+    }
+
+    public static boolean hasPerWorldConfig(String modId) {
+        return ForeignConfigBridge.hasPerWorldConfig(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {

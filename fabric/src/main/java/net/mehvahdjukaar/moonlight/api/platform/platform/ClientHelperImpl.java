@@ -257,6 +257,14 @@ public class ClientHelperImpl {
         return false;
     }
 
+    public static boolean hasOnlyGenericConfigScreen(String modId) {
+        return false;
+    }
+
+    public static boolean hasPerWorldConfig(String modId) {
+        return false;
+    }
+
     public static BlockModel parseBlockModel(JsonElement json) {
         return BlockModel.fromString(json.toString()); //sub optimal... too bad
     }
