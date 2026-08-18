@@ -1,2 +1,1 @@
-- added more utils
-- added ArchiveUtils.detectExtension and OsType.findExecutable
+- texture mask improvements
