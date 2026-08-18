@@ -11,7 +11,7 @@ import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.core.Registry;
@@ -330,7 +330,7 @@ final class SchemaForm {
     }
 
     private static Component readable(String name) {
-        return Component.literal(LangBuilder.getReadableName(name));
+        return Component.literal(TextHelper.getReadableName(name));
     }
 
     private static boolean asBool(@Nullable JsonElement e, boolean fallback) {

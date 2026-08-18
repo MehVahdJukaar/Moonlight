@@ -8,7 +8,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,9 +27,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-// The screen listing one mod's config files. Two panes: the mod's identity on the left (icon, authors, license) and
-// the config list on the right, with an item carousel band above the footer.
-// Other mods should go through ClientHelper.getMoonlightConfigScreen instead of touching this directly.
 @ApiStatus.Internal
 public class MoonlightConfigSelectScreen extends Screen {
 
@@ -52,7 +49,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     private boolean customShowcase;
 
     private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
-        super(Component.literal(ModsTilesScreen.safe(() -> PlatHelper.getModName(modId), LangBuilder.getReadableName(modId))));
+        super(Component.literal(ModsTilesScreen.safe(() -> PlatHelper.getModName(modId), TextHelper.getReadableName(modId))));
         this.modId = modId;
         this.parent = parent;
         this.background = background;
@@ -120,7 +117,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.list.setTopPadding((this.contentBottom() - HEADER - this.holders.size() * SELECT_ITEM_HEIGHT) / 2 - 4);
         List<ConfigListRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
-            Component label = Component.literal(LangBuilder.getReadableName(h.getId().getPath()));
+            Component label = Component.literal(TextHelper.getReadableName(h.getId().getPath()));
             Component subtitle = Component.literal(h.getFileName());
             rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()),
                     () -> this.minecraft.setScreen(h.makeScreen(this, background))));

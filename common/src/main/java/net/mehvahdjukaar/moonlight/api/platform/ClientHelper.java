@@ -11,11 +11,11 @@ import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
@@ -395,7 +395,7 @@ public class ClientHelper {
     }
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, boolean defaultEnabled) {
-        registerOptionalTexturePack(folderName, Component.literal(LangBuilder.getReadableName(folderName.getPath())), defaultEnabled);
+        registerOptionalTexturePack(folderName, Component.literal(TextHelper.getReadableName(folderName.getPath())), defaultEnabled);
     }
 
 

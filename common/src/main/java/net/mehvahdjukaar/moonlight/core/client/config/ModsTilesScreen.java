@@ -11,10 +11,12 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -123,8 +125,6 @@ public class ModsTilesScreen extends Screen {
         return true;
     }
 
-    // Moonlight-tracked mods open our own screen; else, when enabled, we try to convert the mod's own config into a
-    // native one; failing that we defer to the loader/Mod Menu screen it registered. Null when there is none
     @Nullable
     public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable ResourceLocation background) {
         Screen s = MoonlightConfigSelectScreen.create(modId, parent, background);
@@ -164,11 +164,19 @@ public class ModsTilesScreen extends Screen {
         if (this.searchBox != null) this.addRenderableWidget(this.searchBox);
         applyFilter();
 
-        this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 150, 20,
+        this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 140, 20,
                 Component.translatable("gui.moonlight.config.discover_mods"), MoonlightIcons.DISCOVER_MODS, 12, 12,
                 b -> this.minecraft.setScreen(new DiscoverModsScreen(this))));
+        IconButton openFolder = new IconButton(this.width / 2 - 10, this.height - 28, 20, 20,
+                CommonComponents.EMPTY, MoonlightIcons.FOLDER, 12, 12, b -> openConfigFolder());
+        openFolder.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.open_folder")));
+        this.addRenderableWidget(openFolder);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
-                .bounds(this.width / 2 + 4, this.height - 28, 150, 20).build());
+                .bounds(this.width / 2 + 14, this.height - 28, 140, 20).build());
+    }
+
+    private static void openConfigFolder() {
+        Util.getPlatform().openPath(PlatHelper.getGamePath().resolve("config"));
     }
 
     private EditBox makeSearchBox() {
@@ -212,7 +220,6 @@ public class ModsTilesScreen extends Screen {
     }
 
     private int cardX(int i) {
-        // each row is centered on its own, so a short last row sits under the middle of the one above it
         int cardsInRow = Math.min(this.cols, this.entries.size() - (i / this.cols) * this.cols);
         int rowWidth = cardsInRow * (CARD_W + CARD_GAP) - CARD_GAP;
         return (this.width - rowWidth) / 2 + (i % this.cols) * (CARD_W + CARD_GAP);

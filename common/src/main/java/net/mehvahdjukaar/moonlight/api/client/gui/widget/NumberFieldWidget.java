@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
-import static net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper.formatNumber;
+import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
 
 public class NumberFieldWidget extends CompositeWidget {
 

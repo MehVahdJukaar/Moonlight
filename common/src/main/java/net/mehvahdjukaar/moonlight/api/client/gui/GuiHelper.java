@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -162,9 +163,12 @@ public final class GuiHelper {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
     }
 
-    /** A number the way a text field shows it, with no trailing .0 when it happens to be whole. */
+    /**
+     * @deprecated moved to TextHelper
+     */
+    @Deprecated(forRemoval = true)
     public static String formatNumber(double v) {
-        return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
+        return TextHelper.formatNumber(v);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeLocalPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
@@ -52,10 +53,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -260,15 +259,13 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
-    /** Lowercase host of a url, or null when it doesn't parse. */
+    /**
+     * @deprecated moved to TextHelper
+     */
+    @Deprecated(forRemoval = true)
     @Nullable
     public static String urlHost(String url) {
-        try {
-            String host = URI.create(url.trim()).getHost();
-            return host == null ? null : host.toLowerCase(Locale.ROOT);
-        } catch (Exception e) {
-            return null;
-        }
+        return TextHelper.urlHost(url);
     }
 
     @PlatformImpl

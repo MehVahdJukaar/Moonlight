@@ -13,6 +13,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -32,6 +33,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RPUtils {
 
@@ -53,6 +55,19 @@ public class RPUtils {
     //remember to close this stream
     public static JsonObject deserializeJson(InputStream stream) {
         return GsonHelper.parse(new InputStreamReader(stream, StandardCharsets.UTF_8));
+    }
+
+    /** Whole content of a text resource, or an empty string when it can't be read. */
+    public static String readTextFile(ResourceManager manager, ResourceLocation path) {
+        var resource = manager.getResource(path);
+        if (resource.isPresent()) {
+            try (BufferedReader reader = resource.get().openAsReader()) {
+                return reader.lines().collect(Collectors.joining("\n"));
+            } catch (IOException ignored) {
+            }
+        }
+        Moonlight.LOGGER.error("Failed to read text file {}", path);
+        return "";
     }
 
     public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block) throws FileNotFoundException {

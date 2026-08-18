@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 public class MediaButton {
 
@@ -267,6 +269,19 @@ public class MediaButton {
         };
     }
 
+    // the allow-list is keyed by button slot. A plain link has no slot, so it always shows
+    private static boolean enabled(MediaIcon icon) {
+        return switch (icon) {
+            case CURSEFORGE -> enabled(ButtonType.CURSEFORGE);
+            case MODRINTH -> enabled(ButtonType.MODRINTH);
+            case GITHUB -> enabled(ButtonType.GITHUB);
+            case DISCORD -> enabled(ButtonType.DISCORD);
+            case YOUTUBE -> enabled(ButtonType.YOUTUBE);
+            case TWITTER -> enabled(ButtonType.TWITTER);
+            default -> true;
+        };
+    }
+
     /** A url whose host we don't recognise: a plain globe that just opens it. */
     public static Button link(Screen parent, int x, int y, String url) {
         return create(parent, x, y, LINK, url, Component.translatable("tooltip.moonlight.media.link"));
@@ -278,7 +293,7 @@ public class MediaButton {
      */
     @Nullable
     public static MediaIcon iconForUrl(String url) {
-        String host = PlatHelper.urlHost(url);
+        String host = TextHelper.urlHost(url);
         if (host == null) return null;
         if (host.endsWith("curseforge.com")) return MediaIcon.CURSEFORGE;
         if (host.endsWith("modrinth.com")) return MediaIcon.MODRINTH;
@@ -314,9 +329,9 @@ public class MediaButton {
     }
 
     /**
-     * The usual Moonlight bottom bar: a centered Back button with the author's media buttons on either side, support
-     * and mod pages going left, socials going right. Per mod urls left null are read from the loader metadata
-     * instead, and buttons with no url are skipped.
+     * The usual Moonlight bottom bar: a centered Back button with the author's media buttons on either side. Support
+     * links go left and socials right, and the mod pages fill up the emptier side so both halves stay even. Per mod
+     * urls left null are read from the loader metadata instead, and buttons with no url are skipped.
      *
      * @param adder usually screen::addRenderableWidget
      */
@@ -349,41 +364,64 @@ public class MediaButton {
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
-        // outward from the back button in both directions
-        int left = centerX - 45 - spacing;
-        int right = centerX + 45 + 2;
+        // support goes left and socials right, but only on our own mods
+        List<IntFunction<Button>> support = new ArrayList<>();
+        List<IntFunction<Button>> socials = new ArrayList<>();
         if (ours) {
-            adder.accept(patreon(parent, left, y, hub.patreon())); left -= spacing;
-            adder.accept(koFi(parent, left, y, hub.koFi()));       left -= spacing;
+            addIfEnabled(support, ButtonType.PATREON, x -> patreon(parent, x, y, hub.patreon()));
+            addIfEnabled(support, ButtonType.KO_FI, x -> koFi(parent, x, y, hub.koFi()));
+            addIfEnabled(socials, ButtonType.DISCORD, x -> discord(parent, x, y, hub.discord()));
+            addIfEnabled(socials, ButtonType.YOUTUBE, x -> youtube(parent, x, y, hub.youtube()));
+            addIfEnabled(socials, ButtonType.TWITTER, x -> twitter(parent, x, y, hub.twitter()));
+            addIfEnabled(socials, ButtonType.MARKETPLACE, x -> marketplace(parent, x, y, hub.marketplace()));
+            if (hub.partnerServer() != null) {
+                addIfEnabled(socials, ButtonType.SERVER, x -> serverProvider(parent, x, y));
+            }
         }
 
         List<ModLink> pages = new ArrayList<>();
         for (MediaIcon icon : MOD_PAGE_ORDER) {
             String url = byIcon.get(icon);
             // on our own mods the socials are already on the right, no point repeating them
-            if (url == null || (ours && HUB_ICONS.contains(icon))) continue;
+            if (url == null || (ours && HUB_ICONS.contains(icon)) || !enabled(icon)) continue;
             pages.add(new ModLink(icon, url));
         }
         for (String url : unknownHosts.stream().limit(MAX_UNKNOWN_LINKS).toList()) {
             pages.add(new ModLink(MediaIcon.LINK, url));
         }
-        for (int i = 0; i < pages.size(); i++) {
-            ModLink page = pages.get(i);
-            // on our own mods the right side is spoken for by the socials below, so everything stacks left there.
-            // On anyone else's both sides are free, and alternating keeps the bar even
-            boolean goLeft = ours || i % 2 == 0;
-            adder.accept(forIcon(parent, goLeft ? left : right, y, page.icon(), page.url()));
-            if (goLeft) left -= spacing;
-            else right += spacing;
-        }
 
-        if (!ours) return;
-        adder.accept(discord(parent, right, y, hub.discord()));         right += spacing;
-        adder.accept(youtube(parent, right, y, hub.youtube()));         right += spacing;
-        adder.accept(twitter(parent, right, y, hub.twitter()));         right += spacing;
-        adder.accept(marketplace(parent, right, y, hub.marketplace())); right += spacing;
-        Button sp = serverProvider(parent, right, y);
-        if (sp != null) { adder.accept(sp); }
+        // each page joins whichever side has fewer buttons, so the bar comes out even no matter how many there are
+        List<IntFunction<Button>> left = new ArrayList<>();
+        List<IntFunction<Button>> right = new ArrayList<>();
+        int leftCount = support.size();
+        int rightCount = socials.size();
+        for (ModLink page : pages) {
+            if (leftCount <= rightCount) {
+                left.add(x -> forIcon(parent, x, y, page.icon(), page.url()));
+                leftCount++;
+            } else {
+                right.add(x -> forIcon(parent, x, y, page.icon(), page.url()));
+                rightCount++;
+            }
+        }
+        // mod pages hug the back button, the fixed ones trail off outwards
+        left.addAll(support);
+        right.addAll(socials);
+
+        placeRow(adder, left, centerX - 45 - spacing, -spacing);
+        placeRow(adder, right, centerX + 45 + 2, spacing);
+    }
+
+    private static void addIfEnabled(List<IntFunction<Button>> out, ButtonType type, IntFunction<Button> factory) {
+        if (enabled(type)) out.add(factory);
+    }
+
+    private static void placeRow(Consumer<Button> adder, List<IntFunction<Button>> buttons, int startX, int step) {
+        int x = startX;
+        for (IntFunction<Button> button : buttons) {
+            adder.accept(button.apply(x));
+            x += step;
+        }
     }
 
     private record ModLink(MediaIcon icon, String url) {

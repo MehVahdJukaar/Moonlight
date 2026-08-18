@@ -10,7 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.ConfigLangExporter;
@@ -654,7 +654,7 @@ public abstract class ConfigBuilder {
     }
 
     private void putName(String key, String rawName) {
-        this.translations.put(key, LangBuilder.getReadableName(rawName));
+        this.translations.put(key, TextHelper.getReadableName(rawName));
         if (ConfigLangExporter.BUILTIN_NAMES.contains(rawName)){
             this.moonlightNames.put(key, rawName);
         }

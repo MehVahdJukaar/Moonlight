@@ -8,7 +8,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -125,7 +125,7 @@ public final class ForeignConfigBridge {
         ConfigCategory root = new ConfigCategory(Component.empty());
         walk(spec, spec.getValues(), List.of(), root);
 
-        Component name = Component.literal(readableModName(modId) + " - " + LangBuilder.getReadableName(typeName));
+        Component name = Component.literal(readableModName(modId) + " - " + TextHelper.getReadableName(typeName));
         return new ForeignConfigHolder(id, type, spec, root, name);
     }
 
@@ -253,13 +253,13 @@ public final class ForeignConfigBridge {
     private static Component leafTitle(ModConfigSpec.ValueSpec vs, String key) {
         String tk = vs.getTranslationKey();
         if (tk != null && I18n.exists(tk)) return Component.translatable(tk);
-        return Component.literal(LangBuilder.getReadableName(key));
+        return Component.literal(TextHelper.getReadableName(key));
     }
 
     private static Component categoryTitle(ModConfigSpec spec, List<String> path, String key) {
         String tk = spec.getLevelTranslationKey(path);
         if (I18n.exists(tk)) return Component.translatable(tk);
-        return Component.literal(LangBuilder.getReadableName(key));
+        return Component.literal(TextHelper.getReadableName(key));
     }
 
     private static ConfigReloadType reloadType(ModConfigSpec.RestartType rt) {
@@ -273,7 +273,7 @@ public final class ForeignConfigBridge {
     private static String readableModName(String modId) {
         return ModList.get().getModContainerById(modId)
                 .map(c -> c.getModInfo().getDisplayName())
-                .orElse(LangBuilder.getReadableName(modId));
+                .orElse(TextHelper.getReadableName(modId));
     }
 
     private static List<String> append(List<String> path, String key) {

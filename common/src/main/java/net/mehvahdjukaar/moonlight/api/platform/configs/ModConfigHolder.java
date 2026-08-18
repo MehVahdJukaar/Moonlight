@@ -4,9 +4,9 @@ import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.minecraft.server.packs.PackType;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.minecraft.client.gui.screens.Screen;
@@ -85,7 +85,7 @@ public abstract class ModConfigHolder {
         this.filePath = configDirectory.resolve(fileName);
         this.type = type;
         this.changeCallback = changeCallback;
-        this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName() + "_configs"));
+        this.readableName = Component.literal(TextHelper.getReadableName(id.toDebugFileName() + "_configs"));
 
         if (tracked) ModConfigHolder.registerHolder(this);
     }
