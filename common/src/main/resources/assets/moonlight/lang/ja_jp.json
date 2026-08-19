@@ -5,6 +5,12 @@
   "gui.moonlight.open_mod_page": "%sのCurseForgeページを開く",
   "gui.moonlight.config.mods_button": "Mod",
   "gui.moonlight.config.mods_title": "設定可能なMod",
+  "gui.moonlight.config.discover_mods": "Modを見つける",
+  "gui.moonlight.config.open_folder": "configフォルダーを開く",
+  "gui.moonlight.config.discover_title": "Supplementaries Teamのその他のMod",
+  "gui.moonlight.config.discover_loading": "Modリストを取得中",
+  "gui.moonlight.config.discover_offline": "Modリストを取得できませんでした。接続を確認してください。",
+  "gui.moonlight.config.authors": "作成者",
   "gui.moonlight.config.edit_manually": "ファイルを編集",
   "gui.moonlight.config.save": "保存",
   "gui.moonlight.config.save_count": "保存 %s",
@@ -24,6 +30,8 @@
   "gui.moonlight.config.no_matches": "一致なし",
   "gui.moonlight.config.list_entries": "編集 (%s)",
   "gui.moonlight.config.list_add": "項目を追加する",
+  "gui.moonlight.config.list_remove": "項目を削除する",
+  "gui.moonlight.config.list_entry": "項目 %s",
   "gui.moonlight.config.edit": "編集",
   "gui.moonlight.config.reload.world": "ワールドの再読み込みが必要です",
   "gui.moonlight.config.reload.game": "ゲームの再起動が必要です",
@@ -39,6 +47,7 @@
   "tooltip.moonlight.media.modrinth": "Modrinthページ",
   "tooltip.moonlight.media.marketplace": "マーケットプレイスもぜひ見てみてください！",
   "tooltip.moonlight.media.github": "Mod Wiki",
+  "tooltip.moonlight.media.link": "Modページ",
   "tooltip.moonlight.media.partner_server": "サーバーが必要ですか？%sで手に入れましょう",
   "tooltip.moonlight.media.akliz": "サーバーが必要ですか？Aklizで手に入れましょう",
   "message.moonlight.anti_repost": "%1$sを非公式のサイトでダウンロードしたようです(´･ω･`) %2$sから公式版をダウンロードしてください",
@@ -54,6 +63,7 @@
   "block.moonlight.spawn_box": "スポーンボックスブロック",
   "commands.moonlight.blockstate_stats": "合計ブロック数：%1$s、合計ブロック状態：%2$s。追加情報が%3$sに保存されました",
   "commands.moonlight.dice": "ダイスロール D%1$d：%2$d",
+  "commands.moonlight.config.no_config": "Mod「%s」にはConfig画面がありません",
   "commands.moonlight.navigation.add": "%sの経路探索デバッグ用レンダラーを有効化しました",
   "commands.moonlight.navigation.remove": "%sの経路探索デバッグ用レンダラーを無効化しました",
   "commands.moonlight.navigation.on": "経路探索デバッグ用レンダラーを有効化しました",
@@ -112,6 +122,22 @@
   "tag.item.moonlight.non_recolorable": "再染色不可",
   "tag.block.moonlight.non_recolorable": "再染色不可",
   "tag.block.minecraft.mineable.shear": "ハサミで採掘可能",
+
+  "moonlight.config.common.enabled": "有効化",
+  "moonlight.config.common.min": "最小",
+  "moonlight.config.common.max": "最大",
+  "moonlight.config.common.x": "X",
+  "moonlight.config.common.y": "Y",
+  "moonlight.config.common.z": "Z",
+
+
+
+
+
+
+
+
+
 
   "wood_type.minecraft.oak": "オークの",
   "wood_type.minecraft.spruce": "トウヒの",
