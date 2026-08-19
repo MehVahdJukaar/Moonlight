@@ -53,6 +53,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.FireChargeItem;
+import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
@@ -126,6 +128,11 @@ public class PlatHelperImpl {
         var v = FuelRegistry.INSTANCE.get(stack.getItem());
         if (v == null) return 0;
         return v;
+    }
+
+    public static boolean canLightFire(ItemStack stack) {
+        Item item = stack.getItem();
+        return item instanceof FlintAndSteelItem || item instanceof FireChargeItem;
     }
 
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {

@@ -57,6 +57,8 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -85,6 +87,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PlatHelperImpl {
+
 
     public static boolean isDev() {
         return !FMLLoader.isProduction();
@@ -135,6 +138,13 @@ public class PlatHelperImpl {
 
     public static int getBurnTime(ItemStack stack) {
         return stack.getBurnTime(RecipeType.SMELTING);
+    }
+
+    private static final ItemAbility TINKERS_LIGHT_FIRE = ItemAbility.get("light_fire");
+
+    public static boolean canLightFire(ItemStack stack) {
+        return stack.canPerformAction(ItemAbilities.FIRESTARTER_LIGHT) ||
+                stack.canPerformAction(TINKERS_LIGHT_FIRE);
     }
 
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {

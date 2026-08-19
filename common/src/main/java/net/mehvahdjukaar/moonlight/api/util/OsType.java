@@ -13,6 +13,8 @@ import java.util.Locale;
 
 /**
  * Simple operating system family detection based on the {@code os.name} system property.
+ *
+ * Intended purpose is run ffmpeg.
  */
 public enum OsType {
     WINDOWS("windows"),
@@ -21,7 +23,6 @@ public enum OsType {
 
     private static final OsType CURRENT = detect();
 
-    // A launcher started from Finder or the Dock gets a bare PATH, so a Homebrew install is invisible there.
     private static final List<String> EXTRA_MAC_BIN_DIRS = List.of("/opt/homebrew/bin", "/usr/local/bin");
 
     private final String key;

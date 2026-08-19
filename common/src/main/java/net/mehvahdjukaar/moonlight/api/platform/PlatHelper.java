@@ -370,6 +370,11 @@ public class PlatHelper {
     }
 
     @PlatformImpl
+    public static boolean canLightFire(ItemStack stack) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
         throw new AssertionError();
     }
