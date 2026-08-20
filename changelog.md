@@ -1,3 +1,4 @@
 - improved back command
 - any big improvements to the config list screen
 - common string helpers
+- improved lightable helpers to support item abilities
