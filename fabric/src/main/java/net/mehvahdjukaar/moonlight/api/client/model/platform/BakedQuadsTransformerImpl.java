@@ -11,7 +11,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
@@ -94,15 +93,8 @@ public class BakedQuadsTransformerImpl implements BakedQuadsTransformer {
         BakedQuad newQuad = new BakedQuad(v, tint, directionRemap.apply(quad.getDirection()), sprite, shade);
         inner.accept(newQuad);
         lastSpriteHack = null;
-        if (emissivity != null) {
-            AtomicReference<BakedQuad> emissiveQuad = new AtomicReference<>();
-            try (BakedQuadBuilderImpl builder = (BakedQuadBuilderImpl) BakedQuadBuilderImpl
-                    .create(sprite, null, emissiveQuad::set)) {
-                builder.fromVanilla(newQuad);
-                builder.lightEmission(emissivity);
-            } catch (Exception ignored) {
-            }
-            newQuad = emissiveQuad.get();
+        if (emissivity != null && emissivity > 0) {
+            newQuad = new EmissiveBakedQuad(newQuad, emissivity);
         }
         return newQuad;
     }

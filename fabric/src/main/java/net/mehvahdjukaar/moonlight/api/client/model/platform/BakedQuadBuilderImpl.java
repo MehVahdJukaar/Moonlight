@@ -32,6 +32,7 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
     private final Consumer<BakedQuad> quadConsumer;
     private int vertexIndex = -1;
     private boolean autoDirection = false;
+    private int lightEmission = 0;
 
     private BakedQuadBuilderImpl(TextureAtlasSprite sprite, @Nullable Matrix4f transform, Consumer<BakedQuad> quadConsumer) {
         MeshBuilder meshBuilder = Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).meshBuilder();
@@ -135,7 +136,10 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
 
     @Override
     public BakedQuadBuilderImpl lightEmission(int lightLevel) {
+        // the material is set for renderers that read it off the emitter, but toBakedQuad below drops
+        // it, so the level is kept too and the finished quad carries it as its type
         inner.material(Objects.requireNonNull(RendererAccess.INSTANCE.getRenderer()).materialFinder().emissive(true).find());
+        this.lightEmission = lightLevel;
         return this;
     }
 
@@ -148,7 +152,8 @@ public class BakedQuadBuilderImpl implements BakedQuadBuilder {
         if (vertexIndex == 3) {
             vertexIndex = -1;
             Preconditions.checkNotNull(sprite, "sprite cannot be null");
-            quadConsumer.accept(inner.toBakedQuad(sprite));
+            BakedQuad quad = inner.toBakedQuad(sprite);
+            quadConsumer.accept(lightEmission > 0 ? new EmissiveBakedQuad(quad, lightEmission) : quad);
         }
     }
 

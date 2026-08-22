@@ -120,7 +120,11 @@ public final class ForeignConfigBridge {
     }
 
     private static ForeignConfigHolder build(String modId, ModConfig mc, ModConfigSpec spec) {
-        ConfigType type = mc.getType() == ModConfig.Type.CLIENT ? ConfigType.CLIENT : ConfigType.COMMON;
+        ConfigType type = switch (mc.getType()) {
+            case CLIENT -> ConfigType.CLIENT;
+            case SERVER -> ConfigType.COMMON_SYNCED; // world bound, so it gets the server paper icon
+            default -> ConfigType.COMMON;
+        };
         String typeName = mc.getType().name().toLowerCase(Locale.ROOT);
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, typeName);
 
