@@ -1,4 +1,2 @@
-- improved back command
-- any big improvements to the config list screen
-- common string helpers
-- improved lightable helpers to support item abilities
+- added more api for config and discover mods and config screen buttons
+- ported supplementaires model part extension and extended animations
