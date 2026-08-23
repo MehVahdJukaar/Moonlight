@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -80,5 +82,47 @@ public final class ConfigScreenExtensions {
     @Nullable
     public static Supplier<ItemStack> iconOverride(ResourceLocation id) {
         return ICON_OVERRIDES.get(id);
+    }
+
+    public enum Side {LEFT, RIGHT}
+
+    public record FooterLink(MediaButton.MediaIcon icon, String url) {
+    }
+
+    private static final Map<String, List<FooterLink>> LINKS = new HashMap<>();
+
+    /** Adds a link button next to Back. Patreon and ko-fi go left, anything else joins the mod page buttons.
+     * Curseforge, Modrinth, GitHub, Discord, YouTube and Twitter urls are read from the loader metadata already. */
+    public static void registerLink(String modId, MediaButton.MediaIcon icon, String url) {
+        LINKS.computeIfAbsent(modId, k -> new ArrayList<>()).add(new FooterLink(icon, url));
+    }
+
+    @ApiStatus.Internal
+    public static List<FooterLink> linksFor(String modId) {
+        return LINKS.getOrDefault(modId, List.of());
+    }
+
+    @FunctionalInterface
+    public interface FooterButton {
+        Button create(Screen screen, int x, int y);
+    }
+
+    public record FooterButtonEntry(Side side, FooterButton factory) {
+    }
+
+    private static final Map<String, List<FooterButtonEntry>> FOOTER_BUTTONS = new HashMap<>();
+
+    public static void registerFooterButton(String modId, Side side, FooterButton factory) {
+        FOOTER_BUTTONS.computeIfAbsent(modId, k -> new ArrayList<>()).add(new FooterButtonEntry(side, factory));
+    }
+
+    @ApiStatus.Internal
+    public static List<FooterButtonEntry> footerButtonsFor(String modId) {
+        return FOOTER_BUTTONS.getOrDefault(modId, List.of());
+    }
+
+    @ApiStatus.Internal
+    public static boolean hasFooterExtras(String modId) {
+        return !linksFor(modId).isEmpty() || !footerButtonsFor(modId).isEmpty();
     }
 }

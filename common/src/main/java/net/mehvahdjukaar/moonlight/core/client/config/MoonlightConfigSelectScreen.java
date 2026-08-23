@@ -74,9 +74,11 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
-        // a lone config doesn't need a list to pick from, unless an overlay or showcase would be lost along with it
+        // a lone config doesn't need a list to pick from, unless an overlay, showcase or footer button would be
+        // lost along with it
         if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
-                && ConfigScreenExtensions.showcaseFor(modId) == null) {
+                && ConfigScreenExtensions.showcaseFor(modId) == null
+                && !ConfigScreenExtensions.hasFooterExtras(modId)) {
             return holders.getFirst().makeScreen(parent, background);
         }
         return new MoonlightConfigSelectScreen(modId, holders, parent, background);

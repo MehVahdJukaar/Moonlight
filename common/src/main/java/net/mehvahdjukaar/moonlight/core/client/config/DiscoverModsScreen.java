@@ -2,11 +2,11 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.client.gui.ModCatalogAPI;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.client.OurModsList;
 import net.mehvahdjukaar.moonlight.core.client.RemoteIconCache;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -16,9 +16,9 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,7 @@ public class DiscoverModsScreen extends Screen {
     private static final int MAX_CONTENT_W = 320;
     private static final int ROW_H = 48;
     private static final int ROW_GAP = 4;
+    private static final int SECTION_H = 18;
     private static final int GRID_PAD = 8;
     private static final int ICON_SIZE = 32;
     private static final int ROW_INNER_PAD = 8;
@@ -45,10 +46,11 @@ public class DiscoverModsScreen extends Screen {
     private static final int DESC_MISSING = 0xFF6A6A78;
 
     private final Screen parent;
-    private final List<Row> rows = new ArrayList<>();
+    private final List<ModCatalogAPI.Catalog> catalogs;
+    private final List<Item> items = new ArrayList<>();
 
     private LoadingDotsWidget loadingWidget;
-    private boolean built;
+    private int builtFrom = -1; // how many mods had landed when the item list was built
 
     private double scroll;
     private int maxScroll;
@@ -56,18 +58,46 @@ public class DiscoverModsScreen extends Screen {
     private int contentTop, contentBottom, rowX, contentW;
 
     public DiscoverModsScreen(Screen parent) {
-        super(Component.translatable("gui.moonlight.config.discover_title"));
-        this.parent = parent;
+        this(parent, ModCatalogAPI.getCatalogs());
     }
 
-    private record Row(OurModsList.Entry data, boolean installed, List<FormattedCharSequence> descLines) {
+    private DiscoverModsScreen(Screen parent, List<ModCatalogAPI.Catalog> catalogs) {
+        super(titleFor(catalogs));
+        this.parent = parent;
+        this.catalogs = catalogs;
+    }
+
+    // one author gets their name in the title, several share the screen so it goes generic and each gets a section
+    private static Component titleFor(List<ModCatalogAPI.Catalog> catalogs) {
+        if (catalogs.size() == 1) {
+            return Component.translatable("gui.moonlight.config.discover_title_by", catalogs.getFirst().author());
+        }
+        return Component.translatable("gui.moonlight.config.discover_title");
+    }
+
+    private sealed interface Item {
+        int height();
+    }
+
+    private record Section(Component title) implements Item {
+        @Override
+        public int height() {
+            return SECTION_H;
+        }
+    }
+
+    private record Row(ModCatalogAPI.Entry data, boolean installed, List<FormattedCharSequence> descLines) implements Item {
+        @Override
+        public int height() {
+            return ROW_H;
+        }
     }
 
     @Override
     protected void init() {
-        OurModsList.fetchIfNeeded();
-        this.built = false;
-        this.rows.clear();
+        for (ModCatalogAPI.Catalog c : catalogs) c.onScreenOpened();
+        this.builtFrom = -1;
+        this.items.clear();
 
         this.loadingWidget = new LoadingDotsWidget(this.font, Component.translatable("gui.moonlight.config.discover_loading"));
 
@@ -75,32 +105,60 @@ public class DiscoverModsScreen extends Screen {
                 .bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
     }
 
-    private void buildRows() {
-        this.rows.clear();
+    private int modCount() {
+        int count = 0;
+        for (ModCatalogAPI.Catalog c : catalogs) count += c.mods().size();
+        return count;
+    }
+
+    private boolean anyLoading() {
+        for (ModCatalogAPI.Catalog c : catalogs) {
+            if (c.isLoading()) return true;
+        }
+        return false;
+    }
+
+    private void buildItems() {
+        this.items.clear();
         this.contentW = Math.min(this.width - 2 * SIDE_MARGIN, MAX_CONTENT_W);
         int textWidth = this.contentW - (ROW_INNER_PAD + ICON_SIZE + ROW_INNER_PAD) - ROW_INNER_PAD;
-        for (OurModsList.Entry e : OurModsList.getMods()) {
-            boolean installed = PlatHelper.isModLoaded(e.modId());
-            List<FormattedCharSequence> desc = e.description().isBlank()
-                    ? List.of()
-                    : this.font.split(Component.literal(e.description()), textWidth);
-            if (desc.size() > MAX_DESC_LINES) desc = desc.subList(0, MAX_DESC_LINES);
-            this.rows.add(new Row(e, installed, desc));
+        boolean sections = this.catalogs.size() > 1;
+        for (ModCatalogAPI.Catalog catalog : this.catalogs) {
+            if (catalog.mods().isEmpty()) continue;
+            if (sections) {
+                this.items.add(new Section(Component.translatable("gui.moonlight.config.discover_by", catalog.author())));
+            }
+            for (ModCatalogAPI.Entry e : catalog.mods()) {
+                boolean installed = PlatHelper.isModLoaded(e.modId());
+                List<FormattedCharSequence> desc = e.description().isBlank()
+                        ? List.of()
+                        : this.font.split(Component.literal(e.description()), textWidth);
+                if (desc.size() > MAX_DESC_LINES) desc = desc.subList(0, MAX_DESC_LINES);
+                this.items.add(new Row(e, installed, desc));
+            }
         }
-        this.built = true;
+        this.builtFrom = modCount();
     }
 
     private void computeLayout() {
         this.contentTop = HEADER;
         this.contentBottom = this.height - FOOTER;
         this.rowX = (this.width - this.contentW) / 2;
-        int totalHeight = this.rows.size() * (ROW_H + ROW_GAP) - ROW_GAP + 2 * GRID_PAD;
+        int totalHeight = totalHeight() + 2 * GRID_PAD;
         this.maxScroll = Math.max(0, totalHeight - (this.contentBottom - this.contentTop));
         this.scroll = Mth.clamp(this.scroll, 0, this.maxScroll);
     }
 
-    private int rowY(int i) {
-        return this.contentTop + GRID_PAD + i * (ROW_H + ROW_GAP) - (int) this.scroll;
+    private int totalHeight() {
+        int h = 0;
+        for (Item item : this.items) h += item.height() + ROW_GAP;
+        return Math.max(0, h - ROW_GAP);
+    }
+
+    private int itemY(int index) {
+        int y = this.contentTop + GRID_PAD - (int) this.scroll;
+        for (int i = 0; i < index; i++) y += this.items.get(i).height() + ROW_GAP;
+        return y;
     }
 
     @Override
@@ -117,11 +175,12 @@ public class DiscoverModsScreen extends Screen {
 
         GuiHelper.renderListBackground(graphics, contentTop, contentBottom, this.width, this.scroll);
 
-        OurModsList.State state = OurModsList.getState();
-        if (state == OurModsList.State.LOADED) {
-            if (!built) buildRows();
-            renderRows(graphics, mouseX, mouseY);
-        } else if (state == OurModsList.State.FAILED) {
+        int mods = modCount();
+        if (mods > 0) {
+            // catalogs land one at a time, so rebuild whenever another one shows up
+            if (mods != this.builtFrom) buildItems();
+            renderItems(graphics, mouseX, mouseY);
+        } else if (!anyLoading()) {
             graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
                     this.width / 2, (contentTop + contentBottom) / 2 - this.font.lineHeight / 2, ConfigGuiColors.DESCRIPTION);
         } else {
@@ -134,18 +193,31 @@ public class DiscoverModsScreen extends Screen {
         GuiHelper.renderFooterSeparator(graphics, contentBottom, this.width);
     }
 
-    private void renderRows(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderItems(GuiGraphics graphics, int mouseX, int mouseY) {
         computeLayout();
         boolean inViewport = mouseY >= contentTop && mouseY < contentBottom;
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
-        for (int i = 0; i < rows.size(); i++) {
-            int y = rowY(i);
-            if (y + ROW_H < contentTop || y > contentBottom) continue; // cull off-screen rows
-            boolean hover = inViewport && mouseX >= rowX && mouseX < rowX + contentW && mouseY >= y && mouseY < y + ROW_H;
-            renderRow(graphics, rows.get(i), y, hover);
+        int y = this.contentTop + GRID_PAD - (int) this.scroll;
+        for (Item item : items) {
+            int h = item.height();
+            if (y + h >= contentTop && y <= contentBottom) { // cull off-screen items
+                if (item instanceof Section section) {
+                    renderSection(graphics, section, y);
+                } else if (item instanceof Row row) {
+                    boolean hover = inViewport && mouseX >= rowX && mouseX < rowX + contentW && mouseY >= y && mouseY < y + h;
+                    renderRow(graphics, row, y, hover);
+                }
+            }
+            y += h + ROW_GAP;
         }
         graphics.disableScissor();
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
+    }
+
+    private void renderSection(GuiGraphics graphics, Section section, int y) {
+        int textY = y + SECTION_H - this.font.lineHeight - 2;
+        graphics.drawString(this.font, section.title(), rowX, textY, ConfigGuiColors.TEXT_SECONDARY);
+        GuiHelper.renderSeparator(graphics, rowX, textY + this.font.lineHeight + 1, contentW);
     }
 
     private void renderRow(GuiGraphics graphics, Row row, int y, boolean hover) {
@@ -218,19 +290,27 @@ public class DiscoverModsScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && built && mouseY >= contentTop && mouseY < contentBottom) {
-            for (int i = 0; i < rows.size(); i++) {
-                int y = rowY(i);
-                if (mouseX >= rowX && mouseX < rowX + contentW && mouseY >= y && mouseY < y + ROW_H) {
-                    if (openModPage(rows.get(i).data())) return true;
-                }
-            }
+        if (button == 0 && mouseY >= contentTop && mouseY < contentBottom) {
+            Row clicked = rowAt(mouseX, mouseY);
+            if (clicked != null && openModPage(clicked.data())) return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private boolean openModPage(OurModsList.Entry entry) {
-        String url = entry.modrinthUrl() != null ? entry.modrinthUrl() : entry.curseforgeUrl();
+    @Nullable
+    private Row rowAt(double mouseX, double mouseY) {
+        if (mouseX < rowX || mouseX >= rowX + contentW) return null;
+        for (int i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+            if (!(item instanceof Row row)) continue;
+            int y = itemY(i);
+            if (mouseY >= y && mouseY < y + row.height()) return row;
+        }
+        return null;
+    }
+
+    private boolean openModPage(ModCatalogAPI.Entry entry) {
+        String url = entry.curseforgeUrl() != null ? entry.curseforgeUrl() : entry.modrinthUrl();
         if (url == null) return false;
         GuiHelper.playClickSound();
         this.handleComponentClicked(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));

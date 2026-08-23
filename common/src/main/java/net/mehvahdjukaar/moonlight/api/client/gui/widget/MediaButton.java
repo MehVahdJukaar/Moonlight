@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import com.mojang.serialization.Codec;
+import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -253,6 +254,8 @@ public class MediaButton {
     private static final List<MediaIcon> MOD_PAGE_ORDER = List.of(MediaIcon.CURSEFORGE, MediaIcon.MODRINTH,
             MediaIcon.GITHUB, MediaIcon.DISCORD, MediaIcon.YOUTUBE, MediaIcon.TWITTER);
 
+    private static final List<MediaIcon> SUPPORT_ORDER = List.of(MediaIcon.PATREON, MediaIcon.KO_FI);
+
     private static final List<MediaIcon> HUB_ICONS = List.of(MediaIcon.DISCORD, MediaIcon.YOUTUBE, MediaIcon.TWITTER);
 
     private static final int MAX_UNKNOWN_LINKS = 2;
@@ -265,6 +268,8 @@ public class MediaButton {
             case DISCORD -> discord(parent, x, y, url);
             case YOUTUBE -> youtube(parent, x, y, url);
             case TWITTER -> twitter(parent, x, y, url);
+            case PATREON -> patreon(parent, x, y, url);
+            case KO_FI -> koFi(parent, x, y, url);
             default -> link(parent, x, y, url);
         };
     }
@@ -278,6 +283,8 @@ public class MediaButton {
             case DISCORD -> enabled(ButtonType.DISCORD);
             case YOUTUBE -> enabled(ButtonType.YOUTUBE);
             case TWITTER -> enabled(ButtonType.TWITTER);
+            case PATREON -> enabled(ButtonType.PATREON);
+            case KO_FI -> enabled(ButtonType.KO_FI);
             default -> true;
         };
     }
@@ -364,9 +371,10 @@ public class MediaButton {
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
-        // support goes left and socials right, but only on our own mods
+        // support goes left and socials right. Ours point at the hub, anyone else's at whatever they gave us
         List<IntFunction<Button>> support = new ArrayList<>();
         List<IntFunction<Button>> socials = new ArrayList<>();
+        Map<MediaIcon, String> supportLinks = new LinkedHashMap<>();
         if (ours) {
             addIfEnabled(support, ButtonType.PATREON, x -> patreon(parent, x, y, hub.patreon()));
             addIfEnabled(support, ButtonType.KO_FI, x -> koFi(parent, x, y, hub.koFi()));
@@ -376,6 +384,11 @@ public class MediaButton {
             addIfEnabled(socials, ButtonType.MARKETPLACE, x -> marketplace(parent, x, y, hub.marketplace()));
             if (hub.partnerServer() != null) {
                 addIfEnabled(socials, ButtonType.SERVER, x -> serverProvider(parent, x, y));
+            }
+        } else {
+            for (MediaIcon icon : SUPPORT_ORDER) {
+                String url = byIcon.get(icon);
+                if (url != null) supportLinks.put(icon, url);
             }
         }
 
@@ -388,6 +401,19 @@ public class MediaButton {
         }
         for (String url : unknownHosts.stream().limit(MAX_UNKNOWN_LINKS).toList()) {
             pages.add(new ModLink(MediaIcon.LINK, url));
+        }
+
+        // what the mod registered by hand, on top of what its metadata gave us. On our own mods the hub already
+        // covers the support links, so only the pages are taken from there
+        for (ConfigScreenExtensions.FooterLink link : ConfigScreenExtensions.linksFor(modId)) {
+            if (SUPPORT_ORDER.contains(link.icon())) {
+                if (!ours) supportLinks.put(link.icon(), link.url());
+            } else if (enabled(link.icon())) {
+                pages.add(new ModLink(link.icon(), link.url()));
+            }
+        }
+        for (Map.Entry<MediaIcon, String> e : supportLinks.entrySet()) {
+            if (enabled(e.getKey())) support.add(x -> forIcon(parent, x, y, e.getKey(), e.getValue()));
         }
 
         // each page joins whichever side has fewer buttons, so the bar comes out even no matter how many there are
@@ -407,6 +433,11 @@ public class MediaButton {
         // mod pages hug the back button, the fixed ones trail off outwards
         left.addAll(support);
         right.addAll(socials);
+
+        for (ConfigScreenExtensions.FooterButtonEntry extra : ConfigScreenExtensions.footerButtonsFor(modId)) {
+            List<IntFunction<Button>> side = extra.side() == ConfigScreenExtensions.Side.LEFT ? left : right;
+            side.add(x -> extra.factory().create(parent, x, y));
+        }
 
         placeRow(adder, left, centerX - 45 - spacing, -spacing);
         placeRow(adder, right, centerX + 45 + 2, spacing);

@@ -12,12 +12,14 @@ import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
+import net.mehvahdjukaar.moonlight.core.client.OurModsList;
 import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
 import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.moonlight.api.client.gui.ModCatalogAPI;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -53,6 +55,7 @@ public class MoonlightClient {
     public static void initClient() {
         ClientConfigs.init();
         MoonlightHubInfo.fetchFromServer();
+        ModCatalogAPI.register(OurModsList.INSTANCE);
         ClientHelper.addShaderRegistration(MoonlightClient::registerShaders);
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
         ClientHelper.addBlockEntityRenderersRegistration(event -> {
