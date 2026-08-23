@@ -21,8 +21,8 @@ public interface IModelPartExtension {
     int moonlight$getTextHeight();
 
     /**
-     * Best-effort grab of a root {@link ModelPart} of an entity model, handling both the
-     * {@link HierarchicalModel} and {@link net.minecraft.client.model.AgeableListModel} layouts.
+     * Best-effort grab of a root {@link ModelPart} of an entity model, handling the
+     * {@link HierarchicalModel}, the {@link net.minecraft.client.model.AgeableListModel} and the {@link RootModel} layouts.
      * Returns {@code null} for exotic models that expose neither.
      */
     @Nullable
@@ -32,6 +32,8 @@ public interface IModelPartExtension {
                 return v;
             }
         } else if (model instanceof HierarchicalModel<?> m) {
+            return m.root();
+        } else if (model instanceof RootModel m) {
             return m.root();
         }
         return null;
