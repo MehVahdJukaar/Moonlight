@@ -20,6 +20,7 @@
     "FireBlockMixin",
     "HoldingPlayerMixin",
     "MinecraftServerMixin",
+    "PistonStructureResolverMixin",
     "SelfEntitySpawnDataMixin",
     "SelfModFlowingFluidMixin"
   ],

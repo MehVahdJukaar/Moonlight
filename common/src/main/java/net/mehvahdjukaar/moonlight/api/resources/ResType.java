@@ -2,7 +2,10 @@ package net.mehvahdjukaar.moonlight.api.resources;
 
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
+
+import java.util.List;
 
 public enum ResType {
     GENERIC("%s"),
@@ -36,9 +39,14 @@ public enum ResType {
     PNG("%s.png");
 
     private final String loc;
+    private final String prefix;
+    private final String suffix;
 
     ResType(String loc) {
         this.loc = loc;
+        int split = loc.indexOf("%s");
+        this.prefix = loc.substring(0, split);
+        this.suffix = loc.substring(split + 2);
     }
 
 
@@ -48,6 +56,28 @@ public enum ResType {
 
     public ResourceLocation getPath(String relativeLocation) {
         return this.getPath(ResourceLocation.parse(relativeLocation));
+    }
+
+    /**
+     * Inverse of getPath: turns "textures/block/stone.png" back into "block/stone".
+     */
+    public ResourceLocation relativize(ResourceLocation fullPath) {
+        String path = fullPath.getPath();
+        boolean matches = path.length() >= prefix.length() + suffix.length()
+                && path.startsWith(prefix) && path.endsWith(suffix);
+        if (!matches) {
+            throw new IllegalArgumentException(fullPath + " is not a " + this + " location");
+        }
+        return fullPath.withPath(path.substring(prefix.length(), path.length() - suffix.length()));
+    }
+
+    public List<ResourceLocation> listRelative(ResourceManager manager, String folder, boolean recursive) {
+        String root = prefix + folder;
+        if (root.endsWith("/")) root = root.substring(0, root.length() - 1);
+        int firstChildStart = root.length() + 1;
+        return manager.listResources(root, id -> id.getPath().endsWith(suffix)
+                        && (recursive || id.getPath().indexOf('/', firstChildStart) == -1))
+                .keySet().stream().map(this::relativize).toList();
     }
 
     public static ResourceLocation getTagPath(TagKey<?> tag) {

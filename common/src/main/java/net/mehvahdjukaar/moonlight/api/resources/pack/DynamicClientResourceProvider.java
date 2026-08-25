@@ -28,5 +28,6 @@ public abstract class DynamicClientResourceProvider extends DynamicResourcesProv
         }
     }
 
-    protected abstract void addDynamicTranslations(AfterLanguageLoadEvent afterLanguageLoadEvent);
+    protected void addDynamicTranslations(AfterLanguageLoadEvent afterLanguageLoadEvent) {
+    }
 }

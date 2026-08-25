@@ -172,6 +172,14 @@ public record Rect2D(int x, int y, int width, int height) {
         return new Rect2D(newX, newY, newWidth, newHeight);
     }
 
+    public Rect2D column(int index) {
+        return new Rect2D(x + index, y, 1, height);
+    }
+
+    public Rect2D row(int index) {
+        return new Rect2D(x, y + index, width, 1);
+    }
+
     public Rect2D moveBy(int dx, int dy) {
         return new Rect2D(x + dx, y + dy, width, height);
     }

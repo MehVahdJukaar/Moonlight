@@ -92,14 +92,7 @@ public final class TextureOps {
 
 
     private static void applyMask(TextureImage img, TextureImage mask, boolean discardOpaque) {
-        if (mask.frameWidth() < img.frameWidth() || mask.frameHeight() < img.frameHeight()) {
-            Moonlight.LOGGER.error("applyMask - Palette mask {} needs to be at least as large as the target image {}. You must alter the mask's frame size {}x{} to match the texture's frame size {}x{}",
-                    mask.debugPath, img.debugPath, mask.frameWidth(), mask.frameHeight(), img.frameWidth(), img.frameHeight());
-            if (PlatHelper.isDev()) {
-                throw new IllegalArgumentException("Palette mask " + mask.debugPath + " has invalid frame size");
-            }
-            return;
-        }
+        if (!checkMaskCoversImage(img, mask, "applyMask")) return;
 
         int maskFrames = mask.frameCount();
         img.forEachPixel(pixel -> {
@@ -108,6 +101,34 @@ public final class TextureOps {
             if (maskOpaque == discardOpaque) {
                 pixel.setValue(0);
             }
+        });
+    }
+
+    private static boolean checkMaskCoversImage(TextureImage img, TextureImage mask, String opName) {
+        if (mask.frameWidth() < img.frameWidth() || mask.frameHeight() < img.frameHeight()) {
+            Moonlight.LOGGER.error("{} - Mask {} needs to be at least as large as the target image {}. You must alter the mask's frame size {}x{} to match the texture's frame size {}x{}",
+                    opName, mask.debugPath, img.debugPath, mask.frameWidth(), mask.frameHeight(), img.frameWidth(), img.frameHeight());
+            if (PlatHelper.isDev()) {
+                throw new IllegalArgumentException("Mask " + mask.debugPath + " has invalid frame size");
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Multiplies each pixel's alpha by the alpha of the matching mask pixel. Unlike applyMask this keeps
+     * soft edges, so a half transparent mask pixel leaves a half transparent image pixel.
+     */
+    public static void multiplyAlpha(TextureImage img, TextureImage mask) {
+        if (!checkMaskCoversImage(img, mask, "multiplyAlpha")) return;
+
+        int maskFrames = mask.frameCount();
+        img.forEachPixel(pixel -> {
+            int color = pixel.getValue();
+            int maskPixel = mask.getFramePixel(pixel.frameIndex() % maskFrames, pixel.frameX(), pixel.frameY());
+            int alpha = FastColor.ABGR32.alpha(color) * FastColor.ABGR32.alpha(maskPixel) / 255;
+            pixel.setValue(FastColor.ABGR32.color(alpha, color));
         });
     }
 
