@@ -1,2 +1,3 @@
-- added more api for config and discover mods and config screen buttons
-- ported supplementaires model part extension and extended animations
+- hotfix for a bug in last update
+- added ILoomItem, lets nonbanner items be used in a loom and draw their own preview
+- added TabAdderHelper

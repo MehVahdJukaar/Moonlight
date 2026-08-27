@@ -39,13 +39,13 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
 import org.jetbrains.annotations.ApiStatus;
@@ -393,12 +393,8 @@ public class ClientHelperImpl {
 
     public static void addClientLoginCallback(Runnable callback) {
         Moonlight.assertInitPhase();
-        Consumer<PlayerEvent.PlayerLoggedInEvent> eventConsumer = event -> {
-            if (event.getEntity().level().isClientSide()) {
-                callback.run();
-            }
-        };
-        getCurrentBus().addListener(eventConsumer);
+        // game bus, not the mod bus. LoggingIn is the client side counterpart of PlayerLoggedInEvent
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> callback.run());
     }
 
 }
