@@ -35,7 +35,7 @@ public final class DummyBlockGetter implements BlockGetter {
     }
 
     @Override
-    public int getMinBuildHeight() {
+    public int getMinY() {
         return 0;
     }
 }

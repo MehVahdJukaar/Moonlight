@@ -1,128 +1,69 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.mehvahdjukaar.candlelight.api.PlatformImpl;
+import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.MovingBlockRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class RenderUtil {
 
-    //TODO: fix shading so it can be rotated and have consistent shading and is also rendered like a block
-    @PlatformImpl
-    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
-                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
-        throw new AssertionError();
-    }
+    private static final int[] NO_TINTS = new int[0];
 
-    public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
-                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
-        BakedModel model = dispatcher.getBlockModel(state);
-        renderBlock(model, seed, poseStack, buffer, state, level, pos, dispatcher);
-    }
-
-    //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
-    //from resource location
-    public static void renderModel(ModelResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
-                                   BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
-
-        blockRenderer.getModelRenderer().renderModel(matrixStack.last(),
-                buffer.getBuffer(cutout ? Sheets.cutoutBlockSheet() : Sheets.solidBlockSheet()),
-                null,
-                ClientHelper.getModel(blockRenderer.getBlockModelShaper().getModelManager(), modelLocation),
-                1.0F, 1.0F, 1.0F,
-                light, overlay);
-    }
-
-    public static void renderGuiItemRelative(PoseStack poseStack, ItemStack stack, int x, int y, ItemRenderer renderer,
-                                             BiConsumer<PoseStack, BakedModel> movement) {
-        renderGuiItemRelative(poseStack, stack, x, y, renderer, movement, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-    }
-
-
-    //im not even using this on fabric...
-    public static void renderGuiItemRelative(PoseStack poseStack, ItemStack stack, int x, int y, ItemRenderer renderer,
-                                             BiConsumer<PoseStack, BakedModel> movement, int combinedLight, int pCombinedOverlay) {
-
-        BakedModel model = renderer.getModel(stack, null, null, 0);
-        int l = 0;
-
-        poseStack.pushPose();
-
-        poseStack.translate((x + 8), (y + 8), (150 + (model.isGui3d() ? l : 0)));
-        poseStack.mulPose((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
-        poseStack.scale(16.0F, 16.0F, 16.0F);
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        boolean flag = !model.usesBlockLight();
-        if (flag) {
-            Lighting.setupForFlatItems();
-        } else {
-            Lighting.setupFor3DItems();
+    /** Draws a block state like a falling block: level lighting, ao and biome tints resolved at pos. */
+    public static void submitBlock(PoseStack poseStack, SubmitNodeCollector collector, BlockState state,
+                                   @Nullable ClientLevel level, BlockPos pos, BlockPos randomSeedPos) {
+        MovingBlockRenderState renderState = new MovingBlockRenderState();
+        renderState.blockState = state;
+        renderState.blockPos = pos;
+        renderState.randomSeedPos = randomSeedPos;
+        if (level != null) {
+            renderState.biome = level.getBiome(pos);
+            renderState.cardinalLighting = level.cardinalLighting();
+            renderState.lightEngine = level.getLightEngine();
         }
-
-        //-----render---
-        ItemDisplayContext pTransformType = ItemDisplayContext.GUI;
-
-        // applies rotation first then custom rot and gives display context of none
-        model = handleCameraTransforms(model, poseStack, pTransformType);
-
-        //custom rotation
-
-        movement.accept(poseStack, model);
-
-        renderer.render(stack, ItemDisplayContext.NONE, false, poseStack, bufferSource,
-                combinedLight, pCombinedOverlay, model);
-
-        //----end-render---
-
-        bufferSource.endBatch();
-        RenderSystem.enableDepthTest();
-        if (flag) {
-            Lighting.setupFor3DItems();
-        }
-        poseStack.popPose();
+        collector.submitMovingBlock(poseStack, renderState);
     }
 
-    @PlatformImpl
-    private static BakedModel handleCameraTransforms(BakedModel model, PoseStack matrixStack, ItemDisplayContext pTransformType) {
-        throw new AssertionError();
+    /** Draws a block model with an explicit light value, no level lighting or tints. */
+    public static void submitBlockModel(PoseStack poseStack, SubmitNodeCollector collector, BlockStateModel model,
+                                        @Nullable BlockAndTintGetter level, @Nullable BlockPos pos,
+                                        @Nullable BlockState state, RandomSource random, boolean cutout,
+                                        int light, int overlay) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        ClientHelper.collectModelParts(model, level, pos, state, random, parts);
+        RenderType renderType = cutout ? Sheets.cutoutBlockSheet() : Sheets.translucentBlockSheet();
+        collector.submitBlockModel(poseStack, renderType, parts, NO_TINTS, light, overlay, 0);
     }
 
-    @Deprecated(forRemoval = true)
-    public static GuiGraphics getGuiDummy(PoseStack poseStack) {
-        var mc = Minecraft.getInstance();
-        var p = new GuiGraphics(mc, mc.renderBuffers().bufferSource());
-        p.pose().setIdentity();
-        p.pose().mulPose(poseStack.last().pose());
-        return p;
+    public static void renderGuiItemRelative(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y, int size,
+                                             AnimatedGuiItem.Transform transform) {
+        AnimatedGuiItem.submit(graphics, stack, x, y, size, -1, transform);
     }
 
     /**
@@ -138,12 +79,13 @@ public class RenderUtil {
      * @param vH     sprite section height
      * @param sprite can be grabbed from a material
      */
-    public static void blitSpriteSection(GuiGraphics graphics, int x, int y, int w, int h,
+    public static void blitSpriteSection(GuiGraphicsExtractor graphics, int x, int y, int w, int h,
                                          float u, float v, int uW, int vH, TextureAtlasSprite sprite) {
         var c = sprite.contents();
         int width = (int) (c.width() / (sprite.getU1() - sprite.getU0()));
         int height = (int) (c.height() / (sprite.getV1() - sprite.getV0()));
-        graphics.blit(sprite.atlasLocation(), x, y, w, h, sprite.getU(u) * width, height * sprite.getV(v), uW, vH, width, height);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, sprite.atlasLocation(), x, y,
+                sprite.getU(u) * width, sprite.getV(v) * height, w, h, uW, vH, width, height);
     }
 
     public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light,
@@ -153,58 +95,54 @@ public class RenderUtil {
 
     public static void renderSprite(PoseStack stack, VertexConsumer vertexBuilder, int light,
                                     int b, int g, int r, int a, TextureAtlasSprite sprite) {
-        Matrix4f matrix4f1 = stack.last().pose();
-        float u0 = sprite.getU(0);
-        float u1 = sprite.getU(1);
-        float h = (u0 + u1) / 2.0f;
-        float v0 = sprite.getV(0);
-        float v1 = sprite.getV(1);
-        float k = (v0 + v1) / 2.0f;
-        float shrink = sprite.uvShrinkRatio();
-        float u0s = Mth.lerp(shrink, u0, h);
-        float u1s = Mth.lerp(shrink, u1, h);
-        float v0s = Mth.lerp(shrink, v0, k);
-        float v1s = Mth.lerp(shrink, v1, k);
+        renderSprite(stack.last(), vertexBuilder, light, ARGB.color(a, r, g, b), sprite);
+    }
 
-        vertexBuilder.addVertex(matrix4f1, -1.0F, 1.0F, 0).setColor(r, g, b, a).setUv(u0s, v1s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, 1.0F, 1.0F, 0).setColor(r, g, b, a).setUv(u1s, v1s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, 1.0F, -1.0F, 0).setColor(r, g, b, a).setUv(u1s, v0s).setLight(light);
-        vertexBuilder.addVertex(matrix4f1, -1.0F, -1.0F, 0).setColor(r, g, b, a).setUv(u0s, v0s).setLight(light);
+    /**
+     * Draws a sprite as a unit quad centered on the origin, facing +Z
+     */
+    public static void renderSprite(PoseStack.Pose pose, VertexConsumer vertexBuilder, int light,
+                                    int color, TextureAtlasSprite sprite) {
+        float u0s = sprite.getU0();
+        float u1s = sprite.getU1();
+        float v0s = sprite.getV0();
+        float v1s = sprite.getV1();
+
+        vertexBuilder.addVertex(pose, -1.0F, 1.0F, 0).setColor(color).setUv(u0s, v1s).setLight(light);
+        vertexBuilder.addVertex(pose, 1.0F, 1.0F, 0).setColor(color).setUv(u1s, v1s).setLight(light);
+        vertexBuilder.addVertex(pose, 1.0F, -1.0F, 0).setColor(color).setUv(u1s, v0s).setLight(light);
+        vertexBuilder.addVertex(pose, -1.0F, -1.0F, 0).setColor(color).setUv(u0s, v0s).setLight(light);
     }
 
 
     /**
      * Text render type that can use mipmap.
      */
-    public static RenderType getTextMipmapRenderType(ResourceLocation texture) {
+    public static RenderType getTextMipmapRenderType(Identifier texture) {
         return MLRenderTypes.TEXT_MIP.apply(texture);
     }
 
-    public static RenderType getEntityCutoutMipmapRenderType(ResourceLocation texture) {
+    public static RenderType getEntityCutoutMipmapRenderType(Identifier texture) {
         return MLRenderTypes.ENTITY_CUTOUT_MIP.apply(texture);
     }
 
-    public static RenderType getEntitySolidMipmapRenderType(ResourceLocation texture) {
+    public static RenderType getEntitySolidMipmapRenderType(Identifier texture) {
         return MLRenderTypes.ENTITY_SOLID_MIP.apply(texture);
     }
 
     /**
-     * A render type that colors a texture entirely using the shader color. Just takes the shape of it into account (non transparent pixels)
+     * A render type that colors a texture entirely using the vertex color. Just takes the shape of it into account (non transparent pixels)
      */
-    public static RenderType getColoredTextureRenderType(ResourceLocation texture) {
+    public static RenderType getColoredTextureRenderType(Identifier texture) {
         return MLRenderTypes.COLOR_TEXT.apply(texture);
     }
 
     /**
-     * Call at appropriate times to turn your dynamic textures into mipmapped ones. Remember to turn off
+     * Return this from SingleQuadParticle.getLayer for a
+     * block atlas particle that blends additively. Vanilla only has opaque and translucent ones
      */
-    public static void setDynamicTexturesToUseMipmap(boolean mipMap) {
-        MoonlightClient.setMipMap(mipMap);
-    }
-
-
-    public static ModelResourceLocation getStandaloneModelLocation(ResourceLocation location) {
-        return new ModelResourceLocation(location, PlatHelper.getPlatform().isFabric() ? "fabric_resource" : "standalone");
+    public static SingleQuadParticle.Layer getAdditiveParticleLayer() {
+        return MLRenderTypes.ADDITIVE_TERRAIN_PARTICLE_LAYER;
     }
 
 }

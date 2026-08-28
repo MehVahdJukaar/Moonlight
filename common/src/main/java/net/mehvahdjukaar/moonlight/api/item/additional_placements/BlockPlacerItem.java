@@ -89,9 +89,4 @@ public final class BlockPlacerItem extends BlockItem {
         this.mimicBlock = null;
         return r;
     }
-
-    @Override
-    public String getDescriptionId() {
-        return "x";
-    }
 }

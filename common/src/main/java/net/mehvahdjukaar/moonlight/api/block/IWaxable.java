@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.ItemStack;
@@ -21,11 +21,11 @@ public interface IWaxable {
     void setWaxed(boolean b);
 
     //callable on both sides
-    default ItemInteractionResult tryWaxingWithItem(Level level, BlockPos pos, Player player, ItemStack stack) {
+    default InteractionResult tryWaxingWithItem(Level level, BlockPos pos, Player player, ItemStack stack) {
         if (stack.getItem() instanceof HoneycombItem) {
             if (isWaxed()) {
                 level.playSound(player, pos, SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
-                return ItemInteractionResult.FAIL;
+                return InteractionResult.FAIL;
             }
             level.playSound(player, pos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS);
 
@@ -38,12 +38,12 @@ public interface IWaxable {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, stack);
                 player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
 
-                NetworkHelper.sendToAllClientPlayersInParticleRange(serverPlayer.serverLevel(), pos,
+                NetworkHelper.sendToAllClientPlayersInParticleRange(serverPlayer.level(), pos,
                         new ClientBoundParticleAroundBlockMessage(pos, ClientBoundParticleAroundBlockMessage.Kind.WAX_ON));
             }
 
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 }

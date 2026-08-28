@@ -120,18 +120,6 @@ public class TileOrEntityTarget {
     }
 
 
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public BlockPos getPos() {
-        return this.posOrEntityId.left().orElse(null);
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public Integer getEntityId() {
-        return this.posOrEntityId.right().orElse(null);
-    }
-
     @Override
     public String toString() {
         return "TileOrEntityTarget{" +

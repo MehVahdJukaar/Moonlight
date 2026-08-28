@@ -7,8 +7,5 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.util.Collection;
 
-//TODO:remove packs from here, they can be gathered from the resource manager
-public record EarlyPackReloadEvent(Collection<PackResources> selectedPacks, ResourceManager manager,
-                                   PackType type, IProgressTracker progress) implements SimpleEvent {
-
+public record EarlyPackReloadEvent(ResourceManager manager, PackType type, IProgressTracker progress) implements SimpleEvent {
 }

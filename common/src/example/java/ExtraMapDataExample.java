@@ -55,7 +55,7 @@ public class ExtraMapDataExample {
 
         @Override
         public void load(CompoundTag tag, HolderLookup.Provider lookup) {
-            this.value = tag.getInt("my_data");
+            this.value = tag.getIntOr("my_data", 0);
         }
 
         public void set(int data) {

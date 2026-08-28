@@ -11,13 +11,14 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +38,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     private final String modId;
     private final Screen parent;
     @Nullable
-    private final ResourceLocation background;
+    private final Identifier background;
     private final List<ModConfigHolder> holders;
     @Nullable
     private final Component version;
@@ -48,7 +49,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     private int leftPaneBottom;
     private boolean customShowcase;
 
-    private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
+    private MoonlightConfigSelectScreen(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable Identifier background) {
         super(Component.literal(PlatHelper.getModName(modId)));
         this.modId = modId;
         this.parent = parent;
@@ -67,15 +68,14 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     @Nullable
-    public static Screen create(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen create(String modId, Screen parent, @Nullable Identifier background) {
         return create(modId, configsOf(modId), parent, background);
     }
 
     @Nullable
-    public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable Identifier background) {
         if (holders.isEmpty()) return null;
-        // a lone config doesn't need a list to pick from, unless an overlay, showcase or footer button would be
-        // lost along with it
+        // skip the list for a lone config unless an overlay or showcase needs this screen
         if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
                 && ConfigScreenExtensions.showcaseFor(modId) == null
                 && !ConfigScreenExtensions.hasFooterExtras(modId)) {
@@ -94,7 +94,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.customShowcase = showcase != null;
         boolean showcaseTakesCarousel = showcase != null && showcase.replacesCarousel();
         if (showcase != null) {
-            // the mod brought its own thing to put here, so the icon isn't drawn. The carousel goes too unless the
+            // custom showcase replaces the icon. The carousel goes too unless the
             // showcase asked to only fill the icon square
             AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
                     this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? STRIP + 4 : 0));
@@ -153,15 +153,15 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         // header chrome in the background layer, behind the widgets (the list draws its own tiling background)
         GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.version, this.width, HEADER);
         renderLeftPane(graphics);
     }
 
     // the mod's identity pane: icon on top, authors under it, on the same flat background as the header
-    private void renderLeftPane(GuiGraphics graphics) {
+    private void renderLeftPane(GuiGraphicsExtractor graphics) {
         int bottom = this.contentBottom();
         GuiHelper.renderMenuBand(graphics, 0, HEADER, this.leftPaneWidth, bottom - HEADER);
 
@@ -187,21 +187,21 @@ public class MoonlightConfigSelectScreen extends Screen {
 
         // one name per line, wrapping long ones, filling whatever is left of the pane
         int line = this.font.lineHeight;
-        graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
+        graphics.text(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
                 ConfigGuiColors.DESCRIPTION);
         y += line + 1;
         for (String author : this.authors) {
             for (FormattedCharSequence row : this.font.split(Component.literal(author), textWidth)) {
                 if (y + line > bottom - 2) return;
-                graphics.drawString(this.font, row, PAD, y, ConfigGuiColors.LABEL);
+                graphics.text(this.font, row, PAD, y, ConfigGuiColors.LABEL);
                 y += line;
             }
         }
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         // dividers on top of the widget layer, else the list's own background paints over them
         int bottom = this.contentBottom();
@@ -217,18 +217,20 @@ public class MoonlightConfigSelectScreen extends Screen {
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) {
-                graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
             }
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = event.button();
         ConfigScreenExtensions.Panel panel = overlayPanel();
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
             if (overlay.mouseClicked(panel, mouseX, mouseY, button)) return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private ConfigScreenExtensions.Panel overlayPanel() {

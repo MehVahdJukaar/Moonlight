@@ -29,7 +29,7 @@ public class NetworkHelperImpl {
 
             @Override
             public <M extends Message> void registerServerBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
-                PayloadTypeRegistry.playC2S().register(messageType.type(), messageType.codec());
+                PayloadTypeRegistry.serverboundPlay().register(messageType.type(), messageType.codec());
 
                 ServerPlayNetworking.registerGlobalReceiver(messageType.type(),
                         (message, context) -> {
@@ -42,7 +42,7 @@ public class NetworkHelperImpl {
 
             @Override
             public <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
-                PayloadTypeRegistry.playS2C().register(messageType.type(), messageType.codec());
+                PayloadTypeRegistry.clientboundPlay().register(messageType.type(), messageType.codec());
 
                 if (!PlatHelper.getPhysicalSide().isClient()) return;
 
@@ -54,8 +54,7 @@ public class NetworkHelperImpl {
                 this.registerClientBound(messageType);
 
                 NetworkHelper.markOptional(messageType.type());
-                // Fabric never denies a connection over a missing channel, so nothing else is needed to make
-                // the payload optional. This is only so clients can see that the server has it.
+                // only so clients can see the server has the channel, fabric never rejects a missing one
                 PresenceMarker.register(messageType.type());
             }
 
@@ -102,8 +101,7 @@ public class NetworkHelperImpl {
     }
 
     public static void sendToClientPlayer(ServerPlayer serverPlayer, CustomPacketPayload message) {
-        // An optional payload is one the receiver is allowed not to have; only then is the check worth its
-        // cost, and only then can it be false for a player who is properly connected.
+        // only optional payloads can be missing on a properly connected receiver
         if (NetworkHelper.isOptional(message.type()) && !canSendToPlayer(serverPlayer, message.type())) return;
 
         ServerPlayNetworking.send(serverPlayer, message);
@@ -117,12 +115,12 @@ public class NetworkHelperImpl {
 
     public static void sendToAllClientPlayersInRange(ServerLevel level, BlockPos pos, double radius, CustomPacketPayload message) {
         MinecraftServer currentServer = PlatHelper.getCurrentServer();
-        if (!level.isClientSide && currentServer != null) {
+        if (!level.isClientSide() && currentServer != null) {
             PlayerList players = currentServer.getPlayerList();
             var dimension = level.dimension();
 
             players.broadcast(null, pos.getX(), pos.getY(), pos.getZ(),
-                    radius, dimension, ServerPlayNetworking.createS2CPacket(message));
+                    radius, dimension, ServerPlayNetworking.createClientboundPacket(message));
         } else throw makeAssertionError();
 
     }
@@ -133,21 +131,18 @@ public class NetworkHelperImpl {
 
     public static void sendToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
         Level level = target.level();
-        if (level.isClientSide) throw makeAssertionError();
+        if (level.isClientSide()) throw makeAssertionError();
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.getChunkSource().broadcast(target, ServerPlayNetworking.createS2CPacket(message));
+            serverLevel.getChunkSource().sendToTrackingPlayers(target, ServerPlayNetworking.createClientboundPacket(message));
         }
     }
 
     public static void sendToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
         Level level = target.level();
-        if (level.isClientSide) throw makeAssertionError();
+        if (level.isClientSide()) throw makeAssertionError();
         if (level instanceof ServerLevel serverLevel) {
-            var p = ServerPlayNetworking.createS2CPacket(message);
-            serverLevel.getChunkSource().broadcast(target, p);
-            if (target instanceof ServerPlayer player) {
-                sendToClientPlayer(player, message);
-            }
+            serverLevel.getChunkSource().sendToTrackingPlayersAndSelf(target,
+                    ServerPlayNetworking.createClientboundPacket(message));
         }
     }
 

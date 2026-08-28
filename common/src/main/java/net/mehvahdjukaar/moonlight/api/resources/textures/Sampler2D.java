@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Rotation;
 
@@ -55,17 +55,17 @@ public interface Sampler2D {
                 for (int px = Mth.floor(left); px < Mth.ceil(right); px++) {
                     float weight = rowWeight * (Math.min(right, px + 1) - Math.max(left, px));
                     int color = base.sample(px, py);
-                    float alphaWeight = FastColor.ABGR32.alpha(color) * weight;
+                    float alphaWeight = ARGB.alpha(color) * weight;
                     alphaSum += alphaWeight;
-                    red += FastColor.ABGR32.red(color) * alphaWeight;
-                    green += FastColor.ABGR32.green(color) * alphaWeight;
-                    blue += FastColor.ABGR32.blue(color) * alphaWeight;
+                    red += ARGB.blue(color) * alphaWeight;
+                    green += ARGB.green(color) * alphaWeight;
+                    blue += ARGB.red(color) * alphaWeight;
                     covered += weight;
                 }
             }
             if (covered == 0) return base.sample(x, y);
             if (alphaSum == 0) return 0;
-            return FastColor.ABGR32.color(Math.round(alphaSum / covered),
+            return ARGB.color(Math.round(alphaSum / covered),
                     Math.round(blue / alphaSum), Math.round(green / alphaSum), Math.round(red / alphaSum));
         };
     }

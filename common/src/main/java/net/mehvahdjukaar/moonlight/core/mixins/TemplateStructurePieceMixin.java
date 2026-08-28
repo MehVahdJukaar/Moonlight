@@ -41,7 +41,7 @@ public abstract class TemplateStructurePieceMixin {
         for (StructureTemplate.StructureBlockInfo info : this.template.filterBlocks(this.templatePosition, this.placeSettings,
                 MoonlightRegistry.SPAWN_BOX_BLOCK.get())) {
             if (info.nbt() != null) {
-                String s = info.nbt().getString("final_state");
+                String s = info.nbt().getStringOr("final_state", "minecraft:air");
                 BlockState blockstate = Blocks.AIR.defaultBlockState();
 
                 try {

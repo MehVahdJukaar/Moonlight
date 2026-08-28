@@ -4,7 +4,7 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -57,7 +57,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
             SidedInstance.clearAll();
         });
 
-        ServerWorldEvents.UNLOAD.register((server, world) -> {
+        ServerLevelEvents.UNLOAD.register((server, world) -> {
             try {
                 FakeGenericPlayer.unloadLevel(world);
                 if (PlatHelper.getPhysicalSide().isClient()) {

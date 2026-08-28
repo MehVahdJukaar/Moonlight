@@ -72,8 +72,8 @@ public abstract class DynamicRenderedBlockTile extends BlockEntity implements IE
     }
 
     protected boolean getFancyDistance(Vec3 cameraPos) {
-        LOD lod = new LOD(cameraPos, this.getBlockPos());
-        return lod.isNear();
+        if (LOD.isScoping()) return true;
+        return cameraPos.distanceToSqr(this.getBlockPos().getCenter()) <= LOD.NEAR_DIST;
     }
 
 }

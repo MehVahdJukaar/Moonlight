@@ -7,6 +7,7 @@ public class ModNetworkingImpl {
     public static void loaderDependent(NetworkHelper.RegisterMessagesEvent event) {
         event.registerClientBound(ClientBoundSpawnCustomEntityMessage.TYPE);
         event.registerClientBound(ClientBoundSyncDataMapsPacket.TYPE);
+        event.registerClientBound(ClientBoundOpenExtendedMenuMessage.TYPE);
     }
 
 }

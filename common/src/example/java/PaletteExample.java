@@ -18,8 +18,8 @@ public class PaletteExample {
         if (originalPalette.getLuminanceSpan() < 0.2) {
             originalPalette.increaseUp();
         }
-        // we also increase inner adding an inner color
-        originalPalette.increaseInner();
+        // we can also add an inner color by resampling
+        originalPalette.resampleWithOneMore(0);
 
         // gets the two closest colors, removes them and adds their average
         originalPalette.reduceAndAverage();

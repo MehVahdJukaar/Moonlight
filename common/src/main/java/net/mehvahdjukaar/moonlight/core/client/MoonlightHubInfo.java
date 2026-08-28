@@ -23,7 +23,6 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
                                String youtube, String twitter, String discord, String marketplace,
                                Set<MediaButton.ButtonType> buttons) {
 
-    /** @return true if this button should be shown (i.e. it's in the remote allow-list) */
     public boolean isButtonEnabled(MediaButton.ButtonType type) {
         return buttons.contains(type);
     }
@@ -73,7 +72,7 @@ public record MoonlightHubInfo(@Nullable PartnerServerProvider partnerServer, St
     private static final List<String> DEFAULT_BUTTON_NAMES = Arrays.stream(MediaButton.ButtonType.values())
             .map(MediaButton.ButtonType::getSerializedName).toList();
 
-    /** Resolves button ids, silently dropping any this (possibly older) client doesn't recognise. */
+    // unknown button ids (newer than this client) are dropped
     private static Set<MediaButton.ButtonType> toButtons(List<String> names) {
         EnumSet<MediaButton.ButtonType> set = EnumSet.noneOf(MediaButton.ButtonType.class);
         for (String n : names) {

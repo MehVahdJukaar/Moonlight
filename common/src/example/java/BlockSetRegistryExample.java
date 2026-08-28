@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -26,7 +26,9 @@ public class BlockSetRegistryExample {
         // Defining a block set
         BlockSetAPI.registerBlockSetDefinition(new FlowerTypeRegistry());
         // Using a block set to register dynamic blocks
-        BlockSetAPI.addDynamicBlockRegistration(BlockSetRegistryExample::registerFlowerTypeBlocks, FlowerType.class);
+        BlockSetAPI.addDynamicRegistration("yourmodid",
+                reg -> registerFlowerTypeBlocks(reg, BlockSetAPI.getBlockSet(FlowerType.class).getValues()),
+                BuiltInRegistries.BLOCK);
         init2();
     }
 
@@ -38,7 +40,7 @@ public class BlockSetRegistryExample {
         }
 
         @Override
-        public Optional<FlowerType> detectTypeFromBlock(Block block, ResourceLocation blockId) {
+        public Optional<FlowerType> detectTypeFromBlock(Block block, Identifier blockId) {
             // Main method which will detect the existence of a BlockType entry. Here you can check the existence
             // of other blocks (i.e., double flowers or do some id checks on the block itself)
             if (block instanceof FlowerBlock f) {
@@ -102,7 +104,7 @@ public class BlockSetRegistryExample {
         // Register here your dynamic blocks that depend on loaded flower types
         for (FlowerType type : flowerTypes) {
             // The final id will be something like "moonlight:compressed_poppy_block"
-            ResourceLocation id = Moonlight.res(type.getVariantId("block", "compressed"));
+            Identifier id = Moonlight.res(type.getVariantId("block", "compressed"));
             Block block = new Block(BlockBehaviour.Properties.of());
             event.register(id, block);
             // Remember to add your block to the type with a unique key;

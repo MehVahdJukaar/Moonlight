@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
@@ -28,7 +28,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
-    private final ResourceLocation name;
+    private final Identifier name;
     private final PackLocationInfo locationInfo;
     private final PackType packType;
 
@@ -37,7 +37,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
     private volatile boolean needsRegeneration = true;
 
-    public DynamicResourcesProvider(ResourceLocation name, PackType packType, PackGenerationStrategy generationPolicy) {
+    public DynamicResourcesProvider(Identifier name, PackType packType, PackGenerationStrategy generationPolicy) {
         this.name = name;
         this.packType = packType;
         this.generationStrategy = generationPolicy;
@@ -69,7 +69,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         return packResources;
     }
 
-    public final ResourceLocation getName() {
+    public final Identifier getName() {
         return name;
     }
 

@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import net.mehvahdjukaar.moonlight.api.fluids.ModFlowingFluid;
 import net.mehvahdjukaar.moonlight.api.misc.IAttachmentType;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
@@ -16,12 +15,13 @@ import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.tags.TagKey;
@@ -80,7 +80,7 @@ public class RegHelperImpl {
         }
 
         @Override
-        public ResourceLocation getId() {
+        public Identifier getId() {
             return registryObject.getId();
         }
 
@@ -100,7 +100,7 @@ public class RegHelperImpl {
         }
 
         @Override
-        public boolean is(ResourceLocation location) {
+        public boolean is(Identifier location) {
             return registryObject.is(location);
         }
 
@@ -149,6 +149,16 @@ public class RegHelperImpl {
             return registryObject.canSerializeIn(owner);
         }
 
+        @Override
+        public boolean areComponentsBound() {
+            return registryObject.areComponentsBound();
+        }
+
+        @Override
+        public DataComponentMap components() {
+            return registryObject.components();
+        }
+
 
 
         @SuppressWarnings("all")
@@ -182,13 +192,13 @@ public class RegHelperImpl {
     private static final Map<ResourceKey<? extends Registry<?>>, Map<String, DeferredRegister<?>>> REGISTRIES = new ConcurrentHashMap<>();
 
     public static <T, E extends T> RegSupplier<E> register(
-            ResourceLocation name, Supplier<E> supplier, Registry<T> reg) {
+            Identifier name, Supplier<E> supplier, Registry<T> reg) {
         return register(name, supplier, reg.key());
     }
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
-            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+            Identifier name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
@@ -206,14 +216,7 @@ public class RegHelperImpl {
             return r;
         });
         //forge we don't care about mod id since it's always the active container one
-        DeferredHolder<T, E> register = registry.register(name.getPath(), () -> {
-            //super hack for mod fluids auto registering of fluid types
-            var obj = supplier.get();
-            if (regKey.equals(Registries.FLUID) && obj instanceof ModFlowingFluid fluid) {
-                register(name, fluid::getFluidType, NeoForgeRegistries.Keys.FLUID_TYPES);
-            }
-            return obj;
-        });
+        DeferredHolder<T, E> register = registry.register(name.getPath(), supplier);
         return (RegSupplier<E>) new Wrapper<>(register);
     }
 
@@ -249,7 +252,7 @@ public class RegHelperImpl {
         return bus;
     }
 
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(Identifier name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         return register(name, supplier, reg);
     }
 
@@ -263,58 +266,43 @@ public class RegHelperImpl {
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
-            ResourceLocation name,
+            Identifier name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         return register(name, () -> IMenuTypeExtension.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerSimpleMenuType(
-            ResourceLocation name,
+            Identifier name,
             MenuType.MenuSupplier<C> containerFactory) {
         return register(name, () -> new MenuType<>(containerFactory, FeatureFlags.DEFAULT_FLAGS), Registries.MENU);
     }
 
-    public static <T extends
-            Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category,
-                                                                  float width, float height, int clientTrackingRange, int updateInterval) {
-        return register(name, () -> EntityType.Builder.of(factory, category)
-                .sized(width, height).build(name.toString()), Registries.ENTITY_TYPE);
-    }
-
-    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+    public static <T extends Fluid> RegSupplier<T> registerFluid(Identifier name, Supplier<T> fluid) {
         var f = register(name, fluid, Registries.FLUID);
         //register fluid type
         //register(name, () -> f.get().getFluidType(), NeoForgeRegistries.FLUID_TYPES);
         return f;
     }
 
-    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
-        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
-    }
-
-
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name,
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(Identifier name,
                                                                        boolean hasSearchBar,
-                                                                       List<ResourceLocation> afterEntries,
-                                                                       List<ResourceLocation> beforeEntries,
+                                                                       List<Identifier> afterEntries,
+                                                                       List<Identifier> beforeEntries,
                                                                        Consumer<CreativeModeTab.Builder> configurator) {
         return register(name, () -> {
             var b = CreativeModeTab.builder();
             configurator.accept(b);
             if (!beforeEntries.isEmpty()) {
-                b.withTabsBefore(beforeEntries.toArray(ResourceLocation[]::new));
+                b.withTabsBefore(beforeEntries.toArray(Identifier[]::new));
             }
             if (!afterEntries.isEmpty()) {
-                b.withTabsBefore(afterEntries.toArray(ResourceLocation[]::new));
+                b.withTabsBefore(afterEntries.toArray(Identifier[]::new));
             }
             if (hasSearchBar) b.withSearchBar();
             return b.build();
         }, Registries.CREATIVE_MODE_TAB);
     }
 
-
-    public static void registerItemBurnTime(Item item, int burnTime) {
-    }
 
     public static void registerBlockFlammability(Block item, int igniteOdds, int burnOdds) {
         ((FireBlock) Blocks.FIRE).setFlammable(item, igniteOdds, burnOdds);
@@ -356,12 +344,12 @@ public class RegHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
-    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+    public static void registerSimpleRecipeCondition(Identifier id, Predicate<String> predicate) {
         register(id, () -> OptionalRecipeCondition.createCodec(id, predicate), NeoForgeRegistries.Keys.CONDITION_CODECS);
     }
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean synced) {
-        String modId = key.location().getNamespace();
+        String modId = key.identifier().getNamespace();
         DeferredRegister<A> defer = DeferredRegister.create(key, modId);
         var reg = defer.makeRegistry(
                 (b) -> b.sync(synced));
@@ -480,12 +468,12 @@ public class RegHelperImpl {
         Consumer<LootTableLoadEvent> eventConsumer = event ->
                 eventListener.accept(new RegHelper.LootInjectEvent() {
                     @Override
-                    public ResourceLocation getTable() {
+                    public Identifier getTable() {
                         return event.getName();
                     }
 
                     @Override
-                    public void addTableReference(ResourceLocation targetId) {
+                    public void addTableReference(Identifier targetId) {
                         LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
                                 ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
                         event.getTable().addPool(pool);
@@ -494,31 +482,8 @@ public class RegHelperImpl {
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
-    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
-        FireworkStarRecipe.SHAPE_BY_ITEM = new HashMap<>(FireworkStarRecipe.SHAPE_BY_ITEM);
-        FireworkStarRecipe.SHAPE_BY_ITEM.put(ingredient, shape);
-        FireworkStarRecipe.SHAPE_INGREDIENT = CompoundIngredient.of(
-                FireworkStarRecipe.SHAPE_INGREDIENT,
-                Ingredient.of(ingredient));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void startRegisteringFor(Object bus) {
-        if (bus instanceof IEventBus b) {
-            MoonlightForge.startRegistering(b);
-        } else {
-            throw new IllegalArgumentException("Invalid bus type. Must be of IEventBus type: " + bus);
-        }
-
-    }
-
-    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
+    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(Identifier name, Supplier<EntityDataSerializer<T>> serializer) {
         return RegHelper.register(name, serializer, NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-        MoonlightForge.addPoi(poi, blocks);
     }
 
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
@@ -552,7 +517,7 @@ public class RegHelperImpl {
     }
 
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(
-            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
+            Identifier id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
         if (!IAttachmentHolder.class.isAssignableFrom(targetClass)) {
             Moonlight.LOGGER.warn("Registering data attachment for invalid class {} that does not implements IAttachmentHolder. ", targetClass.getName());
         }
@@ -570,7 +535,8 @@ public class RegHelperImpl {
                     .test(iAttachmentHolder, player), c.sync.getFirst());
         }
         if (c.persistentCodec != null) {
-            b.serialize(c.persistentCodec);
+            //neoforge wants a MapCodec, our API takes arbitrary codecs
+            b.serialize(c.persistentCodec.fieldOf("value"));
         }
         if (c.copyOnDeath) {
             b.copyOnDeath();

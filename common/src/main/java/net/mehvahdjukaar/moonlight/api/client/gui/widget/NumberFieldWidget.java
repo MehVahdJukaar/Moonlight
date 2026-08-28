@@ -5,13 +5,14 @@ import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.function.DoubleConsumer;
@@ -21,8 +22,8 @@ import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
 
 public class NumberFieldWidget extends CompositeWidget {
 
-    private static final ResourceLocation FIELD = ResourceLocation.withDefaultNamespace("widget/text_field");
-    private static final ResourceLocation FIELD_FOCUSED = ResourceLocation.withDefaultNamespace("widget/text_field_highlighted");
+    private static final Identifier FIELD = Identifier.withDefaultNamespace("widget/text_field");
+    private static final Identifier FIELD_FOCUSED = Identifier.withDefaultNamespace("widget/text_field_highlighted");
 
     private static final String MINUS = "-";
     private static final String PLUS = "+";
@@ -100,8 +101,7 @@ public class NumberFieldWidget extends CompositeWidget {
         return formatNumber(Math.round(v * 10000d) / 10000d);
     }
 
-    // the value a step starts from: whatever is typed if valid, else the nearest bound of the range
-    private double currentOrNearest() {
+    private double typedValueOrNearestBound() {
         Double parsed = parse(box.getValue());
         if (parsed != null) return parsed;
         return Math.clamp(0, min, max);
@@ -115,8 +115,8 @@ public class NumberFieldWidget extends CompositeWidget {
     }
 
     private void step(int dir) {
-        double from = currentOrNearest();
-        double next = Math.clamp(from + dir * step * (Screen.hasShiftDown() ? SHIFT_MULTIPLIER : 1), min, max);
+        double from = typedValueOrNearestBound();
+        double next = Math.clamp(from + dir * step * (Minecraft.getInstance().hasShiftDown() ? SHIFT_MULTIPLIER : 1), min, max);
         if (next == from && parse(box.getValue()) != null) return;
         this.box.setValue(format(next)); // the responder commits it
         GuiHelper.playClickSound();
@@ -134,22 +134,22 @@ public class NumberFieldWidget extends CompositeWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && this.active) {
-            int dir = overStep(mouseX, mouseY, -1) ? -1 : overStep(mouseX, mouseY, 1) ? 1 : 0;
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && this.active) {
+            int dir = overStep(event.x(), event.y(), -1) ? -1 : overStep(event.x(), event.y(), 1) ? 1 : 0;
             if (dir != 0) {
                 if (canStep(dir)) step(dir);
                 return true; // eat the click either way, the arrow is not a hole in the widget
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int x = getX(), y = getY(), w = getWidth(), h = getHeight();
         boolean focused = this.box.isFocused();
-        graphics.blitSprite(focused ? FIELD_FOCUSED : FIELD, x, y, w, h);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, focused ? FIELD_FOCUSED : FIELD, x, y, w, h);
 
         // the two 1px dividers, and with them the three bands: [border|minus|div|number|div|plus|border]
         int leftDivider = x + STEP_W;
@@ -164,9 +164,9 @@ public class NumberFieldWidget extends CompositeWidget {
         // the same side of both and they read as a pair. No shadow: these are chrome, not label text
         int minusW = glyphWidth(font, MINUS);
         int plusW = glyphWidth(font, PLUS);
-        graphics.drawString(font, MINUS, x + 1 + (STEP_W - 1 - minusW) / 2, textY,
+        graphics.text(font, MINUS, x + 1 + (STEP_W - 1 - minusW) / 2, textY,
                 arrowColor(mouseX, mouseY, -1), false);
-        graphics.drawString(font, PLUS, x + w - 1 - (STEP_W - 1 - plusW) / 2 - plusW, textY,
+        graphics.text(font, PLUS, x + w - 1 - (STEP_W - 1 - plusW) / 2 - plusW, textY,
                 arrowColor(mouseX, mouseY, 1), false);
 
         // the number is centered between the dividers, falling back to left aligned once it no longer fits. An
@@ -176,7 +176,7 @@ public class NumberFieldWidget extends CompositeWidget {
         int slack = Math.max(0, fieldWidth - font.width(this.box.getValue()));
         this.box.setPosition(fieldStart + slack / 2, textY);
         this.box.setWidth(fieldWidth - slack / 2);
-        this.box.render(graphics, mouseX, mouseY, partialTick);
+        this.box.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override

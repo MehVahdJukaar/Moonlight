@@ -1,24 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.gson.JsonElement;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
-import net.mehvahdjukaar.moonlight.api.client.CoreShaderContainer;
-import net.mehvahdjukaar.moonlight.api.client.ItemRenderExtension;
-import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
-import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
-import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
-import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
+
+import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
+import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -27,20 +22,28 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -48,7 +51,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -61,8 +65,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -84,6 +87,13 @@ public class ClientHelper {
     public static Level getLocalLevel() {
         var level = Minecraft.getInstance().level;
         return (Level) (Object) level;
+    }
+
+    /** Null until the local player joins a world. */
+    @Nullable
+    public static GameType getLocalGameMode() {
+        var gameMode = Minecraft.getInstance().gameMode;
+        return gameMode == null ? null : gameMode.getPlayerMode();
     }
 
     @FunctionalInterface
@@ -114,21 +124,7 @@ public class ClientHelper {
     }
 
     @PlatformImpl
-    public static void registerRenderType(Block block, RenderType... types) {
-        throw new AssertionError();
-    }
-
-    public static void registerRenderType(Block block, RenderType type) {
-        registerRenderType(block, new RenderType[]{type});
-    }
-
-    @PlatformImpl
-    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
-        throw new AssertionError();
-    }
-
-    @PlatformImpl
-    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation location) {
+    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier location) {
         throw new AssertionError();
     }
 
@@ -152,35 +148,35 @@ public class ClientHelper {
         void register(ItemLike itemLike, IItemDecoratorRenderer renderer);
     }
 
-    public interface ShaderEvent {
-        void register(ResourceLocation id, VertexFormat vertexFormat, Consumer<ShaderInstance> setter);
-
-        default void register(ResourceLocation id, VertexFormat vertexFormat, CoreShaderContainer container) {
-            register(id, vertexFormat, container::assign);
-        }
+    @FunctionalInterface
+    public interface RenderPipelineEvent {
+        void register(RenderPipeline pipeline);
     }
 
     @PlatformImpl
-    public static void addShaderRegistration(Consumer<ShaderEvent> eventListener) {
+    public static void addRenderPipelineRegistration(Consumer<RenderPipelineEvent> eventListener) {
         throw new AssertionError();
     }
 
     @FunctionalInterface
-    public interface ItemRendererEvent {
-        default void register(ItemLike item, ItemStackRenderer renderer) {
-            register(item, new ItemRenderExtension() {
-                @Override
-                public @Nullable ItemStackRenderer getItemRenderer() {
-                    return renderer;
-                }
-            });
-        }
-
-        void register(ItemLike item, ItemRenderExtension extension);
+    public interface PictureInPictureEvent {
+        <T extends PictureInPictureRenderState> void register(
+                Class<T> stateClass, Function<MultiBufferSource.BufferSource, PictureInPictureRenderer<T>> factory);
     }
 
     @PlatformImpl
-    public static void addItemRenderersRegistration(Consumer<ItemRendererEvent> eventListener) {
+    public static void addPictureInPictureRendererRegistration(Consumer<PictureInPictureEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface SpecialModelEvent {
+        void register(Identifier id, MapCodec<? extends SpecialModelRenderer.Unbaked<?>> codec);
+    }
+
+    /** Items opt in from their items/<id>.json definition with a minecraft:special model of the registered type. */
+    @PlatformImpl
+    public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();
     }
 
@@ -201,7 +197,7 @@ public class ClientHelper {
 
     @FunctionalInterface
     public interface BlockEntityRendererEvent {
-        <E extends BlockEntity> void register(BlockEntityType<? extends E> blockEntity, BlockEntityRendererProvider<E> renderer);
+        <E extends BlockEntity, S extends BlockEntityRenderState> void register(BlockEntityType<? extends E> blockEntity, BlockEntityRendererProvider<E, S> renderer);
     }
 
     @PlatformImpl
@@ -210,7 +206,8 @@ public class ClientHelper {
     }
 
     public interface BlockColorEvent {
-        void register(BlockColor color, Block... block);
+        /** A quad's tint index picks the source at that position. */
+        void register(List<BlockTintSource> tintSources, Block... blocks);
 
         int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint);
 
@@ -218,18 +215,6 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addBlockColorsRegistration(Consumer<BlockColorEvent> eventListener) {
-        throw new AssertionError();
-    }
-
-    public interface ItemColorEvent {
-        void register(ItemColor color, ItemLike... items);
-
-        int getColor(ItemStack stack, int tint);
-
-    }
-
-    @PlatformImpl
-    public static void addItemColorsRegistration(Consumer<ItemColorEvent> eventListener) {
         throw new AssertionError();
     }
 
@@ -243,39 +228,32 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    public interface SpecialModelEvent {
-        void register(ModelResourceLocation modelLocation);
-
-        void register(ResourceLocation id);
+    @FunctionalInterface
+    public interface FluidModelEvent {
+        void register(FluidModel.Unbaked model, Fluid still, Fluid flowing);
     }
 
-    //Use the "special_models" folder instead since that's auto loaded
-    @Deprecated
     @PlatformImpl
-    public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
+    public static void addFluidModelRegistration(Consumer<FluidModelEvent> eventListener) {
         throw new AssertionError();
     }
 
     @FunctionalInterface
-    public interface ModelLoaderEvent {
-        void register(ResourceLocation id, CustomModelLoader loader);
-
-        default void register(ResourceLocation id, Supplier<CustomBakedModel> bakedModelFactory) {
-            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform) -> bakedModelFactory.get());
-        }
-
-        default void register(ResourceLocation id, BiFunction<ModelState, Function<Material, TextureAtlasSprite>, CustomBakedModel> bakedModelFactory) {
-            register(id, (CustomModelLoader) (json, context) -> (modelBaker, spriteGetter, transform) -> bakedModelFactory.apply(transform, spriteGetter));
-        }
+    public interface BlockModelEvent {
+        void register(Identifier id, MapCodec<? extends CustomUnbakedModel> codec);
     }
 
+    /** Custom model types usable in blockstates files, see CustomUnbakedModel. */
     @PlatformImpl
-    public static void addModelLoaderRegistration(Consumer<ModelLoaderEvent> eventListener) {
+    public static void addBlockModelRegistration(Consumer<BlockModelEvent> eventListener) {
         throw new AssertionError();
     }
 
+    /** Like BlockStateModel.collectParts but passes the level along so nested level aware models resolve. */
     @PlatformImpl
-    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
+    public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,
+                                         @Nullable BlockPos pos, @Nullable BlockState state,
+                                         RandomSource random, List<BlockStateModelPart> parts) {
         throw new AssertionError();
     }
 
@@ -300,14 +278,10 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    @PlatformImpl
-    public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        throw new AssertionError();
-    }
-
-    @PlatformImpl
-    public static BlockModel parseBlockModel(JsonElement json) {
-        throw new AssertionError();
+    /** 0xAABBGGRR. Frames are stacked vertically. */
+    public static int getPixelABGR(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
+        SpriteContents contents = sprite.contents();
+        return contents.originalImage.getPixelABGR(x, y + frameIndex * contents.height());
     }
 
     @PlatformImpl
@@ -316,7 +290,7 @@ public class ClientHelper {
     }
 
     @Nullable
-    public static Screen getMoonlightConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen getMoonlightConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
         return MoonlightConfigSelectScreen.create(modId, parent, background);
     }
 
@@ -325,7 +299,7 @@ public class ClientHelper {
      * player turned Moonlight's own config screens off, in which case there is no hub to show.
      */
     @Nullable
-    public static Screen getModsListScreen(@Nullable Screen parent, @Nullable ResourceLocation background) {
+    public static Screen getModsListScreen(@Nullable Screen parent, @Nullable Identifier background) {
         if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) return null;
         return new ModsTilesScreen(parent, background);
     }
@@ -342,7 +316,6 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /** Whether {@link #getModConfigScreen} would return a screen for this mod. */
     @PlatformImpl
     public static boolean hasModConfigScreen(String modId) {
         throw new AssertionError();
@@ -351,17 +324,17 @@ public class ClientHelper {
     /**
      * Builds a Moonlight-native config screen for a mod that does <em>not</em> use Moonlight's config system, by
      * reading the config the mod registered with the loader directly. Only NeoForge can do this (its configs share one
-     * {@code ModConfigSpec} format); Fabric always returns null. Also returns null when the mod has no readable config,
-     * so callers should fall back to {@link #getModConfigScreen}.
+     * ModConfigSpec format); Fabric always returns null. Also returns null when the mod has no readable config,
+     * so callers should fall back to getModConfigScreen.
      */
     @PlatformImpl
     @Nullable
-    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
         throw new AssertionError();
     }
 
     /**
-     * Whether {@link #getNativeForeignConfigScreen} would produce a screen for this mod (a readable config it didn't
+     * Whether getNativeForeignConfigScreen would produce a screen for this mod (a readable config it didn't
      * register through Moonlight). Cheaper than building the screen; used to decide whether to show the mod a tile.
      * Always false on Fabric.
      */
@@ -390,25 +363,16 @@ public class ClientHelper {
      * Pack in /resources/resourcepacks
      */
     @PlatformImpl
-    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(Identifier folderName, Component displayName, boolean defaultEnabled) {
         throw new AssertionError();
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName, boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(Identifier folderName, boolean defaultEnabled) {
         registerOptionalTexturePack(folderName, Component.literal(TextHelper.getReadableName(folderName.getPath())), defaultEnabled);
     }
 
 
-    private static final Cache<ResourceLocation, Material> CACHED_MATERIALS = CacheBuilder.newBuilder()
-            .expireAfterAccess(2, TimeUnit.MINUTES)
-            .build();
-
-    //cached materials
-    public static Material getBlockMaterial(ResourceLocation bockTexture) {
-        try {
-            return CACHED_MATERIALS.get(bockTexture, () -> new Material(TextureAtlas.LOCATION_BLOCKS, bockTexture));
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+    public static Material getBlockMaterial(Identifier blockTexture) {
+        return new Material(blockTexture);
     }
 }

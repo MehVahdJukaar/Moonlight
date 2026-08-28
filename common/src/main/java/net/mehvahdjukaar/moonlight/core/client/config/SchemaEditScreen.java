@@ -14,7 +14,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -160,7 +160,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
         List<JsonElement> values = cat.snapshot(state.session);
         values.add(cat.newEntry());
         rebuild(cat, values);
-        this.list.setScrollAmount(this.list.getMaxScroll()); // reveal the entry that was just appended
+        this.list.setScrollAmount(this.list.maxScrollAmount()); // reveal the entry that was just appended
     }
 
     private void removeEntry(SchemaForm.ListCategory cat, int index) {
@@ -171,7 +171,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     }
 
     private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
-        double scroll = this.list.getScrollAmount();
+        double scroll = this.list.scrollAmount();
         cat.setEntries(values);
         this.overlay.clear(); // the rows are recreated below, and with them any popup one of them had open
         populate();
@@ -200,19 +200,19 @@ public class SchemaEditScreen extends ConfigPageScreen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         if (renderOverlayOrTooltip(graphics, mouseX, mouseY)) return;
         if (this.error != null) {
             // sits just above the button strip, which is one row taller on a list page (the "add entry" button)
             int y = this.height - (listCategory() != null ? 66 : 42);
-            graphics.drawCenteredString(this.font, this.error, this.width / 2, y, ConfigGuiColors.ERROR);
+            graphics.centeredText(this.font, this.error, this.width / 2, y, ConfigGuiColors.ERROR);
         }
     }
 }

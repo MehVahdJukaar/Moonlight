@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModCatalogAPI;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
@@ -8,16 +7,18 @@ import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.client.RemoteIconCache;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.LoadingDotsWidget;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.FOOTER;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.HEADER;
+
 
 public class DiscoverModsScreen extends Screen {
 
@@ -162,14 +164,14 @@ public class DiscoverModsScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         this.contentTop = HEADER;
         this.contentBottom = this.height - FOOTER;
 
@@ -181,19 +183,19 @@ public class DiscoverModsScreen extends Screen {
             if (mods != this.builtFrom) buildItems();
             renderItems(graphics, mouseX, mouseY);
         } else if (!anyLoading()) {
-            graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
+            graphics.centeredText(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
                     this.width / 2, (contentTop + contentBottom) / 2 - this.font.lineHeight / 2, ConfigGuiColors.DESCRIPTION);
         } else {
             // still fetching: center the vanilla loading-dots animation in the panel
             this.loadingWidget.setPosition(0, contentTop);
             this.loadingWidget.setSize(this.width, contentBottom - contentTop);
-            this.loadingWidget.render(graphics, mouseX, mouseY, partialTick);
+            this.loadingWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
         GuiHelper.renderFooterSeparator(graphics, contentBottom, this.width);
     }
 
-    private void renderItems(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderItems(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         computeLayout();
         boolean inViewport = mouseY >= contentTop && mouseY < contentBottom;
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
@@ -214,15 +216,15 @@ public class DiscoverModsScreen extends Screen {
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
     }
 
-    private void renderSection(GuiGraphics graphics, Section section, int y) {
+    private void renderSection(GuiGraphicsExtractor graphics, Section section, int y) {
         int textY = y + SECTION_H - this.font.lineHeight - 2;
-        graphics.drawString(this.font, section.title(), rowX, textY, ConfigGuiColors.TEXT_SECONDARY);
+        graphics.text(this.font, section.title(), rowX, textY, ConfigGuiColors.TEXT_SECONDARY);
         GuiHelper.renderSeparator(graphics, rowX, textY + this.font.lineHeight + 1, contentW);
     }
 
-    private void renderRow(GuiGraphics graphics, Row row, int y, boolean hover) {
+    private void renderRow(GuiGraphicsExtractor graphics, Row row, int y, boolean hover) {
         graphics.fill(rowX, y, rowX + contentW, y + ROW_H, hover ? ConfigGuiColors.TILE_BG_HOVER : ConfigGuiColors.TILE_BG);
-        graphics.renderOutline(rowX, y, contentW, ROW_H, hover ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE);
+        graphics.outline(rowX, y, contentW, ROW_H, hover ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE);
 
         boolean installed = row.installed();
         int iconX = rowX + ROW_INNER_PAD;
@@ -241,39 +243,32 @@ public class DiscoverModsScreen extends Screen {
         int descColor = installed ? DESC_INSTALLED : DESC_MISSING;
         int descY = y + 6 + LINE;
         for (FormattedCharSequence line : row.descLines()) {
-            graphics.drawString(this.font, line, textX, descY, descColor);
+            graphics.text(this.font, line, textX, descY, descColor);
             descY += LINE;
         }
 
         if (installed) {
-            graphics.blitSprite(MoonlightIcons.YES, textRight - 10, y + 7, 10, 10);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.YES, textRight - 10, y + 7, 10, 10);
         }
     }
 
-    private void renderIcon(GuiGraphics graphics, Row row, int iconX, int iconY, boolean installed) {
+    private void renderIcon(GuiGraphicsExtractor graphics, Row row, int iconX, int iconY, boolean installed) {
         // installed mods pull the icon straight from their jar; the rest fetch it from the catalog url
         ModIcons.Icon icon = ModIcons.get(row.data().modId());
         if (icon == null && row.data().iconUrl() != null) {
             icon = RemoteIconCache.get(row.data().modId(), row.data().iconUrl());
         }
         if (icon != null) {
-            if (!installed) {
-                RenderSystem.enableBlend();
-                graphics.setColor(1f, 1f, 1f, 0.35f);
-            }
-            graphics.blit(icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, 0f, 0f,
-                    icon.width(), icon.height(), icon.width(), icon.height());
-            if (!installed) {
-                graphics.setColor(1f, 1f, 1f, 1f);
-                RenderSystem.disableBlend();
-            }
+            graphics.blit(RenderPipelines.GUI_TEXTURED, icon.texture(), iconX, iconY, 0f, 0f, ICON_SIZE, ICON_SIZE,
+                    icon.width(), icon.height(), icon.width(), icon.height(),
+                    installed ? 0xFFFFFFFF : ARGB.white(0.35f));
         } else {
             renderFallbackIcon(graphics, row, iconX, iconY, installed);
         }
     }
 
     // no icon yet (missing, downloading or failed): a dark tile with the mod's initial, dimmed if not installed
-    private void renderFallbackIcon(GuiGraphics graphics, Row row, int iconX, int iconY, boolean installed) {
+    private void renderFallbackIcon(GuiGraphicsExtractor graphics, Row row, int iconX, int iconY, boolean installed) {
         GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, ICON_SIZE,
                 installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B,
                 installed ? ConfigGuiColors.initialLetter(row.data().name()) : DESC_MISSING, MoonlightIcons.CONFIG);
@@ -289,12 +284,14 @@ public class DiscoverModsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = event.button();
         if (button == 0 && mouseY >= contentTop && mouseY < contentBottom) {
             Row clicked = rowAt(mouseX, mouseY);
             if (clicked != null && openModPage(clicked.data())) return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Nullable
@@ -313,7 +310,7 @@ public class DiscoverModsScreen extends Screen {
         String url = entry.curseforgeUrl() != null ? entry.curseforgeUrl() : entry.modrinthUrl();
         if (url == null) return false;
         GuiHelper.playClickSound();
-        this.handleComponentClicked(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
+        ConfirmLinkScreen.confirmLinkNow(this, url);
         return true;
     }
 

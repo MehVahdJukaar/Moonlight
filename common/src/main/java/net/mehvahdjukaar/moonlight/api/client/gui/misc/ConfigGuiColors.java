@@ -7,8 +7,9 @@ import java.util.Objects;
 
 public final class ConfigGuiColors {
 
+    // text with alpha 0 is skipped
     public static int chat(ChatFormatting color) {
-        return Objects.requireNonNull(color.getColor());
+        return 0xFF000000 | Objects.requireNonNull(color.getColor());
     }
 
     // structural chrome, deliberately not themeable

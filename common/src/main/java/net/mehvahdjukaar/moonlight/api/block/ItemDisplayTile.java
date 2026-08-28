@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -28,6 +28,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +52,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     //should only be server side. called when inventory has changed
     @Override
     public void setChanged() {
-        if (this.level == null || level.isClientSide) return;
+        if (this.level == null || level.isClientSide()) return;
         this.serverSideUpdateWhenChanged(this.level.registryAccess());
         if (this.needsToUpdateClientWhenChanged()) {
             //this saves and sends a packet to update the client tile
@@ -68,29 +70,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         return true;
     }
 
-    /**
-     * Called every time the tile is marked dirty or loaded. Server side method.
-     * Put here common logic for things that needs to react to inventory changes like updating blockState or logic
-     */
-    @Deprecated(forRemoval = true)
-    public void updateTileOnInventoryChanged() {
-    }
-
-    /**
-     * Called after the tile is loaded from the packet. Client side.
-     * Put here client only visual logic that needs to react to inventory changes
-     */
-    @Deprecated(forRemoval = true)
-    public void updateClientVisualsOnLoad() {
-    }
-
     public void clientSideUpdateWhenChanged(HolderLookup.Provider registries){
-        updateClientVisualsOnLoad();
     }
 
     public void serverSideUpdateWhenChanged(HolderLookup.Provider registries){
-        updateTileOnInventoryChanged();
-    };
+    }
 
 
     public ItemStack getDisplayedItem() {
@@ -101,11 +85,11 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
         this.setItem(0, stack);
     }
 
-    public ItemInteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack stack) {
+    public InteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack stack) {
         return this.interactWithPlayerItem(player, handIn, stack,0);
     }
 
-    public ItemInteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack handItem, int slot) {
+    public InteractionResult interactWithPlayerItem(Player player, InteractionHand handIn, ItemStack handItem, int slot) {
          if (handIn == InteractionHand.MAIN_HAND) {
             //remove
             if (handItem.isEmpty()) {
@@ -119,7 +103,7 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                         //also update visuals on client. will get overwritten by packet tho
                         this.clientSideUpdateWhenChanged(this.level.registryAccess());
                     }
-                    return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
+                    return InteractionResult.SUCCESS;
                 }
             }
             //place
@@ -130,16 +114,16 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
                 handItem.consume(1, player);
                 onItemAdded(player, it, slot);
                 if (!this.level.isClientSide()) {
-                    this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundSource.BLOCKS, 1.0F, this.level.random.nextFloat() * 0.10F + 0.95F);
+                    this.level.playSound(null, this.worldPosition, this.getAddItemSound(), SoundSource.BLOCKS, 1.0F, this.level.getRandom().nextFloat() * 0.10F + 0.95F);
                     //this.setChanged();
                 } else {
                     //also update visuals on client. will get overwritten by packet tho
                     this.clientSideUpdateWhenChanged(this.level.registryAccess());
                 }
-                return ItemInteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.SUCCESS;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     public void onItemRemoved(Player player, ItemStack stack, int slot) {
@@ -161,24 +145,24 @@ public abstract class ItemDisplayTile extends RandomizableContainerBlockEntity i
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (!this.tryLoadLootTable(tag)) {
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        if (!this.tryLoadLootTable(input)) {
             this.stacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         }
-        ContainerHelper.loadAllItems(tag, this.stacks, registries);
+        ContainerHelper.loadAllItems(input, this.stacks);
         if (this.level != null) {
-            if (this.level.isClientSide) this.clientSideUpdateWhenChanged(registries);
+            if (this.level.isClientSide()) this.clientSideUpdateWhenChanged(this.level.registryAccess());
                 //this doesn't work on first load cause world is null on server. You need to save stuff on nbt
-            else this.serverSideUpdateWhenChanged(registries);
+            else this.serverSideUpdateWhenChanged(this.level.registryAccess());
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
-        super.saveAdditional(compound, registries);
-        if (!this.trySaveLootTable(compound)) {
-            ContainerHelper.saveAllItems(compound, this.stacks, registries);
+    public void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        if (!this.trySaveLootTable(output)) {
+            ContainerHelper.saveAllItems(output, this.stacks);
         }
     }
 

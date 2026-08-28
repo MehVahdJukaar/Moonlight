@@ -75,8 +75,7 @@ final class ConfigBeans {
             return builder.define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
         if (type == float.class || type == Float.class)
             return builder.define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
-        // must reject null: a null-accepting validator makes NeoForge treat a MISSING string field as valid, so it
-        // never writes the default, and then re-corrects the spec every load -> endless "config is not correct" loop
+        // must reject null, else NeoForge treats a missing string as valid, never writes the default and re-corrects every load
         if (type == String.class) return builder.define(name, (String) current);
         if (type.isEnum()) return builder.define(name, (Enum) current);
         throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");

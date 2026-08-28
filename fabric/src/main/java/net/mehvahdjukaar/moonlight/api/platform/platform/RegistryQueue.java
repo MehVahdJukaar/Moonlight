@@ -1,16 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import com.mojang.datafixers.util.Either;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.mehvahdjukaar.moonlight.api.client.ICustomItemRendererProvider;
 import net.mehvahdjukaar.moonlight.api.misc.RegSupplier;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.minecraft.core.*;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 import java.util.*;
@@ -32,7 +31,7 @@ public class RegistryQueue<T> {
         return registry;
     }
 
-    public RegEntryHolder<T> add(Supplier<T> factory, ResourceLocation name) {
+    public RegEntryHolder<T> add(Supplier<T> factory, Identifier name) {
         RegEntryHolder<T> wrapper = new RegEntryHolder<>(name, factory, registry);
         entries.add(wrapper);
         return wrapper;
@@ -58,7 +57,7 @@ public class RegistryQueue<T> {
         private T valueBeingRegistered = null;
 
 
-        public RegEntryHolder(ResourceLocation id, Supplier<T> factory, ResourceKey<Registry<T>> registry) {
+        public RegEntryHolder(Identifier id, Supplier<T> factory, ResourceKey<Registry<T>> registry) {
             this.regSupplier = factory;
             this.id = ResourceKey.create(registry, id);
             this.registryKey = registry;
@@ -71,8 +70,8 @@ public class RegistryQueue<T> {
         }
 
         @Override
-        public ResourceLocation getId() {
-            return id.location();
+        public Identifier getId() {
+            return id.identifier();
         }
 
         @Override
@@ -82,10 +81,10 @@ public class RegistryQueue<T> {
 
         void initialize(boolean throwMissingReg) {
             if (this.holder != null || this.valueBeingRegistered != null) return;
-            WritableRegistry writableRegistry = (WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location());
+            WritableRegistry writableRegistry = (WritableRegistry) BuiltInRegistries.REGISTRY.getValue(registryKey.identifier());
             if (writableRegistry == null) {
                 if (throwMissingReg)
-                    throw new IllegalStateException("Registry not found: " + registryKey.location());
+                    throw new IllegalStateException("Registry not found: " + registryKey.identifier());
                 return;
             }
             this.valueBeingRegistered = regSupplier.get();
@@ -96,16 +95,6 @@ public class RegistryQueue<T> {
             }
             regSupplier = null;
             registryKey = null;
-
-            var entry = this.holder.value();
-            if (PlatHelper.getPhysicalSide().isClient() && entry instanceof ICustomItemRendererProvider pr) {
-                if (BuiltinItemRendererRegistry.INSTANCE.get(pr) == null) {
-                    BuiltinItemRendererRegistry.INSTANCE.register(pr,
-                            (BuiltinItemRendererRegistry.DynamicItemRenderer) pr.getRendererFactory().get());
-                } else {
-                    if (PlatHelper.isDev()) throw new AssertionError();
-                }
-            }
         }
 
         @Override
@@ -126,8 +115,8 @@ public class RegistryQueue<T> {
         }
 
         @Override
-        public boolean is(ResourceLocation location) {
-            return this.id.location().equals(location);
+        public boolean is(Identifier location) {
+            return this.id.identifier().equals(location);
         }
 
         @Override
@@ -177,6 +166,18 @@ public class RegistryQueue<T> {
         public boolean canSerializeIn(HolderOwner<T> owner) {
             initialize(false);
             return this.holder != null && this.holder.canSerializeIn(owner);
+        }
+
+        @Override
+        public boolean areComponentsBound() {
+            initialize(false);
+            return this.holder != null && this.holder.areComponentsBound();
+        }
+
+        @Override
+        public DataComponentMap components() {
+            initialize(true);
+            return this.holder.components();
         }
 
         @Override

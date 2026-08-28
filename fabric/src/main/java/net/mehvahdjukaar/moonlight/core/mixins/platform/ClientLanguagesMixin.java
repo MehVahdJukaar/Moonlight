@@ -17,8 +17,9 @@ public abstract class ClientLanguagesMixin {
 
     @ModifyArg(method = "loadFrom",
             at = @At(value = "INVOKE",
-                    target = "Lcom/google/common/collect/ImmutableMap;copyOf(Ljava/util/Map;)Lcom/google/common/collect/ImmutableMap;"))
-    private static Map<String, String> addEntries(Map<String, String> map, @Local(argsOnly = true) List<String> languageInfo) {
+                    target = "Ljava/util/Map;copyOf(Ljava/util/Map;)Ljava/util/Map;"))
+    private static Map<String, String> moonlight$addDynamicEntries(Map<String, String> map,
+                                                                   @Local(argsOnly = true) List<String> languageInfo) {
         AfterLanguageLoadEvent event = new AfterLanguageLoadEvent(map, languageInfo);
         if (event.isDefault()) {
             //dispatch event and calls listeners
@@ -29,6 +30,4 @@ public abstract class ClientLanguagesMixin {
         }
         return map;
     }
-
-
 }

@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -25,13 +26,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
@@ -47,10 +49,11 @@ import net.neoforged.neoforge.common.*;
 import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
-import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import net.neoforged.neoforge.registries.GameData;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,27 +68,6 @@ public class ForgeHelperImpl {
         return EventHooks.onProjectileImpact(projectile, blockHitResult);
     }
 
-    public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
-        boolean success = false;
-        /*
-        var builder = ConditionalRecipe.builder();
-        for (var c : conditions) {
-            if (c instanceof ICondition condition) {
-                builder.addCondition(condition);
-                success = true;
-            }
-        }
-        if (success) {
-            AtomicReference<FinishedRecipe> newRecipe = new AtomicReference<>();
-            builder.addRecipe(originalRecipe);
-            builder.build(r -> newRecipe.set(new Wrapper(r, originalRecipe)), originalRecipe.getId());
-            return newRecipe.get();
-        }*/
-        //TODO: re add
-        return originalRecipe;
-    }
-
-
     public static <T> RegistryOps<T> conditionalOps(DynamicOps<T> ops, HolderLookup.Provider provider, SimplePreparableReloadListener<?> reloader) {
         var rel = ((ContextAwareReloadListenerAccessor) reloader);
         return new ConditionalOps<>(RegistryOps.create(ops, provider), rel.invokeGetContext());
@@ -96,11 +78,9 @@ public class ForgeHelperImpl {
     }
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
-        EffectCure cure = null;
-        // somehow worse api...
-        if (stack.getItem() instanceof MilkBucketItem) cure = EffectCures.MILK;
-        if (stack.getItem() instanceof HoneyBottleItem) cure = EffectCures.HONEY;
-        if (cure != null) return effect.getCures().contains(cure);
+        // mirrors the vanilla consume effects: milk clears all, honey cures poison
+        if (stack.is(Items.MILK_BUCKET)) return true;
+        if (stack.is(Items.HONEY_BOTTLE)) return effect.is(MobEffects.POISON);
         return false;
     }
 
@@ -119,15 +99,24 @@ public class ForgeHelperImpl {
     }
 
     public static boolean canEntityDestroy(Level level, BlockPos blockPos, Animal animal) {
-        return CommonHooks.canEntityDestroy(level, blockPos, animal);
+        if (level instanceof ServerLevel serverLevel) {
+            return CommonHooks.canEntityDestroy(serverLevel, blockPos, animal);
+        }
+        return true;
     }
 
     public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
-        return EventHooks.onExplosionStart(level, explosion);
+        if (explosion instanceof ServerExplosion serverExplosion) {
+            return EventHooks.onExplosionStart(level, serverExplosion);
+        }
+        return false;
     }
 
     public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
-        EventHooks.onExplosionDetonate(level, explosion, entities, diameter);
+        if (explosion instanceof ServerExplosion serverExplosion) {
+            // the affected block list is computed inside vanilla's explode() and not exposed here
+            EventHooks.onExplosionDetonate(level, serverExplosion, entities, List.of());
+        }
     }
 
     public static void fireOnLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
@@ -143,7 +132,9 @@ public class ForgeHelperImpl {
     }
 
     public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
-        blockstate.onBlockExploded(level, blockpos, explosion);
+        if (level instanceof ServerLevel serverLevel) {
+            blockstate.onBlockExploded(serverLevel, blockpos, explosion);
+        }
     }
 
     public static boolean isFireSource(BlockState blockState, Level level, BlockPos pos, Direction up) {
@@ -175,7 +166,8 @@ public class ForgeHelperImpl {
     }
 
     public static Optional<ItemStack> getCraftingRemainingItem(ItemStack itemstack) {
-        return itemstack.hasCraftingRemainingItem() ? Optional.of(itemstack.getCraftingRemainingItem()) : Optional.empty();
+        var remainder = itemstack.getCraftingRemainder();
+        return remainder == null ? Optional.empty() : Optional.of(remainder.create());
     }
 
     public static void reviveEntity(Entity entity) {
@@ -214,25 +206,26 @@ public class ForgeHelperImpl {
         Moonlight.assertInitPhase();
 
         Consumer<RegisterCapabilitiesEvent> eventConsumer = event -> {
-            event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type, ForgeHelperImpl::makeDefaultInvHandler);
+            event.registerBlockEntity(Capabilities.Item.BLOCK, type, ForgeHelperImpl::makeDefaultInvHandler);
         };
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
-    public static @NotNull IItemHandlerModifiable makeDefaultInvHandler(Container container, Direction side) {
+    public static @NotNull ResourceHandler<ItemResource> makeDefaultInvHandler(Container container, Direction side) {
         if (container instanceof WorldlyContainer wc) {
-            return new SidedInvWrapper(wc, side == null ? Direction.UP : side);
+            return new WorldlyContainerWrapper(wc, side == null ? Direction.UP : side);
         } else {
-            return new InvWrapper(container);
+            return VanillaContainerWrapper.of(container);
         }
     }
 
 
     public static boolean isInFluidThatCanExtinguish(Entity entity) {
-        return entity.isInFluidType((a, b) -> a.canExtinguish(entity));
+        var fluid = entity.level().getFluidState(entity.blockPosition());
+        return !fluid.isEmpty() && fluid.getFluidType().canExtinguish(entity);
     }
 
-    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
+    public static Identifier getQueriedLootTableId(LootContext lootContext) {
         return lootContext.getQueriedLootTableId();
     }
 }

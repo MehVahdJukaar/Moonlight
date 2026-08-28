@@ -27,8 +27,7 @@ public class PlatHelperExample {
     private static void setup() {
         // Showcasing some other PlatHelper functions
         if (PlatHelper.isModLoaded("jei") && !PlatHelper.isDev()) {
-            // Note that this call is fabric only. For Forge, you should override getBurnTime in your item
-            RegHelper.registerItemBurnTime(Items.SKELETON_SKULL, 2);
+            // do mod compat stuff here
         }
     }
 

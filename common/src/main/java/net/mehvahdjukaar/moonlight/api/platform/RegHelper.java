@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
@@ -10,13 +11,11 @@ import net.mehvahdjukaar.moonlight.api.block.ModStairBlock;
 import net.mehvahdjukaar.moonlight.api.misc.*;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
-import net.mehvahdjukaar.moonlight.api.trades.ModItemListing;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.misc.AttachmentBuilderImpl;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -30,10 +29,12 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
@@ -47,16 +48,17 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.trading.TradeSet;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -81,11 +83,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,7 +98,7 @@ public class RegHelper {
 
     @PlatformImpl
     public static <T, E extends T> RegSupplier<E> register(
-            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+            Identifier name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 
@@ -112,71 +111,95 @@ public class RegHelper {
      * Registers stuff immediately on fabric. Normal behavior for forge
      */
     @PlatformImpl
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
+    public static <T, E extends T> RegSupplier<E> registerAsync(Identifier name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> regKey) {
         throw new AssertionError();
     }
 
-    public static <T extends Block> RegSupplier<T> registerBlock(ResourceLocation name, Supplier<T> block) {
-        return register(name, block, Registries.BLOCK);
+    /** Blocks need their key before creation, hence the factory. */
+    public static <T extends Block> RegSupplier<T> registerBlock(
+            Identifier name, Function<BlockBehaviour.Properties, T> factory, BlockBehaviour.Properties properties) {
+        return registerBlock(name, factory, () -> properties);
+    }
+
+    //for properties that can only be built later, like a copy of another block that is being registered now
+    public static <T extends Block> RegSupplier<T> registerBlock(
+            Identifier name, Function<BlockBehaviour.Properties, T> factory, Supplier<BlockBehaviour.Properties> properties) {
+        ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, name);
+        return register(name, () -> factory.apply(properties.get().setId(key)), Registries.BLOCK);
     }
 
     //helpers
-    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory) {
-        return registerBlockWithItem(name, blockFactory, new Item.Properties());
+    public static <T extends Block> RegSupplier<T> registerBlockWithItem(
+            Identifier name, Function<BlockBehaviour.Properties, T> factory, BlockBehaviour.Properties properties) {
+        return registerBlockWithItem(name, factory, properties, new Item.Properties());
     }
 
-    public static <T extends Block> RegSupplier<T> registerBlockWithItem(ResourceLocation name, Supplier<T> blockFactory, Item.Properties properties) {
-        RegSupplier<T> block = registerBlock(name, blockFactory);
-        registerItem(name, () -> new BlockItem(block.get(), properties));
+    public static <T extends Block> RegSupplier<T> registerBlockWithItem(
+            Identifier name, Function<BlockBehaviour.Properties, T> factory, BlockBehaviour.Properties properties,
+            Item.Properties itemProperties) {
+        RegSupplier<T> block = registerBlock(name, factory, properties);
+        registerBlockItem(name, block, itemProperties);
         return block;
     }
 
-    public static <T extends SimpleCriterionTrigger<?>> RegSupplier<T> registerTriggerType(ResourceLocation name, Supplier<T> instance) {
+    public static RegSupplier<BlockItem> registerBlockItem(Identifier name, Supplier<? extends Block> block,
+                                                           Item.Properties properties) {
+        return registerItem(name, p -> new BlockItem(block.get(), p), properties.useBlockDescriptionPrefix());
+    }
+
+    public static <T extends SimpleCriterionTrigger<?>> RegSupplier<T> registerTriggerType(Identifier name, Supplier<T> instance) {
         return register(name, instance, Registries.TRIGGER_TYPE);
     }
 
-    @Deprecated(forRemoval = true)
-    public static <T extends PlacementModifierType<?>> RegSupplier<T> registerPlacementModifier(ResourceLocation name, Supplier<T> instance) {
-        return register(name, instance, Registries.PLACEMENT_MODIFIER_TYPE);
-    }
-
-    public static <T extends PlacementModifier> RegSupplier<PlacementModifierType<T>> registerPlacementModifier(ResourceLocation name, MapCodec<T> codec) {
+    public static <T extends PlacementModifier> RegSupplier<PlacementModifierType<T>> registerPlacementModifier(Identifier name, MapCodec<T> codec) {
         return register(name, () -> () -> codec, Registries.PLACEMENT_MODIFIER_TYPE);
     }
 
-    public static <T extends LootPoolEntryContainer> RegSupplier<LootPoolEntryType> registerLootPoolEntry(ResourceLocation name,
-                                                                                                          Supplier<MapCodec<T>> instance) {
-        return register(name, () -> new LootPoolEntryType(instance.get()), Registries.LOOT_POOL_ENTRY_TYPE);
+    public static <T extends LootPoolEntryContainer> RegSupplier<MapCodec<T>> registerLootPoolEntry(Identifier name,
+                                                                                                    Supplier<MapCodec<T>> codec) {
+        return register(name, codec, Registries.LOOT_POOL_ENTRY_TYPE);
     }
 
-    public static <T extends LootItemCondition> RegSupplier<LootItemConditionType> registerLootCondition(ResourceLocation name,
-                                                                                                         Supplier<MapCodec<T>> instance) {
-        return register(name, () -> new LootItemConditionType(instance.get()), Registries.LOOT_CONDITION_TYPE);
+    public static <T extends LootItemCondition> RegSupplier<MapCodec<T>> registerLootCondition(Identifier name,
+                                                                                               Supplier<MapCodec<T>> codec) {
+        return register(name, codec, Registries.LOOT_CONDITION_TYPE);
     }
 
-    public static <T> Supplier<DataComponentType<T>> registerDataComponent(ResourceLocation name,
+    public static <T> Supplier<DataComponentType<T>> registerDataComponent(Identifier name,
                                                                            Supplier<DataComponentType<T>> component) {
         return register(name, component, Registries.DATA_COMPONENT_TYPE);
     }
 
     @PlatformImpl
-    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
+    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(Identifier name, Supplier<EntityDataSerializer<T>> serializer) {
         throw new AssertionError();
     }
 
     public static RegSupplier<VillagerProfession> registerVillagerProfession(
-            ResourceLocation name,
+            Identifier name,
             Predicate<Holder<PoiType>> heldJobSite, Predicate<Holder<PoiType>> acquirableJobSite,
             ImmutableSet<Item> requestedItems, ImmutableSet<Block> secondaryWorkSite,
             @Nullable Supplier<SoundEvent> workSound) {
-        Supplier<VillagerProfession> factory = () -> new VillagerProfession(name.getPath(),
+        return registerVillagerProfession(name, heldJobSite, acquirableJobSite, requestedItems, secondaryWorkSite,
+                workSound, Int2ObjectMap.ofEntries());
+    }
+
+    /** Trade sets are the keys this profession sells at each level, from a datapack or a dynamic pack. */
+    public static RegSupplier<VillagerProfession> registerVillagerProfession(
+            Identifier name,
+            Predicate<Holder<PoiType>> heldJobSite, Predicate<Holder<PoiType>> acquirableJobSite,
+            ImmutableSet<Item> requestedItems, ImmutableSet<Block> secondaryWorkSite,
+            @Nullable Supplier<SoundEvent> workSound, Int2ObjectMap<ResourceKey<TradeSet>> tradeSetsByLevel) {
+        Supplier<VillagerProfession> factory = () -> new VillagerProfession(
+                Component.translatable("entity." + name.getNamespace() + ".villager." + name.getPath()),
                 heldJobSite, acquirableJobSite,
                 requestedItems, secondaryWorkSite,
-                workSound == null ? null : workSound.get());
+                workSound == null ? null : workSound.get(),
+                tradeSetsByLevel);
         return register(name, factory, Registries.VILLAGER_PROFESSION);
     }
 
-    public static RegSupplier<VillagerProfession> registerVillagerProfession(ResourceLocation name,
+    public static RegSupplier<VillagerProfession> registerVillagerProfession(Identifier name,
                                                                              Supplier<PoiType> heldJobSite,
                                                                              Supplier<PoiType> acquirableJobSite,
                                                                              ImmutableSet<Item> requestedItems,
@@ -190,37 +213,27 @@ public class RegHelper {
                 workSound);
     }
 
-    public static <T extends StructurePoolElement> Supplier<StructurePoolElementType<T>> registerStructurePoolElement(ResourceLocation id, MapCodec<T> codec) {
+    public static <T extends StructurePoolElement> Supplier<StructurePoolElementType<T>> registerStructurePoolElement(Identifier id, MapCodec<T> codec) {
         return register(id, () -> () -> codec, Registries.STRUCTURE_POOL_ELEMENT);
     }
 
-    public static RegSupplier<StructurePieceType> registerStructurePiece(ResourceLocation name, StructurePieceType pieceType) {
+    public static RegSupplier<StructurePieceType> registerStructurePiece(Identifier name, StructurePieceType pieceType) {
         return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
     }
 
-    public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructureProcessor(ResourceLocation name, MapCodec<T> codec) {
+    public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructureProcessor(Identifier name, MapCodec<T> codec) {
         return register(name, () -> () -> codec, Registries.STRUCTURE_PROCESSOR);
     }
 
-    @Deprecated(forRemoval = true)
-    public static <T extends StructureProcessor> RegSupplier<StructureProcessorType<T>> registerStructurePiece(ResourceLocation name, MapCodec<T> codec) {
-        return register(name, () -> () -> codec, Registries.STRUCTURE_PROCESSOR);
-    }
-
-    public static <T extends StructurePlacement> RegSupplier<StructurePlacementType<T>> registerStructurePlacementType(ResourceLocation name, MapCodec<T> codec) {
+    public static <T extends StructurePlacement> RegSupplier<StructurePlacementType<T>> registerStructurePlacementType(Identifier name, MapCodec<T> codec) {
         return register(name, () -> () -> codec, Registries.STRUCTURE_PLACEMENT);
     }
 
-    @Deprecated(forRemoval = true)
-    public static RegSupplier<StructurePieceType> register(ResourceLocation name, StructurePieceType pieceType) {
-        return register(name, () -> pieceType, Registries.STRUCTURE_PIECE);
-    }
-
-    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, Supplier<PoiType> poi) {
+    public static RegSupplier<PoiType> registerPOI(Identifier name, Supplier<PoiType> poi) {
         return register(name, poi, Registries.POINT_OF_INTEREST_TYPE);
     }
 
-    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Block... blocks) {
+    public static RegSupplier<PoiType> registerPOI(Identifier name, int searchDistance, int maxTickets, Block... blocks) {
         return registerPOI(name, () -> {
             ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
             for (Block block : blocks) {
@@ -231,7 +244,7 @@ public class RegHelper {
     }
 
     @SafeVarargs
-    public static RegSupplier<PoiType> registerPOI(ResourceLocation name, int searchDistance, int maxTickets, Supplier<Block>... blocks) {
+    public static RegSupplier<PoiType> registerPOI(Identifier name, int searchDistance, int maxTickets, Supplier<Block>... blocks) {
         return registerPOI(name, () -> {
             ImmutableSet.Builder<BlockState> builder = ImmutableSet.builder();
             for (var block : blocks) {
@@ -241,26 +254,7 @@ public class RegHelper {
         });
     }
 
-    //call in init when you have blocks
-    @Deprecated(forRemoval = true)
-    @PlatformImpl
-    /// USE {@link RegHelper#addExtraPOIStatesRegistration(Consumer)} and it must be called in Init, not Setup
-    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-        throw new AssertionError();
-    }
-
-
     public interface ExtraPOIStatesEvent {
-
-        @Deprecated(forRemoval = true)
-        default void addStatesToPoi(ResourceKey<PoiType> typeKey, Set<BlockState> states) {
-            addStates(typeKey, states);
-        }
-
-        @Deprecated(forRemoval = true)
-        default void addBlockToPoi(ResourceKey<PoiType> typeKey, Block block) {
-            addBlock(typeKey, block);
-        }
 
         void addBlock(ResourceKey<PoiType> typeKey, Block block);
 
@@ -289,104 +283,106 @@ public class RegHelper {
     }
 
     @PlatformImpl
-    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+    public static <T extends Fluid> RegSupplier<T> registerFluid(Identifier name, Supplier<T> fluid) {
         throw new AssertionError();
     }
 
-    public static <T extends Item> RegSupplier<T> registerItem(ResourceLocation name, Supplier<T> item) {
-        return register(name, item, Registries.ITEM);
+    public static <T extends Item> RegSupplier<T> registerItem(Identifier name, Function<Item.Properties, T> factory) {
+        return registerItem(name, factory, new Item.Properties());
     }
 
-    public static <T extends Feature<?>> RegSupplier<T> registerFeature(ResourceLocation name, Supplier<T> feature) {
+    public static <T extends Item> RegSupplier<T> registerItem(
+            Identifier name, Function<Item.Properties, T> factory, Item.Properties properties) {
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, name);
+        return register(name, () -> factory.apply(properties.setId(key)), Registries.ITEM);
+    }
+
+    public static <T extends Feature<?>> RegSupplier<T> registerFeature(Identifier name, Supplier<T> feature) {
         return register(name, feature, Registries.FEATURE);
     }
 
-    public static <T extends StructureType<?>> RegSupplier<T> registerStructure(ResourceLocation name, Supplier<T> feature) {
+    public static <T extends StructureType<?>> RegSupplier<T> registerStructure(Identifier name, Supplier<T> feature) {
         //TODO: this causes issues on fabric and its very random as might be on only with some random unrelated mods. best to lave it like this
         // return register(name, feature, Registry.STRUCTURE_TYPES);
         return registerAsync(name, feature, Registries.STRUCTURE_TYPE);
     }
 
 
-    public static <T extends SoundEvent> RegSupplier<T> registerSound(ResourceLocation name, Supplier<T> sound) {
+    public static <T extends SoundEvent> RegSupplier<T> registerSound(Identifier name, Supplier<T> sound) {
         return register(name, sound, Registries.SOUND_EVENT);
     }
 
-    public static RegSupplier<SoundEvent> registerSound(ResourceLocation name) {
+    public static RegSupplier<SoundEvent> registerSound(Identifier name) {
         return registerSound(name, () -> SoundEvent.createVariableRangeEvent(name));
     }
 
-    public static RegSupplier<SoundEvent> registerSound(ResourceLocation name, float fixedRange) {
+    public static RegSupplier<SoundEvent> registerSound(Identifier name, float fixedRange) {
         return registerSound(name, () -> SoundEvent.createFixedRangeEvent(name, fixedRange));
     }
 
     @PlatformImpl
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
-            ResourceLocation name,
+            Identifier name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         throw new AssertionError();
     }
 
     /**
-     * Registers a menu type that doesn't need any extra data synced when opened. This registers a
-     * plain vanilla {@link MenuType} instead of a platform extended/networked menu type, so menus
-     * can simply be opened with {@code player.openMenu(provider)}. Use the
-     * {@link #registerMenuType(ResourceLocation, TriFunction)} overload when you need to send extra
-     * data to the client (open these with {@link PlatHelper#openCustomMenu}).
+     * Registers a menu type that doesn't need any extra data synced when opened, so it can be opened with
+     * player.openMenu(provider). Use the TriFunction overload to send extra data (opened with PlatHelper.openCustomMenu).
      */
     @PlatformImpl
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerSimpleMenuType(
-            ResourceLocation name,
+            Identifier name,
             MenuType.MenuSupplier<C> containerFactory) {
         throw new AssertionError();
     }
 
-    public static <T extends MobEffect> RegSupplier<T> registerEffect(ResourceLocation name, Supplier<T> effect) {
+    public static <T extends MobEffect> RegSupplier<T> registerEffect(Identifier name, Supplier<T> effect) {
         return register(name, effect, Registries.MOB_EFFECT);
     }
 
-    public static <T extends Enchantment> RegSupplier<T> registerEnchantment(ResourceLocation name, Supplier<T> enchantment) {
+    public static <T extends Enchantment> RegSupplier<T> registerEnchantment(Identifier name, Supplier<T> enchantment) {
         return register(name, enchantment, Registries.ENCHANTMENT);
     }
 
-    public static <T extends SensorType<? extends Sensor<?>>> RegSupplier<T> registerSensor(ResourceLocation name, Supplier<T> sensorType) {
+    public static <T extends SensorType<? extends Sensor<?>>> RegSupplier<T> registerSensor(Identifier name, Supplier<T> sensorType) {
         return register(name, sensorType, Registries.SENSOR_TYPE);
     }
 
-    public static <T extends Sensor<?>> RegSupplier<SensorType<T>> registerSensorI(ResourceLocation name, Supplier<T> sensor) {
+    public static <T extends Sensor<?>> RegSupplier<SensorType<T>> registerSensorI(Identifier name, Supplier<T> sensor) {
         return register(name, () -> new SensorType<>(sensor), Registries.SENSOR_TYPE);
     }
 
-    public static <T extends Activity> RegSupplier<T> registerActivity(ResourceLocation name, Supplier<T> activity) {
+    public static <T extends Activity> RegSupplier<T> registerActivity(Identifier name, Supplier<T> activity) {
         return register(name, activity, Registries.ACTIVITY);
     }
 
-    public static RegSupplier<Activity> registerActivity(ResourceLocation name) {
+    public static RegSupplier<Activity> registerActivity(Identifier name) {
         return registerActivity(name, () -> new Activity(name.getPath()));
     }
 
-    public static <T extends Schedule> RegSupplier<T> registerSchedule(ResourceLocation name, Supplier<T> schedule) {
-        return register(name, schedule, Registries.SCHEDULE);
-    }
-
-    public static <T extends MemoryModuleType<?>> RegSupplier<T> registerMemoryModule(ResourceLocation name, Supplier<T> memory) {
+    public static <T extends MemoryModuleType<?>> RegSupplier<T> registerMemoryModule(Identifier name, Supplier<T> memory) {
         return register(name, memory, Registries.MEMORY_MODULE_TYPE);
     }
 
-    public static <U> RegSupplier<MemoryModuleType<U>> registerMemoryModule(ResourceLocation name, @Nullable Codec<U> codec) {
+    public static <U> RegSupplier<MemoryModuleType<U>> registerMemoryModule(Identifier name, @Nullable Codec<U> codec) {
         return register(name, () -> new MemoryModuleType<>(Optional.ofNullable(codec)), Registries.MEMORY_MODULE_TYPE);
     }
 
-    public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(ResourceLocation name, Supplier<T> recipe) {
+    public static <T extends RecipeSerializer<?>> RegSupplier<T> registerRecipeSerializer(Identifier name, Supplier<T> recipe) {
         return register(name, recipe, Registries.RECIPE_SERIALIZER);
     }
 
-    @PlatformImpl
-    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
-        throw new AssertionError();
+    /** Special recipes are stateless singletons, the supplier is called once. */
+    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(Identifier name, Supplier<T> singleton) {
+        return registerRecipeSerializer(name, () -> {
+            T instance = singleton.get();
+            return new RecipeSerializer<>(MapCodec.unit(instance), StreamCodec.unit(instance));
+        });
     }
 
-    public static <T extends Recipe<?>> Supplier<RecipeType<T>> registerRecipeType(ResourceLocation name) {
+    public static <T extends Recipe<?>> Supplier<RecipeType<T>> registerRecipeType(Identifier name) {
         return RegHelper.register(name, () -> {
             String id = name.toString();
             return new RecipeType<>() {
@@ -399,24 +395,24 @@ public class RegHelper {
     }
 
 
-    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(ResourceLocation name,
+    public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(Identifier name,
                                                                                                                Supplier<T> blockEntity) {
         return register(name, blockEntity, Registries.BLOCK_ENTITY_TYPE);
     }
 
     public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
-            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... blocks) {
+            Identifier name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Block... blocks) {
         return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply, blocks));
     }
 
     @SafeVarargs
     public static <E extends BlockEntity> RegSupplier<BlockEntityType<E>> registerBlockEntityType(
-            ResourceLocation name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<? extends Block>... blocks) {
+            Identifier name, BiFunction<BlockPos, BlockState, E> blockEntitySupplier, Supplier<? extends Block>... blocks) {
         return registerBlockEntityType(name, () -> PlatHelper.newBlockEntityType(blockEntitySupplier::apply,
                 Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new)));
     }
 
-    public static <A> Registry<A> registerRegistry(ResourceLocation key, boolean synced) {
+    public static <A> Registry<A> registerRegistry(Identifier key, boolean synced) {
         return registerRegistry(ResourceKey.createRegistryKey(key), synced);
     }
 
@@ -426,28 +422,14 @@ public class RegHelper {
     }
 
     //give null network codec for no syncing
-    @Deprecated(forRemoval = true)
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
-            ResourceLocation key, Function<ServerLevel, A> constructor,
-            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec) {
-        return registerWorldSavedData(key, constructor, codec, networkCodec, false);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
-            ResourceLocation key, Function<ServerLevel, A> constructor,
-            Codec<A> codec, @Nullable StreamCodec<? super RegistryFriendlyByteBuf, A> networkCodec, boolean perLevel) {
-        return  registerWorldSavedData(key, constructor, () -> codec, networkCodec == null ? null : () -> networkCodec, perLevel);
-    }
-
-    public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
-            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Identifier key, Function<ServerLevel, A> constructor,
             Supplier<Codec<A>> codec, @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, A>> networkCodec) {
         return registerWorldSavedData(key, constructor, codec, networkCodec, false);
     }
 
     public static <A extends WorldSavedData> WorldSavedDataType<A> registerWorldSavedData(
-            ResourceLocation key, Function<ServerLevel, A> constructor,
+            Identifier key, Function<ServerLevel, A> constructor,
             Supplier<Codec<A>> codec, @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, A>> networkCodec, boolean perLevel) {
         WorldSavedDataType<A> instance = new WorldSavedDataType<>(key, constructor,codec,networkCodec,
                 perLevel ? WorldSavedDataType.Scope.PER_LEVEL : WorldSavedDataType.Scope.SINGLE_OVERWORLD);
@@ -456,17 +438,17 @@ public class RegHelper {
     }
 
 
-    public static RegSupplier<SimpleParticleType> registerParticle(ResourceLocation name) {
+    public static RegSupplier<SimpleParticleType> registerParticle(Identifier name) {
         return register(name, PlatHelper::newSimpleParticle, Registries.PARTICLE_TYPE);
     }
 
     public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
-            ResourceLocation name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+            Identifier name, MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
         return register(name, () -> PlatHelper.newParticle(codec, streamCodec, false), Registries.PARTICLE_TYPE);
     }
 
     public static <T extends ParticleOptions> RegSupplier<ParticleType<T>> registerParticle(
-            ResourceLocation name,
+            Identifier name,
             boolean overrideLimiter,
             Function<ParticleType<T>, MapCodec<T>> codecGetter,
             Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> streamCodecGetter
@@ -475,65 +457,39 @@ public class RegHelper {
                 Registries.PARTICLE_TYPE);
     }
 
-    public static <T extends LootItemFunction> RegSupplier<LootItemFunctionType<T>> registerLootFunction(
-            ResourceLocation name, MapCodec<T> codec) {
-        return register(name, () -> new LootItemFunctionType<>(codec), Registries.LOOT_FUNCTION_TYPE);
+    public static <T extends LootItemFunction> RegSupplier<MapCodec<T>> registerLootFunction(
+            Identifier name, MapCodec<T> codec) {
+        return register(name, () -> codec, Registries.LOOT_FUNCTION_TYPE);
     }
 
     //TODO: change to supplier
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.Builder<T> builder) {
-        return register(name, () -> builder.build(name.getPath()), Registries.ENTITY_TYPE);
+    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(Identifier name, EntityType.Builder<T> builder) {
+        return register(name, () -> builder.build(ResourceKey.create(Registries.ENTITY_TYPE, name)), Registries.ENTITY_TYPE);
     }
 
-    @Deprecated(forRemoval = true)
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, Supplier<EntityType<T>> type) {
-        return register(name, type, Registries.ENTITY_TYPE);
+    /** Defense is split among the pieces with the vanilla proportions. */
+    public static ArmorMaterial makeArmorMaterial(Identifier name, int durability, int totalDefense,
+                                                  int enchValue, Holder<SoundEvent> equipSound,
+                                                  float toughness, float knockbackResistance,
+                                                  TagKey<Item> repairIngredient) {
+        return new ArmorMaterial(durability, calculateStandardDefence(totalDefense), enchValue, equipSound,
+                toughness, knockbackResistance, repairIngredient,
+                ResourceKey.create(EquipmentAssets.ROOT_ID, name));
     }
 
-
-    @Deprecated(forRemoval = true)
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                   MobCategory category, float width, float height) {
-        return registerEntityType(name, factory, category, width, height, 5);
-    }
-
-    //not needed?
-    @Deprecated(forRemoval = true)
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                   MobCategory category, float width,
-                                                                                   float height, int clientTrackingRange) {
-        return registerEntityType(name, factory, category, width, height, clientTrackingRange, 3);
-    }
-
-
-    @Deprecated(forRemoval = true)
-    @PlatformImpl
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory,
-                                                                                   MobCategory category, float width, float height,
-                                                                                   int clientTrackingRange, int updateInterval) {
-        throw new AssertionError();
-    }
-
-    public static RegSupplier<ArmorMaterial> registerArmorMaterial(ResourceLocation name, int totalDefense, Supplier<Ingredient> ingredient,
-                                                                   int enchValue, Supplier<Holder<SoundEvent>> sound,
-                                                                   float toughness, float knockbackResistance) {
-        return register(name, () -> new ArmorMaterial(calculateStandardDefence(totalDefense), enchValue, sound.get(), ingredient,
-                List.of(new ArmorMaterial.Layer(name)), toughness, knockbackResistance), Registries.ARMOR_MATERIAL);
-    }
-
-    private static EnumMap<ArmorItem.Type, Integer> calculateStandardDefence(int totalDefense) {
-        EnumMap<ArmorItem.Type, Integer> defenseMap = new EnumMap<>(ArmorItem.Type.class);
+    private static EnumMap<ArmorType, Integer> calculateStandardDefence(int totalDefense) {
+        EnumMap<ArmorType, Integer> defenseMap = new EnumMap<>(ArmorType.class);
 
         // Proportions for each armor piece using a Map
-        Map<ArmorItem.Type, Double> proportions = new LinkedHashMap<>();
-        proportions.put(ArmorItem.Type.CHESTPLATE, 0.41);
-        proportions.put(ArmorItem.Type.LEGGINGS, 0.32);
-        proportions.put(ArmorItem.Type.HELMET, 0.14);
-        proportions.put(ArmorItem.Type.BOOTS, 0.13);
+        Map<ArmorType, Double> proportions = new LinkedHashMap<>();
+        proportions.put(ArmorType.CHESTPLATE, 0.41);
+        proportions.put(ArmorType.LEGGINGS, 0.32);
+        proportions.put(ArmorType.HELMET, 0.14);
+        proportions.put(ArmorType.BOOTS, 0.13);
 
         // Calculate initial (rounded down) values for each piece
-        for (Map.Entry<ArmorItem.Type, Double> entry : proportions.entrySet()) {
-            ArmorItem.Type type = entry.getKey();
+        for (Map.Entry<ArmorType, Double> entry : proportions.entrySet()) {
+            ArmorType type = entry.getKey();
             int defenseValue = (int) (entry.getValue() * totalDefense);
             defenseMap.put(type, defenseValue);
         }
@@ -543,8 +499,8 @@ public class RegHelper {
 
         // Distribute the remainder to pieces with room to grow
         while (remainder > 0) {
-            for (Map.Entry<ArmorItem.Type, Double> entry : proportions.entrySet()) {
-                ArmorItem.Type type = entry.getKey();
+            for (Map.Entry<ArmorType, Double> entry : proportions.entrySet()) {
+                ArmorType type = entry.getKey();
                 int maxDefense = (int) Math.ceil(entry.getValue() * totalDefense);
                 int currentDefense = defenseMap.get(type);
                 if (currentDefense < maxDefense) {
@@ -554,22 +510,11 @@ public class RegHelper {
                 }
             }
         }
-        defenseMap.put(ArmorItem.Type.BODY,
-                defenseMap.get(ArmorItem.Type.CHESTPLATE) + defenseMap.get(ArmorItem.Type.BOOTS));
+        defenseMap.put(ArmorType.BODY,
+                defenseMap.get(ArmorType.CHESTPLATE) + defenseMap.get(ArmorType.BOOTS));
         return defenseMap;
     }
 
-
-    @Deprecated(forRemoval = true)
-    public static void registerCompostable(ItemLike itemLike, float chance) {
-        ComposterBlock.COMPOSTABLES.put(itemLike.asItem(), chance);
-    }
-
-    @Deprecated(forRemoval = true)
-    @PlatformImpl //fabric
-    public static void registerItemBurnTime(Item item, int burnTime) {
-        throw new AssertionError();
-    }
 
     @PlatformImpl
     public static void registerBlockFlammability(Block item, int igniteOdds, int burnOdds) {
@@ -577,7 +522,7 @@ public class RegHelper {
     }
 
     @PlatformImpl
-    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+    public static void registerSimpleRecipeCondition(Identifier id, Predicate<String> predicate) {
         throw new AssertionError();
     }
 
@@ -586,7 +531,7 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    public static <T> ResourceKey<Registry<T>> registerDataPackRegistry(ResourceLocation id, Codec<T> codec, @Nullable Codec<T> networkCodec) {
+    public static <T> ResourceKey<Registry<T>> registerDataPackRegistry(Identifier id, Codec<T> codec, @Nullable Codec<T> networkCodec) {
         ResourceKey<Registry<T>> key = ResourceKey.createRegistryKey(id);
         registerDataPackRegistry(key, codec, networkCodec);
         return key;
@@ -594,20 +539,20 @@ public class RegHelper {
 
     @PlatformImpl
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(
-            ResourceLocation name,
+            Identifier name,
             boolean searchBar,
-            List<ResourceLocation> afterTabs, List<ResourceLocation> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
+            List<Identifier> afterTabs, List<Identifier> beforeTabs, Consumer<CreativeModeTab.Builder> configurator
     ) {
         throw new AssertionError();
     }
 
-    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = java.util.List.of(CreativeModeTabs.SPAWN_EGGS.location());
+    private static final List<Identifier> DEFAULT_AFTER_ENTRIES = java.util.List.of(CreativeModeTabs.SPAWN_EGGS.identifier());
 
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(Identifier name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, false, configurator);
     }
 
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, boolean searchBar, Consumer<CreativeModeTab.Builder> configurator) {
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(Identifier name, boolean searchBar, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, searchBar, DEFAULT_AFTER_ENTRIES, List.of(), configurator);
     }
 
@@ -744,7 +689,7 @@ public class RegHelper {
 
     }
 
-    public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(ResourceLocation baseName, Block parentBlock) {
+    public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(Identifier baseName, Block parentBlock) {
         return registerBaseBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
 
@@ -752,11 +697,11 @@ public class RegHelper {
      * Registers block, slab and vertical slab
      */
     public static EnumMap<VariantType, Supplier<Block>> registerBaseBlockSet(
-            ResourceLocation baseName, BlockBehaviour.Properties properties) {
+            Identifier baseName, BlockBehaviour.Properties properties) {
         return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.SLAB}, baseName, properties);
     }
 
-    public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(ResourceLocation baseName, Block parentBlock) {
+    public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(Identifier baseName, Block parentBlock) {
         return registerReducedBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
 
@@ -764,11 +709,11 @@ public class RegHelper {
      * Registers block, slab stairs and vertical slab
      */
     public static EnumMap<VariantType, Supplier<Block>> registerReducedBlockSet(
-            ResourceLocation baseName, BlockBehaviour.Properties properties) {
+            Identifier baseName, BlockBehaviour.Properties properties) {
         return registerBlockSet(new VariantType[]{VariantType.BLOCK, VariantType.STAIRS, VariantType.SLAB}, baseName, properties);
     }
 
-    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(ResourceLocation baseName,
+    public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(Identifier baseName,
                                                                              Block parentBlock) {
         return registerFullBlockSet(baseName, BlockBehaviour.Properties.ofFullCopy(parentBlock));
     }
@@ -779,18 +724,17 @@ public class RegHelper {
      * @return registry object map
      */
     public static EnumMap<VariantType, Supplier<Block>> registerFullBlockSet(
-            ResourceLocation baseName, BlockBehaviour.Properties properties) {
+            Identifier baseName, BlockBehaviour.Properties properties) {
         return registerBlockSet(VariantType.values(), baseName, properties);
     }
 
     public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
-            VariantType[] types, ResourceLocation baseName, BlockBehaviour.Properties properties) {
+            VariantType[] types, Identifier baseName, BlockBehaviour.Properties properties) {
 
         if (!new ArrayList<>(List.of(types)).contains(VariantType.BLOCK))
             throw new IllegalStateException("Must contain base variant type");
 
-        var block = registerBlock(baseName, () -> VariantType.BLOCK.create(properties, null));
-        registerItem(baseName, () -> new BlockItem(block.get(), (new Item.Properties())));
+        var block = registerBlockWithItem(baseName, p -> VariantType.BLOCK.create(p, null), properties);
 
         var m = registerBlockSet(types, block, baseName.getNamespace());
         m.put(VariantType.BLOCK, block);
@@ -800,25 +744,25 @@ public class RegHelper {
     public static EnumMap<VariantType, Supplier<Block>> registerBlockSet(
             VariantType[] types, RegSupplier<? extends Block> baseBlock, String modId) {
 
-        ResourceLocation baseName = baseBlock.getId();
+        Identifier baseName = baseBlock.getId();
         EnumMap<VariantType, Supplier<Block>> map = new EnumMap<>(VariantType.class);
         for (VariantType type : types) {
             if (type.equals(VariantType.BLOCK)) continue;
             String name = baseName.getPath();
             name += "_" + type.name().toLowerCase(Locale.ROOT);
-            ResourceLocation blockId = ResourceLocation.fromNamespaceAndPath(modId, name);
-            var block = registerBlock(blockId, () ->
-                    type.create(BlockBehaviour.Properties.ofFullCopy(baseBlock.get()), baseBlock::get));
-            registerItem(blockId, () -> new BlockItem(block.get(), new Item.Properties()));
+            Identifier blockId = Identifier.fromNamespaceAndPath(modId, name);
+            var block = registerBlock(blockId, p -> type.create(p, baseBlock::get),
+                    () -> BlockBehaviour.Properties.ofFullCopy(baseBlock.get()));
+            registerBlockItem(blockId, block, new Item.Properties());
             map.put(type, block);
         }
         return map;
     }
 
     public interface LootInjectEvent {
-        ResourceLocation getTable();
+        Identifier getTable();
 
-        void addTableReference(ResourceLocation targetId);
+        void addTableReference(Identifier targetId);
     }
 
     /**
@@ -832,41 +776,12 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    // Only relevant on forge
-    @PlatformImpl
-    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
-        throw new AssertionError();
-    }
-
-    /**
-     * Very hack solution for forge. Call this as soon as your mod is created in its constructor, offering your mod bus
-     */
-    @Deprecated(forRemoval = true)
-    @PlatformImpl
-    public static void startRegisteringFor(Object bus) {
-        throw new AssertionError();
-    }
-
     public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener) {
         DispenserHelper.addListener(eventListener, DispenserHelper.Priority.NORMAL);
     }
 
     public static void addDynamicDispenserBehaviorRegistration(Consumer<DispenserHelper.Event> eventListener, DispenserHelper.Priority priority) {
         DispenserHelper.addListener(eventListener, priority);
-    }
-
-    /**
-     * Call on mod setup. Register a new serializer for your trade
-     */
-    public static void registerDynamicItemListingSerializer(ResourceLocation id, MapCodec<? extends ModItemListing> trade) {
-        ItemListingManager.registerSerializer(id, trade);
-    }
-
-    /**
-     * Registers a simple special trade
-     */
-    public static void registerDynamicItemListingSerializer(ResourceLocation id, VillagerTrades.ItemListing instance, int level) {
-        ItemListingManager.registerSimple(id, instance, level);
     }
 
     @PlatformImpl
@@ -904,7 +819,7 @@ public class RegHelper {
         }
 
         /**
-         * Declares that attachments should persist between server restarts, using the provided {@link Codec} for
+         * Declares that attachments should persist between server restarts, using the provided Codec for
          * (de)serialization.
          *
          * @param codec the codec used for (de)serialization
@@ -920,10 +835,10 @@ public class RegHelper {
         AttachmentBuilder<A> copyOnDeath();
 
         /**
-         * Declares that this attachment type may be automatically synchronized with some clients, as determined by {@code syncPredicate}.
+         * Declares that this attachment type may be automatically synchronized with some clients, as determined by syncPredicate.
          *
          * @param packetCodec   the codec used to serialize the attachment data over the network
-         * @param syncPredicate an {@link BiPredicate} determining with which clients to synchronize data
+         * @param syncPredicate an BiPredicate determining with which clients to synchronize data
          * @return the builder
          */
         AttachmentBuilder<A> syncWith(StreamCodec<? super RegistryFriendlyByteBuf, A> packetCodec, BiPredicate<Object, ServerPlayer> syncPredicate);
@@ -934,15 +849,10 @@ public class RegHelper {
     }
 
     @PlatformImpl
-    public static <A, T> IAttachmentType<A, T> registerDataAttachment(ResourceLocation id,
+    public static <A, T> IAttachmentType<A, T> registerDataAttachment(Identifier id,
                                                                       Supplier<AttachmentBuilder<A>> config,
                                                                       Class<T> targetClass) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <A> IAttachmentType<A, Object> regDataAttachment(ResourceLocation id, Supplier<AttachmentBuilder<A>> config) {
-        return registerDataAttachment(id, config, Object.class);
     }
 
 }

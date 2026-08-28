@@ -13,15 +13,6 @@ import java.util.function.Consumer;
 
 public class AdditionalItemPlacementsAPI {
 
-    /**
-     * Adds a behavior to an existing block. can be called at any time but ideally before registration. Less ideally during mod setup
-     */
-    @Deprecated(forRemoval = true)
-    public static void addRegistration(Consumer<Event> eventConsumer) {
-        Moonlight.assertInitPhase();
-        PlatHelper.addCommonSetup(() -> eventConsumer.accept(AdditionalItemPlacementsAPI::registerPlacement));
-    }
-
     //since these need to be called on client too we MUST allow it to be called at any time so we don't need to reply on our own packet and can run on another mod will
     /***
      * Call in mod setup. Adds a placement to an item
@@ -68,17 +59,6 @@ public class AdditionalItemPlacementsAPI {
 
     public static boolean hasBehavior(Item item) {
         return getBehavior(item) != null;
-    }
-
-    @Deprecated(forRemoval = true)
-    public interface Event {
-
-        void register(Item target, AdditionalItemPlacement instance);
-
-        // Registers default instance to make simple block placement behavior
-        default void registerSimple(Item target, Block toPlace) {
-            register(target, new AdditionalItemPlacement(toPlace));
-        }
     }
 
 }

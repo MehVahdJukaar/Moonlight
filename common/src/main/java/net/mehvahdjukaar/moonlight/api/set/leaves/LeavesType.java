@@ -11,7 +11,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -33,17 +33,9 @@ public class LeavesType extends BlockType {
 
     public final Block leaves;
 
-    protected LeavesType(ResourceLocation id, Block leaves) {
+    protected LeavesType(Identifier id, Block leaves) {
         super(id);
         this.leaves = leaves;
-    }
-
-    @NotNull
-    @Deprecated(forRemoval = true)
-    public WoodType getWoodType() {
-        var w = getAssociatedWoodType();
-        if (w == null) return VanillaWoodTypes.OAK;
-        return w;
     }
 
     @Nullable
@@ -87,7 +79,7 @@ public class LeavesType extends BlockType {
 
         private Supplier<Block> leavesFinder;
 
-        public Finder(ResourceLocation id) {
+        public Finder(Identifier id) {
             super(id, LeavesTypeRegistry.INSTANCE);
             this.leavesSuffix("_leaves"); // defaults
         }
@@ -97,7 +89,7 @@ public class LeavesType extends BlockType {
             return this;
         }
 
-        public Finder leaves(ResourceLocation id) {
+        public Finder leaves(Identifier id) {
             return this.leaves(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find leaves block: " + id)
             ));
@@ -126,7 +118,7 @@ public class LeavesType extends BlockType {
         @SuppressWarnings("UnusedReturnValue")
         /// Associated WoodType
         public Finder equivalentWood(String id) {
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, ResourceLocation.parse(id)); //this is ass too
+            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(this.id, Identifier.parse(id)); //this is ass too
             return this;
         }
 
@@ -150,59 +142,6 @@ public class LeavesType extends BlockType {
                 }
             }
             return Optional.empty();
-        }
-
-// ─────────────────────────────────────────── Marked For Removal ────────────────────────────────────────────
-
-        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public Finder(ResourceLocation id, Supplier<Block> leaves, @Nullable Supplier<WoodType> wood) {
-            this(id, leaves);
-        }
-
-        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public Finder(ResourceLocation id, Supplier<Block> leaves) {
-            super(id, LeavesTypeRegistry.INSTANCE);
-            this.leavesFinder = leaves;
-        }
-
-        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public static Finder simple(String modId, String leavesTypeName, String leavesName) {
-            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
-                    () -> BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(modId, leavesName)), null);
-        }
-
-        /// USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public static Finder simple(String modId, String leavesTypeName, String leavesName, String woodTypeID) {
-            ResourceLocation leavesId = ResourceLocation.fromNamespaceAndPath(modId, leavesName);
-            LeavesTypeRegistry.INSTANCE.addLeavesToWoodMapping(leavesId, ResourceLocation.parse(woodTypeID));
-            return new Finder(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName),
-                    () -> BuiltInRegistries.BLOCK.get(leavesId));
-        }
-
-        /**
-         * USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
-         * <br>OR
-         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
-         */
-        @Deprecated(forRemoval = true)
-        public void addChild(String childType, String childName) {
-            addChild(childType, id.withPath(childName));
-        }
-
-        /**
-         * USE {@link LeavesTypeRegistry#addSimpleFinder(String, String)}
-         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
-         * <br>OR
-         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
-         */
-        @Deprecated(forRemoval = true)
-        public void addChild(String childType, ResourceLocation childName) {
-            childBlock(childType, childName);
         }
 
     }

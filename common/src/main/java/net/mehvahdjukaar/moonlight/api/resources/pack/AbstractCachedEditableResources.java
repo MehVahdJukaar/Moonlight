@@ -2,11 +2,11 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ public abstract class AbstractCachedEditableResources implements PackResources, 
         this.locationInfo = locationInfo;
         this.packType = packType;
         this.metadata = new PackMetadataSection(description,
-                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
+                SharedConstants.getCurrentVersion().packVersion(packType).minorRange());
     }
 
 
@@ -58,7 +58,7 @@ public abstract class AbstractCachedEditableResources implements PackResources, 
     }
 
     @Override
-    public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
+    public @Nullable IoSupplier<InputStream> getResource(PackType packType, Identifier location) {
         if (packType != this.packType) return null;
         if (cachedResources == null) {
             return null;
@@ -68,9 +68,9 @@ public abstract class AbstractCachedEditableResources implements PackResources, 
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
+    public <T> T getMetadataSection(MetadataSectionType<T> type) {
         try {
-            return serializer == PackMetadataSection.TYPE ? (T) this.metadata : null;
+            return type == PackMetadataSection.forPackType(this.packType) ? (T) this.metadata : null;
         } catch (Exception exception) {
             return null;
         }

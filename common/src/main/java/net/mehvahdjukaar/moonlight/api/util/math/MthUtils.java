@@ -110,7 +110,7 @@ public final class MthUtils {
     }
 
     public static Vec3 getNormalFrom3DData(int direction) {
-        return V3itoV3(Direction.from3DDataValue(direction).getNormal());
+        return Direction.from3DDataValue(direction).getUnitVec3();
     }
 
     public static float asymmetricTriangleWave(float t, float mid, float end) {
@@ -133,7 +133,7 @@ public final class MthUtils {
     }
 
     private static double isClockWise(UnaryOperator<Vec3> rot, Direction dir) {
-        Vec3 v = MthUtils.V3itoV3(dir.getNormal());
+        Vec3 v = dir.getUnitVec3();
         Vec3 v2 = rot.apply(v);
         return v2.dot(new Vec3(0, 1, 0));
     }

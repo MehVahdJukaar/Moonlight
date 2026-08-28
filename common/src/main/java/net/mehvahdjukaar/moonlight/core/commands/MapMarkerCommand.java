@@ -19,7 +19,7 @@ public class MapMarkerCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return Commands.literal("add_map_marker")
-                .requires(cs -> cs.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("marker", ResourceArgument.resource(context, MapDataRegistry.MAP_DECORATION_REGISTRY_KEY))
                         .executes(MapMarkerCommand::addMapMarker)
                 );

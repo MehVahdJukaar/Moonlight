@@ -26,7 +26,7 @@ dependencies {
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")
 
-    modImplementation("curse.maven:the-twilight-forest-227639:7398100")
+    modCompileOnly("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
     //modImplementation("curse.maven:prickle-1023259:6961457")
 
@@ -37,16 +37,14 @@ dependencies {
     modImplementation("curse.maven:zeta-968868:7640154")
 
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
-    modRuntimeOnly("curse.maven:supplementaries-412082:8051628")
-    modRuntimeOnly("curse.maven:amendments-896746:8345243")
-    modRuntimeOnly("curse.maven:snowy-spirit-566142:8195621")
-    modRuntimeOnly("curse.maven:haunted-harvest-541753:8332283")
-    modRuntimeOnly("curse.maven:vista-1368607:8348336")
+  // modRuntimeOnly("curse.maven:supplementaries-412082:8051628")
+  // modRuntimeOnly("curse.maven:amendments-896746:8345243")
+  // modRuntimeOnly("curse.maven:snowy-spirit-566142:8195621")
+  // modRuntimeOnly("curse.maven:haunted-harvest-541753:8332283")
+  // modRuntimeOnly("curse.maven:vista-1368607:8348336")
 
     modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
-    modCompileOnly("curse.maven:configured-457570:7276577")
-    modCompileOnly("curse.maven:yacl-667299:5424504")
     modCompileOnly("curse.maven:alexs-caves-924854:4806837")
 }
 

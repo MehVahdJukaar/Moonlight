@@ -15,7 +15,7 @@ import net.minecraft.core.IdMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -40,9 +40,10 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
     }
 
     protected boolean frozen = false;
+    private boolean isBeingFrozenHack = false;
     private final String name;
     private final List<BlockType.SetFinder<T>> finders = new ArrayList<>();
-    private final Set<ResourceLocation> notInclude = new HashSet<>();
+    private final Set<Identifier> notInclude = new HashSet<>();
     protected final MapRegistry<T> valuesReg;
     private final Class<T> typeClass;
     private final Object2ObjectOpenHashMap<Object, T> childrenToType = new Object2ObjectOpenHashMap<>();
@@ -83,44 +84,27 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         return typeClass;
     }
 
-    /**
-     * Gets corresponding block type or oak if the provided one is not installed or missing
-     *
-     * @param name string resource location name of the type
-     * @return wood type
-     */
-    @Deprecated(forRemoval = true)
-    public T getFromNBT(String name) {
-        return valuesReg.getValueOrDefault(ResourceLocation.parse(name), this.getDefaultType());
-    }
-
     @Nullable
-    public T get(ResourceLocation res) {
+    public T get(Identifier res) {
         if (!frozen && (!isBeingFrozenHack || PlatHelper.isDev())) {
             throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
         }
         return valuesReg.getValue(res);
     }
 
-    public T getOrDefault(ResourceLocation res) {
+    public T getOrDefault(Identifier res) {
         if (!frozen && (!isBeingFrozenHack || PlatHelper.isDev())) {
             throw new AssertionError("Tried to get an object from block set registry before the registry was finalized.");
         }
         return valuesReg.getValueOrDefault(res, this.getDefaultType());
     }
 
-    public ResourceLocation getKey(T input) {
+    public Identifier getKey(T input) {
         return valuesReg.getKey(input);
     }
 
     public Codec<T> getCodec() {
         return valuesReg;
-    }
-
-    // use MappedRegistries instead
-    @Deprecated(forRemoval = true)
-    public StreamCodec<ByteBuf, T> getStreamCodec(){
-        return streamCodecSlow;
     }
 
     public StreamCodec<ByteBuf, T> getStreamCodecExplicit() {
@@ -140,7 +124,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
     /**
      * Returns an optional block Type based on the given block. Pretty much defines the logic of how a block set is constructed
      */
-    protected abstract Optional<T> detectTypeFromBlock(Block block, ResourceLocation blockId);
+    protected abstract Optional<T> detectTypeFromBlock(Block block, Identifier blockId);
 
     protected T register(T newType) {
         if (frozen) {
@@ -153,11 +137,6 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         return newType;
     }
 
-    @Deprecated(forRemoval = true)
-    public Collection<BlockType.SetFinder<T>> getFinders() {
-        return List.of();
-    }
-
     public synchronized void addFinder(BlockType.SetFinder<T> finder) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried to register a block type finder after registry events");
@@ -165,7 +144,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         finders.add(finder);
     }
 
-    public synchronized void addRemover(ResourceLocation id) {
+    public synchronized void addRemover(Identifier id) {
         if (frozen) {
             throw new UnsupportedOperationException("Tried remove a block type after registry events");
         }
@@ -183,9 +162,6 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         this.getValues().forEach(BlockType::initializeChildrenBlocks);
         this.getValues().forEach(BlockType::initializeChildrenItems);
     }
-
-    @Deprecated(forRemoval = true)
-    boolean isBeingFrozenHack = false;
 
     @ApiStatus.Internal
     public void buildAll() {
@@ -256,7 +232,7 @@ public abstract class BlockTypeRegistry<T extends BlockType> implements IdMap<T>
         return 100;
     }
 
-    public INamedSupplier<T> makeFutureHolder(ResourceLocation id) {
+    public INamedSupplier<T> makeFutureHolder(Identifier id) {
         return INamedSupplier.memoize(id, () -> this.get(id));
     }
 }

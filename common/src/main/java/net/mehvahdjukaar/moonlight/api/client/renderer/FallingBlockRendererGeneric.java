@@ -1,21 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.entity.state.FallingBlockRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends EntityRenderer<T> {
+public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends EntityRenderer<T, FallingBlockRenderState> {
 
     public FallingBlockRendererGeneric(EntityRendererProvider.Context context) {
         super(context);
@@ -23,30 +21,41 @@ public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends E
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T pEntity) {
-        return TextureAtlas.LOCATION_BLOCKS;
+    public FallingBlockRenderState createRenderState() {
+        return new FallingBlockRenderState();
     }
 
     @Override
-    public void render(T entity, float pEntityYaw, float pPartialTicks, PoseStack poseStack, MultiBufferSource buffer, int pPackedLight) {
+    public boolean shouldRender(T entity, Frustum culler, double camX, double camY, double camZ) {
+        if (!super.shouldRender(entity, culler, camX, camY, camZ)) return false;
         BlockState state = entity.getBlockState();
-        if (state.getRenderShape() == RenderShape.MODEL) {
-            Level level = entity.level();
-            BlockPos pos = entity.blockPosition();
-            boolean isJustSpawned = Math.abs(entity.getY() - pos.getY()) < 0.02 && entity.tickCount < 0 && state != level.getBlockState(pos);
-            if (!isJustSpawned && state.getRenderShape() != RenderShape.INVISIBLE) {
-                poseStack.pushPose();
-                BlockPos blockPos = BlockPos.containing(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
+        if (state.getRenderShape() != RenderShape.MODEL) return false;
+        // just spawned ones still overlap their block and would z fight
+        return state != entity.level().getBlockState(entity.blockPosition());
+    }
 
-                poseStack.translate(-0.5D, 0.0D, -0.5D);
-                BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-                RenderUtil.renderBlock(state.getSeed(entity.getStartPos()),
-                        poseStack, buffer, state, level, blockPos, dispatcher);
-                poseStack.popPose();
-                super.render(entity, pEntityYaw, pPartialTicks, poseStack, buffer, pPackedLight);
-            }
+    @Override
+    public void extractRenderState(T entity, FallingBlockRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
+        BlockPos pos = BlockPos.containing(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
+        var block = state.movingBlockRenderState;
+        block.randomSeedPos = entity.getStartPos();
+        block.blockPos = pos;
+        block.blockState = entity.getBlockState();
+        if (entity.level() instanceof ClientLevel clientLevel) {
+            block.biome = clientLevel.getBiome(pos);
+            block.cardinalLighting = clientLevel.cardinalLighting();
+            block.lightEngine = clientLevel.getLightEngine();
         }
     }
 
-
+    @Override
+    public void submit(FallingBlockRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
+                       CameraRenderState camera) {
+        poseStack.pushPose();
+        poseStack.translate(-0.5, 0, -0.5);
+        collector.submitMovingBlock(poseStack, state.movingBlockRenderState);
+        poseStack.popPose();
+        super.submit(state, poseStack, collector, camera);
+    }
 }

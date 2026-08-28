@@ -2,31 +2,26 @@ package net.mehvahdjukaar.moonlight.core.fake_player;
 
 import com.google.common.collect.MapMaker;
 import com.mojang.authlib.GameProfile;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class FakeGenericPlayer extends Player {
 
     // Map of all active fake player usernames to their entities.
-    // A fake player holds its level, which is this map's key, so weak keys alone would never let an entry go:
-    // the value resurrects it. Hence weak values too, which breaks the loop and makes the whole thing
-    // self healing even if nobody calls unloadLevel.
+    // weak values too: the player holds its level (the key), so weak keys alone would never let an entry go
     private static final Map<Level, Map<GameProfile, FakeGenericPlayer>> FAKE_PLAYERS =
             new MapMaker().weakKeys().makeMap();
 
     /**
-     * Get a fake player with a given username. The returned player is only cached for as long as the caller
-     * keeps a reference to it, so holding onto it also keeps its level in memory: don't store it in a static.
+     * Get a fake player with a given username. Don't store it in a static, it keeps its level alive.
      */
     public static FakeGenericPlayer get(Level level, GameProfile username) {
         return FAKE_PLAYERS.computeIfAbsent(level, l -> new MapMaker().weakValues().makeMap())
@@ -38,7 +33,12 @@ public class FakeGenericPlayer extends Player {
     }
 
     public FakeGenericPlayer(Level level, GameProfile gameProfile) {
-        super(level, BlockPos.ZERO, 0, gameProfile);
+        super(level, gameProfile);
+    }
+
+    @Override
+    public GameType gameMode() {
+        return GameType.SURVIVAL;
     }
 
     @Override
@@ -52,7 +52,11 @@ public class FakeGenericPlayer extends Player {
     }
 
     @Override
-    public void displayClientMessage(Component chatComponent, boolean actionBar) {
+    public void sendSystemMessage(Component message) {
+    }
+
+    @Override
+    public void sendOverlayMessage(Component message) {
     }
 
     @Override
@@ -60,7 +64,7 @@ public class FakeGenericPlayer extends Player {
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source) {
+    public boolean isInvulnerableTo(ServerLevel level, DamageSource source) {
         return true;
     }
 
@@ -75,9 +79,5 @@ public class FakeGenericPlayer extends Player {
 
     @Override
     public void tick() {
-    }
-
-    public @Nullable MinecraftServer getServer() {
-        return PlatHelper.getCurrentServer();
     }
 }

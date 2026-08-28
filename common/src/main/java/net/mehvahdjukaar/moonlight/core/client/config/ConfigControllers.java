@@ -10,9 +10,9 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.Vec3i;
@@ -78,7 +78,7 @@ public final class ConfigControllers {
                 onChange.run();
             });
             EditBox box = (EditBox) control.widget();
-            box.setFormatter(RegexHighlighter.INSTANCE.formatter(box)); // live regex syntax coloring
+            box.addFormatter(RegexHighlighter.INSTANCE.formatter(box)); // live regex syntax coloring
             return control;
         });
 
@@ -200,7 +200,7 @@ public final class ConfigControllers {
     // A category's feature() gate, drawn as check/cross sprites to match the inline toggle the parent screen shows next to
     // the category button
     static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
-        ResourceLocation icon = o.icon();
+        Identifier icon = o.icon();
         // decorative item drawn left of the check/cross symbol, when the id resolves to something
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
@@ -211,7 +211,7 @@ public final class ConfigControllers {
             }
 
             @Override
-            public void render(GuiGraphics graphics, int x, int y, int size, boolean hovered, boolean lit) {
+            public void render(GuiGraphicsExtractor graphics, int x, int y, int size, boolean hovered, boolean lit) {
                 anim.update(hovered && lit);
                 ConfigScreenIcons.renderAnimated(graphics, icon, x, y, anim.phase(), lit);
             }
@@ -225,9 +225,8 @@ public final class ConfigControllers {
     }
 
     private static <E extends Enum<E>> ConfigControl<E> enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {
-        CycleButton<E> w = CycleButton.<E>builder(x -> Component.literal(x.name()))
+        CycleButton<E> w = CycleButton.<E>builder(x -> Component.literal(x.name()), s.current(o))
                 .withValues(o.options)
-                .withInitialValue(s.current(o))
                 .displayOnlyValue()
                 .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {
                     s.put(o, val);

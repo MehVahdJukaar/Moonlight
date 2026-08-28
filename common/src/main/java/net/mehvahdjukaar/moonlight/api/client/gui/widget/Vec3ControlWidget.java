@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -58,7 +58,6 @@ public class Vec3ControlWidget extends CompositeWidget {
         return box;
     }
 
-    /** Pushes the given triple into the fields (used by the row's reset button). */
     public void setValues(double x, double y, double z) {
         this.xBox.setValue(format(x));
         this.yBox.setValue(format(y));
@@ -93,7 +92,7 @@ public class Vec3ControlWidget extends CompositeWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int third = (getWidth() - 2 * INNER_GAP) / 3;
         int y = getY();
         this.xBox.setPosition(getX(), y);
@@ -102,9 +101,9 @@ public class Vec3ControlWidget extends CompositeWidget {
         this.yBox.setWidth(third);
         this.zBox.setPosition(getX() + 2 * (third + INNER_GAP), y);
         this.zBox.setWidth(third);
-        this.xBox.render(graphics, mouseX, mouseY, partialTick);
-        this.yBox.render(graphics, mouseX, mouseY, partialTick);
-        this.zBox.render(graphics, mouseX, mouseY, partialTick);
+        this.xBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        this.yBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        this.zBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override

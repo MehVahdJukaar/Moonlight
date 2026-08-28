@@ -35,7 +35,7 @@ public abstract class JigsawReplacementProcessorMixin {
                 Moonlight.LOGGER.warn("Spawn Box block at {} is missing nbt, will not replace", offset);
                 return original;
             } else {
-                String string = original.nbt().getString("final_state");
+                String string = original.nbt().getStringOr("final_state", "minecraft:air");
                 BlockState blockState2;
                 try {
                     BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(level.holderLookup(Registries.BLOCK), string, true);

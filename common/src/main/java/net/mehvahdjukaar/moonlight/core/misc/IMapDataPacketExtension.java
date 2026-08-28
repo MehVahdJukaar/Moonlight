@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.misc;
 
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +13,13 @@ public interface IMapDataPacketExtension {
 
     Optional<List<MLMapDecoration>> moonlight$getCustomDecorations();
 
-    ResourceLocation moonlight$getDimension();
+    Identifier moonlight$getDimension();
 
     int moonlight$getMapCenterX();
 
     int moonlight$getMapCenterZ();
 
-    void moonlight$setDimension(ResourceLocation dim);
+    void moonlight$setDimension(Identifier dim);
 
     void moonlight$setMapCenter(int x, int z);
 

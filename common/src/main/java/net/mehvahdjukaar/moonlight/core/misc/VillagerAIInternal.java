@@ -4,8 +4,8 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
 
 public class VillagerAIInternal {
 
@@ -16,15 +16,7 @@ public class VillagerAIInternal {
     //called by mixin. Do not call
     public static void onRegisterBrainGoals(Brain<Villager> brain, AbstractVillager villager) {
         if (villager instanceof Villager v) {
-            var event = createEvent(brain, v);
-            MoonlightEventsHelper.postEvent(event, IVillagerBrainEvent.class);
-            //don't waste time if it doesn't have a custom schedule
-            var internal = event.getInternal();
-            if (internal.hasCustomSchedule()) {
-                //finalize schedule
-                brain.setSchedule(internal.buildFinalizedSchedule());
-                brain.updateActivityFromSchedule(villager.level().getDayTime(),villager.level().getGameTime());
-            }
+            MoonlightEventsHelper.postEvent(createEvent(brain, v), IVillagerBrainEvent.class);
         }
     }
 

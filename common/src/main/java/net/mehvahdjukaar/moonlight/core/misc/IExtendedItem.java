@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
+import net.mehvahdjukaar.moonlight.api.item.ClientAnimationExtension;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -16,8 +17,8 @@ public interface IExtendedItem {
     void moonlight$setAdditionalBehavior(AdditionalItemPlacement b);
 
     @Nullable
-    Object moonlight$getClientAnimationExtension();
+    ClientAnimationExtension moonlight$getClientAnimationExtension();
 
-    void moonlight$setClientAnimationExtension(Object b);
+    void moonlight$setClientAnimationExtension(ClientAnimationExtension b);
 
 }

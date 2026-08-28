@@ -1,46 +1,42 @@
 package net.mehvahdjukaar.moonlight.core.misc;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * A parsed .png.mcmeta. A null animation means the file had no "animation" section at all,
- * which is the common case for connected texture mods that only use it to carry their own data.
- * That is NOT the same as a present but defaulted section, so it must not be collapsed into
- * {@link AnimationMetadataSection#EMPTY}: doing so makes a ctm-only file look animated and
- * ends up writing out an animation with no frames.
- */
+// null animation means no "animation" section at all (ctm mods use mcmeta for their own data). Not the same as a
+// present but defaulted one, or a ctm-only file would be written out as animated with no frames
 public record McMetaFile(@Nullable AnimationMetadataSection animation, JsonObject moddedStuff) {
+
+    public static final int UNKNOWN_SIZE = -1;
 
     public static McMetaFile of(@NotNull AnimationMetadataSection vanillaMcmeta) {
         return of(vanillaMcmeta, new JsonObject());
     }
 
     public static McMetaFile of(@NotNull AnimationMetadataSection vanillaMcmeta, JsonObject moddedStuff) {
-        //old api used to pass EMPTY around to mean "no animation"
-        return new McMetaFile(vanillaMcmeta == AnimationMetadataSection.EMPTY ? null : vanillaMcmeta, moddedStuff);
+        return new McMetaFile(vanillaMcmeta, moddedStuff);
     }
 
     public static McMetaFile read(Resource resource) throws IOException {
         try (InputStream metadataStream = resource.open()) {
             var bytes = metadataStream.readAllBytes();
-            AnimationMetadataSection metadata = AbstractPackResources.getMetadataFromStream(AnimationMetadataSection.SERIALIZER, new ByteArrayInputStream(bytes));
-            JsonObject moddedObj = readModdedObj(bytes);
-            return new McMetaFile(metadata, moddedObj);
+            JsonObject json = GsonHelper.parse(new String(bytes));
+            AnimationMetadataSection metadata = json.has("animation")
+                    ? AnimationMetadataSection.CODEC.parse(JsonOps.INSTANCE, json.get("animation")).getOrThrow(IOException::new)
+                    : null;
+            return new McMetaFile(metadata, readModdedObj(bytes));
         }
     }
 
@@ -68,53 +64,29 @@ public record McMetaFile(@Nullable AnimationMetadataSection animation, JsonObjec
         return this.animation != null;
     }
 
-    /**
-     * How many frames a texture must have for this animation's frame indices to be valid.
-     * 0 when there's no explicit frame list, meaning the animation just plays every frame in order
-     */
+    // 0 when there is no explicit frame list
     public int requiredFrameCount() {
         if (animation == null) return 0;
-        int[] highest = {-1};
-        animation.forEachFrame((i, t) -> highest[0] = Math.max(highest[0], i));
-        return highest[0] + 1;
+        int highest = -1;
+        for (AnimationFrame frame : animation.frames().orElse(List.of())) {
+            highest = Math.max(highest, frame.index());
+        }
+        return highest + 1;
     }
 
     //Note that these can be different from TextureImage.frameWidth
     public int getAnimationFrameWidth() {
-        return this.animation == null ? AnimationMetadataSection.UNKNOWN_SIZE : this.animation.frameWidth;
+        return this.animation == null ? UNKNOWN_SIZE : this.animation.frameWidth().orElse(UNKNOWN_SIZE);
     }
 
     public int getAnimationFrameHeight() {
-        return this.animation == null ? AnimationMetadataSection.UNKNOWN_SIZE : this.animation.frameHeight;
+        return this.animation == null ? UNKNOWN_SIZE : this.animation.frameHeight().orElse(UNKNOWN_SIZE);
     }
 
     public JsonObject toJson() {
         JsonObject obj = moddedStuff.deepCopy();
         if (animation == null) return obj;
-
-        JsonObject animObj = new JsonObject();
-
-        animObj.addProperty("frametime", animation.getDefaultFrameTime());
-        animObj.addProperty("interpolate", animation.isInterpolatedFrames());
-        animObj.addProperty("height", animation.frameHeight);
-        animObj.addProperty("width", animation.frameWidth);
-
-        JsonArray frames = new JsonArray();
-
-        animation.forEachFrame((i, t) -> {
-            if (t != -1) {
-                JsonObject o = new JsonObject();
-                o.addProperty("time", t);
-                o.addProperty("index", i);
-                frames.add(o);
-            } else frames.add(i);
-        });
-
-        //an empty list means "every frame in order", which is only valid if we omit it entirely
-        if (!frames.isEmpty()) animObj.add("frames", frames);
-
-        obj.add("animation", animObj);
-
+        obj.add("animation", AnimationMetadataSection.CODEC.encodeStart(JsonOps.INSTANCE, animation).getOrThrow());
         return obj;
     }
 
@@ -124,36 +96,11 @@ public record McMetaFile(@Nullable AnimationMetadataSection animation, JsonObjec
 
     public McMetaFile cloneWithSize(int frameWidth, int frameHeight) {
         if (this.animation == null) return copy();
-        List<AnimationFrame> frameData = new ArrayList<>();
-        this.animation.forEachFrame((i, t) -> frameData.add(new AnimationFrame(i, t)));
-        AnimationMetadataSection newMetadata = new AnimationMetadataSection(frameData, frameWidth, frameHeight,
-                this.animation.getDefaultFrameTime(), this.animation.isInterpolatedFrames());
-        JsonObject newModdedStuff = moddedStuff.deepCopy();
-        return new McMetaFile(newMetadata, newModdedStuff);
-    }
-
-    private static List<Field> FIELDS = null;
-    private static final int VANILLA_FIELDS = 5;
-
-    public static void copyAllMixinAddedFields(AnimationMetadataSection from, AnimationMetadataSection to) {
-        if (FIELDS == null) {
-            FIELDS = new ArrayList<>();
-            Field[] f = AnimationMetadataSection.class.getDeclaredFields();
-            for (int i = 0; i < f.length; i++) {
-                if (i > VANILLA_FIELDS - 1) {
-                    Field field = f[i];
-                    FIELDS.add(field);
-                    field.setAccessible(true);
-                }
-            }
-        }
-        for (Field field : FIELDS) {
-            try {
-                field.set(to, field.get(from));
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        AnimationMetadataSection newMetadata = new AnimationMetadataSection(
+                this.animation.frames().map(ArrayList::new).map(l -> (List<AnimationFrame>) l),
+                Optional.of(frameWidth), Optional.of(frameHeight),
+                this.animation.defaultFrameTime(), this.animation.interpolatedFrames());
+        return new McMetaFile(newMetadata, moddedStuff.deepCopy());
     }
 
 }

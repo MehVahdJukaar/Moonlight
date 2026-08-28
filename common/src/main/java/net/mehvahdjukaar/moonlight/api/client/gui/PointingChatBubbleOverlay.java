@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ChatBubbleWidget;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.network.chat.Component;
@@ -30,7 +30,7 @@ public class PointingChatBubbleOverlay implements Renderable {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (!this.target.visible) return;
 
         Component message = this.messageSupplier.get();

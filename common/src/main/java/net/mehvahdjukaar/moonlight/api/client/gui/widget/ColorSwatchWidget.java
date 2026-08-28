@@ -1,19 +1,16 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-/**
- * A small square showing an ARGB color over a grey checkerboard, so you can tell how transparent it is. With an
- * onPress action it acts as a button and outlines white on hover, with a null one it just sits there. Call
- * setColor to change what it shows.
- */
+/** Color preview square. Acts as a button when onPress is not null. */
 public class ColorSwatchWidget extends AbstractWidget {
 
     private int color;
@@ -39,15 +36,15 @@ public class ColorSwatchWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         renderChecker(graphics, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2);
         graphics.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, color);
         int border = onPress != null && isHovered() ? 0xFFFFFFFF : 0xFF000000;
-        graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), border);
+        graphics.outline(getX(), getY(), getWidth(), getHeight(), border);
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
         if (this.onPress != null) this.onPress.accept(this.color);
     }
 
@@ -56,7 +53,7 @@ public class ColorSwatchWidget extends AbstractWidget {
     }
 
     /** A grey checkerboard, drawn behind translucent colors so alpha reads clearly. */
-    public static void renderChecker(GuiGraphics graphics, int x, int y, int w, int h) {
+    public static void renderChecker(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
         int cell = 4;
         for (int yy = 0; yy < h; yy += cell) {
             for (int xx = 0; xx < w; xx += cell) {

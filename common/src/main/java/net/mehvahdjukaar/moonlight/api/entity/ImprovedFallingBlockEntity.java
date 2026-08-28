@@ -3,7 +3,12 @@ package net.mehvahdjukaar.moonlight.api.entity;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -54,15 +59,15 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putBoolean("saveToItem", this.saveTileDataToItem);
+    public void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("saveToItem", this.saveTileDataToItem);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.saveTileDataToItem = tag.getBoolean("saveToItem");
+    public void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.saveTileDataToItem = input.getBooleanOr("saveToItem", false);
     }
 
     //workaround
@@ -73,23 +78,23 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
         CompoundTag tag = new CompoundTag();
         tag.put("BlockState", NbtUtils.writeBlockState(state));
         tag.putInt("Time", this.time);
-        this.readAdditionalSaveData(tag);
+        this.readAdditionalSaveData(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
     }
 
+    // only ever called with this entity's own block
     @Override
-    public ItemEntity spawnAtLocation(ItemLike itemIn, int offset) {
-        ItemStack stack = new ItemStack(itemIn);
-        if (itemIn instanceof Block && this.saveTileDataToItem && this.blockData != null) {
-            BlockEntity be = BlockEntity.loadStatic(BlockPos.ZERO, getBlockState(), blockData, level().registryAccess());
+    public ItemEntity spawnAtLocation(ServerLevel level, ItemStack stack, float yOffset) {
+        if (this.saveTileDataToItem && this.blockData != null) {
+            BlockEntity be = BlockEntity.loadStatic(BlockPos.ZERO, getBlockState(), blockData, level.registryAccess());
             if (be != null) stack.applyComponents(be.collectComponents());
             else Moonlight.LOGGER.warn("Failed to load block entity for falling block. Block Entity data: {}", blockData);
         }
-        return this.spawnAtLocation(stack, offset);
+        return super.spawnAtLocation(level, stack, yOffset);
     }
 
     @Override
-    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
-        return super.causeFallDamage(pFallDistance, pMultiplier, pSource);
+    public boolean causeFallDamage(double fallDistance, float damageModifier, DamageSource source) {
+        return super.causeFallDamage(fallDistance, damageModifier, source);
     }
 
     public void setCancelDrop(boolean cancelDrop) {

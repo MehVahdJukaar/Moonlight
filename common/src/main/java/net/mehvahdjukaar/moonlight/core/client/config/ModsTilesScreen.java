@@ -10,17 +10,19 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -34,8 +36,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class ModsTilesScreen extends Screen {
 
-    // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
-    // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists
+    // non moonlight mods we still list, opened through the loader config screen when they have one
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
 
     private static final int GRID_PAD = 8;
@@ -64,7 +65,7 @@ public class ModsTilesScreen extends Screen {
 
     private final Screen parent;
     @Nullable
-    private final ResourceLocation background;
+    private final Identifier background;
     private final List<Entry> allEntries = new ArrayList<>();
     private final List<Entry> entries = new ArrayList<>(); // allEntries minus whatever the search filters out
     @Nullable
@@ -76,7 +77,7 @@ public class ModsTilesScreen extends Screen {
     // recomputed each layout pass, shared by render + click
     private int cols, contentTop, contentBottom;
 
-    public ModsTilesScreen(Screen parent, @Nullable ResourceLocation background) {
+    public ModsTilesScreen(Screen parent, @Nullable Identifier background) {
         super(Component.translatable("gui.moonlight.config.mods_title"));
         this.parent = parent;
         this.background = background;
@@ -117,15 +118,14 @@ public class ModsTilesScreen extends Screen {
                 ? new ModsTilesScreen(null, null)
                 : ModsTilesScreen.configScreenFor(modId, null, null);
         if (screen == null) return false;
-        // tell() and not execute(): the packet is handled on the client thread where execute() runs inline, and
-        // ChatScreen closes itself right after the command is sent, which would wipe the screen we just set
+        // schedule, not execute: ChatScreen closes itself right after the command is sent and would wipe our screen
         Minecraft mc = Minecraft.getInstance();
-        mc.tell(() -> mc.setScreen(screen));
+        mc.schedule(() -> mc.setScreen(screen));
         return true;
     }
 
     @Nullable
-    public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable ResourceLocation background) {
+    public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable Identifier background) {
         Screen s = MoonlightConfigSelectScreen.create(modId, parent, background);
         if (s == null && shouldConvert(modId)) {
             s = ClientHelper.getNativeForeignConfigScreen(modId, parent, background);
@@ -225,21 +225,21 @@ public class ModsTilesScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         if (this.searchBox == null) {
             GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
         } else {
             GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
-            graphics.drawCenteredString(this.font, this.title, this.width / 2, TITLE_Y_WITH_SEARCH, ConfigGuiColors.TITLE);
-            graphics.blitSprite(MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - SEARCH_ICON_GAP,
+            graphics.centeredText(this.font, this.title, this.width / 2, TITLE_Y_WITH_SEARCH, ConfigGuiColors.TITLE);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - SEARCH_ICON_GAP,
                     SEARCH_Y + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
         }
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         computeLayout();
 
         GuiHelper.renderListBackground(graphics, contentTop, contentBottom, this.width, this.scroll);
@@ -258,11 +258,11 @@ public class ModsTilesScreen extends Screen {
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
     }
 
-    private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover) {
+    private void renderCard(GuiGraphicsExtractor graphics, Entry entry, int x, int y, boolean hover) {
         graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? ConfigGuiColors.TILE_BG_HOVER : ConfigGuiColors.TILE_BG);
         int outline = ConfigGuiColors.TILE_OUTLINE;
         if (hover) outline = entry.ours() ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE_HOVER_FOREIGN;
-        graphics.renderOutline(x, y, CARD_W, CARD_H, outline);
+        graphics.outline(x, y, CARD_W, CARD_H, outline);
 
         int iconX = x + (CARD_W - ICON_SIZE) / 2;
         int iconY = y + CARD_PAD;
@@ -281,13 +281,13 @@ public class ModsTilesScreen extends Screen {
         }
     }
 
-    private void drawClippedCentered(GuiGraphics graphics, Component text, int centerX, int y, int minX, int maxX, int color) {
+    private void drawClippedCentered(GuiGraphicsExtractor graphics, Component text, int centerX, int y, int minX, int maxX, int color) {
         graphics.enableScissor(minX, y - 1, maxX, y + this.font.lineHeight + 1);
-        graphics.drawCenteredString(this.font, text, centerX, y, color);
+        graphics.centeredText(this.font, text, centerX, y, color);
         graphics.disableScissor();
     }
 
-    private void renderFallbackIcon(GuiGraphics graphics, Entry entry, int iconX, int iconY) {
+    private void renderFallbackIcon(GuiGraphicsExtractor graphics, Entry entry, int iconX, int iconY) {
         GuiHelper.renderInitialTile(graphics, this.font, entry.name().getString(),
                 iconX, iconY, ICON_SIZE, ConfigGuiColors.TILE_ICON_BG,
                 ConfigGuiColors.initialLetter(entry.modId()), MoonlightIcons.CONFIG);
@@ -303,7 +303,9 @@ public class ModsTilesScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = event.button();
         if (button == 0 && mouseY >= contentTop && mouseY < contentBottom) {
             for (int i = 0; i < entries.size(); i++) {
                 int x = cardX(i), y = cardY(i);
@@ -318,7 +320,7 @@ public class ModsTilesScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override

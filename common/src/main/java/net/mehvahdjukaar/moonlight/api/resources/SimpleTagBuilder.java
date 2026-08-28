@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagFile;
@@ -19,13 +19,13 @@ import java.util.Set;
 public class SimpleTagBuilder extends TagBuilder {
 
     private final Set<String> uniqueKeys = new HashSet<>();
-    private final ResourceLocation id;
+    private final Identifier id;
 
-    protected SimpleTagBuilder(ResourceLocation location) {
+    protected SimpleTagBuilder(Identifier location) {
         this.id = location;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
@@ -33,7 +33,7 @@ public class SimpleTagBuilder extends TagBuilder {
         return "#" + id.toString();
     }
 
-    public static SimpleTagBuilder of(ResourceLocation location) {
+    public static SimpleTagBuilder of(Identifier location) {
         return new SimpleTagBuilder(location);
     }
 
@@ -60,18 +60,18 @@ public class SimpleTagBuilder extends TagBuilder {
 
     public SimpleTagBuilder add(String str) {
         if (str.startsWith("#")) {
-            return this.addTag(ResourceLocation.parse(str.substring(1)));
+            return this.addTag(Identifier.parse(str.substring(1)));
         } else {
-            return this.add(ResourceLocation.parse(str));
+            return this.add(Identifier.parse(str));
         }
     }
 
-    public SimpleTagBuilder add(ResourceLocation entry) {
+    public SimpleTagBuilder add(Identifier entry) {
         super.addElement(entry);
         return this;
     }
 
-    public TagBuilder addOptional(ResourceLocation elementLocation) {
+    public TagBuilder addOptional(Identifier elementLocation) {
         super.addOptionalElement(elementLocation);
         return this;
     }
@@ -98,7 +98,7 @@ public class SimpleTagBuilder extends TagBuilder {
     }*/
 
     @Override
-    public SimpleTagBuilder addTag(ResourceLocation pId) {
+    public SimpleTagBuilder addTag(Identifier pId) {
         super.addTag(pId);
         return this;
     }
@@ -108,7 +108,7 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
     @Override
-    public SimpleTagBuilder addOptionalTag(ResourceLocation pId) {
+    public SimpleTagBuilder addOptionalTag(Identifier pId) {
         super.addOptionalTag(pId);
         return this;
     }
@@ -123,7 +123,7 @@ public class SimpleTagBuilder extends TagBuilder {
     }
 
     public SimpleTagBuilder addEntry(Object entry) {
-        if (entry instanceof ResourceLocation rl) {
+        if (entry instanceof Identifier rl) {
             this.add(rl);
             return this;
         }

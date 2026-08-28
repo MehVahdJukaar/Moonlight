@@ -5,8 +5,9 @@ import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.io.ByteArrayInputStream;
 
@@ -16,29 +17,29 @@ public class SyncConfigsMessage implements Message {
     public static final TypeAndCodec<RegistryFriendlyByteBuf, SyncConfigsMessage> TYPE = Message.makeType(
             Moonlight.res("bidi_sync_configs"), SyncConfigsMessage::new);
 
-    public final ResourceLocation configId;
+    public final Identifier configId;
     public final byte[] configData;
 
     public SyncConfigsMessage(RegistryFriendlyByteBuf buf) {
-        this.configId = buf.readResourceLocation();
+        this.configId = buf.readIdentifier();
         this.configData = buf.readByteArray();
     }
 
-    public SyncConfigsMessage(final byte[] configFileData, final ResourceLocation configId) {
+    public SyncConfigsMessage(final byte[] configFileData, final Identifier configId) {
         this.configId = configId;
         this.configData = configFileData;
     }
 
     @Override
     public void write(RegistryFriendlyByteBuf buf) {
-        buf.writeResourceLocation(this.configId);
+        buf.writeIdentifier(this.configId);
         buf.writeByteArray(this.configData);
     }
 
     @Override
     public void handle(Context context) {
         if (context.getDirection() == NetworkDir.SERVER_BOUND) {
-            if (context.getPlayer() instanceof ServerPlayer sp && !sp.hasPermissions(3)) {
+            if (context.getPlayer() instanceof ServerPlayer sp && !sp.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) {
                 Moonlight.LOGGER.warn("Player {} tried to sync their configs without permission", sp.getName().getString());
                 return;
             }

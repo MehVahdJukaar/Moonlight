@@ -9,14 +9,13 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -100,16 +99,15 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
     public List<ItemStack> getMatchingStacks() {
         if (this.items == null) {
-            this.items = convertItems(Arrays.asList(this.inner.getItems()));
+            this.items = convertItems(this.inner.items().map(ItemStack::new).toList());
         }
         return this.items;
     }
 
 
-    public static final ResourceLocation ID = Moonlight.res("block_type_swap");
+    public static final Identifier ID = Moonlight.res("block_type_swap");
 
-    public static final MapCodec<BlockTypeSwapIngredient<?>> CODEC = makeCodec(false);
-    public static final MapCodec<BlockTypeSwapIngredient<?>> CODEC_NONEMPTY = makeCodec(true);
+    public static final MapCodec<BlockTypeSwapIngredient<?>> CODEC = makeCodec();
     public static final StreamCodec<RegistryFriendlyByteBuf, BlockTypeSwapIngredient<?>> STREAM_CODEC =
             new StreamCodec<>() {
                 @Override
@@ -137,7 +135,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
                 }
             };
 
-    private static @NotNull MapCodec<BlockTypeSwapIngredient<?>> makeCodec(boolean nonEmpty) {
+    private static @NotNull MapCodec<BlockTypeSwapIngredient<?>> makeCodec() {
         return new MapCodec<>() {
             @Override
             public <T> Stream<T> keys(DynamicOps<T> ops) {
@@ -146,8 +144,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
             @Override
             public <T> DataResult<BlockTypeSwapIngredient<?>> decode(DynamicOps<T> ops, MapLike<T> input) {
-                var ingCodec = nonEmpty ? Ingredient.CODEC_NONEMPTY : Ingredient.CODEC;
-                DataResult<Ingredient> ingResult = ingCodec.parse(ops, input.get(ops.createString("ingredient")));
+                DataResult<Ingredient> ingResult = Ingredient.CODEC.parse(ops, input.get(ops.createString("ingredient")));
                 if (ingResult.isError()) {
                     return DataResult.error(() -> "Failed to decode inner ingredient: " + ingResult.error().get().message() + " on " + input);
                 }
@@ -175,8 +172,7 @@ public abstract class BlockTypeSwapIngredient<T extends BlockType> {
 
             @Override
             public <T> RecordBuilder<T> encode(BlockTypeSwapIngredient<?> ingr, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-                var ingCodec = nonEmpty ? Ingredient.CODEC_NONEMPTY : Ingredient.CODEC;
-                prefix.add(ops.createString("ingredient"), ingCodec.encodeStart(ops, ingr.inner));
+                prefix.add(ops.createString("ingredient"), Ingredient.CODEC.encodeStart(ops, ingr.inner));
                 prefix.add(ops.createString("block_type"), BlockTypeRegistry.getRegistryCodec().encodeStart(ops, ingr.registry));
                 Codec codec = ingr.registry.getCodec();
                 prefix.add(ops.createString("from"), codec.encodeStart(ops, ingr.fromType));

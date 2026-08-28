@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxStructurePiece;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.MobSpawnSettings;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public interface ISpawnBoxStructure extends ISpecialSpawnsStructure {
 
     @Override
-    default @Nullable WeightedRandomList<MobSpawnSettings.SpawnerData> ml$getSpecialSpawns(
+    default @Nullable WeightedList<MobSpawnSettings.SpawnerData> ml$getSpecialSpawns(
             StructureManager structureManager, Structure structure, BlockPos pos, LongSet chunkPosReferences,
             MobCategory category) {
 

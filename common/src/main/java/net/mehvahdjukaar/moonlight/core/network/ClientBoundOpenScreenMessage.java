@@ -25,7 +25,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     public ClientBoundOpenScreenMessage(RegistryFriendlyByteBuf buffer) {
         this.target = TileOrEntityTarget.read(buffer);
         this.dir = Direction.from3DDataValue(buffer.readVarInt());
-        this.hit = buffer.readVec3();
+        this.hit = Vec3.STREAM_CODEC.decode(buffer);
     }
 
     public ClientBoundOpenScreenMessage(TileOrEntityTarget target, @Nullable Direction hitFace, Vec3 hitPos) {
@@ -38,7 +38,7 @@ public class ClientBoundOpenScreenMessage implements Message {
     public void write(RegistryFriendlyByteBuf buffer) {
         this.target.write(buffer);
         buffer.writeVarInt(this.dir.get3DDataValue());
-        buffer.writeVec3(this.hit);
+        Vec3.STREAM_CODEC.encode(buffer, this.hit);
     }
 
     @Override

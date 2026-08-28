@@ -13,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import java.net.URI;
+
 public class AntiRepostWarning {
 
     public static void run() {
@@ -29,11 +31,11 @@ public class AntiRepostWarning {
                 String modName = PlatHelper.getModName(m);
                 MutableComponent name = Component.literal(modName).withStyle(ChatFormatting.BOLD);
 
-                ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
+                ClickEvent click = new ClickEvent.OpenUrl(URI.create(url));
                 link.setStyle(link.getStyle().withClickEvent(click).withUnderlined(true)
                         .withColor(TextColor.fromLegacyFormat(ChatFormatting.GOLD)));
 
-                player.displayClientMessage(Component.translatable("message.moonlight.anti_repost", name, link), false);
+                player.sendSystemMessage(Component.translatable("message.moonlight.anti_repost", name, link));
 
             }
         } catch (Exception ignored) {

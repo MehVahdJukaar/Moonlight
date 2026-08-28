@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.Vec3;
@@ -31,7 +31,7 @@ public class RandomTeleportCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return Commands.literal("tpr")
-                .requires((p) -> p.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 // /tpr
                 .executes(c -> teleportRandom(
                         c,
@@ -103,9 +103,9 @@ public class RandomTeleportCommand {
         // Clamp sample bounds to the world border bounds so we never sample outside it.
         // WorldBorder often exposes min/max; if present they will be used via getMinX/getMaxX etc.
         // To be robust across mappings we clamp sample coordinates after generation using border.clamp(...)
-        Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
-        set.add(RelativeMovement.X_ROT);
-        set.add(RelativeMovement.Y_ROT);
+        Set<Relative> set = EnumSet.noneOf(Relative.class);
+        set.add(Relative.X_ROT);
+        set.add(Relative.Y_ROT);
 
         for (Entity entity : targets) {
             // pick x and z uniformly inside computed bounds rectangle
@@ -158,7 +158,7 @@ public class RandomTeleportCommand {
     }
 
     private static void performTeleport(CommandSourceStack source, Entity entity, ServerLevel level,
-                                        double x, double y, double z, Set<RelativeMovement> relativeList)
+                                        double x, double y, double z, Set<Relative> relativeList)
             throws CommandSyntaxException {
         BlockPos blockPos = BlockPos.containing(x, y, z);
         if (!Level.isInSpawnableBounds(blockPos)) {
@@ -168,7 +168,7 @@ public class RandomTeleportCommand {
             float g = Mth.wrapDegrees(entity.getXRot());
             BlockPos oldPos = entity.blockPosition();
             var oldDim = entity.level().dimension();
-            if (entity.teleportTo(level, x, y, z, relativeList, f, g)) {
+            if (entity.teleportTo(level, x, y, z, relativeList, f, g, true)) {
                 BackCommand.onTeleported(entity, oldPos, oldDim);
 
                 label23:

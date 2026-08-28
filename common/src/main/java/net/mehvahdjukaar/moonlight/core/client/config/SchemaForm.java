@@ -19,7 +19,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +39,7 @@ final class SchemaForm {
         JsonElement read(ConfigEditSession session);
     }
 
-    // shared by every field using the same registry, else a long list would read and sort the whole registry once
-    // per row. Dynamic registries aren't cached, they change with the world
+    // enumerating and sorting a registry per row is slow. Dynamic registries aren't cached
     private static final Map<ResourceKey<? extends Registry<?>>, List<String>> ID_CACHE = new HashMap<>();
 
     final ConfigCategory root;
@@ -123,7 +122,7 @@ final class SchemaForm {
                 yield s -> new JsonPrimitive(s.current(opt));
             }
             case Schema.ResourceId id -> idField(parent, title, registryIds(id.registry()), asString(seed, ""),
-                    o -> o instanceof String x && ResourceLocation.tryParse(x) != null, UnaryOperator.identity(),
+                    o -> o instanceof String x && Identifier.tryParse(x) != null, UnaryOperator.identity(),
                     iconsFor(id.registry()));
             case Schema.TagId tag -> {
                 // "#namespace:path" when hashed, a bare id otherwise; accept either so a pasted id still works
@@ -173,8 +172,7 @@ final class SchemaForm {
 
     private record FieldReader(String name, Reader reader) {}
 
-    // A sub page holding one entry per element. Unlike a record the entry set is mutable, so the page owns its readers
-    // and is rebuilt wholesale whenever an entry is added or removed. SchemaEditScreen drives that
+    // the entry set is mutable, so the page owns its readers and is rebuilt from the JSON list on add/remove
     static final class ListCategory extends ConfigCategory {
 
         private final Schema<?> element;
@@ -234,8 +232,7 @@ final class SchemaForm {
 
     private static ListCategory listCategory(Component title, Schema.ListOf<?> list,
                                              @Nullable JsonElement current, @Nullable JsonElement def) {
-        // seeded from the default list's first element when there is one: it already has every required field filled
-        // in with something the codec accepts
+        // the default list's first element already has every required field filled in
         JsonElement template = def instanceof JsonArray a && !a.isEmpty() ? a.get(0) : emptyFor(list.element());
         ListCategory cat = new ListCategory(title, list.element(), template, list.min(), list.max());
         List<JsonElement> values = new ArrayList<>();
@@ -244,8 +241,7 @@ final class SchemaForm {
         return cat;
     }
 
-    // A searchable dropdown of the ids we can list. When we can't list them (unknown registry, or tags and dynamic
-    // registries with no world loaded) it becomes a text field that still checks what you type
+    // dropdown when the ids can be enumerated, validated text field otherwise
     private static Reader idField(ConfigCategory parent, Component title, List<String> known, String current,
                                   Predicate<Object> valid, UnaryOperator<String> normalize,
                                   @Nullable Function<String, ItemStack> icon) {
@@ -254,8 +250,7 @@ final class SchemaForm {
             parent.add(opt);
             return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
         }
-        // keep the current value in the list even when it isn't a known id, empty included. Picking the first id for
-        // a field that has none would silently write a real but wrong id
+        // keep the current value selectable, picking the first id for an absent field would commit a wrong id
         List<String> options = known.contains(current) ? known
                 : Stream.concat(Stream.of(current), known.stream()).toList();
         var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(current), current,
@@ -264,12 +259,11 @@ final class SchemaForm {
         return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
     }
 
-    // only for the two registries where the id IS the icon. For anything else (entity types, effects, tags) most
-    // rows would be blank and we'd still get the taller row
+    // only item and block ids are their own icon
     @Nullable
     private static Function<String, ItemStack> iconsFor(@Nullable ResourceKey<? extends Registry<?>> registry) {
         if (!Registries.ITEM.equals(registry) && !Registries.BLOCK.equals(registry)) return null;
-        return id -> ConfigScreenIcons.resolve(ResourceLocation.tryParse(id));
+        return id -> ConfigScreenIcons.resolve(Identifier.tryParse(id));
     }
 
     // empty when the registry can't be reached (unknown, or dynamic with no world loaded)
@@ -277,20 +271,19 @@ final class SchemaForm {
         if (key == null) return List.of();
         List<String> cached = ID_CACHE.get(key);
         if (cached != null) return cached;
-        Registry<?> builtIn = BuiltInRegistries.REGISTRY.get(key.location());
+        Registry<?> builtIn = BuiltInRegistries.REGISTRY.getValue(key.identifier());
         Registry<?> registry = builtIn != null ? builtIn : dynamicRegistry(key);
         if (registry == null) return List.of();
-        List<String> ids = registry.keySet().stream().map(ResourceLocation::toString).sorted().toList();
+        List<String> ids = registry.keySet().stream().map(Identifier::toString).sorted().toList();
         if (builtIn != null) ID_CACHE.put(key, ids);
         return ids;
     }
 
     @Nullable
     private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
-        // biomes, structures and the like only exist with a world loaded, and the getter just throws otherwise. The
-        // config screen can be opened from the main menu, so it has to survive that
+        // dynamic registries throw without a world loaded and the screen can be opened from the main menu
         try {
-            return Utils.hackyGetRegistryAccess().<Object>registry(key).orElse(null);
+            return Utils.hackyGetRegistryAccess().<Object>lookup(key).orElse(null);
         } catch (Exception noWorld) {
             return null;
         }
@@ -392,11 +385,10 @@ final class SchemaForm {
     }
 
     private static boolean isTagId(String s) {
-        return ResourceLocation.tryParse(stripHash(s)) != null;
+        return Identifier.tryParse(stripHash(s)) != null;
     }
 
-    // the on-disk form is fixed by the codec (hashedCodec writes "#ns:path", codec writes "ns:path"), so whichever
-    // way it was typed, write back the one the codec accepts
+    // write back the form the codec accepts (hashedCodec wants "#ns:path")
     private static String normalizeTagId(String s, boolean hashed) {
         return hashed ? "#" + stripHash(s) : stripHash(s);
     }

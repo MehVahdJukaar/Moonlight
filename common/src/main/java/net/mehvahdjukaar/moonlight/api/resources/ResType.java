@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.resources;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 
@@ -32,6 +32,8 @@ public enum ResType {
     MODELS("models/%s.json"),
     BLOCK_MODELS("models/block/%s.json"),
     ITEM_MODELS("models/item/%s.json"),
+    //item model definitions (items/), models/item only holds geometry
+    ITEMS("items/%s.json"),
     BLOCKSTATES("blockstates/%s.json"),
     PARTICLES("particles/%s.json"),
     MOB_EFFECT_TEXTURES("mob_effect/%s.json"),
@@ -50,18 +52,18 @@ public enum ResType {
     }
 
 
-    public ResourceLocation getPath(ResourceLocation relativeLocation) {
+    public Identifier getPath(Identifier relativeLocation) {
         return relativeLocation.withPath(String.format(this.loc, relativeLocation.getPath()));
     }
 
-    public ResourceLocation getPath(String relativeLocation) {
-        return this.getPath(ResourceLocation.parse(relativeLocation));
+    public Identifier getPath(String relativeLocation) {
+        return this.getPath(Identifier.parse(relativeLocation));
     }
 
     /**
      * Inverse of getPath: turns "textures/block/stone.png" back into "block/stone".
      */
-    public ResourceLocation relativize(ResourceLocation fullPath) {
+    public Identifier relativize(Identifier fullPath) {
         String path = fullPath.getPath();
         boolean matches = path.length() >= prefix.length() + suffix.length()
                 && path.startsWith(prefix) && path.endsWith(suffix);
@@ -71,7 +73,7 @@ public enum ResType {
         return fullPath.withPath(path.substring(prefix.length(), path.length() - suffix.length()));
     }
 
-    public List<ResourceLocation> listRelative(ResourceManager manager, String folder, boolean recursive) {
+    public List<Identifier> listRelative(ResourceManager manager, String folder, boolean recursive) {
         String root = prefix + folder;
         if (root.endsWith("/")) root = root.substring(0, root.length() - 1);
         int firstChildStart = root.length() + 1;
@@ -80,8 +82,8 @@ public enum ResType {
                 .keySet().stream().map(this::relativize).toList();
     }
 
-    public static ResourceLocation getTagPath(TagKey<?> tag) {
-        return TAGS.getPath(tag.location().withPrefix(tag.registry().location().getPath() + "/"));
+    public static Identifier getTagPath(TagKey<?> tag) {
+        return TAGS.getPath(tag.location().withPrefix(tag.registry().identifier().getPath() + "/"));
     }
 
 }

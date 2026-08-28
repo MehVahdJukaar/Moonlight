@@ -42,12 +42,8 @@ public class FakeLevelManager {
         return removed;
     }
 
-    @Deprecated(forRemoval = true)
-    public static void invalidate(String name) {
-    }
-
     public static FakeLevel getDefaultClient(Level original) {
-        return getClient("dummy_world", original, FakeLevel::new);
+        return getClient("dummy_world", original, (id, registries) -> new FakeLevel(true, id, registries));
     }
 
     public static <T extends FakeLevel> T getClient(String id, Level original, BiFunction<String, RegistryAccess, FakeLevel> constructor) {

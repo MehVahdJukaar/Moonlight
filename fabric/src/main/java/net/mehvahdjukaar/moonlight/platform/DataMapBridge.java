@@ -7,7 +7,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.registry.FuelValueEvents;
 import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
@@ -24,7 +24,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -62,7 +62,7 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
 
         for (var f : FACTORIES.entrySet()) {
             String mapID = f.getKey();
-            ResourceLocation reloadID = Moonlight.res(mapID);
+            Identifier reloadID = Moonlight.res(mapID);
             PlatHelper.addServerReloadListener(r -> {
                 DataMapBridge<?, ?> instance = f.getValue().apply(r);
                 SERVER_INSTANCES.put(mapID, instance);
@@ -140,6 +140,7 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     }
 
     public final void applyData() {
+        this.beforeApply();
         for (var entry : this.map.entrySet()) {
             for (var holder : entry.getKey()) {
                 var object = holder.value();
@@ -150,6 +151,9 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     }
 
     protected abstract void applyEntry(O object, T dataEntry);
+
+    protected void beforeApply() {
+    }
 
     public void encode(RegistryFriendlyByteBuf buf) {
         streamCodec.encode(buf, this.map);
@@ -164,13 +168,25 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     protected static class BurnTimes extends DataMapBridge<BurnTimes.FurnaceFuel, Item> {
         protected static final String FUEL = "data_maps/item/furnace_fuels.json";
 
+        // FuelValues are immutable and rebuilt by the event after every datapack load, so stash them here
+        private static final Map<Item, Integer> LATEST_VALUES = new HashMap<>();
+
+        static {
+            FuelValueEvents.BUILD.register((builder, context) -> LATEST_VALUES.forEach(builder::add));
+        }
+
         protected BurnTimes(HolderLookup.Provider registryAccess) {
             super(FUEL, registryAccess, FurnaceFuel.CODEC, Registries.ITEM);
         }
 
         @Override
+        protected void beforeApply() {
+            LATEST_VALUES.clear();
+        }
+
+        @Override
         protected void applyEntry(Item object, FurnaceFuel dataEntry) {
-            FuelRegistry.INSTANCE.add(object, dataEntry.burnTime);
+            LATEST_VALUES.put(object, dataEntry.burnTime);
         }
 
         protected record FurnaceFuel(int burnTime) {
@@ -216,7 +232,7 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
 
         @Override
         protected void applyEntry(Block object, Oxidizable dataEntry) {
-            OxidizableBlocksRegistry.registerOxidizableBlockPair(object, dataEntry.nextOxidationStage);
+            OxidizableBlocksRegistry.registerNextStage(object, dataEntry.nextOxidationStage);
         }
 
         public record Oxidizable(Block nextOxidationStage) {
@@ -238,7 +254,7 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
 
         @Override
         protected void applyEntry(Block object, Waxable dataEntry) {
-            OxidizableBlocksRegistry.registerWaxableBlockPair(object, dataEntry.waxed);
+            OxidizableBlocksRegistry.registerWaxable(object, dataEntry.waxed);
         }
 
         public record Waxable(Block waxed) {

@@ -29,7 +29,7 @@ public final class FastCachedWriter {
                         StandardOpenOption.TRUNCATE_EXISTING);
                 return; // success
             } catch (NoSuchFileException e) {
-                // Parent likely deleted between calls → recreate and retry
+                // Parent likely deleted between calls -> recreate and retry
                 if (normParent == null || ++attempts > 2) throw e;
                 Files.createDirectories(normParent);
                 dirCache.add(normParent); // refresh cache after recreation

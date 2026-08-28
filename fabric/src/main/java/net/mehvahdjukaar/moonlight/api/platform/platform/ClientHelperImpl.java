@@ -1,73 +1,68 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import com.google.common.base.Suppliers;
-import com.google.gson.JsonElement;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mehvahdjukaar.moonlight.api.client.model.platform.MLFabricModelLoaderRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat;
-import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
+import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.misc.platform.ITextureAtlasSpriteExtension;
+import net.mehvahdjukaar.moonlight.core.mixins.platform.RenderPipelinesAccessor;
+import net.minecraft.client.Minecraft;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
 
 public class ClientHelperImpl {
-
-    public static void registerRenderType(Block block, RenderType... type) {
-        BlockRenderLayerMap.INSTANCE.putBlock(block, type[0]);
-    }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         Moonlight.assertInitPhase();
@@ -77,7 +72,7 @@ public class ClientHelperImpl {
     }
 
     private static <P extends ParticleType<T>, T extends ParticleOptions> void registerParticle(P type, ClientHelper.ParticleFactory<T> registration) {
-        ParticleFactoryRegistry.getInstance().register(type, registration::create);
+        ParticleProviderRegistry.getInstance().register(type, registration::create);
     }
 
     public static void addEntityRenderersRegistration(Consumer<ClientHelper.EntityRendererEvent> eventListener) {
@@ -102,56 +97,36 @@ public class ClientHelperImpl {
         MoonlightFabricClient.addClientTask(() -> {
             eventListener.accept(new ClientHelper.BlockColorEvent() {
                 @Override
-                public void register(BlockColor color, Block... block) {
-                    ColorProviderRegistry.BLOCK.register(color, block);
+                public void register(List<BlockTintSource> tintSources, Block... blocks) {
+                    BlockColorRegistry.register(tintSources, blocks);
                 }
 
                 @Override
                 public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
-                    var c = ColorProviderRegistry.BLOCK.get(block.getBlock());
-                    return c == null ? -1 : c.getColor(block, level, pos, tint);
+                    var source = Minecraft.getInstance().getBlockColors().getTintSource(block, tint);
+                    return source == null ? -1 : source.colorInWorld(block, level, pos);
                 }
             });
         });
     }
 
-    public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
-        Moonlight.assertInitPhase();
-
-        MoonlightFabricClient.addClientTask(() -> {
-            eventListener.accept(new ClientHelper.ItemColorEvent() {
-                @Override
-                public void register(ItemColor color, ItemLike... items) {
-                    ColorProviderRegistry.ITEM.register(color, items);
-                }
-
-                @Override
-                public int getColor(ItemStack stack, int tint) {
-                    var c = ColorProviderRegistry.ITEM.get(stack.getItem());
-                    return c == null ? -1 : c.getColor(stack, tint);
-                }
-            });
-        });
-    }
-
-    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation name) {
+    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier name) {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(
                 new ReloadWrapper(listener, name));
     }
 
     private record ReloadWrapper(Supplier<PreparableReloadListener> inner,
-                                 ResourceLocation getFabricId) implements IdentifiableResourceReloadListener, PreparableReloadListener {
+                                 Identifier getFabricId) implements IdentifiableResourceReloadListener, PreparableReloadListener {
         private ReloadWrapper(Supplier<PreparableReloadListener> inner,
-                              ResourceLocation getFabricId) {
+                              Identifier getFabricId) {
             this.inner = Suppliers.memoize(inner::get);
             this.getFabricId = getFabricId;
         }
 
         @Override
-        public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager,
-                                              ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler,
-                                              Executor backgroundExecutor, Executor gameExecutor) {
-            return inner.get().reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+        public CompletableFuture<Void> reload(SharedState currentReload, Executor taskExecutor,
+                                              PreparationBarrier preparationBarrier, Executor reloadExecutor) {
+            return inner.get().reload(currentReload, taskExecutor, preparationBarrier, reloadExecutor);
         }
     }
 
@@ -170,24 +145,7 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         MoonlightFabricClient.addClientTask(() -> {
-            eventListener.accept((a, b) -> EntityModelLayerRegistry.registerModelLayer(a, b::get));
-        });
-    }
-
-    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
-        Moonlight.assertInitPhase();
-        ModelLoadingPlugin.register(pluginContext -> {
-            eventListener.accept(new ClientHelper.SpecialModelEvent() {
-                @Override
-                public void register(ModelResourceLocation modelLocation) {
-                    pluginContext.addModels(modelLocation.id());
-                }
-
-                @Override
-                public void register(ResourceLocation id) {
-                    pluginContext.addModels(id);
-                }
-            });
+            eventListener.accept((a, b) -> ModelLayerRegistry.registerModelLayer(a, b::get));
         });
     }
 
@@ -200,34 +158,42 @@ public class ClientHelperImpl {
     }
 
     private static <T extends TooltipComponent> void tooltipReg(Class<T> tClass, Function<? super T, ? extends ClientTooltipComponent> factory) {
-        TooltipComponentCallback.EVENT.register(data -> tClass.isAssignableFrom(data.getClass()) ? factory.apply((T) data) : null);
+        ClientTooltipComponentCallback.EVENT.register(data -> tClass.isAssignableFrom(data.getClass()) ? factory.apply((T) data) : null);
     }
 
 
-    public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
+    public static void addFluidModelRegistration(Consumer<ClientHelper.FluidModelEvent> eventListener) {
         Moonlight.assertInitPhase();
 
         MoonlightFabricClient.addClientTask(() -> {
-            eventListener.accept(MLFabricModelLoaderRegistry::registerLoader);
+            eventListener.accept((model, still, flowing) -> FluidRenderingRegistry.register(still, flowing, model));
         });
+    }
+
+    public static void addBlockModelRegistration(Consumer<ClientHelper.BlockModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        MoonlightFabricClient.addClientTask(() -> {
+            eventListener.accept((id, codec) ->
+                    CustomUnbakedBlockStateModel.register(id, CustomUnbakedModelWrapper.wrap(codec)));
+        });
+    }
+
+    // fabric has no level aware collectParts, this is only the fallback for plain quad access
+    public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,
+                                         @Nullable BlockPos pos, @Nullable BlockState state,
+                                         RandomSource random, List<BlockStateModelPart> parts) {
+        model.collectParts(random, parts);
     }
 
     public static void addKeyBindRegistration(Consumer<ClientHelper.KeyBindEvent> eventListener) {
         Moonlight.assertInitPhase();
 
         MoonlightFabricClient.addClientTask(() -> {
-            eventListener.accept(KeyBindingHelper::registerKeyBinding);
+            eventListener.accept(KeyMappingHelper::registerKeyMapping);
         });
     }
 
-
-    public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        return ((ITextureAtlasSpriteExtension) sprite).getPixelRGBA(frameIndex, x, y);
-    }
-
-    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
-        return modelManager.getModel(modelLocation.id());
-    }
 
 
     public static Path getModIcon(String modId) {
@@ -248,7 +214,8 @@ public class ClientHelperImpl {
     }
 
     @Nullable
-    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
+        // no universal config format on Fabric to convert; callers fall back to the mod's own (Mod Menu) screen
         return null;
     }
 
@@ -262,10 +229,6 @@ public class ClientHelperImpl {
 
     public static boolean hasHiddenPerWorldConfig(String modId) {
         return false;
-    }
-
-    public static BlockModel parseBlockModel(JsonElement json) {
-        return BlockModel.fromString(json.toString()); //sub optimal... too bad
     }
 
     public static void addClientSetup(Runnable clientSetup) {
@@ -286,11 +249,7 @@ public class ClientHelperImpl {
     }
 
 
-    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
-        BlockRenderLayerMap.INSTANCE.putFluid(fluid, type);
-    }
-
-    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(Identifier folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
         if (!PlatHelper.isDev()) {
             FabricLoader.getInstance().getModContainer(folderName.getNamespace()).ifPresent(c -> {
@@ -300,28 +259,27 @@ public class ClientHelperImpl {
         }
     }
 
-    public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
+    public static void addRenderPipelineRegistration(Consumer<ClientHelper.RenderPipelineEvent> eventListener) {
         Moonlight.assertInitPhase();
-        CoreShaderRegistrationCallback.EVENT.register(ev -> {
-            eventListener.accept((id, vertexFormat, setter) -> {
-                try {
-                    ev.register(id, vertexFormat, setter);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to register shader: " + id, e);
-                }
-            });
-        });
+        //no fabric event for this. registering just precompiles the pipeline on reload
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(pipeline ->
+                RenderPipelinesAccessor.getPIPELINES_BY_LOCATION().putIfAbsent(pipeline.getLocation(), pipeline)));
     }
 
-    public static void addItemRenderersRegistration(Consumer<ClientHelper.ItemRendererEvent> eventListener) {
-        MoonlightFabricClient.addClientTask(() -> {
-            eventListener.accept((item, renderer) -> {
-                var rend = renderer.getItemRenderer();
-                if (rend instanceof BuiltinItemRendererRegistry.DynamicItemRenderer br) {
-                    BuiltinItemRendererRegistry.INSTANCE.register(item, br);
-                }
-            });
-        });
+    public static void addPictureInPictureRendererRegistration(Consumer<ClientHelper.PictureInPictureEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        //fabric keys the renderer off getRenderStateClass, the class here is redundant
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(new ClientHelper.PictureInPictureEvent() {
+            @Override
+            public <T extends PictureInPictureRenderState> void register(
+                    Class<T> stateClass, Function<MultiBufferSource.BufferSource, PictureInPictureRenderer<T>> factory) {
+                PictureInPictureRendererRegistry.register(context -> factory.apply(context.bufferSource()));
+            }
+        }));
+    }
+
+    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(SpecialModelRenderers.ID_MAPPER::put));
     }
 
     public static void addMenuScreensRegistration(Consumer<ClientHelper.MenuScreenEvent> eventListener) {

@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -16,11 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * A hex field (#AARRGGBB) with a ColorSwatchWidget next to it. Typing in the field sends the new ARGB color to
- * onChange. If an onSwatchClick action is given the swatch acts as a button, usually opening the ColorPickerScreen,
- * otherwise it just shows the color. With hasAlpha false the alpha is dropped and colors are plain RGB (#RRGGBB).
- */
+/** Hex color field plus a swatch. Colors are ARGB ints, or plain RGB when hasAlpha is false. */
 public class ColorFieldWidget extends CompositeWidget {
 
     private static final int GAP = 4;
@@ -70,7 +66,6 @@ public class ColorFieldWidget extends CompositeWidget {
         return hasAlpha ? c : c | 0xFF000000;
     }
 
-    /** Pushes a color into the field and swatch (e.g. from an external reset). */
     public void setColor(int c) {
         this.color = sanitize(c);
         this.hexBox.setValue(ColorUtils.toHexString(color, hasAlpha));
@@ -82,11 +77,11 @@ public class ColorFieldWidget extends CompositeWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         this.hexBox.setPosition(getX(), getY());
-        this.hexBox.render(graphics, mouseX, mouseY, partialTick);
+        this.hexBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
         this.swatch.setPosition(getX() + getWidth() - swatch.getWidth(), getY());
-        this.swatch.render(graphics, mouseX, mouseY, partialTick);
+        this.swatch.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override

@@ -1,6 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -46,8 +49,8 @@ public class OverlayLayer {
     }
 
     // outside clicks count as consumed too, since they dismiss the popup
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return open != null && open.popupMouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return open != null && open.popupMouseClicked(event, doubleClick);
     }
 
     // while open the wheel is modal: it scrolls the popup and is swallowed so the content behind stays put
@@ -57,15 +60,15 @@ public class OverlayLayer {
         return true;
     }
 
-    public boolean keyPressed(int key, int scanCode, int modifiers) {
-        return open != null && open.popupKeyPressed(key, scanCode, modifiers);
+    public boolean keyPressed(KeyEvent event) {
+        return open != null && open.popupKeyPressed(event);
     }
 
-    public boolean charTyped(char c, int modifiers) {
-        return open != null && open.popupCharTyped(c, modifiers);
+    public boolean charTyped(CharacterEvent event) {
+        return open != null && open.popupCharTyped(event);
     }
 
-    public void render(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (open != null) open.renderPopup(graphics, mouseX, mouseY);
     }
 }

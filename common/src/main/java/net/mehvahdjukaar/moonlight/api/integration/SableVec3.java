@@ -14,7 +14,7 @@ public class SableVec3     {
     }
 
     public Quaterniondc orientation(Level level) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             var sub = SableCompanion.INSTANCE.getContainingClient(this.position);
             if (sub != null) {
                 return sub.renderPose().orientation();
@@ -31,7 +31,7 @@ public class SableVec3     {
 
 
     public Matrix4d matrix(Level level) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             var sub = SableCompanion.INSTANCE.getContainingClient(this.position);
             if (sub != null) {
                 return sub.renderPose().bakeIntoMatrix(new Matrix4d());

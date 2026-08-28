@@ -1,17 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
+import com.mojang.serialization.JsonOps;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -58,42 +60,22 @@ public class TextUtil {
     }
 
     public static FormattedText parseText(String s, @Nullable HolderLookup.Provider provider) {
-        try {
-            if(provider != null) {
-                FormattedText mutableComponent = Component.Serializer.fromJson(s, provider);
-                if (mutableComponent != null) {
-                    return mutableComponent;
-                }
+        if (provider != null) {
+            try {
+                RegistryOps<JsonElement> ops = provider.createSerializationContext(JsonOps.INSTANCE);
+                return CodecUtils.FLAT_COMPONENT.parse(ops, JsonParser.parseString(s)).getOrThrow();
+            } catch (Exception ignored) {
             }
-        } catch (Exception ignored) {
         }
         return FormattedText.of(s);
     }
 
-    @Deprecated(forRemoval = true)
-    public static FormattedText parseText(String s) {
-        return parseText(s, Utils.hackyGetRegistryAccess());
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphics graphics,
-                                     MultiBufferSource.BufferSource buffer,
-                                     int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset) {
-        renderGuiLine(properties, string, font, graphics, cursorPos, selectionPos,
-                isSelected, blink, yOffset, font.lineHeight);
-    }
-
-
     /**
      * Render a line in a GUI
      */
-    public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphics graphics,
+    public static void renderGuiLine(RenderProperties properties, String string, Font font, GuiGraphicsExtractor graphics,
                                      int cursorPos, int selectionPos, boolean isSelected, boolean blink, int yOffset,
                                      int textLineHeight) {
-        PoseStack poseStack = graphics.pose();
-        poseStack.pushPose();
-
         int textColor = properties.textColor;
         int twoTextLineHeight = 2 * textLineHeight;
 
@@ -107,12 +89,12 @@ public class TextUtil {
             }
 
             float centerX = -font.width(string) / 2f;
-            graphics.drawString(font, string, (int) centerX, yOffset, textColor, false);
+            graphics.text(font, string, (int) centerX, yOffset, textColor, false);
 
             if (isSelected) {
                 if (blink) {
                     if (cursorPos >= string.length()) {
-                        graphics.drawString(font, "_", centerStr, yOffset, textColor, false);
+                        graphics.text(font, "_", centerStr, yOffset, textColor, false);
                     }
                 }
 
@@ -129,24 +111,16 @@ public class TextUtil {
                     int t = font.width(string.substring(0, maxC)) - strWidth / 2;
                     int startX = Math.min(s, t);
                     int v = Math.max(s, t);
-                    graphics.fill(RenderType.guiTextHighlight(), startX, yOffset, v, yOffset + textLineHeight, -16776961);
+                    graphics.textHighlight(startX, yOffset, v, yOffset + textLineHeight, false);
                 }
             }
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
-                                     MultiBufferSource.BufferSource buffer,
-                                     int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
-        renderGuiText(properties, guiLines, font, graphics,
-                cursorPos, selectionPos, currentLine, blink, lineSpacing);
-    }
-
     /**
      * Renders multiple lines in a GUI
      */
-    public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphics graphics,
+    public static void renderGuiText(RenderProperties properties, String[] guiLines, Font font, GuiGraphicsExtractor graphics,
                                      int cursorPos, int selectionPos, int currentLine, boolean blink, int lineSpacing) {
 
         int nOfLines = guiLines.length;
@@ -165,7 +139,14 @@ public class TextUtil {
                                   MultiBufferSource buffer, RenderProperties properties) {
         if (formattedCharSequences == null) return;
         float x = -font.width(formattedCharSequences) / 2f;
-        renderLineInternal(formattedCharSequences, font, x, yOffset, poseStack.last().pose(), buffer, properties);
+        Matrix4f matrix4f = poseStack.last().pose();
+        if (properties.outline) {
+            font.drawInBatch8xOutline(formattedCharSequences, x, yOffset, properties.textColor, properties.darkenedColor,
+                    matrix4f, buffer, properties.light);
+        } else {
+            font.drawInBatch(formattedCharSequences, x, yOffset, properties.darkenedColor, false,
+                    matrix4f, buffer, Font.DisplayMode.NORMAL, 0, properties.light);
+        }
     }
 
     /**
@@ -177,19 +158,6 @@ public class TextUtil {
             renderLine(charSequences[i], font, ySeparation * i, poseStack, buffer, properties);
         }
     }
-
-    @Deprecated(forRemoval = true)
-    private static void renderLineInternal(FormattedCharSequence formattedCharSequences, Font font, float xOffset, float yOffset,
-                                           Matrix4f matrix4f, MultiBufferSource buffer, RenderProperties properties) {
-        if (properties.outline) {
-            font.drawInBatch8xOutline(formattedCharSequences, xOffset, yOffset, properties.textColor, properties.darkenedColor,
-                    matrix4f, buffer, properties.light);
-        } else {
-            font.drawInBatch(formattedCharSequences, xOffset, yOffset, properties.darkenedColor, false,
-                    matrix4f, buffer, Font.DisplayMode.NORMAL, 0, properties.light);
-        }
-    }
-
 
     private static int getDarkenedColor(int color, boolean glowing, float mult) {
         if (color == DyeColor.BLACK.getTextColor() && glowing) return 0xFFF0EBCC;
@@ -226,7 +194,7 @@ public class TextUtil {
         } else {
             dark = color;
         }
-        return new RenderProperties(color, dark, outline, glowing ? LightTexture.FULL_BRIGHT : combinedLight, style);
+        return new RenderProperties(color, dark, outline, glowing ? LightCoordsUtil.FULL_BRIGHT : combinedLight, style);
     }
 
 

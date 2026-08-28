@@ -11,7 +11,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 
 public abstract class ModConfigHolder {
 
-    private static final Map<ResourceLocation, ModConfigHolder> TRACKED_HOLDERS = new ConcurrentHashMap<>(); //wack. multithreading mod loading
+    private static final Map<Identifier, ModConfigHolder> TRACKED_HOLDERS = new ConcurrentHashMap<>(); //wack. multithreading mod loading
 
     public static void registerHolder(ModConfigHolder holder) {
         var old = TRACKED_HOLDERS.put(holder.getId(), holder);
@@ -43,43 +43,25 @@ public abstract class ModConfigHolder {
     }
 
     @Nullable
-    public static ModConfigHolder getHolder(ResourceLocation configId) {
+    public static ModConfigHolder getHolder(Identifier configId) {
         return TRACKED_HOLDERS.get(configId);
     }
 
-    @Deprecated(forRemoval = true)
-    public static void addTrackedSpec(ModConfigHolder holder) {
-        registerHolder(holder);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Collection<ModConfigHolder> getTrackedSpecs() {
-        return getTrackedHolders();
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static ModConfigHolder getConfigSpec(ResourceLocation configId) {
-        return getHolder(configId);
-    }
-
-    private final ResourceLocation configId;
+    private final Identifier configId;
     private final String fileName;
     private final Component readableName;
     private final Path filePath;
     private final ConfigType type;
     @Nullable
     private final Runnable changeCallback;
-    // short name and full dotted path -> effective enabled supplier, filled in by the builder at build()
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
 
-    protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
+    protected ModConfigHolder(Identifier id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this(id, fileExtension, configDirectory, type, changeCallback, true);
     }
 
-    // untracked holders only mirror another mod's config (the foreign-config bridge). They stay out of the global
-    // registry, both to avoid a duplicate-id clash on re-open and to stay out of sync/enumeration logic
-    protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback, boolean tracked) {
+    // untracked holders mirror another mod's config and stay out of the global registry
+    protected ModConfigHolder(Identifier id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback, boolean tracked) {
         this.configId = id;
         this.fileName = id.getNamespace() + "-" + id.getPath() + "." + fileExtension;
         this.filePath = configDirectory.resolve(fileName);
@@ -128,7 +110,7 @@ public abstract class ModConfigHolder {
         return configId.getNamespace();
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return configId;
     }
 
@@ -170,7 +152,7 @@ public abstract class ModConfigHolder {
 
     @Nullable
     @ClientOnly
-    public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
+    public abstract Screen makeScreen(Screen parent, @Nullable Identifier background);
 
     @Nullable
     public ConfigCategory getConfigRoot() {

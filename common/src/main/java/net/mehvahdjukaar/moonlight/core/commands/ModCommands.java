@@ -21,7 +21,6 @@ public class ModCommands {
                         .then(RegistryCommand.register())
                         .then(BlockStateStatsCommand.register(context))
                         .then(IUsedToRollTheDice.register(context))
-                        .then(DebugRenderersCommand.register(context))
                         .then(RandomTeleportCommand.register(context))
                         .then(ChangeDimensionCommand.register(context))
                         .then(BackCommand.register(context))

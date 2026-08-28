@@ -15,6 +15,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -108,10 +109,10 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.byId(this.typeId);
 
         Level world = context.getPlayer().level();
-        Entity e = type.create(world);
+        Entity e = type.create(world, EntitySpawnReason.LOAD);
         if (e != null) {
             e.syncPacketPositionCodec(this.posX, this.posY, this.posZ);
-            e.absMoveTo(this.posX, this.posY, this.posZ, (this.yaw * 360) / 256.0F, (this.pitch * 360) / 256.0F);
+            e.absSnapTo(this.posX, this.posY, this.posZ, (this.yaw * 360) / 256.0F, (this.pitch * 360) / 256.0F);
             e.setYHeadRot((this.headYaw * 360) / 256.0F);
             e.setYBodyRot((this.headYaw * 360) / 256.0F);
             e.setId(this.entityId);
@@ -120,7 +121,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
 
             clientSideStuff(world, e);
 
-            e.lerpMotion(this.velX / 8000.0, this.velY / 8000.0, this.velZ / 8000.0);
+            e.lerpMotion(new Vec3(this.velX / 8000.0, this.velY / 8000.0, this.velZ / 8000.0));
             if (e instanceof IExtraClientSpawnData spawnData) {
                 spawnData.readSpawnData(this.extraBuf);
             }

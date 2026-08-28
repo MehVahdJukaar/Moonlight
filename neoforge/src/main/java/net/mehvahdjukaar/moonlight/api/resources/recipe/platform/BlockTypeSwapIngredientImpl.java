@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe.platform;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
@@ -17,8 +19,8 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends BlockTypeS
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
-        return getMatchingStacks().stream();
+    public Stream<Holder<Item>> items() {
+        return getMatchingStacks().stream().map(ItemStack::typeHolder);
     }
 
     @Override

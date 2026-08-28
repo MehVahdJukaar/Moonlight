@@ -17,8 +17,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 
 import java.util.EnumSet;
@@ -33,7 +33,7 @@ public class BackCommand {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return Commands.literal("back")
-                .requires((p) -> p.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(BackCommand::teleportBack);
     }
 
@@ -88,7 +88,7 @@ public class BackCommand {
         double y = pos.getY();
         double z = pos.getZ() + 0.5;
 
-        Set<RelativeMovement> set = EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT);
+        Set<Relative> set = EnumSet.of(Relative.X_ROT, Relative.Y_ROT);
         performTeleport(source, player, targetLevel, x, y, z, set);
 
         source.sendSuccess(() ->
@@ -102,7 +102,7 @@ public class BackCommand {
     }
 
     private static void performTeleport(CommandSourceStack source, Entity entity, ServerLevel level,
-                                        double x, double y, double z, Set<RelativeMovement> relativeList)
+                                        double x, double y, double z, Set<Relative> relativeList)
             throws CommandSyntaxException {
         BlockPos blockPos = BlockPos.containing(x, y, z);
         if (!Level.isInSpawnableBounds(blockPos)) {
@@ -110,7 +110,7 @@ public class BackCommand {
         } else {
             float f = Mth.wrapDegrees(entity.getYRot());
             float g = Mth.wrapDegrees(entity.getXRot());
-            if (entity.teleportTo(level, x, y, z, relativeList, f, g)) {
+            if (entity.teleportTo(level, x, y, z, relativeList, f, g, true)) {
                 label23:
                 {
                     if (entity instanceof LivingEntity livingEntity) {

@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.JsonHighlighter;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -94,24 +94,24 @@ public class JsonEditScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
         renderDescription(graphics);
         if (!this.done.active) {
-            graphics.drawCenteredString(this.font, Component.translatable("gui.moonlight.config.json_invalid"),
+            graphics.centeredText(this.font, Component.translatable("gui.moonlight.config.json_invalid"),
                     this.width / 2, this.height - 42, ConfigGuiColors.ERROR);
         }
     }
 
-    private void renderDescription(GuiGraphics graphics) {
+    private void renderDescription(GuiGraphicsExtractor graphics) {
         if (this.descriptionLines.isEmpty()) return;
         int bandBottom = HEADER + this.descriptionBlockHeight;
         graphics.fill(0, HEADER, this.width, bandBottom, 0xFF121218);
         graphics.fill(0, bandBottom - 1, this.width, bandBottom, ConfigGuiColors.HEADER_SEPARATOR);
         int y = HEADER + DESC_PAD_TOP;
         for (FormattedCharSequence line : this.descriptionLines) {
-            graphics.drawString(this.font, line, SIDE_MARGIN, y, ConfigGuiColors.DESCRIPTION);
+            graphics.text(this.font, line, SIDE_MARGIN, y, ConfigGuiColors.DESCRIPTION);
             y += this.font.lineHeight;
         }
     }

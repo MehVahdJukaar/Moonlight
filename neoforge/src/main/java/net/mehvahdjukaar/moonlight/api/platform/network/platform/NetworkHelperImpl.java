@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -64,6 +65,7 @@ public class NetworkHelperImpl {
                             .versioned(versionStr)
                             .executesOn(HandlerThread.MAIN)
                             .playBidirectional(messageType.type(), messageType.codec(),
+                                    (m, c) -> m.handle(new ContextWrapper(c)),
                                     (m, c) -> m.handle(new ContextWrapper(c)));
                 }
             };
@@ -109,8 +111,7 @@ public class NetworkHelperImpl {
     }
 
     public static void sendToClientPlayer(ServerPlayer serverPlayer, CustomPacketPayload message) {
-        // An optional payload is one the receiver is allowed not to have, and NeoForge throws rather than drop
-        // a payload the connection never negotiated. Required payloads can't be missing, so skip the lookup.
+        // neoforge throws on payloads the connection never negotiated
         if (NetworkHelper.isOptional(message.type()) && !canSendToPlayer(serverPlayer, message.type())) return;
 
         PacketDistributor.sendToPlayer(serverPlayer, message);
@@ -138,7 +139,7 @@ public class NetworkHelperImpl {
     }
 
     public static void sendToServer(CustomPacketPayload message) {
-        PacketDistributor.sendToServer(message);
+        ClientPacketDistributor.sendToServer(message);
     }
 
 

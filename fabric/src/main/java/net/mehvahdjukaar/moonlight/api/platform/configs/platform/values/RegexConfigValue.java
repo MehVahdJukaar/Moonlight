@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 /**
  * A string config value constrained to be a valid regular expression. Stored exactly like a
- * {@link StringConfigValue}; the distinct type just tells the screen to use the regex highlighting field.
+ * StringConfigValue; the distinct type just tells the screen to use the regex highlighting field.
  */
 public class RegexConfigValue extends StringConfigValue {
 

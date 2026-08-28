@@ -13,9 +13,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -30,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.api.set.wood.VanillaWoodChildKeys.*;
@@ -67,22 +68,13 @@ public class WoodType extends BlockType {
     //mega ugly. i cant initialize it immediately as mods might have not run setup yet
     private final Supplier<net.minecraft.world.level.block.state.properties.WoodType> vanillaType = Suppliers.memoize(this::detectVanillaWood);
 
-    private final Supplier<Boat.Type> boatType = Suppliers.memoize(this::detectVanillaBoat);
+    private final Supplier<EntityType<? extends AbstractBoat>> boatType = Suppliers.memoize(this::detectVanillaBoat);
 
+    // each boat is its own entity type, the boat item is the only link to a wood type
     @Nullable
-    private Boat.Type detectVanillaBoat() {
-        if (this == VanillaWoodTypes.OAK) return Boat.Type.OAK;
-        var id = this.getId();
-        var conventions = Set.of(id.getPath(),
-                id.getNamespace() + id.getPath(),
-                id.getNamespace() + "_" + id.getPath(),
-                id.getNamespace() + "/" + id.getPath(),
-                id.toString());
-        for (var s : conventions) {
-            var o = Boat.Type.byName(s);
-            if (o != Boat.Type.OAK) {
-                return o;
-            }
+    private EntityType<? extends AbstractBoat> detectVanillaBoat() {
+        if (this.getItemOfThis(BOAT) instanceof BoatItem boat) {
+            return boat.entityType;
         }
         return null;
     }
@@ -101,11 +93,11 @@ public class WoodType extends BlockType {
         return o.orElse(null);
     }
 
-    public WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
+    public WoodType(Identifier id, Block baseBlock, Block logBlock) {
         this(id, baseBlock, logBlock, defaultIsBambooLike(id));
     }
 
-    public WoodType(ResourceLocation id, Block baseBlock, Block logBlock, boolean bambooLike) {
+    public WoodType(Identifier id, Block baseBlock, Block logBlock, boolean bambooLike) {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
@@ -116,7 +108,7 @@ public class WoodType extends BlockType {
      * Bamboo-like wood types use rafts instead of boats and have different model offsets.
      * Defaults to true when "bamboo" appears in the wood type name (path), not the namespace.
      */
-    public static boolean defaultIsBambooLike(ResourceLocation id) {
+    public static boolean defaultIsBambooLike(Identifier id) {
         String name = id.getPath();
         int slash = name.lastIndexOf('/');
         if (slash >= 0) {
@@ -140,7 +132,7 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    public Boat.Type toVanillaBoat() {
+    public EntityType<? extends AbstractBoat> toVanillaBoat() {
         return this.boatType.get();
     }
 
@@ -152,13 +144,13 @@ public class WoodType extends BlockType {
     }
 
     @NotNull
-    public Boat.Type toVanillaBoatOrOak() {
+    public EntityType<? extends AbstractBoat> toVanillaBoatOrOak() {
         var v = toVanillaBoat();
         if (v != null) return v;
         if (this.isBambooLike()) {
-            return Boat.Type.BAMBOO;
+            return EntityType.BAMBOO_RAFT;
         }
-        return Boat.Type.OAK;
+        return EntityType.OAK_BOAT;
     }
 
     /**
@@ -214,7 +206,7 @@ public class WoodType extends BlockType {
 
         if (fence != null && CompatHandler.DIAGONALFENCES) {
             var diagonalFence = BuiltInRegistries.BLOCK.getOptional(
-                    ResourceLocation.fromNamespaceAndPath("diagonalfences", Utils.getID(fence)
+                    Identifier.fromNamespaceAndPath("diagonalfences", Utils.getID(fence)
                             .toString().replace(":", "/")));
             diagonalFence.ifPresent(block -> this.addChild("diagonalfences:fence", block));
         }
@@ -240,9 +232,9 @@ public class WoodType extends BlockType {
     @Nullable
     protected <V> V findRelatedEntry(String prefixOrInfix, String suffix, Registry<V> reg) {
         if (!suffix.isEmpty()) suffix = "_" + suffix;
-        ResourceLocation[] targets = {
-                ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_" + prefixOrInfix + suffix),
-                ResourceLocation.fromNamespaceAndPath(id.getNamespace(), prefixOrInfix + "_" + id.getPath() + suffix),
+        Identifier[] targets = {
+                Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_" + prefixOrInfix + suffix),
+                Identifier.fromNamespaceAndPath(id.getNamespace(), prefixOrInfix + "_" + id.getPath() + suffix),
                 //weird conventions here
                 id.withPath(id.getPath() + "_planks_" + prefixOrInfix + suffix),
                 // TFC & AFC: Include children of wood_type: stairs, slab...
@@ -293,18 +285,18 @@ public class WoodType extends BlockType {
         if (this.id.getNamespace().matches("tfc|afc")) {
             String prefix_ = prefix.isEmpty() ? "" : prefix + "_";
             var o = BuiltInRegistries.BLOCK.getOptional(
-                    ResourceLocation.fromNamespaceAndPath(this.getNamespace(),
+                    Identifier.fromNamespaceAndPath(this.getNamespace(),
                             "wood/" + prefix_ + suffix + "/" + id.getPath()));
             if (o.isPresent()) return o.get();
         }
 
-        List<ResourceLocation> targets = makeKnownIDConventionsAffix(
+        List<Identifier> targets = makeKnownIDConventionsAffix(
                 this.id.getNamespace(), this.id.getPath(),
                 prefix, suffix, Utils.getID(this.log).getPath());
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, targets);
     }
 
-    private static @NotNull List<ResourceLocation> makeKnownIDConventionsAffix(
+    private static @NotNull List<Identifier> makeKnownIDConventionsAffix(
             String myNamespace, String myPath,
             String prefixOrInfix, String suffix,
             @Nullable String alternateNamespace) {
@@ -314,26 +306,26 @@ public class WoodType extends BlockType {
         String _infix = prefixOrInfix.isEmpty() ? "" : "_" + prefixOrInfix;
         String _suffix = suffix.isEmpty() ? "" : "_" + suffix;
 
-        List<ResourceLocation> targets = new ArrayList<>();
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + _infix + _suffix));
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, myPath + _suffix + _infix));
-        targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath + _suffix));
+        List<Identifier> targets = new ArrayList<>();
+        targets.add(Identifier.fromNamespaceAndPath(myNamespace, myPath + _infix + _suffix));
+        targets.add(Identifier.fromNamespaceAndPath(myNamespace, myPath + _suffix + _infix));
+        targets.add(Identifier.fromNamespaceAndPath(myNamespace, prefix_ + myPath + _suffix));
         if (alternateNamespace != null)
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, alternateNamespace + _infix + _suffix));
+            targets.add(Identifier.fromNamespaceAndPath(myNamespace, alternateNamespace + _infix + _suffix));
         if (noneEmpty && alternateNamespace != null)
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + _suffix));
+            targets.add(Identifier.fromNamespaceAndPath(myNamespace, prefix_ + alternateNamespace + _suffix));
 
         //For things like grimwood_wood -> grimwood
         if (myPath.endsWith(suffix)) {
-            targets.add(ResourceLocation.fromNamespaceAndPath(myNamespace, prefix_ + myPath));
+            targets.add(Identifier.fromNamespaceAndPath(myNamespace, prefix_ + myPath));
         }
         return targets;
     }
 
-    static List<ResourceLocation> makeKnownIDConventions(ResourceLocation id, String... affixKeyword) {
+    static List<Identifier> makeKnownIDConventions(Identifier id, String... affixKeyword) {
         String myPath = id.getPath();
         String myNamespace = id.getNamespace();
-        List<ResourceLocation> possibleTargets = new ArrayList<>();
+        List<Identifier> possibleTargets = new ArrayList<>();
         for (String affix : affixKeyword) {
             possibleTargets.addAll(makeKnownIDConventionsAffix(myNamespace, myPath, "", affix, null));
             possibleTargets.addAll(makeKnownIDConventionsAffix(myNamespace, myPath, affix, "", null));
@@ -342,13 +334,13 @@ public class WoodType extends BlockType {
     }
 
     @Nullable
-    static Block findLog(ResourceLocation id) {
+    static Block findLog(Identifier id) {
         var tests = makeKnownIDConventions(id, "log", "stem", "stalk", "hyphae");
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
     }
 
     @Nullable
-    static Block findPlanks(ResourceLocation id) {
+    static Block findPlanks(Identifier id) {
         var tests = makeKnownIDConventions(id, "planks", "plank");
         return Utils.findFirstInRegistry(BuiltInRegistries.BLOCK, tests);
     }
@@ -371,7 +363,7 @@ public class WoodType extends BlockType {
         @Nullable
         private Boolean bambooLike;
 
-        public Finder(ResourceLocation id) {
+        public Finder(Identifier id) {
             super(id, WoodTypeRegistry.INSTANCE);
             this.log(() -> findLog(id)); // defaults
             this.planks(() -> findPlanks(id)); // defaults
@@ -383,7 +375,7 @@ public class WoodType extends BlockType {
             return this;
         }
 
-        public Finder planks(ResourceLocation id) {
+        public Finder planks(Identifier id) {
             return this.planks(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find planks block: " + id)
             ));
@@ -415,8 +407,8 @@ public class WoodType extends BlockType {
             return this;
         }
 
-        /// @param id Full Id of MudType as ResourceLocation
-        public Finder log(ResourceLocation id) {
+        /// @param id Full Id of MudType as Identifier
+        public Finder log(Identifier id) {
             return this.log(() -> BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(
                     () -> new IllegalStateException("Failed to find log block: " + id)));
         }
@@ -442,7 +434,7 @@ public class WoodType extends BlockType {
         }
 
         /**
-         * Overrides the default bamboo-like detection ({@link WoodType#defaultIsBambooLike(ResourceLocation)}).
+         * Overrides the default bamboo-like detection (WoodType.defaultIsBambooLike).
          */
         public Finder bambooLike(boolean bambooLike) {
             this.bambooLike = bambooLike;
@@ -473,53 +465,6 @@ public class WoodType extends BlockType {
                 }
             }
             return Optional.empty();
-        }
-
-// ─────────────────────────────────────────── Marked For Removal ────────────────────────────────────────────
-
-        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public Finder(ResourceLocation id, Supplier<Block> planks, Supplier<Block> log) {
-            super(id, WoodTypeRegistry.INSTANCE);
-            this.planksFinder = planks;
-            this.logFinder = log;
-        }
-
-        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public static Finder simple(String modId, String woodTypeName, String planksName, String logName) {
-            return simple(ResourceLocation.fromNamespaceAndPath(modId, woodTypeName), ResourceLocation.fromNamespaceAndPath(modId, planksName),
-                    ResourceLocation.fromNamespaceAndPath(modId, logName));
-        }
-
-        /// USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
-        @Deprecated(forRemoval = true)
-        public static Finder simple(ResourceLocation woodTypeName, ResourceLocation planksName, ResourceLocation logName) {
-            return new Finder(woodTypeName,
-                    () -> BuiltInRegistries.BLOCK.get(planksName),
-                    () -> BuiltInRegistries.BLOCK.get(logName));
-        }
-
-        /**
-         * USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
-         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
-         * <br>OR
-         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
-         */
-        @Deprecated(forRemoval = true)
-        public void addChild(String childType, String childName) {
-            this.childBlock(childType, childName);
-        }
-
-        /**
-         * USE {@link WoodTypeRegistry#addSimpleFinder(String, String)}
-         * <br>add {@link SetFinderBuilder#childBlockAffix(String, String, String)}
-         * <br>OR
-         * <br>add {@link SetFinderBuilder#childBlockSuffix(String, String)}
-         */
-        @Deprecated(forRemoval = true)
-        public void addChild(String childType, ResourceLocation childName) {
-            this.childBlock(childType, childName);
         }
 
     }

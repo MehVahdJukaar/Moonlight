@@ -19,7 +19,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Map;
@@ -88,8 +88,8 @@ public class CommonConfigs {
             builder.comment("A double, edited as a text field").define("test_double", 2.0, 0, 22);
             builder.comment("A double, edited as a slider").defineSlider("test_double_slider", 0.5, 0.0, 1.0);
             builder.comment("A percentage, edited as a slider showing %").definePercentage("test_percent", 0.5);
-            builder.comment("An item picked from the registry, with icon").defineItem("test_item", ResourceLocation.parse("minecraft:diamond"));
-            builder.comment("A block picked from the registry, with icon").defineBlock("test_block", ResourceLocation.parse("minecraft:stone"));
+            builder.comment("An item picked from the registry, with icon").defineItem("test_item", Identifier.parse("minecraft:diamond"));
+            builder.comment("A block picked from the registry, with icon").defineBlock("test_block", Identifier.parse("minecraft:stone"));
             builder.comment("A min/max range shown as two fields on one row").defineRange("test_range", Range.of(2, 8), 0, 10);
             builder.comment("A Vec3 shown as three x/y/z fields on one row").defineVec3("test_vec3", new Vec3(0.5, 1.0, -0.5), -10, 10);
             builder.comment("A Vec3i shown as three x/y/z integer fields on one row").defineVec3i("test_vec3i", new Vec3i(1, 2, 3), -16, 16);
@@ -110,7 +110,7 @@ public class CommonConfigs {
                     .defineList("test_dropdown_list", List.of("medium"), List.of("low", "medium", "high", "ultra"));
             builder.comment("An item list, each entry picked from an item dropdown with icons")
                     .defineItemList("test_item_list",
-                            List.of(ResourceLocation.parse("minecraft:diamond"), ResourceLocation.parse("minecraft:emerald")));
+                            List.of(Identifier.parse("minecraft:diamond"), Identifier.parse("minecraft:emerald")));
 
             JsonObject json = new JsonObject();
             json.addProperty("example", 42);
@@ -152,24 +152,20 @@ public class CommonConfigs {
     public static void init() {
     }
 
-    /** Dev-only sample bean for {@code defineBean}: a plain POJO Gson can round-trip. */
     public static class TestBean {
         public String name = "hello";
         public int count = 3;
         public boolean flag = true;
     }
 
-    /** Dev-only sample record bean: Gson (2.10+) round-trips records via their canonical constructor. */
     public record TestRecordBean(String label, int amount) {
     }
 
-    /** Dev-only sample for {@code defineObject}: a codec object whose fields drive a generated form. */
     public record SchemaTest(String name, boolean enabled, int level, Direction facing, int color,
                              Item item, TagKey<Item> tag, List<String> tags, Nested nested,
                              List<Nested> entries, Map<String, String> extra) {
     }
 
-    /** Nested record inside {@link SchemaTest}: rendered as its own navigable sub category. */
     public record Nested(int x, double weight, float speed) {
     }
 }

@@ -93,8 +93,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // renders as the check/cross toggle instead of the plain ON/OFF button. A category gate looks the same but is keyed
-        // off the owning category's gate() rather than this flag
+        // a feature boolean renders as the check/cross toggle instead of the ON/OFF button
         private boolean feature;
 
         public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
@@ -374,7 +373,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         private final Supplier<JsonElement> json;
 
-        // stays lazy. On NeoForge the spec can't be read while defining, so never call json.get() here
+        // on NeoForge the spec can't be read at define time, never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
             super(title, description, null);
             this.json = json;

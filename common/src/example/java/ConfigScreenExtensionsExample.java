@@ -1,12 +1,12 @@
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // for ConfigScreenExtensions class. Adds your own buttons next to Back on your config screen
 public class ConfigScreenExtensionsExample {
 
     private static final String MOD_ID = "my_mod";
-    private static final ResourceLocation WIKI_SPRITE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "wiki");
+    private static final Identifier WIKI_SPRITE = Identifier.fromNamespaceAndPath(MOD_ID, "wiki");
 
     // Call on client init
     public static void init() {

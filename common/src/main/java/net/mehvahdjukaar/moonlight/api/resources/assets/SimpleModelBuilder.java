@@ -2,20 +2,20 @@ package net.mehvahdjukaar.moonlight.api.resources.assets;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SimpleModelBuilder {
-    private final ResourceLocation parent;
-    private final Map<String, ResourceLocation> textures = new HashMap<>();
+    private final Identifier parent;
+    private final Map<String, Identifier> textures = new HashMap<>();
 
-    public SimpleModelBuilder(ResourceLocation parent) {
+    public SimpleModelBuilder(Identifier parent) {
         this.parent = parent;
     }
 
-    public SimpleModelBuilder texture(String name, ResourceLocation texture) {
+    public SimpleModelBuilder texture(String name, Identifier texture) {
         this.textures.put(name, texture);
         return this;
     }

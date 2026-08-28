@@ -15,8 +15,8 @@ import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScree
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModContainer;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.ModConfig;
@@ -49,7 +49,7 @@ public final class ForeignConfigBridge {
     private static final String CONFIGURED_PACKAGE = "com.mrcrayfish.configured.";
 
     @Nullable
-    public static Screen createScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen createScreen(String modId, Screen parent, @Nullable Identifier background) {
         List<ModConfigHolder> holders = holdersFor(modId);
         if (holders.isEmpty()) return null;
         return MoonlightConfigSelectScreen.create(modId, holders, parent, background);
@@ -126,7 +126,7 @@ public final class ForeignConfigBridge {
             default -> ConfigType.COMMON;
         };
         String typeName = mc.getType().name().toLowerCase(Locale.ROOT);
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, typeName);
+        Identifier id = Identifier.fromNamespaceAndPath(modId, typeName);
 
         ConfigCategory root = new ConfigCategory(Component.empty());
         walk(spec, spec.getValues(), List.of(), root);
@@ -178,7 +178,7 @@ public final class ForeignConfigBridge {
             return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
         }
         if (sample instanceof Long l) {
-            // no long control: present it as an int when the range fits, else leave it uneditable
+            // no long control, use the int one when the range fits
             long[] r = longRange(vs);
             if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
                 return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);

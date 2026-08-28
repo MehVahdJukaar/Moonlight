@@ -4,7 +4,7 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +32,7 @@ public class NetworkHelper {
         <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
     }
 
-    private static final Set<ResourceLocation> OPTIONAL_PAYLOADS = new HashSet<>();
+    private static final Set<Identifier> OPTIONAL_PAYLOADS = new HashSet<>();
 
     @ApiStatus.Internal
     public static void markOptional(CustomPacketPayload.Type<?> type) {
@@ -43,6 +43,7 @@ public class NetworkHelper {
         return OPTIONAL_PAYLOADS.contains(type.id());
     }
 
+    /** Whether the player's client negotiated this channel. Always true for required payloads. */
     @PlatformImpl
     public static boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
         throw new AssertionError();
@@ -90,16 +91,6 @@ public class NetworkHelper {
     @PlatformImpl
     public static void sendToAllClientPlayersTrackingChunk(ServerLevel level, ChunkPos pos, CustomPacketPayload message) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void sentToAllClientPlayersTrackingEntity(Entity target, CustomPacketPayload message) {
-        sendToAllClientPlayersTrackingEntity(target, message);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void sentToAllClientPlayersTrackingEntityAndSelf(Entity target, Message message) {
-        sendToAllClientPlayersTrackingEntityAndSelf(target, message);
     }
 
     @PlatformImpl

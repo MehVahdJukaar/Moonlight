@@ -31,13 +31,13 @@ public class ParticleUtil {
             double azimuth = azimuthIncrement * i; // Rotation around the axis
 
             if (angleVariation != 0) {
-                inclination += level.random.nextFloat() * angleVariation - angleVariation / 2;
-                azimuth += level.random.nextFloat() * angleVariation - angleVariation / 2;
+                inclination += level.getRandom().nextFloat() * angleVariation - angleVariation / 2;
+                azimuth += level.getRandom().nextFloat() * angleVariation - angleVariation / 2;
             }
 
             float s = speed;
             if (speedVariation != 0) {
-                s += level.random.nextFloat() * speedVariation - speedVariation / 2;
+                s += level.getRandom().nextFloat() * speedVariation - speedVariation / 2;
             }
 
             double vx = s * Math.sin(inclination) * Math.cos(azimuth);
@@ -57,7 +57,7 @@ public class ParticleUtil {
     public static void spawnParticleOnBoundingBox(AABB bb, Level level, ParticleOptions particleOptions,
                                                   UniformInt uniformInt, float maxSpeed) {
 
-        RandomSource random = level.random;
+        RandomSource random = level.getRandom();
         float offset = 0.1f;
         Vec3 blockCenter = new Vec3(bb.minX - 0.5 + (bb.maxX - bb.minX) / 2f, bb.minY - 0.5 + (bb.maxY - bb.minY) / 2f, bb.minZ - 0.5 + (bb.maxZ - bb.minZ) / 2f);
         bb = bb.move(-blockCenter.x, -blockCenter.y, -blockCenter.z);
@@ -67,8 +67,8 @@ public class ParticleUtil {
             double x = random.nextDouble();
             double y = random.nextDouble();
             if (x > bb.minX && x < bb.maxX && y > bb.minY && y < bb.maxY) {
-                double dx = maxSpeed * level.random.nextDouble();
-                double dy = maxSpeed * level.random.nextDouble();
+                double dx = maxSpeed * level.getRandom().nextDouble();
+                double dy = maxSpeed * level.getRandom().nextDouble();
                 double dz = 0;
                 level.addParticle(particleOptions, blockCenter.x + x, blockCenter.y + y, blockCenter.z + bb.minZ - offset, dx, dy, dz);
             }
@@ -79,8 +79,8 @@ public class ParticleUtil {
             double x = random.nextDouble();
             double y = random.nextDouble();
             if (x > bb.minX && x < bb.maxX && y > bb.minY && y < bb.maxY) {
-                double dx = maxSpeed * level.random.nextDouble();
-                double dy = maxSpeed * level.random.nextDouble();
+                double dx = maxSpeed * level.getRandom().nextDouble();
+                double dy = maxSpeed * level.getRandom().nextDouble();
                 double dz = 0;
                 level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + y, blockCenter.z() + bb.maxZ + offset, dx, dy, dz);
             }
@@ -92,8 +92,8 @@ public class ParticleUtil {
             double y = random.nextDouble();
             if (z > bb.minZ && z < bb.maxZ && y > bb.minY && y < bb.maxY) {
                 double dx = 0;
-                double dy = maxSpeed * level.random.nextDouble();
-                double dz = maxSpeed * level.random.nextDouble();
+                double dy = maxSpeed * level.getRandom().nextDouble();
+                double dz = maxSpeed * level.getRandom().nextDouble();
                 level.addParticle(particleOptions, blockCenter.x() + bb.minX - offset, blockCenter.y() + y, blockCenter.z() + z, dx, dy, dz);
             }
         }
@@ -104,8 +104,8 @@ public class ParticleUtil {
             double y = random.nextDouble();
             if (z > bb.minZ && z < bb.maxZ && y > bb.minY && y < bb.maxY) {
                 double dx = 0;
-                double dy = maxSpeed * level.random.nextDouble();
-                double dz = maxSpeed * level.random.nextDouble();
+                double dy = maxSpeed * level.getRandom().nextDouble();
+                double dz = maxSpeed * level.getRandom().nextDouble();
                 level.addParticle(particleOptions, blockCenter.x() + bb.maxX + offset, blockCenter.y() + y, blockCenter.z() + z, dx, dy, dz);
             }
         }
@@ -115,9 +115,9 @@ public class ParticleUtil {
             double x = random.nextDouble();
             double z = random.nextDouble();
             if (x > bb.minX && x < bb.maxX && z > bb.minZ && z < bb.maxZ) {
-                double dx = maxSpeed * level.random.nextDouble();
+                double dx = maxSpeed * level.getRandom().nextDouble();
                 double dy = 0;
-                double dz = maxSpeed * level.random.nextDouble();
+                double dz = maxSpeed * level.getRandom().nextDouble();
                 level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + bb.minY - offset, blockCenter.z() + z, dx, dy, dz);
             }
         }
@@ -127,9 +127,9 @@ public class ParticleUtil {
             double x = random.nextDouble();
             double z = random.nextDouble();
             if (x > bb.minX && x < bb.maxX && z > bb.minZ && z < bb.maxZ) {
-                double dx = maxSpeed * level.random.nextDouble();
+                double dx = maxSpeed * level.getRandom().nextDouble();
                 double dy = 0;
-                double dz = maxSpeed * level.random.nextDouble();
+                double dz = maxSpeed * level.getRandom().nextDouble();
                 level.addParticle(particleOptions, blockCenter.x() + x, blockCenter.y() + bb.maxY + offset, blockCenter.z() + z, dx, dy, dz);
             }
         }
@@ -139,7 +139,7 @@ public class ParticleUtil {
     public static void spawnParticlesOnBlockFaces(Level level, BlockPos pos, ParticleOptions particleOptions,
                                                   UniformInt uniformInt, float minSpeed, float maxSpeed, boolean perpendicular) {
         for (Direction direction : Direction.values()) {
-            int i = uniformInt.sample(level.random);
+            int i = uniformInt.sample(level.getRandom());
 
             for (int j = 0; j < i; ++j) {
                 spawnParticleOnFace(level, pos, direction, particleOptions, minSpeed, maxSpeed, perpendicular);
@@ -153,22 +153,22 @@ public class ParticleUtil {
         int i = direction.getStepX();
         int j = direction.getStepY();
         int k = direction.getStepZ();
-        double d0 = vec3.x + (i == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : i * 0.6D);
-        double d1 = vec3.y + (j == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : j * 0.6D);
-        double d2 = vec3.z + (k == 0 ? Mth.nextDouble(level.random, -0.5D, 0.5D) : k * 0.6D);
+        double d0 = vec3.x + (i == 0 ? Mth.nextDouble(level.getRandom(), -0.5D, 0.5D) : i * 0.6D);
+        double d1 = vec3.y + (j == 0 ? Mth.nextDouble(level.getRandom(), -0.5D, 0.5D) : j * 0.6D);
+        double d2 = vec3.z + (k == 0 ? Mth.nextDouble(level.getRandom(), -0.5D, 0.5D) : k * 0.6D);
         double dx;
         double dy;
         double dz;
         if (perpendicular) {
-            dx = i * Mth.randomBetween(level.random, minSpeed, maxSpeed);
-            dy = j * Mth.randomBetween(level.random, minSpeed, maxSpeed);
-            dz = k * Mth.randomBetween(level.random, minSpeed, maxSpeed);
+            dx = i * Mth.randomBetween(level.getRandom(), minSpeed, maxSpeed);
+            dy = j * Mth.randomBetween(level.getRandom(), minSpeed, maxSpeed);
+            dz = k * Mth.randomBetween(level.getRandom(), minSpeed, maxSpeed);
         } else {
             float d = maxSpeed - minSpeed;
 
-            dx = (i == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
-            dy = (j == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
-            dz = (k == 0) ? (minSpeed + d * level.random.nextDouble()) : 0.0D;
+            dx = (i == 0) ? (minSpeed + d * level.getRandom().nextDouble()) : 0.0D;
+            dy = (j == 0) ? (minSpeed + d * level.getRandom().nextDouble()) : 0.0D;
+            dz = (k == 0) ? (minSpeed + d * level.getRandom().nextDouble()) : 0.0D;
         }
         level.addParticle(particleOptions, d0, d1, d2, dx, dy, dz);
     }

@@ -18,7 +18,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,13 +35,13 @@ import java.util.stream.Stream;
 
 public class RegistryCommand {
     private static final long PAGE_SIZE = 8L;
-    private static final ResourceKey<Registry<Registry<?>>> ROOT_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("root"));
+    private static final ResourceKey<Registry<Registry<?>>> ROOT_REGISTRY_KEY = ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("root"));
     private static final DynamicCommandExceptionType UNKNOWN_REGISTRY = new DynamicCommandExceptionType((key) ->
             Component.translatable("commands.moonlight.registry.error.unknown_registry", key.toString()));
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("registry")
-                .requires((cs) -> cs.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("registry", ResourceKeyArgument.key(ROOT_REGISTRY_KEY))
                         .suggests(RegistryCommand::suggestRegistries)
                         .then(Commands.literal("list")
@@ -60,7 +60,7 @@ public class RegistryCommand {
                                 )
                         )
                         .then(Commands.literal("dump")
-                                .requires(cs -> cs.hasPermission(3))
+                                .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                                 .then(Commands.argument("file_name", StringArgumentType.string())
                                         .executes((ctx) -> {
                                             String fileName = StringArgumentType.getString(ctx, "file_name");
@@ -74,8 +74,8 @@ public class RegistryCommand {
     private static int dumpRegistry(CommandContext<CommandSourceStack> ctx, String fileName) throws CommandSyntaxException {
         ResourceKey<? extends Registry<?>> registryKey = getResourceKey(ctx, "registry", ROOT_REGISTRY_KEY).orElseThrow();
         CommandSourceStack source = ctx.getSource();
-        Registry<?> registry = source.getServer().registryAccess().registry(registryKey).orElseThrow(() ->
-                UNKNOWN_REGISTRY.create(registryKey.location()));
+        Registry<?> registry = source.getServer().registryAccess().lookup(registryKey).orElseThrow(() ->
+                UNKNOWN_REGISTRY.create(registryKey.identifier()));
 
         var dir = PlatHelper.getGamePath().resolve("registry_dumps");
 
@@ -106,16 +106,16 @@ public class RegistryCommand {
     private static int listElements(CommandContext<CommandSourceStack> ctx, int page, @Nullable String search) throws CommandSyntaxException {
         ResourceKey<? extends Registry<?>> registryKey = getResourceKey(ctx, "registry", ROOT_REGISTRY_KEY).orElseThrow();
         CommandSourceStack source = ctx.getSource();
-        Registry<?> registry = source.getServer().registryAccess().registry(registryKey).orElseThrow(() ->
-                UNKNOWN_REGISTRY.create(registryKey.location()));
+        Registry<?> registry = source.getServer().registryAccess().lookup(registryKey).orElseThrow(() ->
+                UNKNOWN_REGISTRY.create(registryKey.identifier()));
         long elementCount = registry.size();
         source.sendSuccess(() -> createMessage(
                         Component.translatable(
                                 "commands.moonlight.registry.registry_key",
-                                Component.literal(registryKey.location().toString()).withStyle(ChatFormatting.GOLD)
+                                Component.literal(registryKey.identifier().toString()).withStyle(ChatFormatting.GOLD)
                         ),
                         page,
-                        () -> registry.keySet().stream().map(ResourceLocation::toString),
+                        () -> registry.keySet().stream().map(Identifier::toString),
                         search),
                 false);
         return (int) elementCount;
@@ -132,8 +132,8 @@ public class RegistryCommand {
         if (count > 0L) {
             component = ComponentUtils.wrapInSquareBrackets(component.withStyle((s) -> s
                     .withColor(ChatFormatting.GREEN)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, allElementNames))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.moonlight.registry.copy_elements_names")))));
+                    .withClickEvent(new ClickEvent.CopyToClipboard(allElementNames))
+                    .withHoverEvent(new HoverEvent.ShowText(Component.translatable("commands.moonlight.registry.copy_elements_names")))));
             component = Component.translatable("commands.moonlight.registry.page_info", component, actualPage, totalPages);
         }
 
@@ -149,7 +149,7 @@ public class RegistryCommand {
 
     private static CompletableFuture<Suggestions> suggestRegistries(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         Stream<String> strings = ctx.getSource().registryAccess().registries().map(RegistryAccess.RegistryEntry::key)
-                .map(ResourceKey::location).map(ResourceLocation::toString);
+                .map(ResourceKey::identifier).map(Identifier::toString);
         Objects.requireNonNull(builder);
         strings.forEach(builder::suggest);
         return builder.buildFuture();

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map.decoration;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
@@ -10,7 +11,7 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.level.LevelAccessor;
@@ -24,14 +25,14 @@ import java.util.Optional;
 //Base type for simple data-driven type. Basically a simple version of CustomDecorationType that can be serialized
 public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDecoration, SimpleMapMarker> {
 
-    private static final ResourceLocation FACTORY_ID = Moonlight.res("json_decoration_type");
+    private static final Identifier FACTORY_ID = Moonlight.res("json_decoration_type");
     static final Codec<MLJsonMapDecorationType> CODEC;
 
     static {
         CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 //purposefully lenient
                 RuleTest.CODEC.lenientOptionalFieldOf("target_block").forGetter(MLJsonMapDecorationType::getTarget),
-                ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(MLJsonMapDecorationType::getDisplayName),
+                CodecUtils.FLAT_COMPONENT.optionalFieldOf("name").forGetter(MLJsonMapDecorationType::getDisplayName),
                 Codec.FLOAT.optionalFieldOf("rotation", 0f).forGetter(MLJsonMapDecorationType::getRotation),
                 ColorUtils.CODEC.optionalFieldOf("map_color", 0).forGetter(MLJsonMapDecorationType::getDefaultMapColor),
                 //purposefully lenient for the client codec so we silently fail and dont send info we dont need as they rely on tags and we arent given registry ops there
@@ -67,7 +68,7 @@ public final class MLJsonMapDecorationType extends MLMapDecorationType<MLMapDeco
     }
 
     @Override
-    public ResourceLocation getCustomFactoryID() {
+    public Identifier getCustomFactoryID() {
         return FACTORY_ID;
     }
 

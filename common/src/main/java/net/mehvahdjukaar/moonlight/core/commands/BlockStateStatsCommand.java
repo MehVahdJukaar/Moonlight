@@ -26,7 +26,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext dispatcher) {
         return Commands.literal("blockstate_stats")
-                .requires(cs -> cs.hasPermission(Commands.LEVEL_OWNERS))
+                .requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .executes(new BlockStateStatsCommand());
     }
 
@@ -45,8 +45,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
             totalBlocks++;
             blocksList.add(block);
 
-            // Get mod ID
-            String modId = block.builtInRegistryHolder().key().location().getNamespace();
+            String modId = block.builtInRegistryHolder().key().identifier().getNamespace();
 
             // Count blocks per mod
             modBlockCounts.put(modId, modBlockCounts.getOrDefault(modId, 0) + 1);
@@ -63,13 +62,11 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
         Path outputPath = PlatHelper.getGamePath().resolve("blockstate_stats.txt");
         try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
 
-            // --- Basic Info ---
             writer.write("=== Minecraft Blockstate Statistics ===\n");
             writer.write(String.format("Total blocks: %d%n", totalBlocks));
             writer.write(String.format("Total blockstates: %d%n", totalBlockStates));
             writer.write(String.format("Average blockstates per block: %.2f%n%n", averageBlockStates));
 
-            // --- Blocks per mod (sorted) ---
             writer.write("--- Blocks per Mod ---\n");
             modBlockCounts.entrySet().stream()
                     .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // descending
@@ -84,7 +81,6 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
 
             writer.write("\n");
 
-            // --- Blocks with above-average blockstates (detailed) ---
             writer.write("--- Blocks with More Than Average Blockstates ---\n");
             blocksList.stream()
                     .map(block -> new AbstractMap.SimpleEntry<>(block, block.getStateDefinition().getPossibleStates().size()))
@@ -118,7 +114,7 @@ public class BlockStateStatsCommand implements Command<CommandSourceStack> {
             // Click action not allow on dedicated servers as client cannot click link to a server's file path.
             if (PlatHelper.isIntegratedServer()) {
                 clickablePath.withStyle((style) -> style
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, outputPath.toString())));
+                        .withClickEvent(new ClickEvent.OpenFile(outputPath.toString())));
             }
 
 

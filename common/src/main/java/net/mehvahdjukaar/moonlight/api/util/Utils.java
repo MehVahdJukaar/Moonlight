@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
@@ -23,17 +24,18 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.StatType;
@@ -48,15 +50,20 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -72,6 +79,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -86,12 +94,8 @@ import java.util.function.Supplier;
 
 public class Utils {
 
-    @Deprecated(forRemoval = true)
-    public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace) {
-        return openGuiIfPossible(be, player, stack, hitFace, new Vec3(0.5, 0.5, 0.5));
-    }
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-    // orchestrator for opening block entity GUIs with claim checks
     public static boolean openGuiIfPossible(BlockEntity be, ServerPlayer player, ItemStack stack, Direction hitFace, Vec3 hitPos) {
         return openGuiIfPossible(TileOrEntityTarget.of(be), player, stack, hitFace, hitPos);
     }
@@ -130,7 +134,7 @@ public class Utils {
 
     public static void spawnItemWithTileData(Player player, RandomizableContainerBlockEntity tile) {
         Level level = player.level();
-        if (!level.isClientSide && player.isCreative() && !tile.isEmpty()) {
+        if (!level.isClientSide() && player.isCreative() && !tile.isEmpty()) {
             BlockPos pos = tile.getBlockPos();
             ItemStack itemstack = saveTileToItem(tile);
 
@@ -142,22 +146,48 @@ public class Utils {
         }
     }
 
+    /** False until a world loads. */
+    public static boolean areItemComponentsBound() {
+        return Items.AIR.builtInRegistryHolder().areComponentsBound();
+    }
+
+    /** Default stack of an item, also usable before components are bound. */
+    public static ItemStack displayStack(ItemLike item) {
+        Item i = item.asItem();
+        if (i == Items.AIR) return ItemStack.EMPTY;
+        if (i.builtInRegistryHolder().areComponentsBound()) return i.getDefaultInstance();
+        // items with a custom Properties.model won't match this and get dropped by model lookups
+        Identifier model = BuiltInRegistries.ITEM.getKey(i);
+        if (model == null) return ItemStack.EMPTY;
+        DataComponentMap components = DataComponentMap.builder()
+                .set(DataComponents.ITEM_MODEL, model)
+                .set(DataComponents.ITEM_NAME, Component.translatable(i.getDescriptionId()))
+                .build();
+        return new ItemStack(Holder.direct(i, components));
+    }
+
     public static ItemStack saveTileToItem(BlockEntity tile) {
         Block block = tile.getBlockState().getBlock();
         ItemStack stack = new ItemStack(block.asItem());
-        tile.saveToItem(stack, tile.getLevel().registryAccess());
+        try (var reporter = new ProblemReporter.ScopedCollector(tile.problemPath(), LOGGER)) {
+            TagValueOutput output = TagValueOutput.createWithContext(reporter, tile.getLevel().registryAccess());
+            tile.saveCustomOnly(output);
+            tile.removeComponentsFromTag(output);
+            BlockItem.setBlockEntityData(stack, tile.getType(), output);
+            stack.applyComponents(tile.collectComponents());
+        }
         return stack;
     }
 
     public static void loadTileFromItem(BlockEntity tile, ItemStack stack) {
         var comp = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (comp != null) {
-            tile.loadWithComponents(comp.copyTag(), tile.getLevel().registryAccess());
+            comp.loadInto(tile, tile.getLevel().registryAccess());
         }
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothSides) {
-        if (!player.level().isClientSide || bothSides)
+        if (!player.level().isClientSide() || bothSides)
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, player.isCreative()));
     }
 
@@ -166,7 +196,7 @@ public class Utils {
     }
 
     public static void swapItemNBT(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem) {
-        if (!player.level().isClientSide)
+        if (!player.level().isClientSide())
             player.setItemInHand(hand, ItemUtils.createFilledResult(oldItem.copy(), player, newItem, false));
     }
 
@@ -175,11 +205,6 @@ public class Utils {
     }
 
     //TODO: add more stuff from item utils
-
-    @Deprecated(forRemoval = true)
-    public static void addStackToExisting(Player player, ItemStack stack, boolean avoidEmptyHands) {
-        addItemOrDrop(player, stack, avoidEmptyHands ? InvPlacer.handOrExistingOrAnyAvoidEmptyHand(InteractionHand.MAIN_HAND) : InvPlacer.handOrExistingOrAny(InteractionHand.MAIN_HAND));
-    }
 
     /**
      * Adds an item to the player's inventory, uses the given strategy to determine where to place it
@@ -201,99 +226,93 @@ public class Utils {
         return xp;
     }
 
-    public static ResourceLocation getId(Holder<?> object) {
-        return object.unwrapKey().orElseThrow().location();
+    public static Identifier getId(Holder<?> object) {
+        return object.unwrapKey().orElseThrow().identifier();
     }
 
-    public static ResourceLocation getID(@NotNull Block object) {
-        return BuiltInRegistries.BLOCK.getKey(object);
+    //BlockState, ItemStack, Entity, BlockEntity, FluidState
+    public static Identifier getID(@NotNull TypedInstance<?> object) {
+        return getId(object.typeHolder());
     }
 
-    public static ResourceLocation getID(@NotNull EntityType<?> object) {
+    public static Identifier getID(@NotNull Block object) {
+        return object.properties().id.identifier();
+    }
+
+    public static Identifier getID(@NotNull EntityType<?> object) {
         return BuiltInRegistries.ENTITY_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull Biome object) {
+    public static Identifier getID(@NotNull Biome object) {
         return hackyGetRegistry(Registries.BIOME).getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull DamageType type) {
+    public static Identifier getID(@NotNull DamageType type) {
         return hackyGetRegistry(Registries.DAMAGE_TYPE).getKey(type);
     }
 
-    public static ResourceLocation getID(@NotNull ConfiguredFeature<?, ?> object) {
+    public static Identifier getID(@NotNull ConfiguredFeature<?, ?> object) {
         return hackyGetRegistry(Registries.CONFIGURED_FEATURE).getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull Item object) {
-        return BuiltInRegistries.ITEM.getKey(object);
+    //items don't keep their properties around, but the holder they make at construction has the key
+    public static Identifier getID(@NotNull Item object) {
+        return object.builtInRegistryHolder().key().identifier();
     }
 
-    public static ResourceLocation getID(@NotNull Fluid object) {
+    public static Identifier getID(@NotNull Fluid object) {
         return BuiltInRegistries.FLUID.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull BlockEntityType<?> object) {
+    public static Identifier getID(@NotNull BlockEntityType<?> object) {
         return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull RecipeSerializer<?> object) {
+    public static Identifier getID(@NotNull RecipeSerializer<?> object) {
         return BuiltInRegistries.RECIPE_SERIALIZER.getKey(object);
     }
 
-    @Deprecated(forRemoval = true)
-    public static ResourceLocation getID(@NotNull SoftFluid object) {
-        return SoftFluidRegistry.hackyGetRegistry().getKey(object);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static ResourceLocation getID(@NotNull MLMapDecorationType<?, ?> object) {
-        return MapDataInternal.hackyGetRegistry().getKey(object);
-    }
-
-    public static ResourceLocation getID(@NotNull Potion object) {
+    public static Identifier getID(@NotNull Potion object) {
         return BuiltInRegistries.POTION.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull MobEffect object) {
+    public static Identifier getID(@NotNull MobEffect object) {
         return BuiltInRegistries.MOB_EFFECT.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull CreativeModeTab object) {
+    public static Identifier getID(@NotNull CreativeModeTab object) {
         return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull StatType<?> object) {
+    public static Identifier getID(@NotNull StatType<?> object) {
         return BuiltInRegistries.STAT_TYPE.getKey(object);
     }
 
-    public static ResourceLocation getID(@NotNull Object object) {
+    public static Identifier getID(@NotNull Object object) {
+        //classes first, most common ones on top. interfaces go last as those checks are the slow ones
         return switch (object) {
             case Block b -> getID(b);
             case Item b -> getID(b);
+            case Fluid b -> getID(b);
             case EntityType<?> b -> getID(b);
             case BlockEntityType<?> b -> getID(b);
-            case Biome b -> getID(b);
-            case Fluid b -> getID(b);
-            case RecipeSerializer<?> b -> getID(b);
-            case ConfiguredFeature<?, ?> c -> getID(c);
-            case Potion c -> getID(c);
-            case MobEffect c -> getID(c);
-            case Supplier<?> s -> getID(s.get());
             case SoftFluid s -> getID(s);
-            case MLMapDecorationType<?, ?> s -> getID(s);
+            case MobEffect c -> getID(c);
+            case Potion c -> getID(c);
+            case RecipeSerializer<?> b -> getID(b);
             case CreativeModeTab t -> getID(t);
-            case DamageType t -> getID(t);
             case StatType<?> t -> getID(t);
+            case Biome b -> getID(b);
+            case DamageType t -> getID(t);
+            case ConfiguredFeature<?, ?> c -> getID(c);
+            case MLMapDecorationType<?, ?> s -> getID(s);
+            //RegSupplier is both a supplier and a holder, so this one has to stay above
+            case Supplier<?> s -> getID(s.get());
             case Holder<?> h -> getId(h);
+            case TypedInstance<?> t -> getID(t);
             default -> throw new UnsupportedOperationException("Unsupported class type " +
                     object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
         };
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> boolean isTagged(T entry, Registry<T> registry, TagKey<T> tag) {
-        return registry.wrapAsHolder(entry).is(tag);
     }
 
     // finds the right registry access to which a data pack entry belongs to
@@ -308,8 +327,8 @@ public class Utils {
             var level = ClientHelper.getLocalLevel();
             if (level != null) {
                 var clientRa = level.registryAccess();
-                Registry<T> r = clientRa.registryOrThrow(registryKey);
-                if (holder.canSerializeIn(r.holderOwner())) {
+                Registry<T> r = clientRa.lookupOrThrow(registryKey);
+                if (holder.canSerializeIn(r)) {
                     return clientRa.lookupOrThrow(registryKey);
                 }
             }
@@ -317,8 +336,8 @@ public class Utils {
         var s = PlatHelper.getCurrentServer();
         if (s != null) {
             var serverRa = s.registryAccess();
-            Registry<T> r = serverRa.registryOrThrow(registryKey);
-            if (holder.canSerializeIn(r.holderOwner())) {
+            Registry<T> r = serverRa.lookupOrThrow(registryKey);
+            if (holder.canSerializeIn(r)) {
                 return serverRa.lookupOrThrow(registryKey);
             }
         }
@@ -346,7 +365,7 @@ public class Utils {
 
     @UnstableApi
     public static <T> Registry<T> hackyGetRegistry(ResourceKey<Registry<T>> key) {
-        return hackyGetRegistryAccess().registryOrThrow(key);
+        return hackyGetRegistryAccess().lookupOrThrow(key);
     }
 
 
@@ -366,12 +385,12 @@ public class Utils {
         return p;
     }
 
-    public static void awardAdvancement(ServerPlayer sp, ResourceLocation name) {
+    public static void awardAdvancement(ServerPlayer sp, Identifier name) {
         awardAdvancement(sp, name, "unlock");
     }
 
-    public static void awardAdvancement(ServerPlayer sp, ResourceLocation name, String unlockProp) {
-        AdvancementHolder advancement = sp.getServer().getAdvancements().get(name);
+    public static void awardAdvancement(ServerPlayer sp, Identifier name, String unlockProp) {
+        AdvancementHolder advancement = sp.level().getServer().getAdvancements().get(name);
         if (advancement != null) {
             PlayerAdvancements advancements = sp.getAdvancements();
             if (!advancements.getOrStartProgress(advancement).isDone()) {
@@ -395,7 +414,7 @@ public class Utils {
 
 
     public static BlockState readBlockState(CompoundTag compound, @Nullable Level level) {
-        HolderGetter<Block> holderGetter = level != null ? level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup();
+        HolderGetter<Block> holderGetter = level != null ? level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK;
         return NbtUtils.readBlockState(holderGetter, compound);
     }
 
@@ -420,7 +439,9 @@ public class Utils {
         if (player instanceof ServerPlayer sp) {
             gameMode = sp.gameMode.getGameModeForPlayer();
         } else {
-            gameMode = Minecraft.getInstance().gameMode.getPlayerMode();
+            //client player, or a fake player on a dedicated server. the latter has no game mode to query
+            GameType local = PlatHelper.getPhysicalSide().isClient() ? ClientHelper.getLocalGameMode() : null;
+            gameMode = local == null ? GameType.SURVIVAL : local;
         }
         //we don't have context so we check both can break and can place. this below already check canBreak
         //this only checks the adventure mode canDestroyTag tag
@@ -439,14 +460,14 @@ public class Utils {
     }
 
     public static Optional<BlockState> getRotatedDirectionalBlock(BlockState state, Direction axis, boolean ccw) {
-        Vec3 targetNormal = MthUtils.V3itoV3(state.getValue(BlockStateProperties.FACING).getNormal());
-        Vec3 myNormal = MthUtils.V3itoV3(axis.getNormal());
+        Vec3 targetNormal = state.getValue(BlockStateProperties.FACING).getUnitVec3();
+        Vec3 myNormal = axis.getUnitVec3();
         if (!ccw) targetNormal = targetNormal.scale(-1);
 
         Vec3 rotated = myNormal.cross(targetNormal);
         // not on same axis, can rotate
         if (!rotated.equals(Vec3.ZERO)) {
-            Direction newDir = Direction.getNearest(rotated.x(), rotated.y(), rotated.z());
+            Direction newDir = Direction.getApproximateNearest(rotated.x(), rotated.y(), rotated.z());
             return Optional.of(state.setValue(BlockStateProperties.FACING, newDir));
         }
         return Optional.empty();
@@ -467,79 +488,17 @@ public class Utils {
         return null;
     }
 
-    @Deprecated(forRemoval = true)
-    public static final Codec<Boolean> MOD_LOADED_CODEC = Codec.STRING.xmap(PlatHelper::isModLoaded, b -> "");
-
-    @Deprecated(forRemoval = true)
-    public static <A> MapCodec<A> safeOptFieldOf(Codec<A> c, String name, Supplier<A> defaultValue) {
-        return CodecUtils.safeOptFieldOf(c, name, defaultValue);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <K, V, C extends BaseMapCodec<K, V> & Codec<Map<K, V>>> C optionalMapCodec(final Codec<K> keyCodec, final Codec<V> elementCodec) {
-        return CodecUtils.optionalMapCodec(keyCodec, elementCodec);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T> Codec<T> optionalRegistryCodec(Registry<T> reg, T defaultValue) {
-        return CodecUtils.optionalRegistryCodec(reg, defaultValue);
-    }
-
-
-    /**
-     * Like Registry::byNameCodec::listOf but won't fail for missing entries.
-     * No reason to use this really, use HolderSet codec instead
-     */
-    @Deprecated(forRemoval = true)
-    public static <T> Codec<List<T>> optionalRegistryListCodec(Registry<T> reg) {
-        return CodecUtils.optionalRegistryListCodec(reg);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
-                    Vec3.CODEC.fieldOf("from").forGetter(AABB::getMinPosition),
-                    Vec3.CODEC.fieldOf("to").forGetter(AABB::getMaxPosition)
-            ).apply(i, AABB::new)
-    );
-
-
-    @Deprecated(forRemoval = true)
-    public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {
-        return CodecUtils.lenientListOrSingleCodec(elementCodec);
-    }
-
-    /**
-     * Like listOf but won't fail for missing entries.
-     */
-    @Deprecated(forRemoval = true)
-    public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
-        return CodecUtils.lenientListCodec(elementCodec);
-    }
-
-    /**
-     * Lenient holder set
-     */
-    @Deprecated(forRemoval = true)
-    public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
-        return CodecUtils.lenientHomogeneousList(registryKey);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T extends Enum<T>> StreamCodec<FriendlyByteBuf, T> enumStreamCodec(Class<T> enumClass) {
-        return CodecUtils.enumStreamCodec(enumClass);
-    }
-
-    public static ResourceLocation idWithOptionalNamespace(String id, String namespace) {
+    public static Identifier idWithOptionalNamespace(String id, String namespace) {
         if (id.contains(":")) {
-            return ResourceLocation.parse(id);
+            return Identifier.parse(id);
         } else {
-            return ResourceLocation.fromNamespaceAndPath(namespace, id);
+            return Identifier.fromNamespaceAndPath(namespace, id);
         }
     }
 
     @Nullable
-    public static <T> T findFirstInRegistry(Registry<T> registry, ResourceLocation... ids) {
-        for (ResourceLocation r : ids) {
+    public static <T> T findFirstInRegistry(Registry<T> registry, Identifier... ids) {
+        for (Identifier r : ids) {
             var optional = registry.getOptional(r);
             if (optional.isPresent()) return optional.get();
         }
@@ -547,8 +506,8 @@ public class Utils {
     }
 
     @Nullable
-    public static <T> T findFirstInRegistry(Registry<T> registry, Iterable<ResourceLocation> ids) {
-        for (ResourceLocation r : ids) {
+    public static <T> T findFirstInRegistry(Registry<T> registry, Iterable<Identifier> ids) {
+        for (Identifier r : ids) {
             var optional = registry.getOptional(r);
             if (optional.isPresent()) return optional.get();
         }

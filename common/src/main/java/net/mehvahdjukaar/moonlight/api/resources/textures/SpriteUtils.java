@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.mehvahdjukaar.moonlight.api.util.math.kmeans.DataSet;
 import net.mehvahdjukaar.moonlight.api.util.math.kmeans.KMeans;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import org.lwjgl.stb.STBImage;
@@ -13,9 +13,11 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -25,10 +27,20 @@ public final class SpriteUtils {
 
     private static final byte[] PNG_SIGNATURE = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
 
+    public static byte[] toPngBytes(NativeImage image) throws IOException {
+        var out = new ByteArrayOutputStream();
+        try (var channel = Channels.newChannel(out)) {
+            if (!image.writeToChannel(channel)) {
+                throw new IOException("Failed to encode image as png");
+            }
+        }
+        return out.toByteArray();
+    }
+
     /**
      * Shorthand method to read a NativeImage
      */
-    public static NativeImage readImage(ResourceManager manager, ResourceLocation resourceLocation) throws IOException, NoSuchElementException {
+    public static NativeImage readImage(ResourceManager manager, Identifier resourceLocation) throws IOException, NoSuchElementException {
         try (var res = manager.getResource(resourceLocation).get().open()) {
             return NativeImage.read(res);
         } catch (Exception e) {
@@ -37,7 +49,7 @@ public final class SpriteUtils {
     }
 
     /**
-     * Decodes raw image bytes. Unlike {@link NativeImage#read}, which rejects anything that isn't a PNG, this accepts
+     * Decodes raw image bytes. Unlike NativeImage.read, which rejects anything that isn't a PNG, this accepts
      * every format stb can read (gif, jpeg, bmp, tga, ...). Animated gifs decode to their first frame.
      */
     public static NativeImage readImage(byte[] imageBytes) throws IOException {
@@ -91,8 +103,8 @@ public final class SpriteUtils {
     }
 
     public static void grayscaleImage(NativeImage image) {
-        forEachPixel(image, (x, y) -> image.setPixelRGBA(x, y,
-                new RGBColor(image.getPixelRGBA(x, y)).asHCL().withChroma(0).asRGB().toInt()));
+        forEachPixel(image, (x, y) -> image.setPixelABGR(x, y,
+                new RGBColor(image.getPixelABGR(x, y)).asHCL().withChroma(0).asRGB().toInt()));
     }
 
     public static RGBColor averageColor(NativeImage image) {
@@ -215,9 +227,9 @@ public final class SpriteUtils {
         }
 
         SpriteUtils.forEachPixel(image, (x, y) -> {
-            int i = image.getPixelRGBA(x, y);
+            int i = image.getPixelABGR(x, y);
             if (colorToColorMap.containsKey(i)) {
-                image.setPixelRGBA(x, y, colorToColorMap.get(i));
+                image.setPixelABGR(x, y, colorToColorMap.get(i));
             }
         });
 
@@ -248,10 +260,10 @@ public final class SpriteUtils {
         }
 
         SpriteUtils.forEachPixel(image, (x, y) -> {
-            int i = image.getPixelRGBA(x, y);
+            int i = image.getPixelABGR(x, y);
             Integer replacement = removedColors.get(i);
             if (replacement != null)
-                image.setPixelRGBA(x, y, replacement);
+                image.setPixelABGR(x, y, replacement);
         });
     }
 
@@ -261,11 +273,11 @@ public final class SpriteUtils {
      * @param expectColors    expected amount of colors. Will stop reading once the amount is reached
      * @return an ordered color list obtained by reading the provided image pixels one by one from left to right then up to bottom (like a book)
      */
-    public static List<Integer> parsePaletteStrip(ResourceManager manager, ResourceLocation fullTexturePath, int expectColors) {
+    public static List<Integer> parsePaletteStrip(ResourceManager manager, Identifier fullTexturePath, int expectColors) {
         try (NativeImage image = readImage(manager, fullTexturePath)) {
             List<Integer> list = new ArrayList<>();
             forEachPixel(image, (x, y) -> {
-                int i = image.getPixelRGBA(x, y);
+                int i = image.getPixelABGR(x, y);
                 if (i == 0 || list.size() >= expectColors) return;
                 list.add(i);
             });

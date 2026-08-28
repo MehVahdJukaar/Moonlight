@@ -6,7 +6,7 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -21,7 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -52,18 +52,6 @@ import java.util.function.Consumer;
  */
 public class ForgeHelper {
 
-    @Deprecated(forRemoval = true)
-    @PlatformImpl
-    public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
-        throw new AssertionError();
-    }
-
-    //TODO: move these 3 to plat helper
-    @Deprecated(forRemoval = true)
-    public static <T> DynamicOps<T> addConditionOps(DynamicOps<T> ops) {
-        return ops;
-    }
-
     @PlatformImpl
     public static <T> RegistryOps<T> conditionalOps(DynamicOps<T> ops, HolderLookup.Provider provider, SimplePreparableReloadListener<?> reloader) {
         throw new AssertionError();
@@ -72,11 +60,6 @@ public class ForgeHelper {
     @PlatformImpl
     public static <T> Codec<Optional<T>> conditionalCodec(Codec<T> codec) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static boolean onProjectileImpact(Projectile projectile, HitResult blockHitResult) {
-        return fireOnProjectileImpact(projectile, blockHitResult);
     }
 
     @Contract
@@ -113,19 +96,9 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static boolean onExplosionStart(Level level, Explosion explosion) {
-        return fireOnExplosionStart(level, explosion);
-    }
-
     @PlatformImpl
     public static boolean fireOnExplosionStart(Level level, Explosion explosion) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void onLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
-        fireOnLivingConvert(skellyHorseMixin, newHorse);
     }
 
     @PlatformImpl
@@ -138,11 +111,6 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static void onExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
-        fireOnExplosionDetonate(level, explosion, entities, diameter);
-    }
-
     @PlatformImpl
     public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
         throw new AssertionError();
@@ -153,11 +121,6 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static void onBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
-        fireOnBlockExploded(blockstate, level, blockpos, explosion);
-    }
-
     @PlatformImpl
     public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         throw new AssertionError();
@@ -165,12 +128,6 @@ public class ForgeHelper {
 
     @PlatformImpl
     public static boolean canDropFromExplosion(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
-        throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    @PlatformImpl
-    public static boolean isDye(ItemStack itemstack) {
         throw new AssertionError();
     }
 
@@ -207,20 +164,10 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @Deprecated(forRemoval = true)
-    public static boolean onCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
-        return fireOnCropsGrowPre(level, pos, state, b);
-    }
-
     @PlatformImpl
     public static boolean fireOnCropsGrowPre(ServerLevel level, BlockPos pos, BlockState state, boolean b) {
         throw new AssertionError();
 
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void onCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
-        fireOnCropsGrowPost(level, pos, state);
     }
 
     @PlatformImpl
@@ -235,11 +182,6 @@ public class ForgeHelper {
     @PlatformImpl
     public static void fireOnEquipmentChange(LivingEntity entity, EquipmentSlot slot, ItemStack from, ItemStack to) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static InteractionResult onRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
-        return fireOnRightClickBlock(player, hand, below, rayTraceResult);
     }
 
     @PlatformImpl
@@ -272,7 +214,7 @@ public class ForgeHelper {
     }
 
     @PlatformImpl
-    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
+    public static Identifier getQueriedLootTableId(LootContext lootContext) {
         throw new AssertionError();
     }
 }

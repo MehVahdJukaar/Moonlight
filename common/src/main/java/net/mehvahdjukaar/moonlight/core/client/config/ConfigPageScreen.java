@@ -5,8 +5,11 @@ import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +20,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
-    protected final OverlayLayer overlay = new OverlayLayer();
+    protected final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
     protected ConfigRowList list;
 
     protected ConfigPageScreen(Component title) {
@@ -50,6 +53,7 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
 
     protected abstract void populate();
 
+    // expanded state lives in the session so it survives a repopulate
     protected void addDescriptionRows(List<ConfigListRow> rows, ConfigOption<?> option) {
         if (option.description() == null || !session().isExpanded(option)) return;
         List<FormattedCharSequence> lines = this.font.split(option.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
@@ -59,8 +63,8 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return overlay.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return overlay.mouseClicked(event, doubleClick) || super.mouseClicked(event, doubleClick);
     }
 
     @Override
@@ -69,23 +73,23 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
     }
 
     @Override
-    public boolean keyPressed(int key, int scanCode, int modifiers) {
-        return overlay.keyPressed(key, scanCode, modifiers) || super.keyPressed(key, scanCode, modifiers);
+    public boolean keyPressed(KeyEvent event) {
+        return overlay.keyPressed(event) || super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char c, int modifiers) {
-        return overlay.charTyped(c, modifiers) || super.charTyped(c, modifiers);
+    public boolean charTyped(CharacterEvent event) {
+        return overlay.charTyped(event) || super.charTyped(event);
     }
 
-    protected boolean renderOverlayOrTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected boolean renderOverlayOrTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (overlay.isOpen()) {
             overlay.render(graphics, mouseX, mouseY);
             return true;
         }
         Component tooltip = tooltipAt(mouseX, mouseY);
         if (tooltip != null) {
-            graphics.renderTooltip(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
         }
         return false;
     }
@@ -97,6 +101,7 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;
         }
+        // gutter icons sit outside the row hover band
         for (ConfigListRow row : this.list.children()) {
             Component tooltip = row.getGutterTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;

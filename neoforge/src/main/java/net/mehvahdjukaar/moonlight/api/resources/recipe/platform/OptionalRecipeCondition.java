@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.recipe.platform;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
@@ -12,11 +12,11 @@ import java.util.function.Predicate;
 /**
  * Simple recipe condition implementation for conditional recipes
  */
-public record OptionalRecipeCondition(ResourceLocation id,
+public record OptionalRecipeCondition(Identifier id,
                                       Predicate<String> predicate,
                                       String conditionValue) implements ICondition {
 
-    public static MapCodec<OptionalRecipeCondition> createCodec(ResourceLocation id, Predicate<String> predicate) {
+    public static MapCodec<OptionalRecipeCondition> createCodec(Identifier id, Predicate<String> predicate) {
         String name = id.getPath();
         return RecordCodecBuilder.mapCodec(builder -> builder.group(
                 Codec.STRING.fieldOf(name).forGetter(o -> o.id().getPath())
@@ -30,7 +30,7 @@ public record OptionalRecipeCondition(ResourceLocation id,
 
     @Override
     public MapCodec<? extends ICondition> codec() {
-        return NeoForgeRegistries.CONDITION_SERIALIZERS.get(id);
+        return NeoForgeRegistries.CONDITION_SERIALIZERS.getValue(id);
     }
 
 }

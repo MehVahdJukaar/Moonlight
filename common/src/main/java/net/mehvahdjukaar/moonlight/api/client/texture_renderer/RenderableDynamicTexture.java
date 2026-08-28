@@ -1,195 +1,167 @@
 package net.mehvahdjukaar.moonlight.api.client.texture_renderer;
 
-import com.mojang.blaze3d.pipeline.RenderCall;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuFence;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.Tickable;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.client.renderer.texture.TickableTexture;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opengl.GL30;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL11;
 
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
-import static net.minecraft.client.Minecraft.ON_OSX;
+/**
+ * A texture drawn by a drawing function instead of loaded from a resource pack. Once registered its id
+ * works like any texture id. DynamicTextureRenderer has helpers and a cache.
+ */
+public class RenderableDynamicTexture extends AbstractTexture implements TickableTexture {
 
-public class RenderableDynamicTexture extends DynamicTexture implements Tickable {
-
-    //runs when texture is initialized and populates it. Runs each tick if its tickable
+    //runs when the texture is initialized and populates it. Runs again each tick if it's set to
     @NotNull
     protected final Consumer<? super RenderableDynamicTexture> drawingFunction;
 
-    //thing that is drawn later
-    private RenderTarget readTarget;
-    //thing where it renders stuff on
-    private RenderTarget writeTarget;
+    private final Identifier textureLocation;
+    private final TextureTarget target;
 
-    private final int width;
-    private final int height;
-    private final ResourceLocation textureLocation;
+    //cpu copy, only allocated if download() is ever called
+    @Nullable
+    private NativeImage pixels;
 
     private volatile boolean shouldTick = true;
-    public boolean closed = false;
+    private boolean closed = false;
 
-    public RenderableDynamicTexture(ResourceLocation resourceLocation, int width, int height,
+    @SuppressWarnings("unchecked")
+    public RenderableDynamicTexture(Identifier resourceLocation, int width, int height,
                                     @NotNull Consumer<? extends RenderableDynamicTexture> textureDrawingFunction) {
-        super(width, height, false);
         RenderSystem.assertOnRenderThread();
-        this.width = width;
-        this.height = height;
         this.textureLocation = resourceLocation;
         this.drawingFunction = (Consumer<? super RenderableDynamicTexture>) textureDrawingFunction;
-        this.setUpdateNextTick(true);
+        //depth is needed for 3d block models to sort against themselves
+        this.target = new TextureTarget(resourceLocation.toString(), width, height, true);
+        //share the target's color attachment as this texture
+        this.texture = target.getColorTexture();
+        this.textureView = target.getColorTextureView();
     }
 
-    public RenderableDynamicTexture(ResourceLocation resourceLocation, int size,
+    public RenderableDynamicTexture(Identifier resourceLocation, int size,
                                     @NotNull Consumer<? extends RenderableDynamicTexture> textureDrawingFunction) {
         this(resourceLocation, size, size, textureDrawingFunction);
     }
 
-    public ResourceLocation getTextureLocation() {
+    public Identifier getTextureLocation() {
         return textureLocation;
     }
 
-    private static void renderCall(RenderCall call) {
-        if (!RenderSystem.isOnRenderThreadOrInit()) {
-            RenderSystem.recordRenderCall(call);
-        } else {
-            call.execute();
-        }
-    }
-
-    /**
-     * Force redraw using provided render function. You can also redraw manually
-     */
-    public void redraw() {
-        if (closed) {
-            Moonlight.LOGGER.error("redraw on closed");
-            return;
-        }
-        renderCall(() -> {
-            bind();
-            writeTarget.bindWrite(true);
-            drawingFunction.accept(this);
-            swapBackToFront();
-            writeTarget.unbindWrite();
-        });
-    }
-
-    @Override
-    public void load(ResourceManager manager) {
-    }
-
-    // Call after finish drawing
-    public void swapBackToFront() {
-        //a plain framebuffer copy rather than RenderTarget.blitToScreen: that one masks off the
-        //alpha channel, so the front buffer's transparency would stay stuck at its clear value
-        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, writeTarget.frameBufferId);
-        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, readTarget.frameBufferId);
-        GlStateManager._glBlitFrameBuffer(0, 0, writeTarget.width, writeTarget.height,
-                0, 0, readTarget.width, readTarget.height,
-                GL30.GL_COLOR_BUFFER_BIT, GL30.GL_NEAREST);
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-    }
-
     public RenderTarget getRenderTarget() {
-        return writeTarget;
-    }
-
-    //bind read on the current texture
-    @Override
-    public void bind() {
-        if (closed) {
-            //TODO: remove these
-            Moonlight.LOGGER.error("bind on closed");
-            return;
-        }
-        super.bind();
-    }
-
-    //gpu texture ID
-    @Override
-    public int getId() {
-        if (closed) {
-            Moonlight.LOGGER.error("get id on closed");
-            return 0;
-        }
-        RenderSystem.assertOnRenderThreadOrInit();
-        //needs to be here since the super constructor calls this early
-        if (this.readTarget == null || this.writeTarget == null) {
-            int w = getPixels().getWidth();
-            int h = getPixels().getHeight();
-            this.readTarget = new TextureTarget(w, h, false, ON_OSX);
-            this.writeTarget = new TextureTarget(w, h, true, ON_OSX);
-        }
-        //must never change since its just queried when texture is registered
-        //this is what binds texture and frame buffers together
-        return this.readTarget.getColorTextureId();
+        return target;
     }
 
     public int getWidth() {
-        return width;
+        return target.width;
     }
 
     public int getHeight() {
-        return height;
+        return target.height;
     }
 
-
-    @Override
-    public void releaseId() {
-        this.closed = true;
-        super.releaseId();
-        renderCall(() -> {
-            if (this.writeTarget != null) {
-                this.writeTarget.destroyBuffers();
-                this.writeTarget = null;
-            }
-            if (this.readTarget != null) {
-                this.readTarget.destroyBuffers();
-                this.readTarget = null;
-            }
-        });
+    public boolean isClosed() {
+        return closed;
     }
 
     /**
-     * Downloads the GPU texture to CPU for edit.
-     * Works on the back buffer, the one the drawing function renders onto, so this is meant to be
-     * called from within it. Anything written back with upload() shows up once it's swapped to front
+     * Runs the drawing function into this texture. Called on creation and on ticks after setUpdateNextTick.
+     */
+    public void redraw() {
+        if (closed) {
+            Moonlight.LOGGER.error("Tried to redraw closed dynamic texture {}", textureLocation);
+            return;
+        }
+        RenderSystem.assertOnRenderThread();
+        RenderSystem.getDevice().createCommandEncoder()
+                .clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1);
+
+        GpuTextureView oldColor = RenderSystem.outputColorTextureOverride;
+        GpuTextureView oldDepth = RenderSystem.outputDepthTextureOverride;
+        RenderSystem.outputColorTextureOverride = target.getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = target.getDepthTextureView();
+        try {
+            drawingFunction.accept(this);
+        } finally {
+            RenderSystem.outputColorTextureOverride = oldColor;
+            RenderSystem.outputDepthTextureOverride = oldDepth;
+        }
+    }
+
+    /**
+     * Cpu copy, valid after download. Edit it and push it back with upload.
+     */
+    public NativeImage getPixels() {
+        if (this.pixels == null) {
+            this.pixels = new NativeImage(getWidth(), getHeight(), false);
+        }
+        return this.pixels;
+    }
+
+    /**
+     * Reads the texture back into getPixels. Blocks on the gpu, don't call it per frame.
+     * Rows come back bottom up, upload is the inverse.
      */
     public void download() {
         if (closed) {
-            Moonlight.LOGGER.error("download id on closed");
+            Moonlight.LOGGER.error("Tried to download closed dynamic texture {}", textureLocation);
             return;
         }
-        bindBackBuffer();
-        getPixels().downloadTexture(0, false);
+        RenderSystem.assertOnRenderThread();
+        GpuTexture color = target.getColorTexture();
+        int width = target.width;
+        int height = target.height;
+        int pixelSize = color.getFormat().pixelSize();
+        NativeImage image = getPixels();
+
+        CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
+        try (GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Moonlight texture readback",
+                GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST, (long) width * height * pixelSize)) {
+            encoder.copyTextureToBuffer(color, buffer, 0, () -> {
+            }, 0);
+            awaitGpu(encoder);
+            try (GpuBuffer.MappedView view = encoder.mapBuffer(buffer, true, false)) {
+                ByteBuffer data = view.data();
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        image.setPixelABGR(x, y, data.getInt((x + y * width) * pixelSize));
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * Uploads the CPU image back onto the back buffer. Counterpart of download()
-     */
-    @Override
     public void upload() {
-        if (closed) {
-            Moonlight.LOGGER.error("upload on closed");
-            return;
-        }
-        bindBackBuffer();
-        getPixels().upload(0, 0, 0, false);
+        if (closed || pixels == null) return;
+        RenderSystem.getDevice().createCommandEncoder().writeToTexture(target.getColorTexture(), pixels);
     }
 
-    private void bindBackBuffer() {
-        this.getId(); //lazily creates the targets if we got here before any bind
-        RenderSystem.bindTexture(writeTarget.getColorTextureId());
+    //the completion callback of copyTextureToBuffer is only polled once a frame, and mapping right after the
+    //copy races the draws feeding it, so block on our own fence instead. awaitCompletion doesn't flush by itself
+    private static void awaitGpu(CommandEncoder encoder) {
+        try (GpuFence fence = encoder.createFence()) {
+            GL11.glFlush();
+            //noinspection StatementWithEmptyBody
+            while (!fence.awaitCompletion(1_000_000_000L)) {
+            }
+        }
     }
 
     public void setUpdateNextTick(boolean shouldTick) {
@@ -203,7 +175,6 @@ public class RenderableDynamicTexture extends DynamicTexture implements Tickable
         shouldTick = false;
         redraw();
     }
-
 
     public void register() {
         Minecraft.getInstance().getTextureManager().register(textureLocation, this);
@@ -219,9 +190,16 @@ public class RenderableDynamicTexture extends DynamicTexture implements Tickable
         }
     }
 
-    //safeguard but shouldnt be needed
-    public boolean isClosed() {
-        return closed;
+    @Override
+    public void close() {
+        this.closed = true;
+        //the render target owns the texture, null ours so AbstractTexture#close doesn't double free it
+        this.texture = null;
+        this.textureView = null;
+        this.target.destroyBuffers();
+        if (this.pixels != null) {
+            this.pixels.close();
+            this.pixels = null;
+        }
     }
-
 }

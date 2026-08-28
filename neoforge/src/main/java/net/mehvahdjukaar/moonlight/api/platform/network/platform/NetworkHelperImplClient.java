@@ -7,8 +7,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public class NetworkHelperImplClient {
 
     public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
-        // NeoForge negotiates both directions during configuration, so an optional channel only ends up in the
-        // connection's setup when both sides registered it.
+        // an optional channel is only set up when both sides registered it
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         return connection != null && connection.hasChannel(type);
     }

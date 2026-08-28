@@ -3,16 +3,14 @@ package net.mehvahdjukaar.moonlight.core.loot;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -43,12 +41,12 @@ public class ConfigItemPoolEntry extends LootPoolSingletonContainer {
     @Nullable
     private static Item getOptional(String res) {
         if (res.startsWith("#")) {
-            TagKey<Item> key = TagKey.create(Registries.ITEM, ResourceLocation.parse(res.substring(1)));
+            TagKey<Item> key = TagKey.create(Registries.ITEM, Identifier.parse(res.substring(1)));
             //gets first valid tagged item
             for (var v : BuiltInRegistries.ITEM.getTagOrEmpty(key)) return v.value();
             return null;
         }
-        return BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(res)).orElse(null);
+        return BuiltInRegistries.ITEM.getOptional(Identifier.parse(res)).orElse(null);
     }
 
     //hacky
@@ -63,8 +61,8 @@ public class ConfigItemPoolEntry extends LootPoolSingletonContainer {
     }
 
     @Override
-    public LootPoolEntryType getType() {
-        return MoonlightRegistry.LAZY_ITEM.get();
+    public MapCodec<? extends LootPoolSingletonContainer> codec() {
+        return CODEC;
     }
 
     @Override

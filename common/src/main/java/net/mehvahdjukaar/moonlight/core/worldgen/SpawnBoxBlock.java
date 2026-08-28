@@ -6,7 +6,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,8 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class SpawnBoxBlock extends Block implements EntityBlock, GameMasterBlock {
 
-    public SpawnBoxBlock() {
-        super(BlockBehaviour.Properties.ofFullCopy(Blocks.JIGSAW));
+    public SpawnBoxBlock(BlockBehaviour.Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -33,7 +32,7 @@ public class SpawnBoxBlock extends Block implements EntityBlock, GameMasterBlock
             if (player instanceof ServerPlayer serverPlayer) {
                 be.sendOpenGuiPacket(serverPlayer, hitResult.getDirection(), hitResult.getLocation());
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         } else {
             return InteractionResult.PASS;
         }

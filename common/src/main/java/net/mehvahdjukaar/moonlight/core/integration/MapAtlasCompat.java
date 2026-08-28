@@ -1,15 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.integration;
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import pepjebs.mapatlases.MapAtlasesMod;
-import pepjebs.mapatlases.client.MapAtlasesClient;
 import pepjebs.mapatlases.item.MapAtlasItem;
 import pepjebs.mapatlases.map_collection.MapCollection;
 import pepjebs.mapatlases.map_collection.MapGridKey;
@@ -33,15 +30,5 @@ public class MapAtlasCompat {
             }
         }
         return null;
-    }
-
-    @ClientOnly
-    public static void scaleDecoration(PoseStack poseStack) {
-        MapAtlasesClient.modifyDecorationTransform(poseStack);
-    }
-
-    @ClientOnly
-    public static void scaleDecorationText(PoseStack poseStack, float textWidth, float textScale) {
-        MapAtlasesClient.modifyTextDecorationTransform(poseStack, textWidth, textScale);
     }
 }

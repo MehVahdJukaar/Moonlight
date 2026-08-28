@@ -14,6 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider {
@@ -28,45 +30,51 @@ public class SpawnBoxBlockEntity extends BlockEntity implements IScreenProvider 
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString("name", this.targetName);
-        tag.putInt("posX", this.boxOffset.getX());
-        tag.putInt("posY", this.boxOffset.getY());
-        tag.putInt("posZ", this.boxOffset.getZ());
-        tag.putInt("sizeX", this.boxSize.getX());
-        tag.putInt("sizeY", this.boxSize.getY());
-        tag.putInt("sizeZ", this.boxSize.getZ());
-        tag.putBoolean("showBB", this.showBoundingBox);
-        tag.putString("final_state", this.finalState);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putString("name", this.targetName);
+        output.putInt("posX", this.boxOffset.getX());
+        output.putInt("posY", this.boxOffset.getY());
+        output.putInt("posZ", this.boxOffset.getZ());
+        output.putInt("sizeX", this.boxSize.getX());
+        output.putInt("sizeY", this.boxSize.getY());
+        output.putInt("sizeZ", this.boxSize.getZ());
+        output.putBoolean("showBB", this.showBoundingBox);
+        output.putString("final_state", this.finalState);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        this.targetName = readBoxName(tag);
-        this.boxOffset = readOffsetPos(tag);
-        this.boxSize = readBoxSize(tag);
-        this.showBoundingBox = tag.getBoolean("showBB");
-        this.finalState = tag.getString("final_state");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        this.targetName = input.getStringOr("name", "");
+        this.boxOffset = new BlockPos(
+                Mth.clamp(input.getIntOr("posX", 0), -48, 48),
+                Mth.clamp(input.getIntOr("posY", 0), -48, 48),
+                Mth.clamp(input.getIntOr("posZ", 0), -48, 48));
+        this.boxSize = new Vec3i(
+                Mth.clamp(input.getIntOr("sizeX", 0), 0, 48),
+                Mth.clamp(input.getIntOr("sizeY", 0), 0, 48),
+                Mth.clamp(input.getIntOr("sizeZ", 0), 0, 48));
+        this.showBoundingBox = input.getBooleanOr("showBB", false);
+        this.finalState = input.getStringOr("final_state", "");
     }
 
     public static Vec3i readBoxSize(CompoundTag tag) {
-        int l = Mth.clamp(tag.getInt("sizeX"), 0, 48);
-        int m = Mth.clamp(tag.getInt("sizeY"), 0, 48);
-        int n = Mth.clamp(tag.getInt("sizeZ"), 0, 48);
+        int l = Mth.clamp(tag.getIntOr("sizeX", 0), 0, 48);
+        int m = Mth.clamp(tag.getIntOr("sizeY", 0), 0, 48);
+        int n = Mth.clamp(tag.getIntOr("sizeZ", 0), 0, 48);
         return new Vec3i(l, m, n);
     }
 
     public static BlockPos readOffsetPos(CompoundTag tag) {
-        int i = Mth.clamp(tag.getInt("posX"), -48, 48);
-        int j = Mth.clamp(tag.getInt("posY"), -48, 48);
-        int k = Mth.clamp(tag.getInt("posZ"), -48, 48);
+        int i = Mth.clamp(tag.getIntOr("posX", 0), -48, 48);
+        int j = Mth.clamp(tag.getIntOr("posY", 0), -48, 48);
+        int k = Mth.clamp(tag.getIntOr("posZ", 0), -48, 48);
         return new BlockPos(i, j, k);
     }
 
     public static String readBoxName(CompoundTag nbt) {
-        return nbt.getString("name");
+        return nbt.getStringOr("name", "");
     }
 
     public String getFinalState() {

@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
@@ -49,7 +49,7 @@ public class DynamicResourcesExample {
                 // adds a random json item model
                 sink.addItemModel(Moonlight.res("sturdy_stone_bricks"), json);
 
-                ResourceLocation textureRes = Moonlight.res("entity/entity_texture");
+                Identifier textureRes = Moonlight.res("entity/entity_texture");
                 // We create another example texture and add it.
                 // Remember to use try with resources with these
                 try(TextureImage transformedTexture = TextureUtilsExample.createTransformedTexture(manager)) {
@@ -61,7 +61,7 @@ public class DynamicResourcesExample {
                         () -> TextureUtilsExample.createRecoloredTexture(manager));
 
                 // Helper object to handle resources multiple times
-                StaticResource resource = StaticResource.getOrThrow(manager, ResourceLocation.parse("models/block/stone_bricks.json"));
+                StaticResource resource = StaticResource.getOrThrow(manager, Identifier.parse("models/block/stone_bricks.json"));
 
                 // Helper method to add similar resources, just string replaces its content. You can also do more complex operations
                 sink.addSimilarJsonResource(manager, resource, "stone_bricks", "sturdy_stone_bricks");

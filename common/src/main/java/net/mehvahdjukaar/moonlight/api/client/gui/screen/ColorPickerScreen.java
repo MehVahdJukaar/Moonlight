@@ -4,12 +4,13 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorFieldWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorSwatchWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FastColor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
@@ -53,7 +54,7 @@ public class ColorPickerScreen extends Screen {
         this.hue = hsv[0];
         this.sat = hsv[1];
         this.val = hsv[2];
-        this.alpha = hasAlpha ? FastColor.ARGB32.alpha(color) / 255f : 1;
+        this.alpha = hasAlpha ? ARGB.alpha(color) / 255f : 1;
     }
 
     @Override
@@ -102,25 +103,24 @@ public class ColorPickerScreen extends Screen {
         return hasAlpha ? argb : argb & 0xFFFFFF;
     }
 
-    /** Pushes the current color into the hex+preview control (after a drag). */
     private void syncControl() {
         this.suppressControlSync = true;
         this.control.setColor(currentColor());
         this.suppressControlSync = false;
     }
 
-    /** The control's hex field was edited: adopt that color into our hsv/alpha state. */
     private void onControlColorChanged(int c) {
         if (suppressControlSync) return;
         float[] hsv = ColorUtils.argbToHsv(c);
         this.hue = hsv[0];
         this.sat = hsv[1];
         this.val = hsv[2];
-        if (hasAlpha) this.alpha = FastColor.ARGB32.alpha(c) / 255f;
+        if (hasAlpha) this.alpha = ARGB.alpha(c) / 255f;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
         if (inside(mouseX, mouseY, svX, svY, svSize, svSize)) {
             dragging = DRAG_SV;
             updateDrag(mouseX, mouseY);
@@ -136,22 +136,22 @@ public class ColorPickerScreen extends Screen {
             updateDrag(mouseX, mouseY);
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         if (dragging != DRAG_NONE) {
-            updateDrag(mouseX, mouseY);
+            updateDrag(event.x(), event.y());
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         dragging = DRAG_NONE;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     private void updateDrag(double mouseX, double mouseY) {
@@ -171,51 +171,51 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 12, ConfigGuiColors.TITLE);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.font, this.title, this.width / 2, 12, ConfigGuiColors.TITLE);
 
         renderSvSquare(graphics);
         renderHueBar(graphics);
         if (hasAlpha) renderAlphaBar(graphics);
     }
 
-    private void renderSvSquare(GuiGraphics graphics) {
+    private void renderSvSquare(GuiGraphicsExtractor graphics) {
         // one vertical gradient per column: full value at top -> black at bottom, saturation increasing rightwards
         for (int i = 0; i < svSize; i++) {
             float s = (float) i / svSize;
             int top = ColorUtils.hsvToArgb(hue, s, 1f, 255);
             graphics.fillGradient(svX + i, svY, svX + i + 1, svY + svSize, top, 0xFF000000);
         }
-        graphics.renderOutline(svX - 1, svY - 1, svSize + 2, svSize + 2, 0xFF000000);
+        graphics.outline(svX - 1, svY - 1, svSize + 2, svSize + 2, 0xFF000000);
         int cxp = svX + Math.round(sat * svSize);
         int cyp = svY + Math.round((1 - val) * svSize);
         ring(graphics, cxp, cyp);
     }
 
-    private void renderHueBar(GuiGraphics graphics) {
+    private void renderHueBar(GuiGraphicsExtractor graphics) {
         for (int i = 0; i < hueH; i++) {
             graphics.fill(hueX, hueY + i, hueX + hueW, hueY + i + 1, ColorUtils.hsvToArgb((float) i / hueH, 1, 1, 255));
         }
-        graphics.renderOutline(hueX - 1, hueY - 1, hueW + 2, hueH + 2, 0xFF000000);
+        graphics.outline(hueX - 1, hueY - 1, hueW + 2, hueH + 2, 0xFF000000);
         int y = hueY + Math.round(hue * hueH);
         graphics.fill(hueX - 2, y - 1, hueX + hueW + 2, y + 1, 0xFFFFFFFF);
     }
 
-    private void renderAlphaBar(GuiGraphics graphics) {
+    private void renderAlphaBar(GuiGraphicsExtractor graphics) {
         ColorSwatchWidget.renderChecker(graphics, alphaX, alphaY, alphaW, alphaH);
         int rgb = currentColor() & 0x00FFFFFF;
         for (int i = 0; i < alphaW; i++) {
             int a = Math.round((float) i / alphaW * 255);
             graphics.fill(alphaX + i, alphaY, alphaX + i + 1, alphaY + alphaH, (a << 24) | rgb);
         }
-        graphics.renderOutline(alphaX - 1, alphaY - 1, alphaW + 2, alphaH + 2, 0xFF000000);
+        graphics.outline(alphaX - 1, alphaY - 1, alphaW + 2, alphaH + 2, 0xFF000000);
         int x = alphaX + Math.round(alpha * alphaW);
         graphics.fill(x - 1, alphaY - 2, x + 1, alphaY + alphaH + 2, 0xFFFFFFFF);
     }
 
-    private static void ring(GuiGraphics graphics, int cx, int cy) {
-        graphics.renderOutline(cx - 3, cy - 3, 6, 6, 0xFFFFFFFF);
-        graphics.renderOutline(cx - 4, cy - 4, 8, 8, 0xFF000000);
+    private static void ring(GuiGraphicsExtractor graphics, int cx, int cy) {
+        graphics.outline(cx - 3, cy - 3, 6, 6, 0xFFFFFFFF);
+        graphics.outline(cx - 4, cy - 4, 8, 8, 0xFF000000);
     }
 }

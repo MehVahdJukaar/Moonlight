@@ -100,7 +100,7 @@ public final class ImageMerger {
         int w = img.getWidth(), h = img.getHeight();
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                img.setPixelRGBA(x, y, rgba);
+                img.setPixelABGR(x, y, rgba);
             }
         }
     }
@@ -113,8 +113,8 @@ public final class ImageMerger {
             int srcY = sy + y;
             int dstY = dy + y;
             for (int x = 0; x < size; x++) {
-                int rgba = src.getPixelRGBA(sx + x, srcY);
-                dst.setPixelRGBA(dx + x, dstY, rgba);
+                int rgba = src.getPixelABGR(sx + x, srcY);
+                dst.setPixelABGR(dx + x, dstY, rgba);
             }
         }
     }
@@ -135,8 +135,8 @@ public final class ImageMerger {
                 int sx = (int) ((x + 0.5) * s / dSize);
                 if (sx >= s) sx = s - 1;
 
-                int rgba = src.getPixelRGBA(sx, sy);
-                dst.setPixelRGBA(dx + x, dstY, rgba);
+                int rgba = src.getPixelABGR(sx, sy);
+                dst.setPixelABGR(dx + x, dstY, rgba);
             }
         }
     }

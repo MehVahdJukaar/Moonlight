@@ -17,12 +17,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -90,9 +92,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
             this.gameEvent(GameEvent.PROJECTILE_SHOOT, this.getOwner());
             this.hasBeenShot = true;
         }
-        if (!this.leftOwner) {
-            this.leftOwner = this.checkLeftOwner();
-        }
+        this.checkLeftOwner();
 
         this.baseTick();
 
@@ -123,8 +123,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
         this.move(MoverType.SELF, movement);
 
-        // rest stuff
-        this.tryCheckInsideBlocks();
+        //rest stuff
         this.updateFireState();
 
         // after we finished moving we can apply forces and  particles
@@ -138,7 +137,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         }
 
         if (!isStuck) {
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 this.spawnTrailParticles();
             }
 
@@ -152,7 +151,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
 
     private void updateFireState() {
         //copied bit from move method. Extracted for clarity
-        this.wasOnFire = this.isOnFire();
+        boolean wasOnFire = this.isOnFire();
 
         if (this.level().getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch((arg) ->
                 arg.is(BlockTags.FIRE) || arg.is(Blocks.LAVA))) {
@@ -160,13 +159,13 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 this.setRemainingFireTicks(-this.getFireImmuneTicks());
             }
 
-            if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble() ||
+            if (wasOnFire && (this.isInPowderSnow || this.isInWaterOrRain() ||
                     ForgeHelper.isInFluidThatCanExtinguish(this))) {
                 this.playEntityOnFireExtinguishedSound();
             }
         }
 
-        if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble() || ForgeHelper.isInFluidThatCanExtinguish(this))) {
+        if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterOrRain() || ForgeHelper.isInFluidThatCanExtinguish(this))) {
             this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
     }
@@ -208,7 +207,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
                 Vec3 sub = vec3.subtract(movement);
                 yield vec3 == movement ? BlockHitResult.miss(pos.add(vec3), Direction.UP,
                         BlockPos.containing(pos.add(vec3))) : new BlockHitResult(pos.add(vec3),
-                        Direction.getNearest(sub.x, sub.y, sub.z), BlockPos.containing(pos.add(vec3)), false);
+                        Direction.getApproximateNearest(sub.x, sub.y, sub.z), BlockPos.containing(pos.add(vec3)), false);
             }
         };
 
@@ -264,7 +263,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         }
 
         if (!portalHit && hitResult != null && hitResult.getType() != HitResult.Type.MISS &&
-                !ForgeHelper.onProjectileImpact(this, hitResult)) {
+                !ForgeHelper.fireOnProjectileImpact(this, hitResult)) {
             this.onHit(hitResult);
         }
     }
@@ -318,19 +317,19 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
     }
 
     @Override
-    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putBoolean("stuck", this.isStuck);
-        tag.putInt("stuckTime", this.stuckTime);
-        tag.putBoolean("noPhysics", this.isNoPhysics());
+    public void addAdditionalSaveData(@NotNull ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("stuck", this.isStuck);
+        output.putInt("stuckTime", this.stuckTime);
+        output.putBoolean("noPhysics", this.isNoPhysics());
     }
 
     @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.isStuck = tag.getBoolean("stuck");
-        this.stuckTime = tag.getInt("stuckTime");
-        this.setNoPhysics(tag.getBoolean("noPhysics"));
+    public void readAdditionalSaveData(@NotNull ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.isStuck = input.getBooleanOr("stuck", false);
+        this.stuckTime = input.getIntOr("stuckTime", 0);
+        this.setNoPhysics(input.getBooleanOr("noPhysics", false));
     }
 
     @Override

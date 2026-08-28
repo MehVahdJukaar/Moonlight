@@ -8,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -52,8 +52,8 @@ public class ModLootModifiers {
         private final ItemStack addedItemStack;
 
 
-        public AddItemModifier(LootItemCondition[] conditionsIn, ItemStack addedItemStack) {
-            super(conditionsIn);
+        public AddItemModifier(LootItemCondition[] conditionsIn, int priority, ItemStack addedItemStack) {
+            super(conditionsIn, priority);
             this.addedItemStack = addedItemStack;
         }
 
@@ -110,8 +110,8 @@ public class ModLootModifiers {
         private final int maxMatches;
         private final Optional<ItemPredicate> itemPredicate;
 
-        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, Optional<LootPoolEntryContainer> lootPool, Optional<ItemStack> addedItemStack, int maxMatches, Optional<ItemPredicate> itemPredicate) {
-            super(conditionsIn);
+        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, int priority, Optional<LootPoolEntryContainer> lootPool, Optional<ItemStack> addedItemStack, int maxMatches, Optional<ItemPredicate> itemPredicate) {
+            super(conditionsIn, priority);
             this.itemStack = addedItemStack.orElse(null);
             this.lootPool = lootPool.orElse(null);
             this.itemPredicate = itemPredicate;

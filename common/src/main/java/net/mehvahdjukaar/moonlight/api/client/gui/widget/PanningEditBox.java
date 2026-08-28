@@ -3,14 +3,15 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class PanningEditBox extends EditBox {
 
-    private static final ResourceLocation TEXT_FIELD_SPRITE = ResourceLocation.withDefaultNamespace("widget/text_field");
+    private static final Identifier TEXT_FIELD_SPRITE = Identifier.withDefaultNamespace("widget/text_field");
 
     private final Font font;
     private int textColor = ConfigGuiColors.TEXT;
@@ -31,13 +32,13 @@ public class PanningEditBox extends EditBox {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (this.isFocused() || !this.isVisible() || !overflows()) {
-            super.renderWidget(graphics, mouseX, mouseY, partialTick);
+            super.extractWidgetRenderState(graphics, mouseX, mouseY, partialTick);
             return;
         }
         if (this.isBordered()) {
-            graphics.blitSprite(TEXT_FIELD_SPRITE, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXT_FIELD_SPRITE, this.getX(), this.getY(), this.getWidth(), this.getHeight());
         }
         int textX = this.isBordered() ? this.getX() + 4 : this.getX();
         GuiHelper.renderScrollingText(graphics, this.font, Component.literal(this.getValue()),

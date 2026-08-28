@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
@@ -18,40 +18,6 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     public static final WoodTypeRegistry INSTANCE = new WoodTypeRegistry();
 
-    /// USE {@link VanillaWoodTypes#OAK}
-    @Deprecated(forRemoval = true)
-    public static final WoodType OAK_TYPE = VanillaWoodTypes.OAK;
-
-    /// USE {@link WoodTypeRegistry}.{@link WoodTypeRegistry#INSTANCE}
-    @Deprecated(forRemoval = true)
-    public static Collection<WoodType> getTypes() {
-        return INSTANCE.getValues();
-    }
-
-    /// USE {@link VanillaWoodTypes}.woodTypeId, <br>for example "spruce", then use VanillaWoodTypes.SPRUCE
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static WoodType getValue(ResourceLocation woodTypeId) {
-        return INSTANCE.get(woodTypeId);
-    }
-
-    /// USE {@link VanillaWoodTypes}.woodTypeId, <br>for example "spruce", then use VanillaWoodTypes.SPRUCE
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static WoodType getValue(String woodTypeId) {
-        return INSTANCE.get(ResourceLocation.parse(woodTypeId));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static WoodType fromNBT(String name) {
-        return INSTANCE.getFromNBT(name);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static WoodType fromVanilla(net.minecraft.world.level.block.state.properties.WoodType vanillaType) {
-        return INSTANCE.getFromVanilla(vanillaType);
-    }
-
     //instance stuff
 
     private final Map<net.minecraft.world.level.block.state.properties.WoodType, WoodType> fromVanilla = new IdentityHashMap<>();
@@ -59,7 +25,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     public WoodTypeRegistry() {
         super(WoodType.class, "wood_type");
         this.addFinder(() -> {
-            var b = new WoodType(ResourceLocation.parse("bamboo"), Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK);
+            var b = new WoodType(Identifier.parse("bamboo"), Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_BLOCK);
             b.addChild("stripped_log", Blocks.STRIPPED_BAMBOO_BLOCK);
             return Optional.of(b);
         });
@@ -93,7 +59,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<WoodType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseId) {
+    public Optional<WoodType> detectTypeFromBlock(Block baseBlock, Identifier baseId) {
         String name = null;
         String path = baseId.getPath();
 
@@ -104,7 +70,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 var log = BuiltInRegistries.BLOCK.getOptional(
                         baseId.withPath(path.replace("planks", "log")));
                 if (log.isPresent()) {
-                    ResourceLocation id = baseId.withPath(path.replace("wood/planks/", ""));
+                    Identifier id = baseId.withPath(path.replace("wood/planks/", ""));
                     return Optional.of(new WoodType(id, baseBlock, log.get()));
                 }
             }
@@ -130,7 +96,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
                 //needs to use wood sound type
                 //we do not allow "/" in the wood name
                 name = name.replace("/", "_");
-                ResourceLocation id = baseId.withPath(name);
+                Identifier id = baseId.withPath(name);
                 Block logBlock = WoodType.findLog(id);
                 if (logBlock != null && !valuesReg.containsKey(id)) {
                     return Optional.of(new WoodType(id, baseBlock, logBlock));
@@ -152,7 +118,7 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     //shorthand for add finder. Gives a builder-like object that's meant to be configured inline
-    public WoodType.Finder addSimpleFinder(ResourceLocation woodTypeId) {
+    public WoodType.Finder addSimpleFinder(Identifier woodTypeId) {
         WoodType.Finder finder = new WoodType.Finder(woodTypeId);
         this.addFinder(finder);
         return finder;
@@ -160,10 +126,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
 
 
     public WoodType.Finder addSimpleFinder(String nameWoodType) {
-        return addSimpleFinder(ResourceLocation.parse(nameWoodType));
+        return addSimpleFinder(Identifier.parse(nameWoodType));
     }
 
     public WoodType.Finder addSimpleFinder(String namespace, String nameWoodType) {
-        return addSimpleFinder(ResourceLocation.fromNamespaceAndPath(namespace, nameWoodType));
+        return addSimpleFinder(Identifier.fromNamespaceAndPath(namespace, nameWoodType));
     }
 }

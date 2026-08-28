@@ -6,7 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
@@ -29,11 +29,11 @@ public class LangBuilder {
     }
 
     public <T> void addEntry(Registry<T> reg, T entry, String translation) {
-        entries.put(Util.makeDescriptionId(reg.key().location().getPath(), reg.getKey(entry)), translation);
+        entries.put(Util.makeDescriptionId(reg.key().identifier().getPath(), reg.getKey(entry)), translation);
     }
 
     public <T> void addSimpleEntry(Registry<T> reg, T entry) {
-        entries.put(Util.makeDescriptionId(reg.key().location().getPath(), reg.getKey(entry)),
+        entries.put(Util.makeDescriptionId(reg.key().identifier().getPath(), reg.getKey(entry)),
                 TextHelper.getReadableName(reg.getKey(entry).getPath()));
     }
 

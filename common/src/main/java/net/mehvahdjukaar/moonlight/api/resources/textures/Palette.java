@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.colors.HCLColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.LABColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -540,12 +540,7 @@ public class Palette implements Set<PaletteColor> {
         return c;
     }
 
-    /**
-     * Adds a color to the palette by interpolating existing colors
-     * Only works if it has at least 2 colors
-     */
-    @Deprecated(forRemoval = true)
-    public PaletteColor increaseInner() {
+    private PaletteColor increaseInner() {
         assert (this.size() < 2);
         int index = 1;
         //finds max delta lum and adds a color there
@@ -809,10 +804,10 @@ public class Palette implements Set<PaletteColor> {
             }
             var builder = paletteBuilders.get(index);
 
-            if (maskImage == null || FastColor.ABGR32.alpha(
+            if (maskImage == null || ARGB.alpha(
                     maskImage.getFramePixel(index % maskFrames, pixel.frameX(), pixel.frameY())) == 0) {
                 int color = pixel.getValue();
-                if (FastColor.ABGR32.alpha(color) != 0) {
+                if (ARGB.alpha(color) != 0) {
                     var paletteColor = builder.computeIfAbsent(color,
                             p -> new PaletteColor(color));
                     paletteColor.setOccurrence(paletteColor.getOccurrence() + 1);

@@ -8,7 +8,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
 
 
-    record Type<P, T extends CustomMapData<?, P>>(ResourceLocation id, Supplier<T> factory,
+    record Type<P, T extends CustomMapData<?, P>>(Identifier id, Supplier<T> factory,
                                                   StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
 
         public static final Codec<Type<?, ?>> CODEC = MapDataInternal.getMapDataRegistry().byNameCodec();
@@ -133,10 +133,6 @@ public interface CustomMapData<C extends CustomMapData.DirtyCounter, P> {
         
         public Simple(O defaultValue) {
             this.value = defaultValue;
-        }
-
-        @Deprecated(forRemoval = true)
-        public Simple() {
         }
 
         protected O value;

@@ -14,10 +14,6 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
         this.buffer = new Object[capacity];
     }
 
-    /* =======================
-       Core circular helpers
-       ======================= */
-
     private int cap() { return buffer.length; }
 
     private int toPhysical(int logicalIndex) {
@@ -33,10 +29,6 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
     private void setPhysical(int physical, T e) {
         buffer[physical] = e;
     }
-
-    /* =======================
-       Public API (legacy)
-       ======================= */
 
     /** Alias for addLast(e). */
     public void push(T element) {
@@ -58,10 +50,6 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
             addLast(element);
         }
     }
-
-    /* =======================
-       List / SequencedCollection
-       ======================= */
 
     @Override
     public int size() {
@@ -95,8 +83,8 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
 
     /**
      * Indexed adds are only supported at the ends:
-     * - index == 0 ➜ addFirst
-     * - index == size() ➜ addLast
+     * - index == 0 -> addFirst
+     * - index == size() -> addLast
      * Middle inserts are not supported.
      */
     @Override
@@ -158,10 +146,6 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
         start = 0;
         size = 0;
     }
-
-    /* =======================
-       Sequenced ends
-       ======================= */
 
     /** Adds at the logical head; if full, drops the last (most recent) element. */
     @Override
@@ -231,10 +215,6 @@ public class RollingBuffer<T> extends AbstractList<T> implements RandomAccess {
         size--;
         return v;
     }
-
-    /* =======================
-       Debug
-       ======================= */
 
     @Override
     public String toString() {

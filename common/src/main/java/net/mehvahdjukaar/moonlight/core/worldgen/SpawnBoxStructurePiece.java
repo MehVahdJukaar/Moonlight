@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.worldgen;
 
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -63,7 +63,7 @@ public class SpawnBoxStructurePiece extends PoolElementStructurePiece {
         return null;
     }
 
-    private static final RandomSource RAND = RandomSource.createNewThreadLocalInstance();
+    private static final RandomSource RAND = RandomSource.createThreadLocalInstance();
 
     //gets first random box at
     @Nullable

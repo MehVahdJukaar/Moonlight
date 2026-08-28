@@ -11,6 +11,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,14 +28,17 @@ import java.util.*;
 
 public class ChangeDimensionCommand {
 
+    private static final WorldCoordinates CURRENT_POS = new WorldCoordinates(
+            new WorldCoordinate(true, 0), new WorldCoordinate(true, 0), new WorldCoordinate(true, 0));
+
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return Commands.literal("dimension")
-                .requires((p) -> p.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("dimension", new DimensionArgument())
                         .executes(c -> teleportToPos(c,
                                 List.of(c.getSource().getEntityOrException()),
                                 DimensionArgument.getDimension(c, "dimension"),
-                                WorldCoordinates.current()))
+                                CURRENT_POS))
                         .then(Commands.argument("location", Vec3Argument.vec3())
                                 .executes((c) -> teleportToPos(c,
                                         List.of(c.getSource().getEntityOrException()),
@@ -45,7 +49,7 @@ public class ChangeDimensionCommand {
                                 .executes((c) -> teleportToPos(c,
                                         EntityArgument.getEntities(c, "targets"),
                                         DimensionArgument.getDimension(c, "dimension"),
-                                        WorldCoordinates.current()))
+                                        CURRENT_POS))
                                 .then(Commands.argument("location", Vec3Argument.vec3())
                                         .executes((c) -> teleportToPos(c,
                                                 EntityArgument.getEntities(c, "targets"),
@@ -64,21 +68,21 @@ public class ChangeDimensionCommand {
         var source = context.getSource();
 
         Vec3 vec3 = position.getPosition(source);
-        Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
+        Set<Relative> set = EnumSet.noneOf(Relative.class);
         if (position.isXRelative()) {
-            set.add(RelativeMovement.X);
+            set.add(Relative.X);
         }
 
         if (position.isYRelative()) {
-            set.add(RelativeMovement.Y);
+            set.add(Relative.Y);
         }
 
         if (position.isZRelative()) {
-            set.add(RelativeMovement.Z);
+            set.add(Relative.Z);
         }
 
-        set.add(RelativeMovement.X_ROT);
-        set.add(RelativeMovement.Y_ROT);
+        set.add(Relative.X_ROT);
+        set.add(Relative.Y_ROT);
 
 
         for (Entity entity : targets) {
@@ -95,7 +99,7 @@ public class ChangeDimensionCommand {
 
     }
 
-    private static void performTeleport(CommandSourceStack source, Entity entity, ServerLevel level, double x, double y, double z, Set<RelativeMovement> relativeList) throws CommandSyntaxException {
+    private static void performTeleport(CommandSourceStack source, Entity entity, ServerLevel level, double x, double y, double z, Set<Relative> relativeList) throws CommandSyntaxException {
         BlockPos blockPos = BlockPos.containing(x, y, z);
         if (!Level.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
@@ -104,7 +108,7 @@ public class ChangeDimensionCommand {
             float g = Mth.wrapDegrees(entity.getXRot());
             BlockPos oldPos = entity.blockPosition();
             var oldDim = entity.level().dimension();
-            if (entity.teleportTo(level, x, y, z, relativeList, f, g)) {
+            if (entity.teleportTo(level, x, y, z, relativeList, f, g, true)) {
                 BackCommand.onTeleported(entity, oldPos, oldDim);
                 label23:
                 {

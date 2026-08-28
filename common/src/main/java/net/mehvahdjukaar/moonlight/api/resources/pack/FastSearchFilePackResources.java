@@ -10,7 +10,7 @@ import com.google.common.base.Stopwatch;
 import com.mojang.logging.LogUtils;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -71,7 +71,7 @@ public class FastSearchFilePackResources extends AbstractPackResources {
         }
     }
 
-    private static String getPathFromLocation(PackType packType, ResourceLocation location) {
+    private static String getPathFromLocation(PackType packType, Identifier location) {
         return String.format(Locale.ROOT, "%s/%s/%s", packType.getDirectory(), location.getNamespace(), location.getPath());
     }
 
@@ -81,7 +81,7 @@ public class FastSearchFilePackResources extends AbstractPackResources {
     }
 
     @Override
-    public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
+    public IoSupplier<InputStream> getResource(PackType packType, Identifier location) {
         if (packType != this.packType) return null;
         return this.getResource(getPathFromLocation(packType, location));
     }

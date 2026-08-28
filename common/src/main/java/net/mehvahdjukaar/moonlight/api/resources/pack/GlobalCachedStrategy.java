@@ -102,7 +102,7 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
 
             String description = "";
             try {
-                PackMetadataSection metadataSection = p.getMetadataSection(PackMetadataSection.TYPE);
+                PackMetadataSection metadataSection = p.getMetadataSection(PackMetadataSection.CLIENT_TYPE);
                 if (metadataSection != null) {
                     description = metadataSection.description().getString();
                 }

@@ -1,4 +1,4 @@
-accessWidener v2 named
+accessWidener v2 official
 
 transitive-accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 
@@ -7,8 +7,6 @@ transitive-accessible method net/minecraft/client/gui/screens/MenuScreens regist
 transitive-accessible class net/minecraft/world/inventory/MenuType$MenuSupplier
 
 transitive-accessible field net/minecraft/world/entity/LivingEntity dead Z
-accessible field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
-mutable field net/minecraft/client/renderer/RenderStateShard setupState Ljava/lang/Runnable;
 
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
@@ -21,7 +19,6 @@ accessible class net/minecraft/world/level/levelgen/structure/pools/JigsawPlacem
 accessible method net/minecraft/world/level/levelgen/structure/pools/SinglePoolElement getTemplate (Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager;)Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate;
 accessible field net/minecraft/world/level/levelgen/structure/pools/ListPoolElement elements Ljava/util/List;
 
-
 accessible field net/minecraft/server/packs/resources/ReloadableResourceManager type Lnet/minecraft/server/packs/PackType;
 accessible class net/minecraft/server/packs/resources/SimpleReloadInstance$StateFactory
 
@@ -30,6 +27,12 @@ accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
 transitive-accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes registerBlockStates (Lnet/minecraft/core/Holder;Ljava/util/Set;)V
 
 accessible field net/minecraft/world/level/block/Block item Lnet/minecraft/world/item/Item;
+
+#block key
+accessible field net/minecraft/world/level/block/state/BlockBehaviour$Properties id Lnet/minecraft/resources/ResourceKey;
+
+#boat wood type
+accessible field net/minecraft/world/item/BoatItem entityType Lnet/minecraft/world/entity/EntityType;
 
 # fluid holder hacks
 accessible field net/minecraft/core/Holder$Reference owner Lnet/minecraft/core/HolderOwner;
@@ -40,19 +43,13 @@ accessible field net/minecraft/core/registries/BuiltInRegistries LOADERS Ljava/u
 accessible field net/minecraft/server/level/ServerLevel entityManager Lnet/minecraft/world/level/entity/PersistentEntitySectionManager;
 
 accessible field net/minecraft/world/entity/projectile/Projectile leftOwner Z
-accessible method net/minecraft/world/entity/projectile/Projectile checkLeftOwner ()Z
 accessible method net/minecraft/world/entity/Entity collide (Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
-
-transitive-accessible class net/minecraft/world/level/block/entity/BlockEntity$ComponentHelper
 
 #hand stuff
 transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer applyItemArmTransform (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
 transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer applyItemArmAttackTransform (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V
 
 #render type
-transitive-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
-
-accessible method net/minecraft/client/resources/TextureAtlasHolder getSprite (Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
 
 #lighting
 accessible field com/mojang/blaze3d/platform/Lighting DIFFUSE_LIGHT_0 Lorg/joml/Vector3f;
@@ -64,6 +61,9 @@ accessible field com/mojang/blaze3d/platform/Lighting NETHER_DIFFUSE_LIGHT_0 Lor
 mutable field com/mojang/blaze3d/platform/Lighting NETHER_DIFFUSE_LIGHT_0 Lorg/joml/Vector3f;
 accessible field com/mojang/blaze3d/platform/Lighting NETHER_DIFFUSE_LIGHT_1 Lorg/joml/Vector3f;
 mutable field com/mojang/blaze3d/platform/Lighting NETHER_DIFFUSE_LIGHT_1 Lorg/joml/Vector3f;
+
+#gui light directions are baked in the lighting ubo, shade fix has to push them again
+accessible method com/mojang/blaze3d/platform/Lighting updateBuffer (Lcom/mojang/blaze3d/platform/Lighting$Entry;Lorg/joml/Vector3f;Lorg/joml/Vector3f;)V
 transitive-accessible method net/minecraft/world/level/block/state/properties/BlockSetType register (Lnet/minecraft/world/level/block/state/properties/BlockSetType;)Lnet/minecraft/world/level/block/state/properties/BlockSetType;
 transitive-accessible method net/minecraft/world/level/block/state/properties/WoodType register (Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/world/level/block/state/properties/WoodType;
 
@@ -71,8 +71,6 @@ transitive-accessible method net/minecraft/world/level/block/DoorBlock <init> (L
 transitive-accessible method net/minecraft/world/level/block/TrapDoorBlock <init> (Lnet/minecraft/world/level/block/state/properties/BlockSetType;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
 #shader stuff
-accessible field com/mojang/blaze3d/systems/RenderSystem shaderLightDirections [Lorg/joml/Vector3f;
-transitive-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 #tabs
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs BUILDING_BLOCKS Lnet/minecraft/resources/ResourceKey;
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs SPAWN_EGGS Lnet/minecraft/resources/ResourceKey;
@@ -89,14 +87,15 @@ transitive-accessible field net/minecraft/world/item/CreativeModeTabs NATURAL_BL
 transitive-accessible field net/minecraft/world/item/CreativeModeTabs OP_BLOCKS Lnet/minecraft/resources/ResourceKey;
 
 transitive-accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier
+#add valid blocks
+accessible field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
+mutable field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
 
 accessible field net/minecraft/client/gui/components/AbstractWidget height I
 
 mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData centerX I
 mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData centerZ I
 mutable field net/minecraft/world/level/saveddata/maps/MapItemSavedData dimension Lnet/minecraft/resources/ResourceKey;
-
-transitive-accessible method net/minecraft/client/renderer/item/ItemProperties register (Lnet/minecraft/world/item/Item;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/renderer/item/ClampedItemPropertyFunction;)V
 
 #config list
 accessible method net/minecraft/client/gui/components/AbstractSelectionList replaceEntries (Ljava/util/Collection;)V
@@ -111,16 +110,12 @@ accessible field net/minecraft/server/MinecraftServer storageSource Lnet/minecra
 accessible field net/minecraft/server/level/ServerLevel serverLevelData Lnet/minecraft/world/level/storage/ServerLevelData;
 
 #fox sleeping for cages
-transitive-accessible method net/minecraft/world/entity/animal/Fox setSleeping (Z)V
-transitive-accessible method net/minecraft/world/entity/animal/Fox trusts (Ljava/util/UUID;)Z
 
 #villager ai
-mutable field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
-accessible field net/minecraft/world/entity/npc/Villager MEMORY_TYPES Lcom/google/common/collect/ImmutableList;
 transitive-accessible field net/minecraft/world/entity/Mob goalSelector Lnet/minecraft/world/entity/ai/goal/GoalSelector;
 
 #bee growable
-transitive-accessible method net/minecraft/world/entity/animal/Bee incrementNumCropsGrownSincePollination ()V
+transitive-accessible method net/minecraft/world/entity/animal/bee/Bee incrementNumCropsGrownSincePollination ()V
 
 #key mapping
 transitive-accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
@@ -130,16 +125,9 @@ transitive-accessible method net/minecraft/client/renderer/texture/SpriteContent
 #texture image stuff
 #paletted permutations: rebuild virtual repaletted sprites at gen time
 accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations createPaletteMapping ([I[I)Ljava/util/function/IntUnaryOperator;
-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
-accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frames Ljava/util/List;
+accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations loadPaletteEntryFromImage (Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/Identifier;)[I
 
 #firework stuff
-transitive-mutable field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_BY_ITEM Ljava/util/Map;
-transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_BY_ITEM Ljava/util/Map;
-
-transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_INGREDIENT Lnet/minecraft/world/item/crafting/Ingredient;
-transitive-mutable field net/minecraft/world/item/crafting/FireworkStarRecipe SHAPE_INGREDIENT Lnet/minecraft/world/item/crafting/Ingredient;
 
 #fabric texture stuff
 accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;
@@ -151,49 +139,57 @@ accessible field net/minecraft/client/renderer/texture/SpriteContents originalIm
 transitive-accessible method net/minecraft/world/level/block/IronBarsBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V
 
 #explosion stuff
-transitive-accessible field net/minecraft/world/level/Explosion damageCalculator Lnet/minecraft/world/level/ExplosionDamageCalculator;
-transitive-accessible field net/minecraft/world/level/Explosion level Lnet/minecraft/world/level/Level;
-transitive-accessible field net/minecraft/world/level/Explosion radius F
-transitive-accessible field net/minecraft/world/level/Explosion x D
-transitive-accessible field net/minecraft/world/level/Explosion y D
-transitive-accessible field net/minecraft/world/level/Explosion z D
-transitive-accessible field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
-transitive-mutable field net/minecraft/world/level/Explosion damageSource Lnet/minecraft/world/damagesource/DamageSource;
-transitive-accessible field net/minecraft/world/level/Explosion blockInteraction Lnet/minecraft/world/level/Explosion$BlockInteraction;
 
+#recipe remapping
+accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStackTemplate;
+accessible field net/minecraft/world/item/crafting/ShapelessRecipe ingredients Ljava/util/List;
+accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStackTemplate;
+accessible method net/minecraft/world/item/crafting/SingleItemRecipe result ()Lnet/minecraft/world/item/ItemStackTemplate;
 
 accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
 accessible method net/minecraft/world/level/block/FireBlock setFlammable (Lnet/minecraft/world/level/block/Block;II)V
 
 #flute renderer fabric
-transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
 
 #item renderer
-transitive-accessible method net/minecraft/client/renderer/ItemInHandRenderer renderPlayerArm (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IFFLnet/minecraft/world/entity/HumanoidArm;)V
 
 #sensor type constructor fabric
 transitive-accessible method net/minecraft/world/entity/schedule/Activity <init> (Ljava/lang/String;)V
 transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <init> (Ljava/util/function/Supplier;)V
 
 #fabric custom model loader
-accessible field net/minecraft/client/renderer/block/model/BlockModel parent Lnet/minecraft/client/renderer/block/model/BlockModel;
 
 accessible field com/mojang/blaze3d/platform/NativeImage pixels J
+#png encoding
+accessible method com/mojang/blaze3d/platform/NativeImage writeToChannel (Ljava/nio/channels/WritableByteChannel;)Z
+accessible method com/mojang/blaze3d/platform/NativeImage getPixelABGR (II)I
 
 #post chain
-accessible field net/minecraft/client/renderer/GameRenderer postEffect Lnet/minecraft/client/renderer/PostChain;
-accessible field net/minecraft/client/renderer/PostChain screenTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
-accessible field net/minecraft/client/renderer/PostChain time F
-accessible field net/minecraft/client/renderer/PostChain lastStamp F
-accessible field net/minecraft/client/renderer/PostChain customRenderTargets Ljava/util/Map;
-accessible field net/minecraft/client/renderer/PostChain fullSizedTargets Ljava/util/List;
-accessible method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
-extendable method net/minecraft/client/renderer/PostChain load (Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/resources/ResourceLocation;)V
 accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
-accessible field net/minecraft/client/renderer/PostChain shaderOrthoMatrix Lorg/joml/Matrix4f;
 accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
 
 #native config screen: highlighted multiline json editor
 accessible field net/minecraft/client/gui/components/MultiLineEditBox textField Lnet/minecraft/client/gui/components/MultilineTextField;
+accessible method net/minecraft/client/gui/components/MultiLineEditBox <init> (Lnet/minecraft/client/gui/Font;IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;IZIZZ)V
 accessible class net/minecraft/client/gui/components/MultilineTextField$StringView
 accessible method net/minecraft/client/gui/components/MultilineTextField$StringView <init> (II)V
+
+#render pipelines for our mipmapped/additive render types
+accessible field net/minecraft/client/renderer/RenderPipelines TEXT_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+accessible field net/minecraft/client/renderer/RenderPipelines FOG_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+accessible field net/minecraft/client/renderer/RenderPipelines PARTICLE_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+accessible method net/minecraft/client/renderer/rendertype/RenderType create (Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+
+#item carousel. getItemModel would return the missing model, we need to know if there is none
+accessible field net/minecraft/client/resources/model/ModelManager bakedItemStackModels Ljava/util/Map;
+
+#animated gui items
+accessible field net/minecraft/client/renderer/item/ItemStackRenderState activeLayerCount I
+accessible field net/minecraft/client/renderer/item/ItemStackRenderState layers [Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;
+accessible field net/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState localTransform Lorg/joml/Matrix4f;
+accessible field net/minecraft/client/gui/render/pip/PictureInPictureRenderer textureView Lcom/mojang/blaze3d/textures/GpuTextureView;
+#gui render state + scissor stack
+accessible field net/minecraft/client/gui/GuiGraphicsExtractor guiRenderState Lnet/minecraft/client/renderer/state/gui/GuiRenderState;
+accessible class net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack
+accessible field net/minecraft/client/gui/GuiGraphicsExtractor scissorStack Lnet/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack;
+accessible method net/minecraft/client/gui/GuiGraphicsExtractor$ScissorStack peek ()Lnet/minecraft/client/gui/navigation/ScreenRectangle;

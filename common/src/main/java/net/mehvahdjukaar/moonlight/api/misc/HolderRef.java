@@ -6,7 +6,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -48,10 +48,10 @@ public class HolderRef<T> {
     }
 
     public static <A> HolderRef<A> of(String id, ResourceKey<Registry<A>> registry) {
-        return of(ResourceLocation.tryParse(id), registry);
+        return of(Identifier.tryParse(id), registry);
     }
 
-    public static <A> HolderRef<A> of(ResourceLocation location, ResourceKey<Registry<A>> registry) {
+    public static <A> HolderRef<A> of(Identifier location, ResourceKey<Registry<A>> registry) {
         return new HolderRef<>(registry, ResourceKey.create(registry, location));
     }
 
@@ -59,7 +59,7 @@ public class HolderRef<T> {
         return new HolderRef<>(ResourceKey.createRegistryKey(key.registry()), key);
     }
 
-    public static <A> OptHolderRef<A> optional(ResourceLocation location, ResourceKey<Registry<A>> registry) {
+    public static <A> OptHolderRef<A> optional(Identifier location, ResourceKey<Registry<A>> registry) {
         return new OptHolderRef<>(registry, ResourceKey.create(registry, location));
     }
 
@@ -128,7 +128,7 @@ public class HolderRef<T> {
         } catch (Exception e) {
             String extra = "";
             if (lookup instanceof HolderLookup<T> l) {
-                extra = ".\nRegistry content was: " + l.listElements().map(b -> b.key().location()).toList();
+                extra = ".\nRegistry content was: " + l.listElements().map(b -> b.key().identifier()).toList();
             }
             throw new RuntimeException("Failed to get object from registry: " + key +
                     ".\nCalled from " + Thread.currentThread() + ".\n" + extra);
@@ -136,19 +136,19 @@ public class HolderRef<T> {
     }
 
     public String getRegisteredName() {
-        return key.location().toString();
+        return key.identifier().toString();
     }
 
-    public ResourceLocation getID() {
-        return key.location();
+    public Identifier getID() {
+        return key.identifier();
     }
 
     public ResourceKey<T> getKey() {
         return key;
     }
 
-    public boolean is(ResourceLocation location) {
-        return registryKey.location().equals(location);
+    public boolean is(Identifier location) {
+        return registryKey.identifier().equals(location);
     }
 
     public boolean is(ResourceKey<T> resourceKey) {
@@ -165,7 +165,7 @@ public class HolderRef<T> {
 
     @Override
     public String toString() {
-        return "DynamicHolder{" + key + '}';
+        return "HolderRef{" + key + '}';
     }
 
     @Override
@@ -180,12 +180,5 @@ public class HolderRef<T> {
         return Objects.hash(registryKey, key);
     }
 
-    @Deprecated(forRemoval = true)
-    public static class Opt<T> extends OptHolderRef<T> {
-
-        protected Opt(ResourceKey<Registry<T>> registryKey, ResourceKey<T> key) {
-            super(registryKey, key);
-        }
-    }
 }
 

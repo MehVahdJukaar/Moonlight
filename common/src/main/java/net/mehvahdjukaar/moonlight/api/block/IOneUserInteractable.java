@@ -25,7 +25,7 @@ public interface IOneUserInteractable {
         if (!(player instanceof ServerPlayer sp)) {
             return isCloseEnoughToUse(player, myPos);
         }
-        validateClaimer(myPos, sp.serverLevel());
+        validateClaimer(myPos, sp.level());
         UUID uuid = this.getCurrentUser();
         if (uuid == null) return true;
         return uuid.equals(player.getUUID());
@@ -48,7 +48,7 @@ public interface IOneUserInteractable {
     default boolean isCloseEnoughToUse(Entity e, BlockPos myPos) {
         double maxDistance = 8.0;
         if (e instanceof Player p) {
-            return p.canInteractWithBlock(myPos, maxDistance);
+            return p.isWithinBlockInteractionRange(myPos, maxDistance);
         } else {
             double currentDist = (new AABB(myPos)).distanceToSqr(e.getEyePosition());
             return currentDist < maxDistance * maxDistance;

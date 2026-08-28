@@ -12,7 +12,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -56,8 +56,8 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
         //like tags, we match resource stacks instead of all resources to avoid overriding since these work more like tags
         for (var entry : filetoidconverter.listMatchingResourceStacks(resourceManager).entrySet()) {
-            ResourceLocation resourcelocation = entry.getKey();
-            ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
+            Identifier resourcelocation = entry.getKey();
+            Identifier resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
             var value = entry.getValue();
             for (Resource r : value) {
                 try {
@@ -121,18 +121,18 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
     private <T> Map<String, ColoredSet<T>> scanRegistryAndDetectSets(Map<String, DyeColor> colors, List<String> colorPriority,
                                                                      Registry<T> registry) {
-        Map<ResourceLocation, ColorSetBuilder<T>> groupedByType = new HashMap<>();
+        Map<Identifier, ColorSetBuilder<T>> groupedByType = new HashMap<>();
         colorPriority.sort(Comparator.comparingInt(String::length));
         Collections.reverse(colorPriority);
         //group by color
         loop1:
         for (var e : registry.entrySet()) {
-            ResourceLocation id = e.getKey().location();
+            Identifier id = e.getKey().identifier();
             String name = id.getPath();
             if (!name.contains("_")) continue;
 
             for (var c : colorPriority) {
-                ResourceLocation newId = null;
+                Identifier newId = null;
                 if (name.startsWith(c + "_")) {
                     newId = id.withPath(name.substring((c + "_").length()));
                 }
@@ -152,7 +152,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
         //to qualify all vanilla colors must be found
         for (var j : groupedByType.entrySet()) {
             ColorSetBuilder <T> set = j.getValue();
-            ResourceLocation id = j.getKey();
+            Identifier id = j.getKey();
             if (isHardcodedBlacklisted(id)) continue;
             if (set.hasAllVanilla()) {
                 addExtraEntries(id, registry, set);
@@ -162,7 +162,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
         return result;
     }
 
-    private <T> void addExtraEntries(ResourceLocation id, Registry<T> registry, ColorSetBuilder<T> colorsToObj) {
+    private <T> void addExtraEntries(Identifier id, Registry<T> registry, ColorSetBuilder<T> colorsToObj) {
         //fill optional
         //we dont know the namespace of these
         colors:
@@ -172,7 +172,7 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
             for (var mod : KNOWN_COLOR_MODS) {
                 for (var s : new String[]{namespace + ":" + path + "_%s", namespace + ":%s_" + path, mod + ":" + path + "_%s", mod + ":%s_" + path}) {
-                    var o = registry.getOptional(ResourceLocation.parse(String.format(s, c.getName())));
+                    var o = registry.getOptional(Identifier.parse(String.format(s, c.getName())));
                     if (o.isPresent()) {
                         colorsToObj.setColor(c, o.get());
                         continue colors;
@@ -183,12 +183,12 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
         //fill default
         var o = registry.getOptional(id);
-        T def = o.orElseGet(() -> registry.getOptional(ResourceLocation.parse(id.getPath()))
+        T def = o.orElseGet(() -> registry.getOptional(Identifier.parse(id.getPath()))
                 .orElseGet(() -> colorsToObj.getColor(DyeColor.WHITE)));
         colorsToObj.setColor(null, def);
     }
 
-    private boolean isHardcodedBlacklisted(ResourceLocation id) {
+    private boolean isHardcodedBlacklisted(Identifier id) {
         String modId = id.getNamespace();
         return modId.equals("energeticsheep") || modId.equals("xycraft_world") || modId.equals("botania") || modId.equals("spectrum");
     }
@@ -277,13 +277,13 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
     @Nullable
     private ColoredSet<Block> getBlockSet(String key) {
-        key = ResourceLocation.parse(key).toString();
+        key = Identifier.parse(key).toString();
         return state.blockColorSets.get(key);
     }
 
     @Nullable
     private ColoredSet<Item> getItemSet(String key) {
-        key = ResourceLocation.parse(key).toString();
+        key = Identifier.parse(key).toString();
         return state.itemColorSets.get(key);
     }
 

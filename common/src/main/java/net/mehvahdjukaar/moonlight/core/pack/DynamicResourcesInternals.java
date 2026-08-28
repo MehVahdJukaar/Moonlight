@@ -6,14 +6,12 @@ import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynResourceGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -27,62 +25,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApiStatus.Internal
 public class DynamicResourcesInternals {
 
-    @Deprecated(forRemoval = true)
-    private static final Set<DynResourceGenerator<?>> GENERATORS = ConcurrentHashMap.newKeySet();
-
     private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
 
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             PackType type = earlyPackReloadEvent.type();
-            Set<DynamicResourcePack> packs = new HashSet<>();
-            for (var g : GENERATORS) {
-                if (g.dynamicPack.getPackType() == type && g.shouldClearOnReload()) {
-                    packs.add(g.dynamicPack);
-                }
-            }
-            for (var p : packs) {
-                p.clearAllContent();
-            }
-
-            List<DynResourceGenerator<?>> validGen = GENERATORS.stream()
-                    .filter(gen -> gen.dynamicPack.getPackType() == type)
-                    .toList();
-            if (validGen.isEmpty()) return;
-            List<String> modIds = validGen.stream()
-                    .map(DynResourceGenerator::getModId).toList();
-            Moonlight.LOGGER.info("Starting Legacy Runtime Resource Generation for pack type {} with generators from mods {}: {}",
-                    type, modIds, validGen);
-
-            Stopwatch stopwatch = Stopwatch.createStarted();
-
-            IProgressTracker reporter = earlyPackReloadEvent.progress();
-            //These are not parallel. pass flat
-            for (var gen : validGen) {
-                gen.onEarlyReload(earlyPackReloadEvent, reporter); // run synchronously
-            }
-
-            Moonlight.LOGGER.info("Finished Legacy Runtime Resources Generation for {} packs in a total of {} ms",
-                    GENERATORS.size(), stopwatch.elapsed().toMillis());
-        }, EarlyPackReloadEvent.class);
-
-
-        MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
-            PackType type = earlyPackReloadEvent.type();
             Collection<DynamicResourcesProvider> validGen = PROVIDERS.get(type);
             if (validGen.isEmpty()) return;
 
-            var selectedPacks = earlyPackReloadEvent.selectedPacks();
+            ResourceManager manager = earlyPackReloadEvent.manager();
 
-
-            GlobalCachedStrategy.refreshState(type, selectedPacks);
+            GlobalCachedStrategy.refreshState(type, manager.listPacks().toList());
 
             for (var p : PROVIDERS.get(type)) {
                 p.prepare();
             }
 
 
-            List<ResourceLocation> modIds = validGen.stream()
+            List<Identifier> modIds = validGen.stream()
                     .map(DynamicResourcesProvider::getName).toList();
             Moonlight.LOGGER.info("Starting runtime resource generation for pack type {} with generators {}",
                     type, modIds);
@@ -94,7 +54,6 @@ public class DynamicResourcesInternals {
             Stopwatch stopwatch = Stopwatch.createStarted();
 
             IProgressTracker reporter = earlyPackReloadEvent.progress();
-            ResourceManager manager = earlyPackReloadEvent.manager();
             ResourceManager vanillaManager = null;
             //These are not parallel. pass flat
             for (var gen : validGen) {
@@ -113,10 +72,6 @@ public class DynamicResourcesInternals {
 
         }, EarlyPackReloadEvent.class);
 
-    }
-
-    public static void addGenerator(DynResourceGenerator<?> generator) {
-        GENERATORS.add(generator);
     }
 
     public static void registerProvider(DynamicResourcesProvider provider) {

@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.misc.FilteredResManager;
 import net.mehvahdjukaar.moonlight.core.misc.ReloadInstanceWrapper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.*;
@@ -42,7 +42,7 @@ public abstract class ReloadableClientResourcesMixin {
         //fires on world load or on /reload
         //token to assure that modded resources are included
         if (!(this.resources instanceof FilteredResManager) &&
-                this.resources.getResource(ResourceLocation.parse("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
+                this.resources.getResource(Identifier.parse("moonlight:moonlight/token.json")).isPresent()) { //this assumes that it includes all pack including all mod assets
             //one would think that this would be fool proof. Well check again, some mod like to re create this resource manager during block load! All modded resources included aswell
             //so to be EXTRA safe we check if registry phase is over
             if (!PlatHelper.isInitializing()) {

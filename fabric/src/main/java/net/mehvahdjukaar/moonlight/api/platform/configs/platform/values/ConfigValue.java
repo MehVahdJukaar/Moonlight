@@ -43,7 +43,6 @@ public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigV
     /** Reads this value out of its json element. May throw or return null to fall back to the default. */
     protected abstract T parseValue(JsonElement element) throws Exception;
 
-    /** Serializes this value into the json element written under {@link #getName()}. */
     protected abstract JsonElement encodeValue(T value);
 
     @Override
@@ -79,7 +78,6 @@ public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigV
         return changed;
     }
 
-    /** Void convenience setter (used as a {@code Consumer} by the legacy Cloth/YACL screens). */
     public void set(T newValue) {
         setValue(newValue);
     }

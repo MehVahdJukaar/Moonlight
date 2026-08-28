@@ -22,7 +22,7 @@ public class SoftFluidInternalImpl {
     public static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
         //only runs on the first object
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.get(ra);
-        reg.unfreeze();
+        reg.unfreeze(false);
         for (Fluid f : BuiltInRegistries.FLUID) {
             try {
                 if (f == null) continue;

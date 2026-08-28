@@ -34,7 +34,7 @@
     "${mod_id}-common.mixins.json"
   ],
   "depends": {
-    "fabric": ">=0.116.6+1.21.1",
+    "fabric-api": ">=0.155.2+26.1.2",
     "minecraft": "=${minecraft_version}"
   },
   "custom": {

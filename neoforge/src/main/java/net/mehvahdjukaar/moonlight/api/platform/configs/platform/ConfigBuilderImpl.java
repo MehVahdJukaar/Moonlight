@@ -16,9 +16,9 @@ import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.databuddy.ConfigHelper;
 import net.mehvahdjukaar.moonlight.platform.ConfigHacks;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import org.apache.http.annotation.Experimental;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -34,14 +34,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private final List<TrackedConfigValue<?>> trackedValues = new ArrayList<>();
 
-    public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
+    public static ConfigBuilder create(Identifier name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
     private final ModConfigSpec.Builder builder;
     private final Deque<String> categoryStack = new ArrayDeque<>();
 
-    public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
+    public ConfigBuilderImpl(Identifier name, ConfigType type) {
         super(name, type);
         this.builder = new ModConfigSpec.Builder();
         ConfigHacks.init();
@@ -178,7 +178,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return w;
     }
 
-    @Experimental
+    @ApiStatus.Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
         return defineFloat(name, defaultValue, min, max, false);
@@ -362,9 +362,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         super.addTranslationsAndComments(name);
     }
 
-    // Forge attaches a .toml comment to the NEXT defined value, so hand it the pending before-comment right before
-    // that define runs, once per comment. After-comments never reach a define this way, so they miss the .toml file
-    // but still reach the lang file and the screen row
+    // must run before every builder.define(). after-comments never reach the toml, only the lang file and screen row
     private void forwardPendingComment() {
         String toForward = pollCommentToForward();
         if (toForward != null) builder.comment(toForward);

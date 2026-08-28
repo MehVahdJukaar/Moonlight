@@ -21,13 +21,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.mehvahdjukaar.moonlight.api.util.ItemStackResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,11 +92,8 @@ public class SoftFluidTank {
     protected final int capacity;
     protected @NotNull SoftFluidStack fluidStack;
 
-    //Minor optimization. Caches the tint color for the fluid
-    protected int stillTintCache = 0;
-    protected int flowingTintCache = 0;
-    protected int particleTintCache = 0;
-    protected boolean needsColorRefresh = true;
+    //Minor optimization. Caches the tint colors for the fluid. Only ever filled in by SoftFluidColors, client side
+    protected final TintCache tintCache = new TintCache();
 
     protected SoftFluidTank(int capacity, HolderLookup.Provider registries) {
         this(capacity, registries.lookupOrThrow(SoftFluidRegistry.KEY));
@@ -108,11 +105,6 @@ public class SoftFluidTank {
         this.fluidStack = SoftFluidStack.empty(fluidReg);
     }
 
-    @Deprecated(forRemoval = true)
-    protected SoftFluidTank(int capacity) {
-        this(capacity, Utils.hackyGetRegistryAccess());
-    }
-
     public static SoftFluidTank create(int capacity, HolderLookup.Provider registries) {
         return create(capacity, registries.lookupOrThrow(SoftFluidRegistry.KEY));
     }
@@ -120,18 +112,6 @@ public class SoftFluidTank {
     @PlatformImpl
     public static SoftFluidTank create(int capacity, HolderGetter<SoftFluid> fluidReg) {
         throw new AssertionError();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static SoftFluidTank create(int capacity) {
-        return create(capacity, SoftFluidRegistry.get(
-                Utils.hackyGetRegistryAccess()).asLookup());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static SoftFluidTank create(SoftFluidStack stack, int capacity) {
-        return create(stack, capacity,
-                SoftFluidRegistry.get(Utils.hackyGetRegistryAccess()).asLookup());
     }
 
     public static SoftFluidTank create(SoftFluidStack stack, int capacity, HolderGetter<SoftFluid> fluidReg) {
@@ -180,15 +160,15 @@ public class SoftFluidTank {
         ItemStack returnStack;
         //try filling
         var fillResult = this.fillItem(stack, world, pos, simulate);
-        if (fillResult.getResult().consumesAction()) return fillResult.getObject();
+        if (fillResult.consumesAction()) return fillResult.stack();
         //try emptying
         var drainResult = this.drainItem(stack, world, pos, simulate);
-        if (drainResult.getResult().consumesAction()) return drainResult.getObject();
+        if (drainResult.consumesAction()) return drainResult.stack();
 
         return null;
     }
 
-    public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+    public ItemStackResult drainItem(ItemStack filledContainerStack, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
         return drainItem(filledContainerStack, world, pos, simulate, true);
     }
 
@@ -199,9 +179,9 @@ public class SoftFluidTank {
      *
      * @return empty container item, PASS if it failed
      */
-    public InteractionResultHolder<ItemStack> drainItem(ItemStack filledContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
+    public ItemStackResult drainItem(ItemStack filledContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
         var extracted = SoftFluidStack.fromItem(filledContainer, level.registryAccess());
-        if (extracted == null) return InteractionResultHolder.pass(ItemStack.EMPTY);
+        if (extracted == null) return ItemStackResult.pass(ItemStack.EMPTY);
         SoftFluidStack fluidStack = extracted.getFirst();
 
         //if it can add all of it
@@ -218,14 +198,14 @@ public class SoftFluidTank {
                     level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
                 }
             }
-            return InteractionResultHolder.sidedSuccess(emptyContainer, level.isClientSide);
+            return ItemStackResult.success(emptyContainer);
         }
-        return InteractionResultHolder.pass(ItemStack.EMPTY);
+        return ItemStackResult.pass(ItemStack.EMPTY);
 
     }
 
 
-    public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
+    public ItemStackResult fillItem(ItemStack emptyContainer, @Nullable Level world, @Nullable BlockPos pos, boolean simulate) {
         return fillItem(emptyContainer, world, pos, simulate, true);
     }
 
@@ -235,7 +215,7 @@ public class SoftFluidTank {
      *
      * @return filled bottle item. null if it failed or if simulated is true and failed
      */
-    public InteractionResultHolder<ItemStack> fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
+    public ItemStackResult fillItem(ItemStack emptyContainer, Level level, @Nullable BlockPos pos, boolean simulate, boolean playSound) {
         var pair = this.fluidStack.splitToItem(emptyContainer);
 
         if (pair != null) {
@@ -244,9 +224,9 @@ public class SoftFluidTank {
             if (sound != null && pos != null) {
                 level.playSound(null, pos, sound, SoundSource.BLOCKS, 1, 1);
             }
-            return InteractionResultHolder.sidedSuccess(pair.getFirst(), level.isClientSide);
+            return ItemStackResult.success(pair.getFirst());
         }
-        return InteractionResultHolder.pass(ItemStack.EMPTY);
+        return ItemStackResult.pass(ItemStack.EMPTY);
     }
 
     /**
@@ -263,7 +243,7 @@ public class SoftFluidTank {
      * @return filled bottle item. null if it failed
      */
     @Nullable
-    public InteractionResultHolder<ItemStack> fillBottle(Level world, BlockPos pos) {
+    public ItemStackResult fillBottle(Level world, BlockPos pos) {
         return fillItem(Items.GLASS_BOTTLE.getDefaultInstance(), world, pos, false);
     }
 
@@ -273,7 +253,7 @@ public class SoftFluidTank {
      * @return filled bucket item. null if it failed
      */
     @Nullable
-    public InteractionResultHolder<ItemStack> fillBucket(Level world, BlockPos pos) {
+    public ItemStackResult fillBucket(Level world, BlockPos pos) {
         return fillItem(Items.BUCKET.getDefaultInstance(), world, pos, false);
     }
 
@@ -283,7 +263,7 @@ public class SoftFluidTank {
      * @return filled bowl item. null if it failed
      */
     @Nullable
-    public InteractionResultHolder<ItemStack> fillBowl(Level world, BlockPos pos) {
+    public ItemStackResult fillBowl(Level world, BlockPos pos) {
         return fillItem(Items.BOWL.getDefaultInstance(), world, pos, false);
     }
 
@@ -332,27 +312,6 @@ public class SoftFluidTank {
             this.fluidStack.shrink(toRemove);
         }
         return stack;
-    }
-
-    /**
-     * Transfers between 2 soft fluid tanks
-     */
-    @Deprecated(forRemoval = true)
-    public boolean transferFluid(SoftFluidTank destination) {
-        return this.transferFluid(destination, BOTTLE_COUNT);
-    }
-
-    //transfers between two fluid holders
-    //I forgot why this was deprecated
-    @Deprecated(forRemoval = true)
-    public boolean transferFluid(SoftFluidTank destination, int amount) {
-        if (this.isEmpty()) return false;
-        var removed = this.removeFluid(amount, false);
-        if (destination.addFluid(removed, true) == removed.getCount()) {
-            destination.addFluid(removed, false);
-            return true;
-        }
-        return false;
     }
 
     public int getSpace() {
@@ -404,8 +363,21 @@ public class SoftFluidTank {
     }
 
     public void refreshTintCache() {
-        stillTintCache = 0;
-        needsColorRefresh = true;
+        tintCache.still = 0;
+        tintCache.needsRefresh = true;
+    }
+
+    @ApiStatus.Internal
+    public TintCache getTintCache() {
+        return tintCache;
+    }
+
+    @ApiStatus.Internal
+    public static final class TintCache {
+        public int still = 0;
+        public int flowing = 0;
+        public int particle = 0;
+        public boolean needsRefresh = true;
     }
 
     private void fillCount() {
@@ -437,28 +409,6 @@ public class SoftFluidTank {
         this.fluidStack.setCount(Mth.clamp(this.fluidStack.getCount(), 0, capacity));
     }
 
-    private void cacheColors(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        stillTintCache = this.fluidStack.getStillColor(world, pos);
-        flowingTintCache = this.fluidStack.getFlowingColor(world, pos);
-        particleTintCache = this.fluidStack.getParticleColor(world, pos);
-        needsColorRefresh = false;
-    }
-
-    public int getCachedStillColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        if (needsColorRefresh) cacheColors(world, pos);
-        return stillTintCache;
-    }
-
-    public int getCachedFlowingColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        if (needsColorRefresh) cacheColors(world, pos);
-        return flowingTintCache;
-    }
-
-    public int getCachedParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        if (needsColorRefresh) cacheColors(world, pos);
-        return particleTintCache;
-    }
-
     /**
      * @return true if contained fluid has associated food
      */
@@ -472,26 +422,15 @@ public class SoftFluidTank {
      * @param compound nbt
      */
     public void load(CompoundTag compound, HolderLookup.Provider registries) {
-        CompoundTag fluidTag = compound.getCompound("fluid");
+        CompoundTag fluidTag = compound.getCompoundOrEmpty("fluid");
         //TODO: remove this in 1.22
-        CompoundTag backCompat = compound.getCompound("FluidHolder");
+        CompoundTag backCompat = compound.getCompoundOrEmpty("FluidHolder");
         if (!backCompat.isEmpty()) {
             fluidTag = backCompat;
         }
         if (!fluidTag.isEmpty()) {
             this.setFluid(SoftFluidStack.load(registries, fluidTag));
         }
-    }
-
-    @Deprecated(forRemoval = true)
-    public void load(CompoundTag compound) {
-        this.load(compound, Utils.hackyGetRegistryAccess());
-    }
-
-    @Deprecated(forRemoval = true)
-    public CompoundTag save(CompoundTag compound) {
-        this.save(compound, Utils.hackyGetRegistryAccess());
-        return compound;
     }
 
     /**

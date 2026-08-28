@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.Map;
 import java.util.Set;

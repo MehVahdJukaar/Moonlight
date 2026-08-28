@@ -7,15 +7,13 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceSink;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.renderer.block.model.ItemOverride;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -58,7 +56,7 @@ public class RPUtils {
     }
 
     /** Whole content of a text resource, or an empty string when it can't be read. */
-    public static String readTextFile(ResourceManager manager, ResourceLocation path) {
+    public static String readTextFile(ResourceManager manager, Identifier path) {
         var resource = manager.getResource(path);
         if (resource.isPresent()) {
             try (BufferedReader reader = resource.get().openAsReader()) {
@@ -70,7 +68,7 @@ public class RPUtils {
         return "";
     }
 
-    public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block) throws FileNotFoundException {
+    public static Identifier findFirstBlockTextureLocation(ResourceManager manager, Block block) throws FileNotFoundException {
         return findFirstBlockTextureLocation(manager, block, t -> true);
     }
 
@@ -82,11 +80,11 @@ public class RPUtils {
      * @param texturePredicate predicate that will be applied to the texture name
      * @return found texture location
      */
-    public static ResourceLocation findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
-        ResourceLocation blockId = Utils.getID(block);
+    public static Identifier findFirstBlockTextureLocation(ResourceManager manager, Block block, Predicate<String> texturePredicate) throws FileNotFoundException {
+        Identifier blockId = Utils.getID(block);
         var cached = TextureCache.getCachedTexture(block, texturePredicate);
         if (cached.isSuccess()) {
-            return ResourceLocation.parse(cached.getObject());
+            return Identifier.parse(cached.getObject());
         } else if (cached.isPass()) {
             var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(blockId));
             try (var bsStream = blockState.orElseThrow().open()) {
@@ -104,7 +102,7 @@ public class RPUtils {
                 }
                 cached = TextureCache.getCachedTexture(block, texturePredicate);
                 if (cached.isSuccess()) {
-                    return ResourceLocation.parse(cached.getObject());
+                    return Identifier.parse(cached.getObject());
                 }
 
             } catch (Exception ignored) {
@@ -115,18 +113,18 @@ public class RPUtils {
             var hack = guessBlockTextureLocation(blockId, block);
             for (var t : hack) {
                 TextureCache.add(block, t);
-                if (texturePredicate.test(t)) return ResourceLocation.parse(t);
+                if (texturePredicate.test(t)) return Identifier.parse(t);
             }
         }
         throw new FileNotFoundException("Could not find any texture associated to the given block " + blockId);
     }
 
     //if texture is not there try to guess location. Hack for better end
-    private static Set<String> guessItemTextureLocation(ResourceLocation id, Item item) {
+    private static Set<String> guessItemTextureLocation(Identifier id, Item item) {
         return Set.of(id.getNamespace() + ":item/" + item);
     }
 
-    private static List<String> guessBlockTextureLocation(ResourceLocation id, Block block) {
+    private static List<String> guessBlockTextureLocation(Identifier id, Block block) {
         String name = id.getPath();
         List<String> textures = new ArrayList<>();
         //just works for wood types
@@ -160,10 +158,22 @@ public class RPUtils {
         return textures;
     }
 
-    //TODO: account for parents
-
-    public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item block) throws FileNotFoundException {
+    public static Identifier findFirstItemTextureLocation(ResourceManager manager, Item block) throws FileNotFoundException {
         return findFirstItemTextureLocation(manager, block, t -> true);
+    }
+
+    private static List<String> findItemDefinitionTextures(ResourceManager manager, Identifier itemId) {
+        List<String> textures = new ArrayList<>();
+        var definition = manager.getResource(ResType.ITEMS.getPath(itemId));
+        if (definition.isEmpty()) return textures;
+        try (var stream = definition.get().open()) {
+            JsonElement json = RPUtils.deserializeJson(stream);
+            for (var modelPath : findAllResourcesInJsonRecursive(json, s -> s.equals("model"))) {
+                textures.addAll(findAllTexturesInModelRecursive(manager, modelPath));
+            }
+        } catch (Exception ignored) {
+        }
+        return textures;
     }
 
     /**
@@ -174,20 +184,22 @@ public class RPUtils {
      * @param texturePredicate predicate that will be applied to the texture name
      * @return found texture location
      */
-    public static ResourceLocation findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
-        ResourceLocation itemId = Utils.getID(item);
+    public static Identifier findFirstItemTextureLocation(ResourceManager manager, Item item, Predicate<String> texturePredicate) throws FileNotFoundException {
+        Identifier itemId = Utils.getID(item);
         var cached = TextureCache.getCachedTexture(item, texturePredicate);
         if (cached.isSuccess()) {
-            return ResourceLocation.parse(cached.getObject());
+            return Identifier.parse(cached.getObject());
         } else if (cached.isPass()) {
 
-            Set<String> textures;
-            var itemModel = manager.getResource(ResType.ITEM_MODELS.getPath(itemId));
-            try (var stream = itemModel.orElseThrow().open()) {
-                JsonElement bsElement = RPUtils.deserializeJson(stream);
-
-                textures = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject().getAsJsonObject("textures"));
-            } catch (Exception ignored) {
+            Collection<String> textures = findItemDefinitionTextures(manager, itemId);
+            if (textures.isEmpty()) {
+                //no definition (or an exotic one we can't follow), assume the conventional geometry model
+                try {
+                    textures = findAllTexturesInModelRecursive(manager, itemId.withPrefix("item/").toString());
+                } catch (Exception ignored) {
+                }
+            }
+            if (textures.isEmpty()) {
                 //if texture is not there try to guess location. Hack for better end
                 textures = guessItemTextureLocation(itemId, item);
             }
@@ -196,7 +208,7 @@ public class RPUtils {
             }
             cached = TextureCache.getCachedTexture(item, texturePredicate);
             if (cached.isSuccess()) {
-                return ResourceLocation.parse(cached.getObject());
+                return Identifier.parse(cached.getObject());
             }
         }
         throw new FileNotFoundException("Could not find any texture associated to the given item " + itemId);
@@ -244,11 +256,11 @@ public class RPUtils {
     }
 
     // path is relative to recipe folder
-    public static Recipe<?> readRecipe(ResourceManager manager, ResourceLocation location) {
+    public static Recipe<?> readRecipe(ResourceManager manager, Identifier location) {
         return readRecipeAbsolute(manager, ResType.RECIPES.getPath(location));
     }
 
-    private static Recipe<?> readRecipeAbsolute(ResourceManager manager, ResourceLocation location) {
+    private static Recipe<?> readRecipeAbsolute(ResourceManager manager, Identifier location) {
         var resource = manager.getResource(location);
         try (var stream = resource.orElseThrow().open()) {
             JsonObject element = RPUtils.deserializeJson(stream);
@@ -266,26 +278,13 @@ public class RPUtils {
         return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow();
     }
 
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, String baseID) {
-        return makeSimilarRecipe(original, originalMat, destinationMat, ResourceLocation.parse(baseID));
-    }
-
-    /**
-     * Use @link ResourceSink#addBlockTypeSwapRecipe
-     */
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> RecipeHolder<?> makeSimilarRecipe(Recipe<?> original, T originalMat, T destinationMat, ResourceLocation baseID) {
-        return RecipeTemplate.makeSimilarRecipe(original, originalMat, destinationMat, baseID);
-    }
-
-    public static Path getResourcePath(Path path, ResourceLocation k, PackType packType) {
+    public static Path getResourcePath(Path path, Identifier k, PackType packType) {
         return path.resolve(packType.getDirectory())
                 .resolve(k.getNamespace())
                 .resolve(k.getPath());
     }
 
-    public static void writeResource(ResourceLocation id, byte[] bytes, Path path, PackType packType) {
+    public static void writeResource(Identifier id, byte[] bytes, Path path, PackType packType) {
         Path p = getResourcePath(path, id, packType);
         try {
             Files.createDirectories(p.getParent());
@@ -294,73 +293,5 @@ public class RPUtils {
             throw new RuntimeException(e);
         }
     }
-
-    @FunctionalInterface
-    public interface OverrideAppender {
-        void add(ItemOverride override);
-
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void appendModelOverride(ResourceManager manager, DynamicTexturePack pack,
-                                           ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
-        var o = manager.getResource(ResType.ITEM_MODELS.getPath(modelRes));
-        if (o.isPresent()) {
-            try (var model = o.get().open()) {
-                var json = RPUtils.deserializeJson(model);
-                JsonArray overrides;
-                if (json.has("overrides")) {
-                    overrides = json.getAsJsonArray("overrides");
-                } else overrides = new JsonArray();
-
-                modelConsumer.accept(ov -> overrides.add(serializeModelOverride(ov)));
-
-                json.add("overrides", overrides);
-                pack.addItemModel(modelRes, json);
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
-    /**
-     * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
-     */
-    @Deprecated(forRemoval = true)
-    public static void appendModelOverride(ResourceManager manager, ResourceSink pack,
-                                           ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
-        var json = makeModelOverride(manager, modelRes, modelConsumer);
-        pack.addItemModel(modelRes, json);
-    }
-
-    public static JsonElement makeModelOverride(ResourceManager manager,
-                                                ResourceLocation modelRes, Consumer<OverrideAppender> modelConsumer) {
-        try (var model = manager.getResourceOrThrow(ResType.ITEM_MODELS.getPath(modelRes)).open()) {
-            var json = RPUtils.deserializeJson(model);
-            JsonArray overrides;
-            if (json.has("overrides")) {
-                overrides = json.getAsJsonArray("overrides");
-            } else overrides = new JsonArray();
-
-            modelConsumer.accept(ov -> overrides.add(serializeModelOverride(ov)));
-
-            json.add("overrides", overrides);
-            return json;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private static JsonObject serializeModelOverride(ItemOverride override) {
-        JsonObject json = new JsonObject();
-        json.addProperty("model", override.getModel().toString());
-        JsonObject predicates = new JsonObject();
-        override.getPredicates().forEach(p -> {
-            predicates.addProperty(p.getProperty().toString(), p.getValue());
-        });
-        json.add("predicate", predicates);
-        return json;
-    }
-
 
 }

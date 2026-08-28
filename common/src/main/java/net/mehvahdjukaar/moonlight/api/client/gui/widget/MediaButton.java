@@ -10,12 +10,11 @@ import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
+
 
 public class MediaButton {
 
@@ -52,14 +52,14 @@ public class MediaButton {
         public static final Codec<MediaIcon> CODEC = StringRepresentable.fromValues(MediaIcon::values);
 
         private final String name;
-        private final ResourceLocation sprite;
+        private final Identifier sprite;
 
         MediaIcon() {
             this.name = this.toString().toLowerCase(Locale.ROOT);
             this.sprite = Moonlight.res("media/" + name);
         }
 
-        public ResourceLocation sprite() { return sprite; }
+        public Identifier sprite() { return sprite; }
 
         @Override
         public String getSerializedName() { return name; }
@@ -89,7 +89,6 @@ public class MediaButton {
         public String getSerializedName() { return name; }
     }
 
-    /** @return true if the hub allow-list currently permits this button type. */
     private static boolean enabled(ButtonType type) {
         return MoonlightHubInfo.INSTANCE.isButtonEnabled(type);
     }
@@ -103,45 +102,42 @@ public class MediaButton {
         return OWN_MODS.computeIfAbsent(modId, id -> PlatHelper.findModResource(id, OWN_PACKAGE) != null);
     }
 
-    public static final ResourceLocation YOUTUBE = MediaIcon.YOUTUBE.sprite();
-    public static final ResourceLocation TWITTER = MediaIcon.TWITTER.sprite();
-    public static final ResourceLocation DISCORD = MediaIcon.DISCORD.sprite();
-    public static final ResourceLocation PATREON = MediaIcon.PATREON.sprite();
-    public static final ResourceLocation KO_FI = MediaIcon.KO_FI.sprite();
-    public static final ResourceLocation CURSEFORGE = MediaIcon.CURSEFORGE.sprite();
-    public static final ResourceLocation MODRINTH = MediaIcon.MODRINTH.sprite();
-    public static final ResourceLocation MARKETPLACE = MediaIcon.MARKETPLACE.sprite();
-    public static final ResourceLocation GITHUB = MediaIcon.GITHUB.sprite();
-    public static final ResourceLocation AKLIZ = MediaIcon.AKLIZ.sprite();
-    public static final ResourceLocation BISECT = MediaIcon.BISECT.sprite();
-    public static final ResourceLocation LINK = MediaIcon.LINK.sprite();
+    public static final Identifier YOUTUBE = MediaIcon.YOUTUBE.sprite();
+    public static final Identifier TWITTER = MediaIcon.TWITTER.sprite();
+    public static final Identifier DISCORD = MediaIcon.DISCORD.sprite();
+    public static final Identifier PATREON = MediaIcon.PATREON.sprite();
+    public static final Identifier KO_FI = MediaIcon.KO_FI.sprite();
+    public static final Identifier CURSEFORGE = MediaIcon.CURSEFORGE.sprite();
+    public static final Identifier MODRINTH = MediaIcon.MODRINTH.sprite();
+    public static final Identifier MARKETPLACE = MediaIcon.MARKETPLACE.sprite();
+    public static final Identifier GITHUB = MediaIcon.GITHUB.sprite();
+    public static final Identifier AKLIZ = MediaIcon.AKLIZ.sprite();
+    public static final Identifier BISECT = MediaIcon.BISECT.sprite();
+    public static final Identifier LINK = MediaIcon.LINK.sprite();
 
-    public static final ResourceLocation YES = MoonlightIcons.YES;
-    public static final ResourceLocation NO = MoonlightIcons.NO;
+    public static final Identifier YES = MoonlightIcons.YES;
+    public static final Identifier NO = MoonlightIcons.NO;
 
-    public static Button create(Screen parent, int x, int y, ResourceLocation texture,
+    public static Button create(Screen parent, int x, int y, Identifier texture,
                                 String url, String tooltip) {
         return create(parent, x, y, texture, url, Component.literal(tooltip));
     }
 
-    public static Button create(Screen parent, int x, int y, ResourceLocation texture,
+    public static Button create(Screen parent, int x, int y, Identifier texture,
                                 String url, Component tooltip) {
         return create(14, 14, texture, parent, x, y, url, tooltip);
     }
 
-    public static Button create(int iconW, int iconH, ResourceLocation texture,
+    public static Button create(int iconW, int iconH, Identifier texture,
                                 Screen parent, int x, int y, String url, String tooltip) {
         return create(iconW, iconH, texture, parent, x, y, url, Component.literal(tooltip));
     }
 
-    public static Button create(int iconW, int iconH, ResourceLocation texture,
+    public static Button create(int iconW, int iconH, Identifier texture,
                                 Screen parent, int x, int y, String url, Component tooltip) {
 
         String finalUrl = getLink(url);
-        Button.OnPress onPress = (op) -> {
-            Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, finalUrl));
-            parent.handleComponentClicked(style);
-        };
+        Button.OnPress onPress = op -> ConfirmLinkScreen.confirmLinkNow(parent, finalUrl);
 
         var button = new SpriteIconButton.Builder(CommonComponents.EMPTY, onPress, true)
                 .sprite(texture, iconW, iconH)
@@ -166,41 +162,41 @@ public class MediaButton {
     }
 
     // redirects to the fetched url if the given one is the canonical url we used to ship
-    private static String swap(String url, String old, String fetched) {
+    private static String replaceCanonicalUrl(String url, String old, String fetched) {
         return old.equals(url) ? fetched : url;
     }
 
     public static Button youtube(Screen parent, int x, int y, String url) {
         if (!enabled(ButtonType.YOUTUBE)) return placeholderButton(x, y);
-        String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.youtube(), MoonlightHubInfo.INSTANCE.youtube());
+        String redirected = replaceCanonicalUrl(url, MoonlightHubInfo.OLD_SIGNATURE.youtube(), MoonlightHubInfo.INSTANCE.youtube());
         return create(parent, x, y, YOUTUBE, redirected,
                 Component.translatable("tooltip.moonlight.media.youtube"));
     }
 
     public static Button twitter(Screen parent, int x, int y, String url) {
         if (!enabled(ButtonType.TWITTER)) return placeholderButton(x, y);
-        String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.twitter(), MoonlightHubInfo.INSTANCE.twitter());
+        String redirected = replaceCanonicalUrl(url, MoonlightHubInfo.OLD_SIGNATURE.twitter(), MoonlightHubInfo.INSTANCE.twitter());
         return create(parent, x, y, TWITTER, redirected,
                 Component.translatable("tooltip.moonlight.media.twitter"));
     }
 
     public static Button discord(Screen parent, int x, int y, String url) {
         if (!enabled(ButtonType.DISCORD)) return placeholderButton(x, y);
-        String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.discord(), MoonlightHubInfo.INSTANCE.discord());
+        String redirected = replaceCanonicalUrl(url, MoonlightHubInfo.OLD_SIGNATURE.discord(), MoonlightHubInfo.INSTANCE.discord());
         return create(parent, x, y, DISCORD, redirected,
                 Component.translatable("tooltip.moonlight.media.discord"));
     }
 
     public static Button patreon(Screen parent, int x, int y, String url) {
         if (!enabled(ButtonType.PATREON)) return placeholderButton(x, y);
-        String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.patreon(), MoonlightHubInfo.INSTANCE.patreon());
+        String redirected = replaceCanonicalUrl(url, MoonlightHubInfo.OLD_SIGNATURE.patreon(), MoonlightHubInfo.INSTANCE.patreon());
         return create(parent, x, y, PATREON, redirected,
                 Component.translatable("tooltip.moonlight.media.patreon"));
     }
 
     public static Button koFi(Screen parent, int x, int y, String url) {
         if (!enabled(ButtonType.KO_FI)) return placeholderButton(x, y);
-        String redirected = swap(url, MoonlightHubInfo.OLD_SIGNATURE.koFi(), MoonlightHubInfo.INSTANCE.koFi());
+        String redirected = replaceCanonicalUrl(url, MoonlightHubInfo.OLD_SIGNATURE.koFi(), MoonlightHubInfo.INSTANCE.koFi());
         return create(parent, x, y, KO_FI, redirected,
                 Component.translatable("tooltip.moonlight.media.ko_fi"));
     }
@@ -227,11 +223,6 @@ public class MediaButton {
         if (!enabled(ButtonType.MARKETPLACE)) return placeholderButton(x, y);
         return create(parent, x, y, MARKETPLACE, url,
                 Component.translatable("tooltip.moonlight.media.marketplace"));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Button akliz(Screen parent, int x, int y, String url, String tooltip) {
-        return akliz(parent, x, y, url);
     }
 
     /**
@@ -458,14 +449,12 @@ public class MediaButton {
     private record ModLink(MediaIcon icon, String url) {
     }
 
-    /** Auto-resolves all per-mod urls from loader metadata. */
     public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
                                              int centerX, int y, int spacing,
                                              String modId, Runnable onBack) {
         addAuthorMediaButtons(parent, adder, centerX, y, spacing, modId, null, null, null, onBack);
     }
 
-    /** Explicit CF + MR urls; the mod-page url is inferred from loader metadata. */
     public static void addAuthorMediaButtons(Screen parent, Consumer<Button> adder,
                                              int centerX, int y, int spacing,
                                              String modId,

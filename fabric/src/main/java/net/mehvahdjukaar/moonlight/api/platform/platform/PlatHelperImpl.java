@@ -7,28 +7,29 @@ import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.Person;
+import io.netty.buffer.Unpooled;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
+import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
+import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundOpenExtendedMenuMessage;
 import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundSpawnCustomEntityMessage;
-import net.mehvahdjukaar.moonlight.core.network.platform.ExtraDataMenuProvider;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabric;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
@@ -36,19 +37,20 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -59,7 +61,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -74,6 +76,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -103,7 +106,8 @@ public class PlatHelperImpl {
 
 
     public static boolean isMobGriefingOn(Level level, Entity entity) {
-        return level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+        // gamerules are server side only
+        return !(level instanceof ServerLevel sl) || sl.getGameRules().get(GameRules.MOB_GRIEFING);
     }
 
     public static boolean isAreaLoaded(LevelReader level, BlockPos pos, int maxRange) {
@@ -125,9 +129,10 @@ public class PlatHelperImpl {
 
 
     public static int getBurnTime(ItemStack stack) {
-        var v = FuelRegistry.INSTANCE.get(stack.getItem());
-        if (v == null) return 0;
-        return v;
+        // fuel values live on the server
+        var server = getCurrentServer();
+        if (server == null) return 0;
+        return server.fuelValues().burnDuration(stack);
     }
 
     public static boolean canLightFire(ItemStack stack) {
@@ -136,11 +141,11 @@ public class PlatHelperImpl {
     }
 
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getSpreadChance();
+        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getIgniteOdds();
     }
 
     public static int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnChance();
+        return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getBurnOdds();
     }
 
     public static boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
@@ -159,17 +164,13 @@ public class PlatHelperImpl {
         return MoonlightFabric.getCurrentServer();
     }
 
-    public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity) {
-        var packet = new ClientBoundSpawnCustomEntityMessage(entity);
-        return (Packet<ClientGamePacketListener>) (Packet) ServerPlayNetworking.createS2CPacket(packet);
-    }
-
     public static Path getGamePath() {
         return FabricLoader.getInstance().getGameDir();
     }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
-        return new SpawnEggItem(entityType.get(), color, outerColor, properties);
+        // colors come from the spawn egg item model, params ignored
+        return new SpawnEggItem(properties.spawnEgg(entityType.get()));
     }
 
     public static Path getModFilePath(String modId) {
@@ -274,37 +275,41 @@ public class PlatHelperImpl {
     public static <E extends Entity> EntityType<E> newEntityType(String name,
                                                                  EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
                                                                  int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
-        return FabricEntityTypeBuilder.create(category, factory)
-                .dimensions(EntityDimensions.scalable(width, height))
-                .trackedUpdateRate(updateInterval)
-                .trackRangeChunks(clientTrackingRange)
-                .forceTrackedVelocityUpdates(velocityUpdates).build();
+        return EntityType.Builder.of(factory, category)
+                .sized(width, height)
+                .updateInterval(updateInterval)
+                .clientTrackingRange(clientTrackingRange)
+                .alwaysUpdateVelocity(velocityUpdates)
+                .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.parse(name)));
     }
 
-    public static void addServerReloadListener(Function<HolderLookup.Provider, PreparableReloadListener> listener, ResourceLocation name) {
+    public static void addServerReloadListener(Function<HolderLookup.Provider, PreparableReloadListener> listener, Identifier name) {
         Moonlight.assertInitPhase();
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(name, p -> new IdentifiableResourceReloadListener() {
             private final PreparableReloadListener instance = listener.apply(p);
 
             @Override
-            public ResourceLocation getFabricId() {
+            public Identifier getFabricId() {
                 return name;
             }
 
             @Override
-            public CompletableFuture<Void> reload(PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler,
-                                                  ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return instance.reload(preparationBarrier, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor);
+            public CompletableFuture<Void> reload(SharedState currentReload, Executor taskExecutor,
+                                                  PreparationBarrier preparationBarrier, Executor reloadExecutor) {
+                return instance.reload(currentReload, taskExecutor, preparationBarrier, reloadExecutor);
             }
         });
     }
 
     public static void openCustomMenu(ServerPlayer player, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataProvider) {
-        // Opens through vanilla's flow via Fabric's extended screen handler API. Menus registered via
-        // RegHelper.registerMenuType are ExtendedScreenHandlerType, so the extra data is synced and the
-        // open/content packets stay correctly ordered.
-        player.openMenu(new ExtraDataMenuProvider(menuProvider, extraDataProvider));
+        // the extra data is sent ahead of the open screen packet, the client menu factory picks it up
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
+        extraDataProvider.accept(buf);
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.getBytes(buf.readerIndex(), bytes);
+        NetworkHelper.sendToClientPlayer(player, new ClientBoundOpenExtendedMenuMessage(bytes));
+        player.openMenu(menuProvider);
     }
 
     public static boolean isModLoadingValid() {
@@ -349,7 +354,7 @@ public class PlatHelperImpl {
 
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
         ClientBoundSpawnCustomEntityMessage packet = new ClientBoundSpawnCustomEntityMessage(entity);
-        return (Packet<ClientGamePacketListener>) (Packet) ServerPlayNetworking.createS2CPacket(packet);
+        return (Packet<ClientGamePacketListener>) (Packet) ServerPlayNetworking.createClientboundPacket(packet);
     }
 
     public static <A> void setComponent(DataComponentHolder to, DataComponentType<A> type, A componentValue) {
@@ -361,7 +366,7 @@ public class PlatHelperImpl {
 
     public static void invokeLevelUnload(Level l) {
         if (l instanceof ServerLevel sl) {
-            ServerWorldEvents.UNLOAD.invoker().onWorldUnload(sl.getServer(), sl);
+            ServerLevelEvents.UNLOAD.invoker().onLevelUnload(sl.getServer(), sl);
         }
     }
 
@@ -372,7 +377,17 @@ public class PlatHelperImpl {
     private record FabricCondition(ResourceCondition condition) implements LoaderCondition {
         @Override
         public boolean test(HolderLookup.Provider ra) {
-            return condition.test(ra);
+            return condition.test(ra == null ? null : infoLookup(ra));
+        }
+
+        // same adaptation vanilla's RegistryOps.HolderLookupAdapter does (private there)
+        private static RegistryOps.RegistryInfoLookup infoLookup(HolderLookup.Provider ra) {
+            return new RegistryOps.RegistryInfoLookup() {
+                @Override
+                public <E> Optional<RegistryOps.RegistryInfo<E>> lookup(ResourceKey<? extends Registry<? extends E>> key) {
+                    return ra.lookup(key).map(RegistryOps.RegistryInfo::fromRegistryLookup);
+                }
+            };
         }
     }
 

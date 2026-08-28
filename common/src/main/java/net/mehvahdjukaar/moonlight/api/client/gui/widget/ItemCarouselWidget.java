@@ -2,18 +2,21 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -45,6 +48,7 @@ public class ItemCarouselWidget extends AbstractWidget {
     private static final int MAX_ITEMS = 256;      // sanity cap for content-heavy mods
 
     private static final Map<String, List<ItemStack>> MOD_ITEMS = new HashMap<>();
+    private static boolean cacheIsDisplayOnly;
 
     private final List<ItemStack> items;
     private final double span;                     // px of one full loop
@@ -78,26 +82,39 @@ public class ItemCarouselWidget extends AbstractWidget {
     // model cube). Creative tab membership would be the ideal filter, but the tabs stay empty until the player opens
     // the creative menu
     public static List<ItemStack> itemsOf(String modId) {
-        return MOD_ITEMS.computeIfAbsent(modId, id -> {
-            Level level = Minecraft.getInstance().level;
-            FeatureFlagSet features = level == null ? FeatureFlags.DEFAULT_FLAGS : level.enabledFeatures();
-            List<ItemStack> found = new ArrayList<>();
-            for (Map.Entry<ResourceKey<Item>, Item> e : BuiltInRegistries.ITEM.entrySet()) {
-                if (!e.getKey().location().getNamespace().equals(id)) continue;
-                Item item = e.getValue();
-                if (!item.isEnabled(features) || !I18n.exists(item.getDescriptionId())) continue;
-                ItemStack stack = item.getDefaultInstance();
-                if (stack.isEmpty() || hasNoModel(stack)) continue;
-                found.add(stack);
-                if (found.size() >= MAX_ITEMS) break;
-            }
-            return List.copyOf(found);
-        });
+        boolean bound = Utils.areItemComponentsBound();
+        if (bound && cacheIsDisplayOnly) {
+            MOD_ITEMS.clear();
+            cacheIsDisplayOnly = false;
+        }
+        List<ItemStack> cached = MOD_ITEMS.get(modId);
+        if (cached != null) return cached;
+        List<ItemStack> found = collect(modId);
+        MOD_ITEMS.put(modId, found);
+        cacheIsDisplayOnly = !bound;
+        return found;
+    }
+
+    private static List<ItemStack> collect(String modId) {
+        Level level = Minecraft.getInstance().level;
+        FeatureFlagSet features = level == null ? FeatureFlags.DEFAULT_FLAGS : level.enabledFeatures();
+        List<ItemStack> found = new ArrayList<>();
+        for (Map.Entry<ResourceKey<Item>, Item> e : BuiltInRegistries.ITEM.entrySet()) {
+            if (!e.getKey().identifier().getNamespace().equals(modId)) continue;
+            Item item = e.getValue();
+            if (!item.isEnabled(features) || !I18n.exists(item.getDescriptionId())) continue;
+            ItemStack stack = Utils.displayStack(item);
+            if (stack.isEmpty() || hasNoModel(stack)) continue;
+            found.add(stack);
+            if (found.size() >= MAX_ITEMS) break;
+        }
+        return List.copyOf(found);
     }
 
     private static boolean hasNoModel(ItemStack stack) {
-        Minecraft mc = Minecraft.getInstance();
-        return mc.getItemRenderer().getModel(stack, null, null, 0) == mc.getModelManager().getMissingModel();
+        Identifier modelId = stack.get(DataComponents.ITEM_MODEL);
+        // the model manager would log a warning for a missing model
+        return modelId == null || !Minecraft.getInstance().getModelManager().bakedItemStackModels.containsKey(modelId);
     }
 
     /** The color the strip sits on and fades into at its edges. Must match whatever is behind it. */
@@ -106,18 +123,17 @@ public class ItemCarouselWidget extends AbstractWidget {
         return this;
     }
 
-    /** Frames the strip with a 1px outline. Off by default. */
     public ItemCarouselWidget withOutline(int argb) {
         this.outline = argb;
         return this;
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int right = this.getX() + this.width;
         int bottom = this.getY() + this.height;
         graphics.fill(this.getX(), this.getY(), right, bottom, this.background);
-        if (this.outline != null) graphics.renderOutline(this.getX(), this.getY(), this.width, this.height, this.outline);
+        if (this.outline != null) graphics.outline(this.getX(), this.getY(), this.width, this.height, this.outline);
         if (this.items.isEmpty()) return;
 
         advance(this.isHovered);
@@ -133,12 +149,12 @@ public class ItemCarouselWidget extends AbstractWidget {
         int hovered = -1;
 
         graphics.enableScissor(this.getX(), this.getY(), right, bottom);
-        graphics.pose().pushPose();
-        graphics.pose().translate(-subShift, 0, 0);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(-subShift, 0f);
         for (int i = 0, cells = this.width / CELL + 2; i <= cells; i++) {
             int x = this.getX() + i * CELL + GAP / 2 - wholeShift;
             int index = Math.floorMod(firstCell + i, this.items.size());
-            graphics.renderFakeItem(this.items.get(index), x, iconY);
+            graphics.fakeItem(this.items.get(index), x, iconY);
             // only the fully lit middle band gets a tooltip, items dissolving into the edges aren't readable
             float drawnX = x - subShift;
             if (this.isHovered && mouseX >= drawnX && mouseX < drawnX + ICON
@@ -146,14 +162,12 @@ public class ItemCarouselWidget extends AbstractWidget {
                 hovered = index;
             }
         }
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
         graphics.disableScissor();
 
-        // guiOverlay skips the depth test, so the fade covers the items instead of being clipped by them
-        int transparent = FastColor.ARGB32.color(0, this.background);
-        RenderType overItems = RenderType.guiOverlay();
-        GuiHelper.fillGradientHorizontal(graphics, overItems, this.getX(), this.getY(), this.getX() + fade, bottom, this.background, transparent);
-        GuiHelper.fillGradientHorizontal(graphics, overItems, right - fade, this.getY(), right, bottom, transparent, this.background);
+        int transparent = ARGB.color(0, this.background);
+        GuiHelper.fillGradientHorizontal(graphics, this.getX(), this.getY(), this.getX() + fade, bottom, this.background, transparent);
+        GuiHelper.fillGradientHorizontal(graphics, right - fade, this.getY(), right, bottom, transparent, this.background);
 
         if (hovered != this.hoveredIndex) {
             this.hoveredIndex = hovered;
@@ -189,7 +203,7 @@ public class ItemCarouselWidget extends AbstractWidget {
     }
 
     @Override
-    protected boolean isValidClickButton(int button) {
+    protected boolean isValidClickButton(MouseButtonInfo buttonInfo) {
         return false;
     }
 

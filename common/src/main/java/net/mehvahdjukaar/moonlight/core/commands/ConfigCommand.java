@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Set;
 
-/** Opens the config screens on the caller's own client: the mods list, or one mod's config. */
 public class ConfigCommand {
 
     private static final String MOD_ARG = "mod_id";
@@ -36,7 +35,6 @@ public class ConfigCommand {
         return 1;
     }
 
-    /** Installed mods minus the ones that are really the platform: the game, the JVM, the loader and its api modules. */
     private static List<String> suggestedMods() {
         return PlatHelper.getInstalledMods().stream()
                 .filter(id -> !NOT_MODS.contains(id) && !id.startsWith("fabric-"))

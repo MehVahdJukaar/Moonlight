@@ -8,14 +8,16 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -96,35 +98,33 @@ class OptionRow extends ConfigListRow {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
-                       int mouseX, int mouseY, boolean hovering, float partialTick) {
+    public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        int top = this.getContentY(), left = this.getX(), width = this.getWidth(), height = this.getContentHeight();
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        // greyed while the owning category's feature toggle (or an ancestor's) is off. The gate row itself only dims
-        // when an ancestor is off, so turning it off doesn't lock away its own switch
+        // the gate row only dims when an ancestor is off, so it can always be turned back on
         boolean contextEnabled = owner == null || (isGate ? view.areAncestorsEnabled(owner) : view.isCategoryEnabled(owner));
 
         int resetX = left + width - resetButton.getWidth();
         resetButton.setX(resetX);
         resetButton.setY(cy);
         resetButton.active = editable && contextEnabled && !Objects.equals(session.currentRaw(value), value.defaultValue());
-        resetButton.render(graphics, mouseX, mouseY, partialTick);
+        resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         AbstractWidget w = control.widget();
         w.active = editable && contextEnabled;
         int controlX = resetX - GAP - w.getWidth();
         w.setX(controlX);
         w.setY(top + (height - w.getHeight()) / 2);
-        w.render(graphics, mouseX, mouseY, partialTick);
+        w.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int textLeft = left;
         if (hasDescription()) {
             boolean expanded = session.isExpanded(value);
-            ResourceLocation arrow = expanded ? MoonlightIcons.SECTION_EXPANDED : MoonlightIcons.SECTION_COLLAPSED;
+            Identifier arrow = expanded ? MoonlightIcons.SECTION_EXPANDED : MoonlightIcons.SECTION_COLLAPSED;
             int arrowSize = 7;
-            if (!contextEnabled) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
-            graphics.blitSprite(arrow, left + 2, top + (height - arrowSize) / 2, arrowSize, arrowSize);
-            if (!contextEnabled) graphics.setColor(1f, 1f, 1f, 1f);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, arrow, left + 2, top + (height - arrowSize) / 2,
+                    arrowSize, arrowSize, contextEnabled ? 0xFFFFFFFF : 0xFF808080);
             textLeft = left + ARROW_WIDTH;
         }
         // decorative hover-animated icon before the label. Feature toggles draw theirs inside the control instead
@@ -138,11 +138,11 @@ class OptionRow extends ConfigListRow {
 
         // pure decoration in the far-left gutter, never shifts the row content
         this.reloadIconX0 = this.reloadIconX1 = -1;
-        ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
+        Identifier reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
             int iconSize = 8; // native size of the world_reload / game_restart sprites
             int iconX = left - iconSize - 3;
-            graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
             this.reloadIconX0 = iconX;
             this.reloadIconX1 = iconX + iconSize;
         }
@@ -158,14 +158,16 @@ class OptionRow extends ConfigListRow {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = event.button();
         if (hasDescription() && button == 0
                 && mouseX >= toggleX0 && mouseX < toggleX1 && mouseY >= rowY0 && mouseY < rowY1) {
             GuiHelper.playClickSound();
             view.toggleExpanded(value);
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override

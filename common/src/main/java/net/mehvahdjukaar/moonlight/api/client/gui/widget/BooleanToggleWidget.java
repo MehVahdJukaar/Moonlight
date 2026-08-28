@@ -1,11 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -16,19 +18,19 @@ public class BooleanToggleWidget extends AbstractButton {
     private static final int ITEM_SIZE = 16; // decorative item drawn next to the symbol
     private static final int ITEM_GAP = 2;
 
-    private final ResourceLocation onIcon;
-    private final ResourceLocation offIcon;
+    private final Identifier onIcon;
+    private final Identifier offIcon;
     private boolean value;
     private final Consumer<Boolean> onChange;
     @Nullable
     private final ExtraIcon iconRenderer;
 
-    public BooleanToggleWidget(int width, int height, ResourceLocation onIcon, ResourceLocation offIcon,
+    public BooleanToggleWidget(int width, int height, Identifier onIcon, Identifier offIcon,
                                boolean initial, Consumer<Boolean> onChange) {
         this(width, height, onIcon, offIcon, initial, onChange, null);
     }
 
-    public BooleanToggleWidget(int width, int height, ResourceLocation onIcon, ResourceLocation offIcon,
+    public BooleanToggleWidget(int width, int height, Identifier onIcon, Identifier offIcon,
                                boolean initial, Consumer<Boolean> onChange, @Nullable ExtraIcon iconRenderer) {
         super(0, 0, width, height, Component.empty());
         this.onIcon = onIcon;
@@ -41,7 +43,7 @@ public class BooleanToggleWidget extends AbstractButton {
     public interface ExtraIcon {
         boolean available();
 
-        void render(GuiGraphics graphics, int x, int y, int size, boolean hovered, boolean lit);
+        void render(GuiGraphicsExtractor graphics, int x, int y, int size, boolean hovered, boolean lit);
     }
 
     public void set(boolean v) {
@@ -49,14 +51,14 @@ public class BooleanToggleWidget extends AbstractButton {
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers input) {
         this.value = !this.value;
         this.onChange.accept(this.value);
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderWidget(graphics, mouseX, mouseY, partialTick);
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        this.extractDefaultSprite(graphics);
         int cy = getY() + getHeight() / 2;
         boolean hasIcon = iconRenderer != null && iconRenderer.available();
         // center the [item?][symbol] group as a whole so the symbol stays put when no icon is present
@@ -66,7 +68,7 @@ public class BooleanToggleWidget extends AbstractButton {
             iconRenderer.render(graphics, x, cy - ITEM_SIZE / 2, ITEM_SIZE, isHovered(), active);
             x += ITEM_SIZE + ITEM_GAP;
         }
-        graphics.blitSprite(value ? onIcon : offIcon, x, cy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, value ? onIcon : offIcon, x, cy - ICON_SIZE / 2, ICON_SIZE, ICON_SIZE);
     }
 
     @Override

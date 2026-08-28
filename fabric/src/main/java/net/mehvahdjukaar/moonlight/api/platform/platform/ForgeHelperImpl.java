@@ -6,8 +6,9 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -23,7 +24,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -52,10 +53,6 @@ public class ForgeHelperImpl {
 
     public static boolean fireOnProjectileImpact(Projectile improvedProjectileEntity, HitResult blockHitResult) {
         return false;
-    }
-
-    public static <T extends RecipeInput> Recipe<T> copyRecipeConditions(Recipe<T> originalRecipe, Recipe<?> otherRecipe) {
-        return originalRecipe;
     }
 
     public static boolean isCurativeItem(ItemStack stack, MobEffectInstance effect) {
@@ -99,7 +96,9 @@ public class ForgeHelperImpl {
 
     public static void fireOnBlockExploded(BlockState blockstate, Level level, BlockPos blockpos, Explosion explosion) {
         level.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 3);
-        blockstate.getBlock().wasExploded(level, blockpos, explosion);
+        if (level instanceof ServerLevel serverLevel) {
+            blockstate.getBlock().wasExploded(serverLevel, blockpos, explosion);
+        }
     }
 
     public static boolean areStacksEqual(ItemStack stack, ItemStack other, boolean sameNbt) {
@@ -116,14 +115,11 @@ public class ForgeHelperImpl {
     }
 
     public static boolean isDye(ItemStack itemstack) {
-        return itemstack.getItem() instanceof DyeItem;
+        return itemstack.has(DataComponents.DYE);
     }
 
     public static DyeColor getColor(ItemStack stack) {
-        if (stack.getItem() instanceof DyeItem dyeItem) {
-            return dyeItem.getDyeColor();
-        }
-        return null;
+        return stack.get(DataComponents.DYE);
     }
 
     public static BlockState rotateBlock(BlockState state, Level world, BlockPos targetPos, Rotation rot) {
@@ -139,9 +135,9 @@ public class ForgeHelperImpl {
     }
 
     public static Optional<ItemStack> getCraftingRemainingItem(ItemStack itemstack) {
-        var r = itemstack.getItem().getRecipeRemainder(itemstack);
-        if (r.isEmpty()) return Optional.empty();
-        return Optional.of(r);
+        var r = itemstack.getCraftingRemainder();
+        if (r == null) return Optional.empty();
+        return Optional.of(r.create());
     }
 
     public static void reviveEntity(Entity entity) {
@@ -189,7 +185,7 @@ public class ForgeHelperImpl {
         return codec.xmap(Optional::of, Optional::get);
     }
 
-    public static ResourceLocation getQueriedLootTableId(LootContext lootContext) {
-        return ResourceLocation.withDefaultNamespace("unknown"); //TODO: add
+    public static Identifier getQueriedLootTableId(LootContext lootContext) {
+        return Identifier.withDefaultNamespace("unknown"); //TODO: add
     }
 }

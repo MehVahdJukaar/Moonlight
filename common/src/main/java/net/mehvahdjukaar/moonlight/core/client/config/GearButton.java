@@ -1,13 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
+import org.joml.Matrix3x2fStack;
 
 public class GearButton extends Button {
 
@@ -25,7 +26,7 @@ public class GearButton extends Button {
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         long now = Util.getMillis();
         float dt = lastMs < 0 ? 0 : Math.min((now - lastMs) / 1000f, 0.1f); // clamp big gaps (e.g. screen reopen)
         lastMs = now;
@@ -34,15 +35,14 @@ public class GearButton extends Button {
         scale += (target - scale) * Math.min(1f, SCALE_APPROACH * dt);
         float angle = (now % (long) (SECONDS_PER_TURN * 1000)) / (SECONDS_PER_TURN * 1000) * 360f;
 
-        PoseStack pose = graphics.pose();
-        pose.pushPose();
-        pose.translate(this.getX() + this.getWidth() / 2f, this.getY() + this.getHeight() / 2f, 0);
-        pose.mulPose(Axis.ZP.rotationDegrees(angle));
-        pose.scale(scale, scale, 1);
-        pose.translate(-SPRITE_SIZE / 2f, -SPRITE_SIZE / 2f, 0);
-        if (!this.active) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
-        graphics.blitSprite(MoonlightIcons.CONFIG, 0, 0, SPRITE_SIZE, SPRITE_SIZE);
-        if (!this.active) graphics.setColor(1f, 1f, 1f, 1f);
-        pose.popPose();
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(this.getX() + this.getWidth() / 2f, this.getY() + this.getHeight() / 2f);
+        pose.rotate(angle * Mth.DEG_TO_RAD);
+        pose.scale(scale, scale);
+        pose.translate(-SPRITE_SIZE / 2f, -SPRITE_SIZE / 2f);
+        int tint = this.active ? 0xFFFFFFFF : 0xFF808080;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CONFIG, 0, 0, SPRITE_SIZE, SPRITE_SIZE, tint);
+        pose.popMatrix();
     }
 }

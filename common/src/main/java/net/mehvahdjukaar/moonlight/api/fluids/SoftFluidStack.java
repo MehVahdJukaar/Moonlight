@@ -8,7 +8,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
-import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.PotionBottleType;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -34,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -118,20 +116,8 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(fluid, SoftFluid.BOTTLE_COUNT);
     }
 
-    @Deprecated(forRemoval = true)
-    public static SoftFluidStack fromFluid(Fluid fluid, int amount) {
-        return fromFluid(fluid, amount, DataComponentPatch.EMPTY);
-    }
-
     public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull HolderLookup.Provider reg) {
         return fromFluid(fluid, amount, DataComponentPatch.EMPTY, reg);
-    }
-
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static SoftFluidStack fromFluid(Fluid fluid, int amount, @NotNull DataComponentPatch component) {
-        RegistryAccess reg = Utils.hackyGetRegistryAccess();
-        return fromFluid(fluid, amount, component, reg);
     }
 
     @NotNull
@@ -141,23 +127,12 @@ public class SoftFluidStack implements DataComponentHolder {
         return of(f, amount, component);
     }
 
-    @Deprecated(forRemoval = true)
-    @NotNull
-    public static SoftFluidStack fromFluid(FluidState fluid) {
-        return fromFluid(fluid, Utils.hackyGetRegistryAccess());
-    }
-
     @NotNull
     public static SoftFluidStack fromFluid(FluidState fluid, HolderLookup.Provider reg) {
         if (fluid.is(FluidTags.WATER)) {
             return fromFluid(fluid.getType(), SoftFluid.WATER_BUCKET_COUNT, DataComponentPatch.EMPTY, reg);
         }
         return fromFluid(fluid.getType(), SoftFluid.BUCKET_COUNT, DataComponentPatch.EMPTY, reg);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static SoftFluidStack empty() {
-        return of(SoftFluidRegistry.hackyGetEmpty(), 0);
     }
 
     public static SoftFluidStack empty(HolderLookup.Provider lookupProvider) {
@@ -201,10 +176,6 @@ public class SoftFluidStack implements DataComponentHolder {
         return fluid.is(this.fluidHolder);
     }
 
-    public boolean is(HolderReference<SoftFluid> fluid) {
-        return fluid.is(this.fluidHolder);
-    }
-
     public boolean is(TagKey<SoftFluid> tag) {
         return getHolder().is(tag);
     }
@@ -213,18 +184,8 @@ public class SoftFluidStack implements DataComponentHolder {
         return getHolder().is(location);
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean is(SoftFluid fluid) {
-        return this.fluid() == fluid;
-    }
-
     public boolean is(Holder<SoftFluid> fluid) {
         return fluid == this.fluidHolder || fluid.is(this.fluidKey());
-    }
-
-    @Deprecated(forRemoval = true)
-    private Holder<SoftFluid> getFluid() {
-        return isEmptyCache ? myEmptyFluid : fluidHolder;
     }
 
     public final Holder<SoftFluid> getHolder() {
@@ -335,11 +296,6 @@ public class SoftFluidStack implements DataComponentHolder {
 
     // item conversion
 
-    @Deprecated(forRemoval = true)
-    public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack) {
-        return fromItem(itemStack, Utils.hackyGetRegistryAccess());
-    }
-
     @Nullable
     public static Pair<SoftFluidStack, FluidContainerList.Category> fromItem(ItemStack itemStack, HolderLookup.Provider reg) {
         Item filledContainer = itemStack.getItem();
@@ -382,13 +338,6 @@ public class SoftFluidStack implements DataComponentHolder {
     public Pair<ItemStack, FluidContainerList.Category> splitToItem(ItemStack emptyContainer) {
         var r = toItem(emptyContainer);
         if (r != null) this.shrink(r.getSecond().getCapacity());
-        return r;
-    }
-
-    @Deprecated(forRemoval = true)
-    public Pair<ItemStack, FluidContainerList.Category> toItem(ItemStack emptyContainer, boolean dontModifyStack) {
-        var r = toItem(emptyContainer);
-        if (r != null && !dontModifyStack) this.shrink(r.getSecond().getCapacity());
         return r;
     }
 
@@ -509,51 +458,13 @@ public class SoftFluidStack implements DataComponentHolder {
         return this.fluid().getVanillaFluid();
     }
 
-    /**
-     * Client only
-     *
-     * @return tint color to be applied on the fluid texture
-     */
-    public int getStillColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        SoftFluid fluid = this.fluid();
-        SoftFluid.TintMethod method = fluid.getTintMethod();
-        if (method == SoftFluid.TintMethod.NO_TINT) return -1;
-        int specialColor = SoftFluidColors.getSpecialColor(this, world, pos);
-
-        if (specialColor != 0) return specialColor;
-        return fluid.getTintColor();
-    }
-
-    /**
-     * Client only
-     *
-     * @return tint color to be applied on the fluid texture
-     */
-    public int getFlowingColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        SoftFluid.TintMethod method = this.fluid().getTintMethod();
-        if (method == SoftFluid.TintMethod.FLOWING) return this.getParticleColor(world, pos);
-        else return this.getStillColor(world, pos);
-    }
-
-    /**
-     * Client only
-     *
-     * @return tint color to be used on particle. Differs from getTintColor since it returns an mixWith color extrapolated from their fluid textures
-     */
-    public int getParticleColor(@Nullable BlockAndTintGetter world, @Nullable BlockPos pos) {
-        int tintColor = getStillColor(world, pos);
-        //if tint color is white gets averaged color
-        if (tintColor == -1) return this.fluid().getAverageTextureTintColor();
-        return tintColor;
-    }
-
     @Override
     public @NotNull PatchedDataComponentMap getComponents() {
         return this.components;
     }
 
     @Nullable
-    public <T> T set(DataComponentType<? super T> type, @Nullable T component) {
+    public <T> T set(DataComponentType<T> type, @Nullable T component) {
         return this.components.set(type, component);
     }
 

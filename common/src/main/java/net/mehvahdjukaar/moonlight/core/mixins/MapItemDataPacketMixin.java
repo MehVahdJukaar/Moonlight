@@ -15,7 +15,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -54,7 +54,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
     @Unique
     private int moonlight$mapCenterZ = 0;
     @Unique
-    private ResourceLocation moonlight$dimension = Level.OVERWORLD.location();
+    private Identifier moonlight$dimension = Level.OVERWORLD.identifier();
 
     //new constructor expansion
     @Inject(method = "<init>(Lnet/minecraft/world/level/saveddata/maps/MapId;BZLjava/util/Optional;Ljava/util/Optional;)V",
@@ -68,7 +68,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
             if (data != null) {
                 this.moonlight$mapCenterX = data.centerX;
                 this.moonlight$mapCenterZ = data.centerZ;
-                this.moonlight$dimension = data.dimension.location();
+                this.moonlight$dimension = data.dimension.identifier();
             }
         }
     }
@@ -82,7 +82,7 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getCustomDecorations(),
                 CustomMapData.DirtyDataPatch.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
                 p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDirtyCustomData(),
-                ResourceLocation.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
+                Identifier.STREAM_CODEC, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getDimension(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterX(),
                 ByteBufCodecs.INT, p -> ((IMapDataPacketExtension) (Object) p).moonlight$getMapCenterZ(),
                 (old, deco, dataPatch, res, x, z) -> {
@@ -121,12 +121,12 @@ public abstract class MapItemDataPacketMixin implements IMapDataPacketExtension 
 
     @NotNull
     @Override
-    public ResourceLocation moonlight$getDimension() {
+    public Identifier moonlight$getDimension() {
         return moonlight$dimension;
     }
 
     @Override
-    public void moonlight$setDimension(ResourceLocation dim) {
+    public void moonlight$setDimension(Identifier dim) {
         this.moonlight$dimension = dim;
     }
 

@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.criteria_triggers;
 
 import net.mehvahdjukaar.moonlight.api.client.PostShadersHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class PostShadersExample {
 
@@ -16,8 +16,8 @@ public class PostShadersExample {
             Moonlight.res("binocular_effect"), 10
     );
 
-    private static final ResourceLocation LENS_POST = Moonlight.res("shaders/post/colored_contact.json");
-    private static final ResourceLocation BINOCULAR_POST = ResourceLocation.withDefaultNamespace("shaders/post/binocular_fisheye.json");
+    private static final Identifier LENS_POST = Moonlight.res("shaders/post/colored_contact.json");
+    private static final Identifier BINOCULAR_POST = Identifier.withDefaultNamespace("shaders/post/binocular_fisheye.json");
 
     // register with loader events
     public static void onClientTick() {

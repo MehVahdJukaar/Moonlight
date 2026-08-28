@@ -2,9 +2,9 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.ImmutableList;
 import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.HolderSet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -115,17 +115,6 @@ public class BlocksColorAPI {
         return BlocksColorInternal.INSTANCE.getItemHolderSet(key);
     }
 
-
-    /**
-     * Registers or override a color set if not already detected
-     */
-    @Deprecated(forRemoval = true)
-    public static void registerBlockColorSet(ResourceLocation key, EnumMap<DyeColor, Block> blocks, @Nullable Block defaultBlock) {
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void registerItemColorSet(ResourceLocation key, EnumMap<DyeColor, Item> items, @Nullable Item defaultItem) {
-    }
 
     public static final List<DyeColor> SORTED_COLORS = Util.make(() -> {
         ImmutableList.Builder<DyeColor> b = ImmutableList.builder();

@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.resources;
 
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
@@ -17,12 +17,12 @@ import java.util.NoSuchElementException;
  */
 public class StaticResource {
     public final byte[] data;
-    public final ResourceLocation location;
+    public final Identifier location;
     public final String sourceName;
 
     private String dataAsString = null;
 
-    private StaticResource(byte[] data, ResourceLocation location, String sourceName) {
+    private StaticResource(byte[] data, Identifier location, String sourceName) {
         this.data = data;
         this.location = location;
         this.sourceName = sourceName;
@@ -31,7 +31,7 @@ public class StaticResource {
     /**
      * Converts and consume a resource to be used multiple time
      */
-    public static StaticResource of(Resource original, ResourceLocation location) {
+    public static StaticResource of(Resource original, Identifier location) {
         byte[] data1 = new byte[]{};
         try (var stream = original.open()) {
             try {
@@ -47,12 +47,12 @@ public class StaticResource {
     /**
      * Just used as a record
      */
-    public static StaticResource create(byte[] data, ResourceLocation location) {
+    public static StaticResource create(byte[] data, Identifier location) {
         return new StaticResource(data, location, location.toString());
     }
 
     @Nullable
-    public static StaticResource getOrLog(ResourceManager manager, ResourceLocation location) {
+    public static StaticResource getOrLog(ResourceManager manager, Identifier location) {
         try {
             return of(manager.getResource(location).get(),location);
         } catch (Exception var4) {
@@ -61,12 +61,7 @@ public class StaticResource {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public static StaticResource getOrFail(ResourceManager manager, ResourceLocation location) throws NoSuchElementException {
-        return of(manager.getResource(location).orElseThrow(), location);
-    }
-
-    public static StaticResource getOrThrow(ResourceManager manager, ResourceLocation location) throws NoSuchElementException {
+    public static StaticResource getOrThrow(ResourceManager manager, Identifier location) throws NoSuchElementException {
         return of(manager.getResource(location).orElseThrow(), location);
     }
 

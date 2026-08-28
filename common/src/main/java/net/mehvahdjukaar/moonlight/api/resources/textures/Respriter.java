@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,11 +36,6 @@ public class Respriter {
      */
     public static Respriter masked(TextureImage imageToRecolor, TextureImage colorMask) {
         return new Respriter(imageToRecolor, Palette.fromImage(imageToRecolor, colorMask, 0), colorMask);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Respriter ofPalette(TextureImage imageToRecolor, List<Palette> colorsToSwap) {
-        return new Respriter(imageToRecolor, Palette.merge(colorsToSwap.toArray(Palette[]::new)), null);
     }
 
     /**
@@ -78,11 +73,6 @@ public class Respriter {
      */
     public TextureImage recolorWithAnimationOf(TextureImage textureImage) {
         return recolorWithAnimation(List.of(Palette.fromImage(textureImage)), textureImage.getMcMeta());
-    }
-
-    @Deprecated(forRemoval = true)
-    public TextureImage recolorWithAnimation(List<Palette> targetPalettes, @Nullable AnimationMetadataSection targetAnimationData) {
-        return recolorWithAnimation(targetPalettes, targetAnimationData == null ? null : McMetaFile.of(targetAnimationData));
     }
 
     /**
@@ -127,7 +117,7 @@ public class Respriter {
             int ind = pixel.frameIndex();
             //TODO:optimize. only needed for some types of textures
             // If there's a recoloring mask, sample it. Skip recoloring if mask is "off" at this pixel
-            if (recoloringMask != null && FastColor.ABGR32.alpha(recoloringMask.sample(pixel.globalX, pixel.globalY)) != 0) {
+            if (recoloringMask != null && ARGB.alpha(recoloringMask.sample(pixel.globalX, pixel.globalY)) != 0) {
                 return; // skip recoloring this pixel
             }
             Integer newColor = colorRemapper.remapColor(ind, pixel.getValue());

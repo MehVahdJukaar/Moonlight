@@ -1,18 +1,18 @@
 package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcePack;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.SimplePackProvider;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.IoSupplier;
@@ -47,12 +47,6 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
         }
     }
 
-    public synchronized void addLegacy(DynamicResourcePack dynPack) {
-        this.packResourcesStack.add(dynPack);
-        this.packResourcesStack.sort(Comparator.comparing(PackResources::packId));
-        this.modNamespaces.add(dynPack.mainNamespace);
-    }
-
     @Override
     public @Nullable IoSupplier<InputStream> getRootResource(String... strings) {
         String fileName = String.join("/", strings);
@@ -67,7 +61,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
     }
 
     @Override
-    public @Nullable IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
+    public @Nullable IoSupplier<InputStream> getResource(PackType packType, Identifier location) {
         Iterator<PackResources> iterator = this.packResourcesStack.iterator();
 
         IoSupplier<InputStream> ioSupplier;
@@ -85,7 +79,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
 
     @Override
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
-        Map<ResourceLocation, IoSupplier<InputStream>> map = new HashMap<>();
+        Map<Identifier, IoSupplier<InputStream>> map = new HashMap<>();
         for (PackResources packResources : this.packResourcesStack) {
             Objects.requireNonNull(map);
             packResources.listResources(packType, namespace, path, map::putIfAbsent);
@@ -104,14 +98,13 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
     }
 
     @Override
-    public @Nullable <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
+    public @Nullable <T> T getMetadataSection(MetadataSectionType<T> type) {
         if (metadata == null) {
             this.metadata = new PackMetadataSection(Component
                     .translatable("message.moonlight.merged_pack.description", modNamespaces.size()),
-                    SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
-                    Optional.empty());
+                    SharedConstants.getCurrentVersion().packVersion(PackType.CLIENT_RESOURCES).minorRange());
         }
-        return serializer == PackMetadataSection.TYPE ? (T) this.metadata : null;
+        return type == PackMetadataSection.CLIENT_TYPE ? (T) this.metadata : null;
     }
 
     @Override
@@ -149,7 +142,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
             }
         }
         try (NativeImage image = ImageMerger.mergeSquare(icons, ImageMerger.Mode.MIN_AREA_NO_UPSCALE, 0xFF000000)) {
-            return image.asByteArray();
+            return SpriteUtils.toPngBytes(image);
         } catch (Exception ignored) {
             Moonlight.LOGGER.error("Failed to merge pack icons");
         } finally {

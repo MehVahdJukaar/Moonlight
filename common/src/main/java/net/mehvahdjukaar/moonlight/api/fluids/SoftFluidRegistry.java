@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import java.util.Collection;
@@ -26,7 +26,7 @@ public class SoftFluidRegistry {
     }
 
     public static Registry<SoftFluid> get(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(KEY);
+        return registryAccess.lookupOrThrow(KEY);
     }
 
     public static HolderLookup.RegistryLookup<SoftFluid> get(HolderLookup.Provider provider) {
@@ -35,60 +35,6 @@ public class SoftFluidRegistry {
 
     public static Registry<SoftFluid> get(Level level) {
         return get(level.registryAccess());
-    }
-
-
-
-    @Deprecated(forRemoval = true)
-    public static Registry<SoftFluid> getRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(KEY);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Holder<SoftFluid> getEmpty() {
-        return MLBuiltinSoftFluids.EMPTY.getHolder(Utils.hackyGetRegistryAccess());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Holder<SoftFluid> hackyGetEmpty() {
-        return MLBuiltinSoftFluids.EMPTY.getHolder(Utils.hackyGetRegistryAccess());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static SoftFluid empty() {
-        return MLBuiltinSoftFluids.EMPTY.get(Utils.hackyGetRegistryAccess());
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Registry<SoftFluid> hackyGetRegistry() {
-        return Utils.hackyGetRegistry(KEY);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Collection<SoftFluid> getValues() {
-        return hackyGetRegistry().stream().toList();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Collection<Holder.Reference<SoftFluid>> getHolders() {
-        return hackyGetRegistry().holders().toList();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Set<Map.Entry<ResourceKey<SoftFluid>, SoftFluid>> getEntries() {
-        return hackyGetRegistry().entrySet();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Holder<SoftFluid> getHolder(ResourceLocation id) {
-        var opt = getOptionalHolder(id);
-        if (opt.isPresent()) return opt.get();
-        return getEmpty();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Optional<Holder.Reference<SoftFluid>> getOptionalHolder(ResourceLocation id) {
-        return hackyGetRegistry().getHolder(ResourceKey.create(KEY, id));
     }
 
 }

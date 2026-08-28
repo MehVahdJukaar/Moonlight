@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -48,7 +48,7 @@ public class BlockSetAPI {
      * @param id id of the block that is getting erroneously added and should be removed
      */
     @Deprecated
-    public static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
+    public static <T extends BlockType> void addBlockTypeRemover(Class<T> type, Identifier id) {
         BlockSetInternal.addBlockTypeRemover(type, id);
     }
 
@@ -59,33 +59,6 @@ public class BlockSetAPI {
     @FunctionalInterface
     public interface BlockTypeRegistryCallback<E, T extends BlockType> {
         void accept(Registrator<E> reg, Collection<T> wood);
-    }
-
-    /**
-     * Add a registry function meant to register a set of blocks that use a specific wood type
-     * Other entries like items can access the block types directly since it will be filled
-     * Will be called (hopefully) after all other blocks registrations have been fired so the block set type is complete
-     * Note that whatever gets registered here should in no way influence the block sets themselves (you shouldn't add new wood types here for example)
-     *
-     * @param registrationFunction registry function
-     */
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> void addDynamicBlockRegistration(
-            BlockTypeRegistryCallback<Block, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.BLOCK);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType> void addDynamicItemRegistration(
-            BlockTypeRegistryCallback<Item, T> registrationFunction, Class<T> blockType) {
-        addDynamicRegistration(registrationFunction, blockType, BuiltInRegistries.ITEM);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static <T extends BlockType, E> void addDynamicRegistration(
-            BlockSetAPI.BlockTypeRegistryCallback<E, T> registrationFunction, Class<T> blockType,
-            Registry<E> registry) {
-        BlockSetInternal.addDynamicRegistration(registrationFunction, blockType, registry);
     }
 
     public static <E> void addDynamicRegistration(

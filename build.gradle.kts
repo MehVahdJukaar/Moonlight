@@ -92,7 +92,7 @@ subprojects {
       //  maven { url = uri("https://maven.tterrag.com/") } // Flywheel, EnderIO
         maven { url = uri("https://mvn.devos.one/releases/") } // Registrate, Porting Lib (releases)
         maven { url = uri("https://mvn.devos.one/snapshots/") } // Registrate, Porting Lib (snapshots)
-//        maven { url = uri("https://maven.terraformersmc.com/") } // TerraformersMC mods
+        maven { url = uri("https://maven.terraformersmc.com/releases") } // TerraformersMC mods (Mod Menu)
         maven { url = uri("https://maven.saps.dev/releases") } // FTB Mods
         maven { url = uri("https://dl.cloudsmith.io/public/tslat/sbl/maven/") }
         maven { url = uri("https://maven.theillusivec4.top/") } // Curios API
@@ -104,5 +104,9 @@ subprojects {
         maven { url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven") } // Fuzss' Mod Resources
         maven { url = uri("https://maven.jamieswhiteshirt.com/libs-release") } // Jamie's Mods
         maven { url = uri("https://maven.ryanhcode.dev/releases") }
+        maven {
+            url = uri("https://api.modrinth.com/maven") // Modrinth mods
+            content { includeGroup("maven.modrinth") }
+        }
     }
 }

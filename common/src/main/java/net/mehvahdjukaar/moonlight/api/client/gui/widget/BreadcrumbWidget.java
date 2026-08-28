@@ -2,11 +2,12 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class BreadcrumbWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         Arrays.fill(crumbX0, -1);
         Arrays.fill(crumbX1, -1);
         int x = getX();
@@ -53,12 +54,12 @@ public class BreadcrumbWidget extends AbstractWidget {
         boolean first = true;
         for (int i : computeVisibleCrumbs(getWidth())) {
             if (!first) {
-                graphics.drawString(font, SEP, x, y, CRUMB_SEPARATOR);
+                graphics.text(font, SEP, x, y, CRUMB_SEPARATOR);
                 x += font.width(SEP);
             }
             first = false;
             if (i < 0) { // ellipsis placeholder for the collapsed middle
-                graphics.drawString(font, ELLIPSIS, x, y, CRUMB_SEPARATOR);
+                graphics.text(font, ELLIPSIS, x, y, CRUMB_SEPARATOR);
                 x += font.width(ELLIPSIS);
                 continue;
             }
@@ -68,13 +69,15 @@ public class BreadcrumbWidget extends AbstractWidget {
             crumbX1[i] = x + w;
             boolean hover = !c.current() && inside(mouseX, mouseY, x, w);
             int color = c.current() ? CRUMB_CURRENT : (hover ? CRUMB_HOVER : CRUMB);
-            graphics.drawString(font, c.label(), x, y, color);
+            graphics.text(font, c.label(), x, y, color);
             x += w;
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = event.button();
         if (this.active && this.visible && button == 0) {
             Screen target = crumbAt(mouseX, mouseY);
             if (target != null) {
@@ -90,7 +93,6 @@ public class BreadcrumbWidget extends AbstractWidget {
         return mouseX >= x && mouseX <= x + w && mouseY >= getY() - 2 && mouseY <= getY() + 9;
     }
 
-    /** If a clickable breadcrumb segment is under the cursor, returns its target screen; otherwise null. */
     @Nullable
     private Screen crumbAt(double mouseX, double mouseY) {
         for (int i = 0; i < crumbs.size(); i++) {

@@ -4,17 +4,14 @@ package net.mehvahdjukaar.moonlight.api.misc;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -28,13 +25,13 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
     public static final Codec<WorldSavedDataType<? extends WorldSavedData>> CODEC =
             (Codec)      MoonlightRegistry.WORLD_SAVED_DATA_TYPE_REGISTRY.byNameCodec();
 
-    //TODO: 1.22 make map codec here instead
+    //TODO: old world data (data/<ns>_<path>.dat, name keyed) is not migrated
 
     private final Supplier<Codec<D>> codec;
     @Nullable
     private final Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec;
-    private final SavedData.Factory<D> factory;
-    private final String name;
+    private final Function<ServerLevel, D> constructor;
+    private final Identifier id;
     private final Scope scope;
 
 
@@ -55,35 +52,37 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
         }
     }
 
-    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor,
+    public WorldSavedDataType(Identifier id, Function<ServerLevel, D> overworldToDataConstructor,
                               Supplier<Codec<D>> codec,
                               @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec) {
         this(id, overworldToDataConstructor, codec, streamCodec, Scope.SINGLE_OVERWORLD);
     }
 
-    public WorldSavedDataType(ResourceLocation id, Function<ServerLevel, D> overworldToDataConstructor,
+    public WorldSavedDataType(Identifier id, Function<ServerLevel, D> overworldToDataConstructor,
                               Supplier<Codec<D>> codec,
                               @Nullable Supplier<StreamCodec<? super RegistryFriendlyByteBuf, D>> streamCodec, Scope scope) {
         this.codec = codec;
         this.streamCodec = streamCodec;
-        this.name = id.toDebugFileName();
+        this.id = id;
         this.scope = scope;
+        this.constructor = overworldToDataConstructor;
+    }
 
-        this.factory = new SavedData.Factory<>(() -> overworldToDataConstructor.apply(
-                PlatHelper.getCurrentServer().overworld()),
-                this::load, null);
+    // SavedDataType has no level parameter so one is built per call. It only compares by id so the storage key is stable
+    private SavedDataType<D> typeFor(ServerLevel level) {
+        return new SavedDataType<>(id, () -> constructor.apply(level), Codec.lazyInitialized(codec), null);
     }
 
     //only null when called on client too early
     @Nullable
     public D getData(Level level) {
-        if (level.isClientSide && !this.isSyncable()) {
+        if (level.isClientSide() && !this.isSyncable()) {
             throw new IllegalStateException("Tried to access unsyncable world saved data on client side!");
         }
 
         if (level instanceof ServerLevel server) {
             ServerLevel targetLevel = scope.getTargetLevel(server);
-            return targetLevel.getDataStorage().computeIfAbsent(factory, name);
+            return targetLevel.getDataStorage().computeIfAbsent(typeFor(targetLevel));
         } else {
             return clientInstance;
         }
@@ -93,21 +92,13 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
     public void setData(Level level, D data) {
         if (level instanceof ServerLevel server) {
             ServerLevel targetLevel = scope.getTargetLevel(server);
-            targetLevel.getDataStorage().set(name, data);
+            targetLevel.getDataStorage().set(typeFor(targetLevel), data);
         } else {
             this.clientInstance = data;
         }
         data.onReassigned(level);
     }
 
-    private D load(CompoundTag tag, HolderLookup.Provider provider) {
-        var t = tag.get(this.getName());
-        var ops = provider.createSerializationContext(NbtOps.INSTANCE);
-        var dataResult = codec.get().decode(ops, t);
-        return dataResult.getOrThrow().getFirst();
-    }
-
-    //TODO: make map codec
     public Codec<D> getCodec() {
         return codec.get();
     }
@@ -121,7 +112,11 @@ public final class WorldSavedDataType<D extends WorldSavedData> {
         return streamCodec != null;
     }
 
+    public Identifier getId() {
+        return id;
+    }
+
     public String getName() {
-        return name;
+        return id.toDebugFileName();
     }
 }

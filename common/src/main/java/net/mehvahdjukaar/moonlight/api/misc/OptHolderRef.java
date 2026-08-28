@@ -5,7 +5,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class OptHolderRef<T> extends HolderRef<T> {
 
 
-    public static <A> OptHolderRef<A> of(ResourceLocation location, ResourceKey<Registry<A>> registry) {
+    public static <A> OptHolderRef<A> of(Identifier location, ResourceKey<Registry<A>> registry) {
         return new OptHolderRef<>(registry, ResourceKey.create(registry, location));
     }
 

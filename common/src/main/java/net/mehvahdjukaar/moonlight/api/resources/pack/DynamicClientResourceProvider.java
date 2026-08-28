@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 
 import java.nio.file.Files;
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 public abstract class DynamicClientResourceProvider extends DynamicResourcesProvider {
 
-    protected DynamicClientResourceProvider(ResourceLocation name, PackGenerationStrategy generationPolicy) {
+    protected DynamicClientResourceProvider(Identifier name, PackGenerationStrategy generationPolicy) {
         super(name, PackType.CLIENT_RESOURCES, generationPolicy);
         if (PlatHelper.getPhysicalSide().isServer()) {
             throw new IllegalStateException("Client only class registered on server side! Issue from mod" + name);

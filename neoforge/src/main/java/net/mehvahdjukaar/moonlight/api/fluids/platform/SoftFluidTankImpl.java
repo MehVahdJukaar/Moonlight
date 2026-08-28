@@ -1,13 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.fluids.platform;
 
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import static net.mehvahdjukaar.moonlight.api.fluids.platform.SoftFluidStackImpl.bottlesToMB;
 
@@ -21,120 +21,81 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         return new SoftFluidTankImpl(capacity, registries);
     }
 
-    @Deprecated(forRemoval = true)
-    protected SoftFluidTankImpl(int capacity) {
-        super(capacity, SoftFluidRegistry.get(Utils.hackyGetRegistryAccess()).asLookup());
-    }
-
     protected SoftFluidTankImpl(int capacity, HolderGetter<SoftFluid> registries) {
         super(capacity, registries);
     }
 
     /**
-     * try adding provided forge fluid to the tank
+     * pours n bottle of my content into said fluid handler
      *
-     * @param fluidStack forge fluid stack
-     * @return success
-     */
-    @Deprecated(forRemoval = true)
-    public boolean addVanillaFluid(FluidStack fluidStack) {
-        var s = SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess());
-        if (s.isEmpty()) return false;
-        return addFluid(s, false) == s.getCount();
-    }
-
-    /**
-     * pours n bottle of my content into said forge fluid tank
-     *
-     * @param fluidDestination forge fluid tank handler
+     * @param fluidDestination fluid handler to fill
      * @param bottles          number of bottles to empty (1blt = 250mb)
      * @return success
      */
-    public boolean transferToFluidTank(IFluidHandler fluidDestination, int bottles) {
+    public boolean transferToFluidTank(ResourceHandler<FluidResource> fluidDestination, int bottles) {
         if (this.isEmpty() || this.getFluidCount() < bottles) return false;
         FluidStack stack = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
+        if (stack.isEmpty()) return false;
         int milliBuckets = stack.getAmount();
-        if (!stack.isEmpty()) {
-            int fillableAmount = fluidDestination.fill(stack, IFluidHandler.FluidAction.SIMULATE);
-            if (fillableAmount == milliBuckets) {
-                fluidDestination.fill(stack, IFluidHandler.FluidAction.EXECUTE);
-                this.fluidStack.shrink(bottles);
-                return true;
-            }
+        try (Transaction t = Transaction.openRoot()) {
+            if (fluidDestination.insert(FluidResource.of(stack), milliBuckets, t) != milliBuckets) return false;
+            t.commit();
         }
-        return false;
+        this.fluidStack.shrink(bottles);
+        return true;
     }
 
-    public boolean transferToFluidTank(IFluidHandler fluidDestination) {
+    public boolean transferToFluidTank(ResourceHandler<FluidResource> fluidDestination) {
         return this.transferToFluidTank(fluidDestination, BOTTLE_COUNT);
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean drainFluidTank(IFluidHandler fluidSource, int bottles) {
-        return drainFluidTank(fluidSource,bottles, Utils.hackyGetRegistryAccess());
-    }
-
-    //drains said fluid tank of 250mb (1 bottle) of fluid
-    public boolean drainFluidTank(IFluidHandler fluidSource, int bottles, HolderLookup.Provider ra  ) {
+    //drains said fluid handler of 250mb (1 bottle) of fluid
+    public boolean drainFluidTank(ResourceHandler<FluidResource> fluidSource, int bottles, HolderLookup.Provider ra) {
         if (this.getSpace() < bottles) return false;
         int milliBuckets = bottlesToMB(bottles);
-        FluidStack drainable = fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.SIMULATE);
-        if (!drainable.isEmpty() && drainable.getAmount() == milliBuckets) {
-            boolean transfer = false;
+        for (int i = 0; i < fluidSource.size(); i++) {
+            FluidResource resource = fluidSource.getResource(i);
+            if (resource.isEmpty()) continue;
+            FluidStack drainable = resource.toStack(milliBuckets);
+            boolean transfer;
             if (this.fluidStack.isEmpty()) {
-                this.setFluid(drainable, ra);
                 transfer = true;
-            } else if (((SoftFluidStackImpl) fluidStack).isFluidEqual(drainable, ra)) {
-                transfer = true;
+            } else {
+                transfer = ((SoftFluidStackImpl) fluidStack).isFluidEqual(drainable, ra);
             }
-            if (transfer) {
-                fluidSource.drain(milliBuckets, IFluidHandler.FluidAction.EXECUTE);
-                return true;
+            if (!transfer) continue;
+            try (Transaction t = Transaction.openRoot()) {
+                if (fluidSource.extract(i, resource, milliBuckets, t) != milliBuckets) continue;
+                t.commit();
             }
+            if (this.fluidStack.isEmpty()) this.setFluid(drainable, ra);
+            else this.fluidStack.grow(bottles);
+            return true;
         }
         return false;
     }
 
-    public boolean drainFluidTank(IFluidHandler fluidSource, HolderLookup.Provider ra) {
+    public boolean drainFluidTank(ResourceHandler<FluidResource> fluidSource, HolderLookup.Provider ra) {
         return this.drainFluidTank(fluidSource, BOTTLE_COUNT, ra);
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean drainFluidTank(IFluidHandler fluidSource) {
-        return this.drainFluidTank(fluidSource, BOTTLE_COUNT, Utils.hackyGetRegistryAccess());
-    }
-
     /**
-     * copies the content of a fluid tank into this
-     *
-     * @param other forge fluid tank
+     * copies the content of a fluid handler's first tank into this
      */
-    public void copy(IFluidHandler other, HolderLookup.Provider ra) {
-        FluidStack forgeFluid = other.getFluidInTank(0).copy();// 250, IFluidHandler.FluidAction.SIMULATE);
-        this.setFluid(forgeFluid, ra);
+    public void copy(ResourceHandler<FluidResource> other, HolderLookup.Provider ra) {
+        FluidStack fluid = other.getResource(0).toStack(other.getAmountAsInt(0));
+        this.setFluid(fluid, ra);
         this.capCapacity();
     }
 
-    @Deprecated(forRemoval = true)
-    public void copy(IFluidHandler other) {
-        this.copy(other, Utils.hackyGetRegistryAccess());
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public void setFluid(FluidStack fluidStack) {
-        this.setFluid(SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess()));
-    }
-
     /**
-     * sets current fluid to provided forge fluid equivalent
+     * sets current fluid to provided vanilla fluid equivalent
      *
-     * @param fluidStack forge fluid
+     * @param fluidStack fluid stack
      */
     public void setFluid(FluidStack fluidStack, HolderLookup.Provider ra) {
         this.setFluid(SoftFluidStackImpl.fromForgeFluid(fluidStack, ra));
     }
-
 
 
 }

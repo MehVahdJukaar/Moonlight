@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -48,7 +48,6 @@ public class RangeControlWidget extends CompositeWidget {
         this.boxes = List.of(minBox, maxBox);
     }
 
-    /** Pushes the given range into the fields (used by the row's reset button). */
     public void setRange(Range range) {
         this.minBox.setValue(formatNumber(range.min()));
         this.maxBox.setValue(formatNumber(range.max()));
@@ -75,17 +74,17 @@ public class RangeControlWidget extends CompositeWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int half = (getWidth() - INNER_GAP) / 2;
         this.minBox.setPosition(getX(), getY());
         this.minBox.setWidth(half);
         this.maxBox.setPosition(getX() + half + INNER_GAP, getY());
         this.maxBox.setWidth(half);
-        this.minBox.render(graphics, mouseX, mouseY, partialTick);
-        this.maxBox.render(graphics, mouseX, mouseY, partialTick);
+        this.minBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        this.maxBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
         // a small "<" between the two fields to read as min-below-max
         Font font = Minecraft.getInstance().font;
-        graphics.drawString(font, SEPARATOR,
+        graphics.text(font, SEPARATOR,
                 getX() + half + (INNER_GAP - font.width(SEPARATOR)) / 2 + 1,
                 getY() + (getHeight() - font.lineHeight) / 2 + 1, LABEL, false);
     }

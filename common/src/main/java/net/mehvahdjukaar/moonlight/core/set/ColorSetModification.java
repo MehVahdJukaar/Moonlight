@@ -6,7 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Keyable;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.moonlight.api.misc.BlockAndItem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class ColorSetModification {
     public static final Codec<ColorSetModification> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.simpleMap(Codec.STRING, BlockAndItem.CODEC, makeKeys()).fieldOf("colors").forGetter(ColorSetModification::toStringMap),
             Codec.BOOL.optionalFieldOf("replace", false).orElse(false).forGetter(cs -> cs.replace),
-            ResourceLocation.CODEC.fieldOf("id").forGetter(cs -> cs.id)
+            Identifier.CODEC.fieldOf("id").forGetter(cs -> cs.id)
     ).apply(instance, ColorSetModification::new));
 
     private static Keyable makeKeys() {
@@ -37,10 +37,10 @@ public class ColorSetModification {
     }
 
     private final Map<DyeColor, BlockAndItem> colorsMap = new HashMap<>();
-    private final ResourceLocation id;
+    private final Identifier id;
     private final boolean replace;
 
-    public ColorSetModification(Map<String, BlockAndItem> colorsMap, boolean replace, ResourceLocation id) {
+    public ColorSetModification(Map<String, BlockAndItem> colorsMap, boolean replace, Identifier id) {
         this.replace = replace;
         this.id = id;
         for (Map.Entry<String, BlockAndItem> entry : colorsMap.entrySet()) {
@@ -50,7 +50,7 @@ public class ColorSetModification {
         }
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 

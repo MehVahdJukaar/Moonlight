@@ -2,16 +2,9 @@ package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.util.FastColor;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.util.ARGB;
 import org.joml.Vector3f;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class VertexUtil {
 
@@ -50,9 +43,9 @@ public class VertexUtil {
         int lv = combinedLightIn >> 16 & '\uffff';
         float minV2 = maxV - w;
 
-        int r = FastColor.ARGB32.red(color);
-        int g = FastColor.ARGB32.green(color);
-        int b = FastColor.ARGB32.blue(color);
+        int r = ARGB.red(color);
+        int g = ARGB.green(color);
+        int b = ARGB.blue(color);
         int a = (int) (255 * alpha);
 
         float hw = w / 2f;
@@ -172,19 +165,6 @@ public class VertexUtil {
 
     public static int lightV(int light) {
         return light >> 16 & '\uffff';
-    }
-
-    private static final Direction[] DIRS = new Direction[]{
-            Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST,
-            Direction.UP, Direction.DOWN, null
-    };
-
-    public static List<BakedQuad> getAllModelQuads(BakedModel model, BlockState state, RandomSource rand) {
-        List<BakedQuad> allQuads = new ArrayList<>();
-        for (var d : DIRS) {
-            allQuads.addAll(model.getQuads(state, d, rand));
-        }
-        return allQuads;
     }
 
 }

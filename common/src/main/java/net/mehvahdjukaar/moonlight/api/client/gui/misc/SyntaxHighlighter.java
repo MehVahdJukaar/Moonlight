@@ -8,7 +8,6 @@ import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * Colors one line of text at a time. All an implementation does is give a color per character of the line, and both
@@ -23,7 +22,6 @@ public interface SyntaxHighlighter {
     /** @return one RGB color per character of the line. */
     int[] colors(String line);
 
-    /** Renders one line as a colored sequence, coalescing runs of equal color. */
     default FormattedCharSequence highlightLine(String line) {
         if (line.isEmpty()) return FormattedCharSequence.EMPTY;
         int[] colors = colors(line);
@@ -43,13 +41,13 @@ public interface SyntaxHighlighter {
      * A formatter for EditBox.setFormatter. Colors the box's whole value, then hands back the piece it asked for.
      * The scan is cached per source string so it isn't redone for every rendered chunk.
      */
-    default BiFunction<String, Integer, FormattedCharSequence> formatter(EditBox box) {
-        return new BiFunction<>() {
+    default EditBox.TextFormatter formatter(EditBox box) {
+        return new EditBox.TextFormatter() {
             private String cachedSource;
             private int[] cachedColors;
 
             @Override
-            public FormattedCharSequence apply(String chunk, Integer displayPos) {
+            public FormattedCharSequence format(String chunk, int displayPos) {
                 String source = box.getValue();
                 if (!source.equals(cachedSource)) {
                     cachedSource = source;

@@ -30,7 +30,7 @@ public class DebugBlockTypes {
 
                 StringBuilder builder = new StringBuilder();
 
-                builder.append("─────────────────────────────── LIST ────────────────────────────────")
+                builder.append("------------------------------- LIST --------------------------------")
                         .append(System.lineSeparator());
 
                 // Step 1: list all block types
@@ -42,7 +42,7 @@ public class DebugBlockTypes {
 
                 if (EXTRA_CHILDREN_DEBUG.get()) {
                     builder.append(System.lineSeparator())
-                            .append("─────────────────────────────── LIST OF CHILDREN ────────────────────────────────")
+                            .append("------------------------------- LIST OF CHILDREN --------------------------------")
                             .append(System.lineSeparator());
 
                     // Step 1.5: collect all possible child keys

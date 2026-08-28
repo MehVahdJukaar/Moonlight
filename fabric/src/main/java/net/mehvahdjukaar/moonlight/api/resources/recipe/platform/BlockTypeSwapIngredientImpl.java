@@ -6,15 +6,25 @@ import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.BlockTypeSwapIngredient;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import java.util.stream.Stream;
 
 public class BlockTypeSwapIngredientImpl<T extends BlockType> extends BlockTypeSwapIngredient<T> implements CustomIngredient {
 
     protected BlockTypeSwapIngredientImpl(Ingredient inner, T fromType, T toType, BlockTypeRegistry<T> reg) {
         super(inner, fromType, toType, reg);
+    }
+
+    @Override
+    public Stream<Holder<Item>> items() {
+        return getMatchingStacks().stream().map(ItemStack::typeHolder);
     }
 
     @Override
@@ -32,17 +42,17 @@ public class BlockTypeSwapIngredientImpl<T extends BlockType> extends BlockTypeS
             new CustomIngredientSerializer<>() {
 
                 @Override
-                public ResourceLocation getIdentifier() {
+                public Identifier getIdentifier() {
                     return ID;
                 }
 
                 @Override
-                public MapCodec<BlockTypeSwapIngredientImpl<?>> getCodec(boolean allowEmpty) {
+                public MapCodec<BlockTypeSwapIngredientImpl<?>> getCodec() {
                     return (MapCodec<BlockTypeSwapIngredientImpl<?>>) (Object) CODEC;
                 }
 
                 @Override
-                public StreamCodec<RegistryFriendlyByteBuf, BlockTypeSwapIngredientImpl<?>> getPacketCodec() {
+                public StreamCodec<RegistryFriendlyByteBuf, BlockTypeSwapIngredientImpl<?>> getStreamCodec() {
                     return (StreamCodec<RegistryFriendlyByteBuf, BlockTypeSwapIngredientImpl<?>>) (Object) STREAM_CODEC;
                 }
 

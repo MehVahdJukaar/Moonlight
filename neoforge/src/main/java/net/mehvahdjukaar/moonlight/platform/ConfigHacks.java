@@ -17,8 +17,9 @@ public class ConfigHacks {
     static {
         try {
             replaceStaticField(ConfigTracker.class, "LOGGER", o -> new ShushLogger((Logger) o));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            // Unsafe field offsets may throw on newer JDKs. This only silences FML config spam, so give up quietly
+            Moonlight.LOGGER.warn("Could not silence config tracker logger: {}", e.toString());
         }
     }
 

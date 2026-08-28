@@ -34,10 +34,7 @@ public final class ConfigEditSession {
         this.returnScreen = returnScreen;
     }
 
-    /**
-     * A session with no config behind it, for screens that edit a value in memory and hand it back themselves (the
-     * generated schema form). apply() does nothing on one of these.
-     */
+    /** A session with no config behind it. apply does nothing. */
     public static ConfigEditSession scratch(Screen returnScreen) {
         return new ConfigEditSession(returnScreen);
     }

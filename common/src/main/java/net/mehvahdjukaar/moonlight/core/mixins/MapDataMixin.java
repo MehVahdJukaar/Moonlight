@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.google.common.collect.Maps;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
@@ -20,6 +22,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -28,6 +31,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -137,8 +141,9 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public MapItemSavedData ml$copy() {
-        MapItemSavedData newData = MapItemSavedData.load(this.save(
-                new CompoundTag(), Utils.hackyGetRegistryAccess()), Utils.hackyGetRegistryAccess());
+        RegistryOps<Tag> ops = Utils.hackyGetRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+        Tag encoded = MapDataInternal.EXPANDED_CODEC.encodeStart(ops, (MapItemSavedData) (Object) this).getOrThrow();
+        MapItemSavedData newData = MapDataInternal.EXPANDED_CODEC.parse(ops, encoded).getOrThrow();
         newData.setDirty();
         return newData;
     }
@@ -230,7 +235,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
 
     @Inject(method = "tickCarriedBy", at = @At("TAIL"))
-    public void tickCarriedBy(Player player, ItemStack stack, CallbackInfo ci) {
+    public void tickCarriedBy(Player player, ItemStack stack, ItemFrame frame, CallbackInfo ci) {
         //for exploration maps. Decoration assigned to an item instead of a map directly
         MLMapDecorationsComponent customDecoComponent = stack.get(MoonlightRegistry.CUSTOM_MAP_DECORATIONS.get());
         if (customDecoComponent != null) {
@@ -239,49 +244,10 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
 
-    @Inject(method = "load", at = @At("RETURN"))
-    private static void load(CompoundTag compound, HolderLookup.Provider
-            registries, CallbackInfoReturnable<MapItemSavedData> cir) {
-        MapItemSavedData data = cir.getReturnValue();
-        if (compound.contains("customMarkers") && data instanceof ExpandedMapData mapData) {
-            ListTag listNBT = compound.getList("customMarkers", 10);
-
-            MLMapMarker.assertCanSerialize(registries);
-            RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
-
-            for (int j = 0; j < listNBT.size(); ++j) {
-                MLMapMarker.CODEC.parse(registryOps, listNBT.getCompound(j))
-                        .resultOrPartial(string -> Moonlight.LOGGER.warn("Failed to parse moonlight map marker: '{}'", string))
-                        .ifPresent(marker -> {
-                            mapData.ml$getCustomMarkers().put(marker.getMarkerUniqueId(), marker);
-                            mapData.ml$addCustomMarker(marker);
-                        });
-            }
-
-            mapData.ml$getCustomData().values().forEach(customMapData -> customMapData.load(compound, registries));
-        }
-    }
-
-    @Inject(method = "save", at = @At("RETURN"))
-    public void save(CompoundTag tag, HolderLookup.Provider registries, CallbackInfoReturnable<CompoundTag> cir) {
-        CompoundTag com = cir.getReturnValue();
-
-        ListTag listNBT = new ListTag();
-
-        if (!this.moonlight$customMapMarkers.isEmpty()) {
-            MLMapMarker.assertCanSerialize(registries);
-        }
-        RegistryOps<Tag> registryOps = registries.createSerializationContext(NbtOps.INSTANCE);
-
-        for (MLMapMarker<?> marker : this.moonlight$customMapMarkers.values()) {
-            if (marker.shouldSave()) {
-                listNBT.add(MLMapMarker.CODEC.encodeStart(registryOps, marker).getOrThrow());
-            }
-        }
-        com.put("customMarkers", listNBT);
-
-        this.moonlight$customData.forEach((s, o) -> o.save(tag, registries));
-
+    @ModifyExpressionValue(method = "type", at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC,
+            target = "Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;CODEC:Lcom/mojang/serialization/Codec;"))
+    private static Codec<MapItemSavedData> ml$saveCustomMarkersAndData(Codec<MapItemSavedData> original) {
+        return MapDataInternal.EXPANDED_CODEC;
     }
 
     @Inject(method = "checkBanners", at = @At("TAIL"))
@@ -311,7 +277,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
         toAdd.forEach(this::ml$addCustomMarker);
     }
 
-    @Inject(method = "<init>", at = @At("TAIL"))
+    @Inject(method = "<init>(IIBZZZLnet/minecraft/resources/ResourceKey;)V", at = @At("TAIL"))
     public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
                                ResourceKey<Level> resourceKey, CallbackInfo ci) {
         for (var d : MapDataInternal.getMapDataRegistry()) {

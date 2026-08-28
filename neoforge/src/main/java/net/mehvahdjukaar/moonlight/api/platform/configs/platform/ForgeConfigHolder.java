@@ -14,9 +14,9 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -65,7 +65,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     private final List<TrackedConfigValue<?>> trackedValues;
     private final ConfigCategory configRoot;
 
-    ForgeConfigHolder(ResourceLocation name, ModConfigSpec spec, ConfigType type,
+    ForgeConfigHolder(Identifier name, ModConfigSpec spec, ConfigType type,
                       @Nullable Runnable onChange,
                       List<TrackedConfigValue<?>> trackedValues,
                       ConfigCategory configRoot) {
@@ -136,7 +136,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
+    public Screen makeScreen(Screen parent, @Nullable Identifier background) {
         if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
             var root = getConfigRoot();
             return root == null ? null : new MoonlightConfigScreen(this, root, parent, background);
@@ -160,7 +160,7 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @ApiStatus.Internal
     @EventCalled
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity().level().isClientSide) {
+        if (event.getEntity().level().isClientSide()) {
             onRefresh();
         }
     }

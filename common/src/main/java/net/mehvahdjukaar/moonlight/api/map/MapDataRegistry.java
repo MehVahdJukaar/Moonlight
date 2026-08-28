@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLSpecialMapDecorationType;
-import net.mehvahdjukaar.moonlight.api.misc.HolderReference;
+import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
 import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.core.map.MapDataInternal;
 import net.minecraft.core.Holder;
@@ -12,7 +12,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -28,11 +28,9 @@ import java.util.function.Supplier;
 public class MapDataRegistry {
 
 
-    @Deprecated(forRemoval = true)
-    public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> MAP_DECORATION_REGISTRY_KEY = MapDataInternal.MAP_DECORATION_REGISTRY_KEY ;
 
-    public static final HolderReference<MLMapDecorationType<?, ?>> GENERIC_STRUCTURE_MARKER = HolderReference.of(MapDataInternal.GENERIC_STRUCTURE_ID,
+    public static final HolderRef<MLMapDecorationType<?, ?>> GENERIC_STRUCTURE_MARKER = HolderRef.of(MapDataInternal.GENERIC_STRUCTURE_ID,
             MAP_DECORATION_REGISTRY_KEY);
 
     /**
@@ -43,7 +41,7 @@ public class MapDataRegistry {
     }
 
     public static <P, T extends CustomMapData<?, P>> CustomMapData.Type<P, T> registerCustomMapSavedData(
-            ResourceLocation id, Supplier<T> factory,
+            Identifier id, Supplier<T> factory,
             StreamCodec<? super RegistryFriendlyByteBuf, P> patchCodec) {
         return registerCustomMapSavedData(new CustomMapData.Type<>(id, factory, patchCodec));
     }
@@ -55,7 +53,7 @@ public class MapDataRegistry {
     //we have instances of markers per map. these have a type which determines their type
     //each type is assigned to one and one only json file. essntally the type is what is parsed from json.
     //each type can intern have its own type.., the custom factory
-    public static void registerSpecialMapDecorationTypeFactory(ResourceLocation factoryId, Supplier<MLSpecialMapDecorationType<?, ?>> decorationTypeFactory) {
+    public static void registerSpecialMapDecorationTypeFactory(Identifier factoryId, Supplier<MLSpecialMapDecorationType<?, ?>> decorationTypeFactory) {
         MapDataInternal.registerCustomType(factoryId, decorationTypeFactory);
     }
 
@@ -82,11 +80,6 @@ public class MapDataRegistry {
     }
 
 
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
-        return MapDataInternal.getAssociatedType(structure);
-    }
-
     public static Holder<MLMapDecorationType<?, ?>> getDecorationFoStructure(Level level, Holder<Structure> structure) {
         return MapDataInternal.getDecorationFoStructure(level, structure);
     }
@@ -99,30 +92,4 @@ public class MapDataRegistry {
         return MapDataInternal.getMapDataRegistry();
     }
 
-    @Deprecated(forRemoval = true)
-    public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
-        return MapDataInternal.getRegistry(registryAccess);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getOrDefault(ResourceLocation id) {
-        return MapDataInternal.getOrDefault(id);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
-        return MapDataInternal.getOptional(id);
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static Holder<MLMapDecorationType<?, ?>> getHolder(ResourceLocation id) {
-        return MapDataInternal.getHolder(id);
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getDefaultType() {
-        return MapDataInternal.getGenericStructure();
-    }
 }

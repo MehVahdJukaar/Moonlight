@@ -12,7 +12,7 @@ import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
@@ -21,11 +21,13 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -55,24 +57,24 @@ public class CodecUtils {
     }
 
     public static <T> Codec<T> optionalRegistryCodec(Registry<T> reg, T defaultValue) {
-        return ResourceLocation.CODEC.xmap(
+        return Identifier.CODEC.xmap(
                 rl -> {
-                    T value = reg.get(rl);
+                    T value = reg.getValue(rl);
                     return value == null ? defaultValue : value;
                 },
                 reg::getKey);
     }
 
     public static <T> Codec<T> remapNamespaceCodec(Registry<T> reg, String oldNamespace, String newNamespace) {
-        return ResourceLocation.CODEC.flatXmap(
+        return Identifier.CODEC.flatXmap(
                 rl -> {
-                    T value = reg.get(rl);
+                    T value = reg.getValue(rl);
                     if (value == null && rl.getNamespace().equals(oldNamespace)) {
-                        rl = ResourceLocation.fromNamespaceAndPath(newNamespace, rl.getPath());
-                        value = reg.get(rl);
+                        rl = Identifier.fromNamespaceAndPath(newNamespace, rl.getPath());
+                        value = reg.getValue(rl);
                     }
                     if (value == null) {
-                        ResourceLocation finalRl = rl;
+                        Identifier finalRl = rl;
                         return DataResult.error(() -> "Unknown registry key in " + reg.key() + ": " + finalRl);
                     }
                     return DataResult.success(value);
@@ -86,10 +88,13 @@ public class CodecUtils {
      * No reason to use this really, use HolderSet codec instead
      */
     public static <T> Codec<List<T>> optionalRegistryListCodec(Registry<T> reg) {
-        return ResourceLocation.CODEC.listOf().xmap(
-                l -> l.stream().filter(reg::containsKey).map(reg::get).toList(),
+        return Identifier.CODEC.listOf().xmap(
+                l -> l.stream().filter(reg::containsKey).map(reg::getValue).toList(),
                 a -> a.stream().map(reg::getKey).toList());
     }
+
+    /** Component codec that writes plain strings when it can. */
+    public static final Codec<Component> FLAT_COMPONENT = ComponentSerialization.flatRestrictedCodec(Integer.MAX_VALUE);
 
     public static final Codec<AABB> AABB_CODEC = RecordCodecBuilder.create(i -> i.group(
                     Vec3.CODEC.fieldOf("from").forGetter(AABB::getMinPosition),
@@ -155,13 +160,13 @@ public class CodecUtils {
     public static final Codec<Vector2f> VEC2F = Codec.FLOAT.listOf()
             .comapFlatMap((list) -> Util.fixedSize(list, 2).map((listx) -> new Vector2f(listx.getFirst(), listx.get(1))), (vector3f) -> List.of(vector3f.x(), vector3f.y()));
 
-    public static final Codec<ItemStack> ITEM_OR_STACK = Codec.withAlternative(ItemStack.SINGLE_ITEM_CODEC, BuiltInRegistries.ITEM.byNameCodec(),
+    public static final Codec<ItemStack> ITEM_OR_STACK = Codec.withAlternative(ItemStack.CODEC, BuiltInRegistries.ITEM.byNameCodec(),
             Item::getDefaultInstance);
 
     public static final Codec<List<ItemStack>> ITEMSTACK_OR_ITEMSTACK_LIST = singleOrList(ITEM_OR_STACK);
 
     public static final Codec<Supplier<List<ItemStack>>> ITEMSTACK_HOLDER_SET = RegistryCodecs.homogeneousList(Registries.ITEM)
-            .xmap(l -> () -> l.stream().map(Holder::value).map(ItemStack::new).toList(), s -> HolderSet.direct(s.get().stream().map(ItemStack::getItemHolder).toList()));
+            .xmap(l -> () -> l.stream().map(Holder::value).map(ItemStack::new).toList(), s -> HolderSet.direct(s.get().stream().map(ItemStack::typeHolder).toList()));
 
     public static final Codec<Supplier<List<ItemStack>>> ITEMSTACK_OR_LIST_OR_HOLDER_SET =
             Codec.withAlternative(
@@ -243,7 +248,7 @@ public class CodecUtils {
                     Some mod higher up in this stack trace called us with an empty or partial HolderLookup.Provider,
                     such as RegistryAccess.EMPTY, instead of the one from the level. That is a bug in THAT mod,
                     not in Moonlight nor in the mod that owns the object being saved.""".formatted(
-                    registryKey.location(), lookupProvider));
+                    registryKey.identifier(), lookupProvider));
         }
     }
 

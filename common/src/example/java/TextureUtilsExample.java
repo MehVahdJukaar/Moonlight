@@ -1,6 +1,6 @@
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.textures.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -10,8 +10,8 @@ public class TextureUtilsExample {
     public static TextureImage createRecoloredTexture(ResourceManager manager) {
 
         // We start by creating textureImages, helper objects that we use to transform images
-        try (TextureImage stone = TextureImage.open(manager, ResourceLocation.parse("block/stone"));
-             TextureImage deepslate = TextureImage.open(manager, ResourceLocation.parse("block/deepslate"))) {
+        try (TextureImage stone = TextureImage.open(manager, Identifier.parse("block/stone"));
+             TextureImage deepslate = TextureImage.open(manager, Identifier.parse("block/deepslate"))) {
 
             // Respriter object that will create textures with the shape of a "blocks/stone" texture using the colors we feed into it
             Respriter respriter = Respriter.of(stone);
@@ -36,10 +36,10 @@ public class TextureUtilsExample {
 
         try {
             // Helper to get the first texture of a block
-            ResourceLocation diamondRes = RPUtils.findFirstBlockTextureLocation(manager, Blocks.DIAMOND_BLOCK);
+            Identifier diamondRes = RPUtils.findFirstBlockTextureLocation(manager, Blocks.DIAMOND_BLOCK);
             try (TextureImage diamond = TextureImage.open(manager, diamondRes);
-                 TextureImage pick = TextureImage.open(manager, ResourceLocation.parse("item/diamond_pickaxe"));
-                 TextureImage emerald = TextureImage.open(manager, ResourceLocation.parse("block/emerald"))) {
+                 TextureImage pick = TextureImage.open(manager, Identifier.parse("item/diamond_pickaxe"));
+                 TextureImage emerald = TextureImage.open(manager, Identifier.parse("block/emerald"))) {
 
                 // New image is created, so we can keep using old ones
                try( TextureImage newImage = diamond.makeCopy()) {

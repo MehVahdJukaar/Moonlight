@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.fluid;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.fluids.MLBuiltinSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
-import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidRegistry;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -111,8 +110,6 @@ public class SoftFluidInternal {
         for (var f : reg) {
             f.afterInit();
         }
-        //ok so here the extra registered fluids should have already been sent to the client
-        SoftFluidColors.refreshParticleColors(reg);
     }
 
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {

@@ -14,14 +14,14 @@ public class IUsedToRollTheDice implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext dispatcher) {
         return Commands.literal("roll")
-                .requires(cs -> cs.hasPermission(0))
+                .requires(Commands.hasPermission(Commands.LEVEL_ALL))
                 .then(Commands.argument("dice", IntegerArgumentType.integer(1))
                         .executes(new IUsedToRollTheDice()));
     }
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) {
-        RandomSource r = context.getSource().getLevel().random;
+        RandomSource r = context.getSource().getLevel().getRandom();
         int dice = IntegerArgumentType.getInteger(context, "dice");
 
         int roll = r.nextInt(dice);

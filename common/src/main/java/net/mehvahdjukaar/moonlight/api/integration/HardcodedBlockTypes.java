@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -299,15 +299,15 @@ public class HardcodedBlockTypes {
 //!! LEAVES
         // No Man's Land - REASON: Associated WoodType
         leafReg.addSimpleFinder("nomansland", "autumnal_oak")
-                .childBlock(LOG, ResourceLocation.withDefaultNamespace("oak_log"));
+                .childBlock(LOG, Identifier.withDefaultNamespace("oak_log"));
         leafReg.addSimpleFinder("nomansland", "frosted")
                 .childBlock(LOG, "pine_log");
         leafReg.addSimpleFinder("nomansland", "pale_cherry")
-                .childBlock(LOG, ResourceLocation.withDefaultNamespace("cherry_log"));
+                .childBlock(LOG, Identifier.withDefaultNamespace("cherry_log"));
         leafReg.addSimpleFinder("nomansland", "red_maple")
                 .childBlock(LOG, "maple_log");
         leafReg.addSimpleFinder("nomansland", "yellow_birch")
-                .childBlock(LOG, ResourceLocation.withDefaultNamespace("birch_log"));
+                .childBlock(LOG, Identifier.withDefaultNamespace("birch_log"));
 
         // Oh The Biomes We've Gone - REASON: Associated WoodType
         leafReg.addSimpleFinder("biomeswevegone", "flowering_palo_verde")
@@ -456,7 +456,7 @@ public class HardcodedBlockTypes {
 
         // Ars Elemental - REASON: Associated WoodType
         leafReg.addSimpleFinder("ars_elemental", "yellow_archwood")
-                .childBlock(LOG, ResourceLocation.parse("ars_nouveau:archwood_log"));
+                .childBlock(LOG, Identifier.parse("ars_nouveau:archwood_log"));
     }
 
 

@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 
 public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder, IExtraModelDataProvider {
@@ -46,15 +48,15 @@ public abstract class MimicBlockTile extends BlockEntity implements IBlockHolder
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        setHeldBlock(Utils.readBlockState(tag.getCompound("Mimic"), level), 0);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        setHeldBlock(input.read("Mimic", BlockState.CODEC).orElse(Blocks.AIR.defaultBlockState()), 0);
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("Mimic", NbtUtils.writeBlockState(mimic));
+    public void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.store("Mimic", BlockState.CODEC, mimic);
     }
 
     @Override

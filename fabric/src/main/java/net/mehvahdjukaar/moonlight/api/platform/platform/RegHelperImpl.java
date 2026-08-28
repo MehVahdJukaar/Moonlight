@@ -5,16 +5,15 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
@@ -38,26 +37,19 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.FireworkExplosion;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -84,7 +76,6 @@ public class RegHelperImpl {
         //corrected forge registry order. same that forge does
         list.add(Registries.ATTRIBUTE);
         list.add(Registries.DATA_COMPONENT_TYPE);
-        list.add(Registries.ARMOR_MATERIAL);
         list.addAll(BuiltInRegistries.LOADERS.keySet().stream()
                 .map(ResourceKey::createRegistryKey).toList());
         REG_PRIORITY = list;
@@ -140,7 +131,7 @@ public class RegHelperImpl {
 
     @SuppressWarnings("unchecked")
     public static <T, E extends T> RegSupplier<E> register(
-            ResourceLocation name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
+            Identifier name, Supplier<E> supplier, ResourceKey<? extends Registry<T>> reg) {
         if (supplier == null) {
             throw new IllegalArgumentException("Registry entry Supplier for " + name + " can't be null");
         }
@@ -158,15 +149,16 @@ public class RegHelperImpl {
         if (reg.equals(Registries.POINT_OF_INTEREST_TYPE)) {
             PlatHelper.addCommonSetup(() -> {
                 var holder = BuiltInRegistries.POINT_OF_INTEREST_TYPE
-                        .getHolderOrThrow(ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, name));
+                        .getOrThrow(ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, name));
                 PoiTypes.registerBlockStates(holder, holder.value().matchingStates());
             });
         }
-        return (RegSupplier<E>) registry.add((Supplier<T>) supplier, name);
+        return (RegSupplier<E>) registry.add((Supplier<T>) supplier::get, name);
     }
 
-    public static <T, E extends T> RegSupplier<E> registerAsync(ResourceLocation name, Supplier<E> supplier, ResourceKey<?  extends Registry<T>> reg) {
-        RegistryQueue.RegEntryHolder<T> entry = new RegistryQueue.RegEntryHolder<>(name, supplier,(ResourceKey) reg);
+    public static <T, E extends T> RegSupplier<E> registerAsync(Identifier name, Supplier<E> supplier, ResourceKey<?  extends Registry<T>> reg) {
+        RegistryQueue.RegEntryHolder<T> entry = new RegistryQueue.RegEntryHolder<>(name,
+                supplier::get, (ResourceKey) reg);
         entry.initialize(true);
         return (RegSupplier<E>) entry;
     }
@@ -178,48 +170,24 @@ public class RegHelperImpl {
     }
 
 
-    public static <T extends Fluid> RegSupplier<T> registerFluid(ResourceLocation name, Supplier<T> fluid) {
+    public static <T extends Fluid> RegSupplier<T> registerFluid(Identifier name, Supplier<T> fluid) {
         return register(name, fluid, Registries.FLUID);
     }
 
-    public static <T extends CraftingRecipe> RegSupplier<RecipeSerializer<T>> registerSpecialRecipe(ResourceLocation name, SimpleCraftingRecipeSerializer.Factory<T> factory) {
-        return RegHelper.registerRecipeSerializer(name, () -> new SimpleCraftingRecipeSerializer<>(factory));
-    }
-
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerMenuType(
-            ResourceLocation name,
+            Identifier name,
             TriFunction<Integer, Inventory, FriendlyByteBuf, C> containerFactory) {
         return register(name, () -> IFabricMenuType.create(containerFactory::apply), Registries.MENU);
     }
 
     public static <C extends AbstractContainerMenu> RegSupplier<MenuType<C>> registerSimpleMenuType(
-            ResourceLocation name,
+            Identifier name,
             MenuType.MenuSupplier<C> containerFactory) {
         return register(name, () -> IFabricMenuType.createSimple(containerFactory), Registries.MENU);
     }
 
-    public static <T extends Entity> RegSupplier<EntityType<T>> registerEntityType(ResourceLocation name, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height, int clientTrackingRange, int updateInterval) {
-        Supplier<EntityType<T>> s = () -> EntityType.Builder.of(factory, category).sized(width, height).build(name.toString());
-        return register(name, s, Registries.ENTITY_TYPE);
-    }
-
-    public static void registerItemBurnTime(Item item, int burnTime) {
-        FuelRegistry.INSTANCE.add(item, burnTime);
-    }
-
     public static void registerBlockFlammability(Block item, int igniteOddsSpread, int burnOdds) {
         FlammableBlockRegistry.getDefaultInstance().add(item, burnOdds, igniteOddsSpread);
-    }
-
-    public static void registerVillagerTrades(VillagerProfession profession, int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        Moonlight.assertInitPhase();
-
-        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerVillagerOffers(profession, level, factories));
-    }
-
-    public static void registerWanderingTraderTrades(int level, Consumer<List<VillagerTrades.ItemListing>> factories) {
-        //this just runs immediately... needs to run on mod setup instead
-        MoonlightFabric.PRE_SETUP_WORK.add(() -> TradeOfferHelper.registerWanderingTraderOffers(level, factories));
     }
 
     public static void addAttributeRegistration(Consumer<RegHelper.AttributeEvent> eventListener) {
@@ -240,7 +208,7 @@ public class RegHelperImpl {
         CommandRegistrationCallback.EVENT.register(eventListener::accept);
     }
 
-    public static void registerSimpleRecipeCondition(ResourceLocation id, Predicate<String> predicate) {
+    public static void registerSimpleRecipeCondition(Identifier id, Predicate<String> predicate) {
         Moonlight.assertInitPhase();
         var codec = OptionalRecipeCondition.createCodec(id, predicate);
         ResourceConditionType<OptionalRecipeCondition> type = ResourceConditionType.create(id, codec);
@@ -262,12 +230,12 @@ public class RegHelperImpl {
 
     public static void addItemsToTabsRegistration(Consumer<RegHelper.ItemToTabEvent> eventListener) {
         Moonlight.assertInitPhase();
-        ItemGroupEvents.MODIFY_ENTRIES_ALL.register((creativeModeTab, entries) -> {
+        CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register((creativeModeTab, output) -> {
             ResourceKey<CreativeModeTab> tabKey = BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(creativeModeTab).get();
             eventListener.accept(new RegHelper.ItemToTabEvent() {
                 @Override
                 public CreativeModeTab.ItemDisplayParameters getParameters() {
-                    return entries.getContext();
+                    return output.getContext();
                 }
 
                 @Override
@@ -278,20 +246,20 @@ public class RegHelperImpl {
                 @Override
                 public void remove(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> condition) {
                     if (tab != tabKey) return;
-                    entries.getDisplayStacks().removeIf(condition);
-                    entries.getSearchTabStacks().removeIf(condition);
+                    output.getDisplayStacks().removeIf(condition);
+                    output.getSearchTabStacks().removeIf(condition);
                 }
 
                 @Override
                 public void addItems(ResourceKey<CreativeModeTab> tab, @Nullable Predicate<ItemStack> target, boolean after, List<ItemStack> items) {
                     if (tab != tabKey) return;
                     if (target == null) {
-                        entries.acceptAll(items);
+                        output.acceptAll(items);
                     } else {
                         if (after) {
-                            entries.addAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            output.insertAfter(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         } else {
-                            entries.addBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                            output.insertBefore(target, items, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                         }
                     }
                 }
@@ -299,13 +267,13 @@ public class RegHelperImpl {
         });
     }
 
-    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name,
+    public static RegSupplier<CreativeModeTab> registerCreativeModeTab(Identifier name,
                                                                        boolean search,
-                                                                       List<ResourceLocation> beforeEntries,
-                                                                       List<ResourceLocation> afterEntries,
+                                                                       List<Identifier> beforeEntries,
+                                                                       List<Identifier> afterEntries,
                                                                        Consumer<CreativeModeTab.Builder> configurator) {
         return register(name, () -> {
-            var builder = FabricItemGroup.builder();
+            var builder = FabricCreativeModeTab.builder();
             configurator.accept(builder);
             return builder.build();
         }, Registries.CREATIVE_MODE_TAB);
@@ -315,15 +283,15 @@ public class RegHelperImpl {
         Moonlight.assertInitPhase();
 
         LootTableEvents.MODIFY.register(
-                (key, tableBuilder, source) -> {
+                (key, tableBuilder, source, registries) -> {
                     eventListener.accept(new RegHelper.LootInjectEvent() {
                         @Override
-                        public ResourceLocation getTable() {
-                            return key.location();
+                        public Identifier getTable() {
+                            return key.identifier();
                         }
 
                         @Override
-                        public void addTableReference(ResourceLocation targetId) {
+                        public void addTableReference(Identifier targetId) {
                             LootPool pool = LootPool.lootPool().add(NestedLootTable.lootTableReference(
                                     ResourceKey.create(Registries.LOOT_TABLE, targetId))).build();
                             tableBuilder.pool(pool);
@@ -333,21 +301,18 @@ public class RegHelperImpl {
         );
     }
 
-    public static void registerFireworkRecipe(FireworkExplosion.Shape shape, Item ingredient) {
-    }
-
     public static void startRegisteringFor(Object bus) {
 
     }
 
-    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(ResourceLocation name, Supplier<EntityDataSerializer<T>> serializer) {
+    public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(Identifier name, Supplier<EntityDataSerializer<T>> serializer) {
         var value = serializer.get();
-        EntityDataSerializers.registerSerializer(value);
+        FabricEntityDataRegistry.register(name, value);
         return () -> value;
     }
 
     public static <A> Registry<A> registerRegistry(ResourceKey<Registry<A>> key, boolean sync) {
-        var b = FabricRegistryBuilder.createSimple(key)
+        var b = FabricRegistryBuilder.create(key)
                 .attribute(RegistryAttribute.MODDED);
         if (sync) {
             b = b.attribute(RegistryAttribute.SYNCED);
@@ -355,28 +320,12 @@ public class RegHelperImpl {
         return b.buildAndRegister();
     }
 
-    @Deprecated(forRemoval = true)
-    public static void addBlocksToPOI(ResourceKey<PoiType> poi, Iterable<? extends Block> blocks) {
-        var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
-        //add vanilla states if they are mutable
-        Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
-        Set<BlockState> newStates = new HashSet<>();
-        for (Block block : blocks) {
-            matchingStates.add(block.defaultBlockState());
-            newStates.add(block.defaultBlockState());
-        }
-        ((PoiTypeAccessor) (Object) beehivePOI.value())
-                .setMatchingStates(matchingStates);
-
-        PoiTypes.registerBlockStates(beehivePOI, newStates);
-    }
-
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {
         PlatHelper.addCommonSetup(() -> {
             eventListener.accept(new RegHelper.ExtraPOIStatesEvent() {
                 @Override
                 public void addBlock(ResourceKey<PoiType> poi, Block block) {
-                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getOrThrow(poi);
                     //add vanilla states if they are mutable
                     Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
                     matchingStates.addAll(block.getStateDefinition().getPossibleStates());
@@ -389,7 +338,7 @@ public class RegHelperImpl {
 
                 @Override
                 public void addStates(ResourceKey<PoiType> poi, Set<BlockState> states) {
-                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolderOrThrow(poi);
+                    var beehivePOI = BuiltInRegistries.POINT_OF_INTEREST_TYPE.getOrThrow(poi);
                     //add vanilla states if they are mutable
                     Set<BlockState> matchingStates = new HashSet<>(beehivePOI.value().matchingStates());
                     matchingStates.addAll(states);
@@ -420,7 +369,7 @@ public class RegHelperImpl {
 
 
     public static <A, T> IAttachmentType<A, T> registerDataAttachment(
-            ResourceLocation id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
+            Identifier id, Supplier<RegHelper.AttachmentBuilder<A>> config, Class<T> targetClass) {
         if (!AttachmentTarget.class.isAssignableFrom(targetClass)) {
             Moonlight.LOGGER.warn("Registering data attachment for invalid class {} that does not implements AttachmentTarget. ", targetClass.getName());
         }
@@ -446,8 +395,12 @@ public class RegHelperImpl {
     }
 
     public static void addExtraBEBlockStatesRegistration(Consumer<RegHelper.ExtraBEStatesEvent> eventListener) {
-        PlatHelper.addCommonSetup(() -> eventListener.accept((typeKey, block) ->
-                Arrays.stream(block).forEach(typeKey::addSupportedBlock)));
+        //validBlocks may be immutable, swap the set via AW
+        PlatHelper.addCommonSetup(() -> eventListener.accept((typeKey, block) -> {
+            Set<Block> newBlocks = new HashSet<>(typeKey.validBlocks);
+            newBlocks.addAll(Arrays.asList(block));
+            typeKey.validBlocks = newBlocks;
+        }));
     }
 
     private record AttachmentWrapper<A, T>(AttachmentType<A> type) implements IAttachmentType<A, T> {

@@ -15,7 +15,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +79,7 @@ public class BlockSetInternal {
     }
 
     @Deprecated
-    public synchronized static <T extends BlockType> void addBlockTypeRemover(Class<T> type, ResourceLocation id) {
+    public synchronized static <T extends BlockType> void addBlockTypeRemover(Class<T> type, Identifier id) {
         if (hasFilledBlockSets()) {
             throw new UnsupportedOperationException(
                     String.format("Tried to remove block type %s for type %s after registry events", id, type));

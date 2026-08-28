@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.block;
 
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -16,14 +17,12 @@ public interface IOwnerProtected {
     default void saveOwner(CompoundTag tag){
         UUID owner = this.getOwner();
         if(owner != null){
-            tag.putUUID("Owner", owner);
+            tag.store("Owner", UUIDUtil.CODEC, owner);
         }
     }
 
     default void loadOwner(CompoundTag tag) {
-        if (tag.contains("Owner")){
-            this.setOwner(tag.getUUID("Owner"));
-        }
+        tag.read("Owner", UUIDUtil.CODEC).ifPresent(this::setOwner);
     }
 
     default boolean isOwnedBy(Player player) {

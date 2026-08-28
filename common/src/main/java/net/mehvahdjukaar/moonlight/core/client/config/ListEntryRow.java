@@ -2,11 +2,12 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -40,20 +41,21 @@ class ListEntryRow extends ConfigListRow {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
-                       int mouseX, int mouseY, boolean hovering, float partialTick) {
-        inner.render(graphics, index, top, left, width - RESET_WIDTH - GAP, height,
-                mouseX, mouseY, hovering, partialTick);
-        remove.setX(left + width - RESET_WIDTH);
-        remove.setY(top + (height - CONTROL_HEIGHT) / 2);
-        remove.render(graphics, mouseX, mouseY, partialTick);
+    public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        inner.setX(this.getX());
+        inner.setY(this.getY());
+        inner.setWidth(this.getWidth() - RESET_WIDTH - GAP);
+        inner.setHeight(this.getHeight()); // same slot, the inner row insets it itself
+        inner.extractContent(graphics, mouseX, mouseY, hovering, partialTick);
+        remove.setX(this.getX() + this.getWidth() - RESET_WIDTH);
+        remove.setY(this.getContentY() + (this.getContentHeight() - CONTROL_HEIGHT) / 2);
+        remove.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // the wrapped row gets first go (OptionRow toggles its description on a label click); only if it passes does
-        // the default child dispatch run, so nothing is handled twice
-        return inner.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        // the wrapped row goes first so nothing is handled twice
+        return inner.mouseClicked(event, doubleClick) || super.mouseClicked(event, doubleClick);
     }
 
     @Override

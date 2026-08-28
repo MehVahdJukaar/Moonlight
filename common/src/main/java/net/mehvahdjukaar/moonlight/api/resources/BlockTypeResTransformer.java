@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.misc.TriFunction;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
 public class BlockTypeResTransformer<T extends BlockType> {
 
     @FunctionalInterface
-    public interface TextModification<T extends BlockType> extends TriFunction<String, ResourceLocation, T, String> {
+    public interface TextModification<T extends BlockType> extends TriFunction<String, Identifier, T, String> {
         @Override
-        String apply(String originalText, ResourceLocation blockId, T type);
+        String apply(String originalText, Identifier blockId, T type);
     }
 
     private final ResourceManager manager;
@@ -137,7 +137,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
             if (!s.matches("\\{\\s*\"parent\":\\s*\".*\"\\s*\\}")) {
                 try {
                     ItemLike woodObject = childProvider.apply(w);
-                    ResourceLocation newTexture = null;
+                    Identifier newTexture = null;
                     if (woodObject instanceof Block b) {
                         newTexture = RPUtils.findFirstBlockTextureLocation(manager, b, texturePredicate);
                     } else if (woodObject instanceof Item i) {
@@ -162,30 +162,30 @@ public class BlockTypeResTransformer<T extends BlockType> {
      * @param type     block type of the target block
      * @return new resource
      */
-    public StaticResource transform(StaticResource resource, ResourceLocation blockId, T type) {
+    public StaticResource transform(StaticResource resource, Identifier blockId, T type) {
         String newText = resource.asString();
 
         for (var m : textModifiers) {
             newText = m.apply(newText, blockId, type);
         }
-        ResourceLocation oldPath = resource.location;
+        Identifier oldPath = resource.location;
 
         String id = idModifiers.apply(oldPath.getPath(), blockId, type);
-        ResourceLocation newLocation = blockId.withPath(id);
+        Identifier newLocation = blockId.withPath(id);
 
         return StaticResource.create(newText.getBytes(), newLocation);
     }
 
-    public static String replaceTypeNoNamespace(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName) {
+    public static String replaceTypeNoNamespace(String text, BlockType blockType, Identifier blockId, String oldTypeName) {
         return replaceFullGenericType(text, blockType, blockId, oldTypeName, null, 1);
     }
 
-    public static String replaceType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName, String oldNamespace) {
+    public static String replaceType(String text, BlockType blockType, Identifier blockId, String oldTypeName, String oldNamespace) {
         return replaceFullGenericType(text, blockType, blockId, oldTypeName, oldNamespace, 1);
     }
 
     // Same as before but takes folder depth instead of a specific folder name
-    public static String replaceFullGenericType(String text, BlockType newBlockType, ResourceLocation newBlockId, String oldTypeName,
+    public static String replaceFullGenericType(String text, BlockType newBlockType, Identifier newBlockId, String oldTypeName,
                                                 @Nullable String oldTypeNamespace, int folderDepth) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < folderDepth; i++) {
@@ -208,7 +208,7 @@ public class BlockTypeResTransformer<T extends BlockType> {
 
 
 //quite messy
-    public static String replaceFullGenericType(String text, BlockType blockType, ResourceLocation blockId, String oldTypeName,
+    public static String replaceFullGenericType(String text, BlockType blockType, Identifier blockId, String oldTypeName,
                                                 @Nullable String oldNamespace, String folderName) {
 
         Pattern blockPathSubPathPattern = Pattern.compile("([^,]*(?=/))");

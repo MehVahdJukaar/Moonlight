@@ -39,8 +39,6 @@ public abstract class MLMapMarker<D extends MLMapDecoration> {
     public static final Codec<MLMapMarker<?>> CODEC =
             MLMapDecorationType.REFERENCE_CODEC.dispatch("type", MLMapMarker::getType,
                     mapWorldMarker -> mapWorldMarker.value().getMarkerCodec());
-    @Deprecated(forRemoval = true)
-    public static final Codec<MLMapMarker<?>> REFERENCE_CODEC =CODEC;
 
     /**
      * Map decoration types live in a data pack registry, so serializing a marker needs a provider that actually has
@@ -57,7 +55,7 @@ public abstract class MLMapMarker<D extends MLMapDecoration> {
                 MLMapDecorationType.REFERENCE_CODEC.fieldOf("type").forGetter(m -> m.getType()),
                 BlockPos.CODEC.fieldOf("pos").forGetter(m -> m.getPos()),
                 Codec.FLOAT.optionalFieldOf("rot", 0f).forGetter(m -> m.getRotation()),
-                ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(m -> m.getDisplayName()),
+                CodecUtils.FLAT_COMPONENT.optionalFieldOf("name").forGetter(m -> m.getDisplayName()),
                 Codec.BOOL.optionalFieldOf("should_refresh").forGetter(m -> Optional.of(m.shouldRefreshFromWorld())),
                 Codec.BOOL.optionalFieldOf("should_save").forGetter(m -> Optional.of(m.shouldSave())),
                 Codec.BOOL.optionalFieldOf("prevents_extending", false).forGetter(m -> m.preventsExtending())

@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.mehvahdjukaar.moonlight.api.MoonlightTags;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,10 +17,11 @@ import java.util.List;
 @Mixin(ShearsItem.class)
 public class ShearItemMixin {
 
-    @ModifyArg(method = "createToolProperties", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/Tool;<init>(Ljava/util/List;FI)V"))
+    @ModifyArg(method = "createToolProperties", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/Tool;<init>(Ljava/util/List;FIZ)V"))
     private static List<Tool.Rule> ml$addShearableTag(List<Tool.Rule> rules) {
         List<Tool.Rule> list = new ArrayList<>(rules);
-        list.add(Tool.Rule.minesAndDrops(MoonlightTags.SHEARABLE_TAG, 2));
+        var blocks = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
+        list.add(Tool.Rule.minesAndDrops(blocks.getOrThrow(MoonlightTags.SHEARABLE_TAG), 2));
         return list;
     }
 

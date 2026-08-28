@@ -3,33 +3,41 @@ package net.mehvahdjukaar.moonlight.api.misc.fake_level;
 import net.mehvahdjukaar.candlelight.api.VirtualOverride;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.ExplosionParticleInfo;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
-import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.TickRateManager;
+import net.minecraft.world.attribute.EnvironmentAttributeSystem;
+import net.minecraft.world.clock.ClockManager;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.crafting.RecipeAccess;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
@@ -42,6 +50,7 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +60,7 @@ import net.minecraft.world.ticks.ScheduledTick;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -63,28 +73,27 @@ public class FakeLevel extends Level {
 
     private final Scoreboard scoreboard = new Scoreboard();
     private final RecipeManager recipeManager;
-    private final MapId mapId = new MapId(0);
+    private final FuelValues fuelValues;
     private final TickRateManager tickRateManager = new TickRateManager();
     private final ChunkSource chunkManager = new DummyChunkSource();
     private final DummyLevelEntityGetter<Entity> entityGetter = new DummyLevelEntityGetter<>();
     private final LevelTickAccess<Block> blockTicks = new EmptyLevelTickAccess<>();
     private final LevelTickAccess<Fluid> fluidTicks = new EmptyLevelTickAccess<>();
-
-    @Deprecated(forRemoval = true)
-    protected FakeLevel(String id, RegistryAccess registryAccess) {
-        this(true, id, registryAccess);
-    }
+    private final EnvironmentAttributeSystem environmentAttributes = EnvironmentAttributeSystem.builder().build();
+    private final ClockManager clockManager = definition -> 0L;
+    private final WorldBorder worldBorder = new WorldBorder();
+    private LevelData.RespawnData respawnData = LevelData.RespawnData.DEFAULT;
 
     protected FakeLevel(boolean clientside, String id, RegistryAccess registryAccess) {
         super(new DummyData(),
-                ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(id)),
+                ResourceKey.create(Registries.DIMENSION, Identifier.parse(id)),
                 registryAccess,
-                registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                () -> InactiveProfiler.INSTANCE,
+                registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE).getOrThrow(BuiltinDimensionTypes.OVERWORLD),
                 true, //client side
                 clientside, //debug
                 0, 0);
         this.recipeManager = new RecipeManager(registryAccess);
+        this.fuelValues = FuelValues.vanillaBurnTimes(registryAccess, FeatureFlags.DEFAULT_FLAGS);
     }
 
     @VirtualOverride("neoforge")
@@ -124,27 +133,25 @@ public class FakeLevel extends Level {
     }
 
     @Override
-    public void playSound(Player player, double x, double y, double z, SoundEvent sound, SoundSource category, float volume, float pitch) {
-    }
-
-    @Override
     public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player player, double d, double e, double f, Holder<SoundEvent> holder, SoundSource soundSource, float g, float h, long l) {
+    public void playSeededSound(@Nullable Entity except, double x, double y, double z, Holder<SoundEvent> sound,
+                                SoundSource source, float volume, float pitch, long seed) {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float p_220369_, float p_220370_, long p_220371_) {
+    public void playSeededSound(@Nullable Entity except, Entity sourceEntity, Holder<SoundEvent> sound,
+                                SoundSource source, float volume, float pitch, long seed) {
     }
 
     @Override
-    public void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l) {
-    }
-
-    @Override
-    public void playSound(Player player, Entity entity, SoundEvent sound, SoundSource category, float volume, float pitch) {
+    public void explode(@Nullable Entity source, @Nullable DamageSource damageSource,
+                        @Nullable ExplosionDamageCalculator damageCalculator, double x, double y, double z,
+                        float radius, boolean fire, ExplosionInteraction interactionType,
+                        ParticleOptions smallExplosionParticles, ParticleOptions largeExplosionParticles,
+                        WeightedList<ExplosionParticleInfo> blockParticles, Holder<SoundEvent> explosionSound) {
     }
 
     @Override
@@ -153,8 +160,23 @@ public class FakeLevel extends Level {
     }
 
     @Override
+    public void setRespawnData(LevelData.RespawnData respawnData) {
+        this.respawnData = respawnData;
+    }
+
+    @Override
+    public LevelData.RespawnData getRespawnData() {
+        return this.respawnData;
+    }
+
+    @Override
     public Entity getEntity(int id) {
         return null;
+    }
+
+    @Override
+    public Collection<EnderDragonPart> dragonParts() {
+        return List.of();
     }
 
     @Override
@@ -168,21 +190,11 @@ public class FakeLevel extends Level {
     }
 
     @Override
-    public void setMapData(MapId mapId, MapItemSavedData mapData) {
-
-    }
-
-    @Override
-    public MapId getFreeMapId() {
-        return mapId;
-    }
-
-    @Override
     public void destroyBlockProgress(int entityId, BlockPos pos, int progress) {
     }
 
     @Override
-    public RecipeManager getRecipeManager() {
+    public RecipeAccess recipeAccess() {
         return recipeManager;
     }
 
@@ -202,16 +214,11 @@ public class FakeLevel extends Level {
     }
 
     @Override
-    public void levelEvent(Player player, int eventId, BlockPos pos, int data) {
+    public void levelEvent(@Nullable Entity source, int eventId, BlockPos pos, int data) {
     }
 
     @Override
     public void gameEvent(Holder<GameEvent> gameEvent, Vec3 pos, GameEvent.Context context) {
-    }
-
-    @Override
-    public float getShade(Direction direction, boolean shaded) {
-        return 0;
     }
 
     @Override
@@ -220,8 +227,33 @@ public class FakeLevel extends Level {
     }
 
     @Override
+    public ClockManager clockManager() {
+        return clockManager;
+    }
+
+    @Override
+    public EnvironmentAttributeSystem environmentAttributes() {
+        return environmentAttributes;
+    }
+
+    @Override
     public PotionBrewing potionBrewing() {
         throw new UnsupportedOperationException("This level does not support potion brewing. Sorry...");
+    }
+
+    @Override
+    public FuelValues fuelValues() {
+        return fuelValues;
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return 63;
+    }
+
+    @Override
+    public WorldBorder getWorldBorder() {
+        return worldBorder;
     }
 
     @Override
@@ -236,9 +268,7 @@ public class FakeLevel extends Level {
 
     @NotNull
     private static Holder.Reference<Biome> getPlains(RegistryAccess registryAccess) {
-        return registryAccess.registry(Registries.BIOME)
-                .get().getHolder(ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("plains")))
-                .get();
+        return registryAccess.lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
     }
 
     private class DummyChunkSource extends ChunkSource {
@@ -252,8 +282,8 @@ public class FakeLevel extends Level {
         }
         @Override
         public @Nullable ChunkAccess getChunk(int x, int z, net.minecraft.world.level.chunk.status.ChunkStatus chunkStatus, boolean requireChunk) {
-            return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), registryAccess().registryOrThrow(Registries.BIOME)
-                    .getHolderOrThrow(Biomes.FOREST));
+            return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), registryAccess().lookupOrThrow(Registries.BIOME)
+                    .getOrThrow(Biomes.FOREST));
         }
 
         @Override
@@ -308,16 +338,13 @@ public class FakeLevel extends Level {
 
     protected static class DummyData implements WritableLevelData {
 
-        final GameRules gameRules = new GameRules();
-
         @Override
-        public BlockPos getSpawnPos() {
-            return BlockPos.ZERO;
+        public void setSpawn(LevelData.RespawnData respawnData) {
         }
 
         @Override
-        public float getSpawnAngle() {
-            return 0;
+        public LevelData.RespawnData getRespawnData() {
+            return LevelData.RespawnData.DEFAULT;
         }
 
         @Override
@@ -326,32 +353,8 @@ public class FakeLevel extends Level {
         }
 
         @Override
-        public long getDayTime() {
-            return 0;
-        }
-
-        @Override
-        public boolean isThundering() {
-            return false;
-        }
-
-        @Override
-        public boolean isRaining() {
-            return false;
-        }
-
-        @Override
-        public void setRaining(boolean raining) {
-        }
-
-        @Override
         public boolean isHardcore() {
             return false;
-        }
-
-        @Override
-        public GameRules getGameRules() {
-            return gameRules;
         }
 
         @Override
@@ -362,11 +365,6 @@ public class FakeLevel extends Level {
         @Override
         public boolean isDifficultyLocked() {
             return false;
-        }
-
-        @Override
-        public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
-
         }
     }
 

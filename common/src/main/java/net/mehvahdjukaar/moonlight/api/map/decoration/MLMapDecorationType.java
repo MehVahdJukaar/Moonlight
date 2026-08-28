@@ -15,7 +15,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -73,18 +73,10 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
     @ApiStatus.Internal
     abstract boolean isFromWorld();
 
-    public abstract ResourceLocation getCustomFactoryID();
+    public abstract Identifier getCustomFactoryID();
 
     @Nullable
     public abstract M createMarkerFromWorld(LevelAccessor reader, BlockPos pos);
-
-    @Deprecated(forRemoval = true)
-    public M createMarkerFromWorld(BlockGetter reader, BlockPos pos) {
-        if (reader instanceof Level l) {
-            return createMarkerFromWorld(l, pos);
-        }
-        return null;
-    }
 
     public int getDefaultMapColor() {
         return 1;
@@ -104,13 +96,8 @@ public sealed abstract class MLMapDecorationType<D extends MLMapDecoration, M ex
         return markerCodec;
     }
 
-    @Deprecated(forRemoval = true)
-    protected Holder<MLMapDecorationType<?, ?>> wrapAsHolder() {
-        return MapDataInternal.hackyGetRegistry().wrapAsHolder(this);
-    }
-
     protected Holder<MLMapDecorationType<?, ?>> wrapAsHolder(RegistryAccess reg) {
-        return reg.registryOrThrow(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY)
+        return reg.lookupOrThrow(MapDataRegistry.MAP_DECORATION_REGISTRY_KEY)
                 .wrapAsHolder(this);
     }
 }

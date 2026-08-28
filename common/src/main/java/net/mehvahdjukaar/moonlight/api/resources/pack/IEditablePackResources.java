@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 
@@ -12,9 +12,9 @@ public interface IEditablePackResources extends PackResources {
 
     void addRootResource(String name, byte[] resource);
 
-    void addResource(ResourceLocation id, byte[] bytes);
+    void addResource(Identifier id, byte[] bytes);
 
-    void removeResource(ResourceLocation id);
+    void removeResource(Identifier id);
 
     void removeRootResource(String name);
 
@@ -23,11 +23,6 @@ public interface IEditablePackResources extends PackResources {
     PackType getPackType();
 
     boolean isEmpty();
-
-    @Deprecated(forRemoval = true)
-    default void commitChanges(Executor executor) {
-        commitChanges();
-    }
 
     default void commitChanges() {
     }

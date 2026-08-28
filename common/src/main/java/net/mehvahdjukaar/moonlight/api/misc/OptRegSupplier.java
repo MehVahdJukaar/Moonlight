@@ -4,11 +4,12 @@ import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Either;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,27 +24,27 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
 
     private final Supplier<A> supp;
     private final Supplier<Holder<A>> holderSupplier;
-    private final ResourceLocation id;
+    private final Identifier id;
     private final ResourceKey<A> key;
 
-    protected OptRegSupplier(Registry<A> reg, ResourceLocation loc) {
+    protected OptRegSupplier(Registry<A> reg, Identifier loc) {
         this.supp = Suppliers.memoize(() -> reg.getOptional(loc).orElse(null));
-        this.holderSupplier = Suppliers.memoize(() -> reg.getHolder(loc).orElse(null));
+        this.holderSupplier = Suppliers.memoize(() -> reg.get(loc).orElse(null));
         this.id = loc;
         this.key = ResourceKey.create(reg.key(), loc);
     }
 
-    public static <A> OptRegSupplier<A> of(ResourceLocation location, Registry<A> registry) {
+    public static <A> OptRegSupplier<A> of(Identifier location, Registry<A> registry) {
         return new OptRegSupplier<>(registry, location);
     }
 
-    public static <A> OptRegSupplier<A> of(ResourceLocation location, ResourceKey<Registry<A>> registry) {
-        Registry<A> reg = BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) registry);
+    public static <A> OptRegSupplier<A> of(Identifier location, ResourceKey<Registry<A>> registry) {
+        Registry<A> reg = (Registry<A>) BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) registry).value();
         return new OptRegSupplier<>(reg, location);
     }
 
     public static <A> OptRegSupplier<A> wrap(A obj, ResourceKey<Registry<A>> registry) {
-        Registry<A> reg = BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) registry);
+        Registry<A> reg = (Registry<A>) BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) registry).value();
         return wrap(obj, reg);
     }
 
@@ -70,7 +71,7 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     }
 
     @Override
-    public boolean is(ResourceLocation location) {
+    public boolean is(Identifier location) {
         return this.id.equals(location);
     }
 
@@ -124,6 +125,18 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     }
 
     @Override
+    public boolean areComponentsBound() {
+        Holder<A> h = holderSupplier.get();
+        return h != null && h.areComponentsBound();
+    }
+
+    @Override
+    public DataComponentMap components() {
+        Holder<A> h = holderSupplier.get();
+        return h != null ? h.components() : DataComponentMap.EMPTY;
+    }
+
+    @Override
     public boolean canSerializeIn(HolderOwner<A> owner) {
         if (isPresent()) {
             return holderSupplier.get().canSerializeIn(owner);
@@ -149,7 +162,7 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
@@ -160,7 +173,6 @@ public class OptRegSupplier<A> implements RegSupplier<A> {
     }
 
     @Nullable
-    @Override
     public Holder<A> getHolder() {
         return holderSupplier.get();
     }

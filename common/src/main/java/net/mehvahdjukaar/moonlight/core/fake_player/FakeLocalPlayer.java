@@ -2,30 +2,25 @@ package net.mehvahdjukaar.moonlight.core.fake_player;
 
 import com.google.common.collect.MapMaker;
 import com.mojang.authlib.GameProfile;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 public class FakeLocalPlayer extends AbstractClientPlayer {
 
-    // see FakeGenericPlayer: weak values as well as weak keys, or the cached player would keep its own
-    // level key alive forever
+    // weak values too, or the cached player keeps its level key alive
     private static final Map<ClientLevel, Map<GameProfile, FakeLocalPlayer>> FAKE_PLAYERS =
             new MapMaker().weakKeys().makeMap();
 
     /**
-     * Get a fake player with a given username. The returned player is only cached for as long as the caller
-     * keeps a reference to it, so holding onto it also keeps its level in memory: don't store it in a static.
+     * Only cached while the caller holds it. Don't store it in a static, it keeps its level alive.
      */
     static FakeLocalPlayer get(ClientLevel level, GameProfile username) {
         return FAKE_PLAYERS.computeIfAbsent(level, l -> new MapMaker().weakValues().makeMap())
@@ -45,11 +40,6 @@ public class FakeLocalPlayer extends AbstractClientPlayer {
 
     @Override
     public void playSound(SoundEvent pSound, float pVolume, float pPitch) {
-    }
-
-    @Override
-    public @Nullable MinecraftServer getServer() {
-        return PlatHelper.getCurrentServer();
     }
 
     @Override

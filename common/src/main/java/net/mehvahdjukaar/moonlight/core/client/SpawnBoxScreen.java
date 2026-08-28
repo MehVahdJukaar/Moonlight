@@ -1,15 +1,18 @@
 package net.mehvahdjukaar.moonlight.core.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.core.network.ServerBoundUpdateBoxBlockTileMessage;
 import net.mehvahdjukaar.moonlight.core.worldgen.SpawnBoxBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
@@ -63,9 +66,9 @@ public class SpawnBoxScreen extends Screen {
         );
         this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
             @Override
-            public boolean charTyped(char codePoint, int modifiers) {
-                return isValidCharacterForName(this.getValue(), codePoint, this.getCursorPosition()) &&
-                        super.charTyped(codePoint, modifiers);
+            public boolean charTyped(CharacterEvent event) {
+                return isValidCharacterForName(this.getValue(), event.codepoint(), this.getCursorPosition()) &&
+                        super.charTyped(event);
             }
         };
         this.nameEdit.setMaxLength(128);
@@ -110,12 +113,12 @@ public class SpawnBoxScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderTransparentBackground(guiGraphics);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        this.extractTransparentBackground(graphics);
     }
 
     @Override
-    public void resize(Minecraft minecraft, int width, int height) {
+    public void resize(int width, int height) {
         String string = this.nameEdit.getValue();
         String string2 = this.posXEdit.getValue();
         String string3 = this.posYEdit.getValue();
@@ -123,7 +126,7 @@ public class SpawnBoxScreen extends Screen {
         String string5 = this.sizeXEdit.getValue();
         String string6 = this.sizeYEdit.getValue();
         String string7 = this.sizeZEdit.getValue();
-        this.init(minecraft, width, height);
+        this.init(width, height);
         this.nameEdit.setValue(string);
         this.posXEdit.setValue(string2);
         this.posYEdit.setValue(string3);
@@ -163,10 +166,10 @@ public class SpawnBoxScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (keyCode != 257 && keyCode != 335) {
+        } else if (event.key() != InputConstants.KEY_RETURN && event.key() != InputConstants.KEY_NUMPADENTER) {
             return false;
         } else {
             this.save();
@@ -175,17 +178,14 @@ public class SpawnBoxScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
-
-        guiGraphics.drawString(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
-
-        guiGraphics.drawString(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
-
-        guiGraphics.drawString(this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
-
-        guiGraphics.drawString(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 150, 10526880);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.font, this.title, this.width / 2, 10, 16777215);
+        graphics.text(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
+        graphics.text(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
+        graphics.text(this.font, SHOW_BOUNDING_BOX_LABEL,
+                this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
+        graphics.text(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 150, 10526880);
     }
 
     @Override

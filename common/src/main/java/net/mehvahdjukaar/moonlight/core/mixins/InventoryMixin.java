@@ -1,54 +1,49 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.mehvahdjukaar.moonlight.api.events.IDropItemOnDeathEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Iterator;
-import java.util.List;
 
 @Mixin(Inventory.class)
 public abstract class InventoryMixin {
 
-    @Shadow
-    @Final
-    public Player player;
-
     @Unique
     private ItemStack moonlight$toRestore = null;
 
-
-    @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
-            shift = At.Shift.BEFORE))
-    public void ml$fireDropEvent(CallbackInfo ci, @Local List<ItemStack> list, @Local int i) {
-        if (this.player.isDeadOrDying() || this.player.dead) {
-            ItemStack stack = list.get(i);
+    @WrapOperation(method = "dropAll", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
+    private ItemEntity ml$fireDropEvent(Player player, ItemStack stack, boolean dropAround, boolean traceItem,
+                                        Operation<ItemEntity> original) {
+        if (player.isDeadOrDying() || player.dead) {
             IDropItemOnDeathEvent event = IDropItemOnDeathEvent.create(stack, player, true);
             MoonlightEventsHelper.postEvent(event, IDropItemOnDeathEvent.class);
             if (event.isCanceled()) {
-                list.set(i, ItemStack.EMPTY);
                 moonlight$toRestore = event.getReturnItemStack();
+                return null;
             }
         }
+        return original.call(player, stack, dropAround, traceItem);
     }
 
-    @Inject(method = "dropAll", at = @At(value = "INVOKE", target = "Ljava/util/List;get(I)Ljava/lang/Object;",
-            shift = At.Shift.AFTER))
-    public void ml$restoreNotDropped(CallbackInfo ci, @Local List<ItemStack> list, @Local int i) {
+    //the slot is cleared right after the drop, so put back whatever the event wanted to keep
+    @WrapOperation(method = "dropAll", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
+    private Object ml$restoreNotDropped(NonNullList<ItemStack> items, int index, Object emptyStack,
+                                        Operation<Object> original) {
         if (moonlight$toRestore != null) {
-            list.set(i, moonlight$toRestore);
+            Object old = original.call(items, index, moonlight$toRestore);
             moonlight$toRestore = null;
+            return old;
         }
+        return original.call(items, index, emptyStack);
     }
 }

@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.util.FilesHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
@@ -23,7 +23,7 @@ import java.util.zip.ZipOutputStream;
 
 public class CacheZipPackResources extends AbstractCachedEditableResources {
 
-    private final Map<ResourceLocation, byte[]> tempResources = new ConcurrentHashMap<>();
+    private final Map<Identifier, byte[]> tempResources = new ConcurrentHashMap<>();
     private volatile boolean dirty = false;
 
     public CacheZipPackResources(PackLocationInfo location, PackType type, Path path) {
@@ -34,13 +34,13 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public void addResource(ResourceLocation id, byte[] bytes) {
+    public void addResource(Identifier id, byte[] bytes) {
         this.tempResources.put(id, bytes);
         this.dirty = true;
     }
 
     @Override
-    public void removeResource(ResourceLocation id) {
+    public void removeResource(Identifier id) {
         this.tempResources.remove(id);
         this.dirty = true;
     }
@@ -126,9 +126,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         }
     }
 
-    // ---- Zip writing helpers ----
-
-    public void writeZipPreferStored(Map<ResourceLocation, byte[]> files, Path outputZip) throws IOException {
+    public void writeZipPreferStored(Map<Identifier, byte[]> files, Path outputZip) throws IOException {
 
         try {
             // Try STORED first
@@ -150,7 +148,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         }
     }
 
-    private void writeEntriesStored(ZipOutputStream zos, Map<ResourceLocation, byte[]> files) throws IOException {
+    private void writeEntriesStored(ZipOutputStream zos, Map<Identifier, byte[]> files) throws IOException {
         for (var e : files.entrySet()) {
             String name = packType.getDirectory() + "/" +
                     e.getKey().toString().replace(':', '/').replace('\\', '/');
@@ -172,7 +170,7 @@ public class CacheZipPackResources extends AbstractCachedEditableResources {
         }
     }
 
-    private void writeEntriesDeflated(ZipOutputStream zos, Map<ResourceLocation, byte[]> files, int level) throws IOException {
+    private void writeEntriesDeflated(ZipOutputStream zos, Map<Identifier, byte[]> files, int level) throws IOException {
         zos.setLevel(level);
         for (var e : files.entrySet()) {
             String name = packType.getDirectory() + "/" +

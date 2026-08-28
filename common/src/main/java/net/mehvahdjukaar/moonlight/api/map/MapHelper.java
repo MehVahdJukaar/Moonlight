@@ -11,7 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
@@ -81,29 +81,14 @@ public class MapHelper {
      *
      * @param id decoration type id. if invalid will default to generic structure decoration
      */
-    public static void addTargetDecorationToItem(Level level, ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
-        var vanillaType = BuiltInRegistries.MAP_DECORATION_TYPE.getHolder(id);
+    public static void addTargetDecorationToItem(Level level, ItemStack stack, BlockPos pos, Identifier id, int mapColor) {
+        var vanillaType = BuiltInRegistries.MAP_DECORATION_TYPE.get(id);
         if (vanillaType.isPresent()) {
             addVanillaTargetDecorationToItem(stack, pos, vanillaType.get(), mapColor);
             return;
         }
         var reg = MapDataRegistry.getMapDecorationRegistry(level.registryAccess());
-        var moddedType = reg.getHolder(id).orElse(null);
-        if (moddedType != null) {
-            addCustomTargetDecorationToItem(stack, pos, moddedType, mapColor);
-        } else {
-            addVanillaTargetDecorationToItem(stack, pos, MapDecorationTypes.TARGET_X, mapColor);
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static void addTargetDecorationToItem(ItemStack stack, BlockPos pos, ResourceLocation id, int mapColor) {
-        var vanillaType = BuiltInRegistries.MAP_DECORATION_TYPE.getHolder(id);
-        if (vanillaType.isPresent()) {
-            addVanillaTargetDecorationToItem(stack, pos, vanillaType.get(), mapColor);
-            return;
-        }
-        var moddedType = MapDataRegistry.getHolder(id);
+        var moddedType = reg.get(id).orElse(null);
         if (moddedType != null) {
             addCustomTargetDecorationToItem(stack, pos, moddedType, mapColor);
         } else {
@@ -125,7 +110,7 @@ public class MapHelper {
     public static boolean removeAllCustomMarkers(Level level, ItemStack stack, @Nullable Player player) {
         MapItemSavedData data = getMapData(stack, level, player);
         if (data instanceof ExpandedMapData expandedMapData) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 expandedMapData.ml$resetCustomDecoration();
                 return true;
             }

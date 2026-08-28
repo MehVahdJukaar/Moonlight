@@ -12,7 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.conditions.AndCondition;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -53,7 +53,7 @@ public class ResourceConditionsBridge {
     //registers equivalent of fabric conditions
     public static void init() {
         try {
-            RegHelper.register(ResourceLocation.parse("neoforge:all_mods_loaded"),
+            RegHelper.register(Identifier.parse("neoforge:all_mods_loaded"),
                     () -> AllModsLoadedResourceCondition.CODEC, NeoForgeRegistries.Keys.CONDITION_CODECS);
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to register neoforge conditions", e);

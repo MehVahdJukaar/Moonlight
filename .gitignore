@@ -21,12 +21,8 @@ classes/
 /common/build/
 /fabric/build/
 /neoforge/build/
-/build/tmp/jar/MANIFEST.MF
-/build/tmp/sourcesJar/MANIFEST.MF
-/build/tmp/publishMavenPublicationToMavenLocal/module-maven-metadata.xml
-/build/tmp/publishMavenPublicationToMavenLocalRepository/module-maven-metadata.xml
+/build/tmp/
 /build/publications/maven/pom-default.xml
 /build/reports/problems/problems-report.html
 /wiki/
-/research/
-/primers/
+/docs/

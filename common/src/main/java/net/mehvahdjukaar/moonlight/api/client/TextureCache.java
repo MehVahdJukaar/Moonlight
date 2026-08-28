@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client;
 
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.misc.TriResult;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ public class TextureCache {
      * @param id          id that will be used to identify this texture. needs to match the criteria that are used to normally identify textures inside a model
      * @param texturePath actual texture location. It is not its absolute path so no :textures/
      */
-    public static void registerSpecialTextureForBlock(ItemLike block, String id, ResourceLocation texturePath) {
+    public static void registerSpecialTextureForBlock(ItemLike block, String id, Identifier texturePath) {
         SPECIAL_TEXTURES.computeIfAbsent(block, b -> new HashSet<>()).add(new Pair<>(id, texturePath.toString()));
     }
 
@@ -33,12 +33,6 @@ public class TextureCache {
 
     public static void clear() {
         CACHED_TEXTURES.clear();
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static String getCached(ItemLike block, Predicate<String> texturePredicate) {
-        return getCachedTexture(block, texturePredicate).getObject();
     }
 
     public static TriResult<String> getCachedTexture(ItemLike block, Predicate<String> texturePredicate) {

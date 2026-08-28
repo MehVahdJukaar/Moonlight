@@ -5,13 +5,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public interface Message extends CustomPacketPayload {
 
     static <T extends Message> TypeAndCodec<RegistryFriendlyByteBuf, T> makeType(
-            ResourceLocation id, StreamDecoder<RegistryFriendlyByteBuf, T> decoder) {
+            Identifier id, StreamDecoder<RegistryFriendlyByteBuf, T> decoder) {
         return new TypeAndCodec<>(new Type<>(id), StreamCodec.ofMember(Message::write, decoder));
     }
 

@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -31,13 +31,13 @@ public abstract class BlockType {
 
     //stuff made out of this type
     private final BiMap<String, Object> children = HashBiMap.create();
-    public final ResourceLocation id;
+    public final Identifier id;
 
-    protected BlockType(ResourceLocation resourceLocation) {
+    protected BlockType(Identifier resourceLocation) {
         this.id = resourceLocation;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
@@ -175,7 +175,7 @@ public abstract class BlockType {
         String infixed = (prefixOrInfix.isEmpty()) ? "" : "_" + prefixOrInfix;
         String suffixed = (suffix.isEmpty()) ? "" : "_" + suffix;
 
-        ResourceLocation[] targets = {
+        Identifier[] targets = {
                 id.withPath(id.getPath() + infixed + suffixed),
                 id.withPath(prefixed + id.getPath() + suffixed),
         };
@@ -356,11 +356,11 @@ public abstract class BlockType {
 
     public abstract static class SetFinderBuilder<T extends BlockType> implements SetFinder<T> {
 
-        protected final ResourceLocation id;
+        protected final Identifier id;
         protected final Map<String, Supplier<ItemLike>> childNames = new HashMap<>();
         private final BlockTypeRegistry<T> reg; //TODO:remove this and place this class in registry class
 
-        public SetFinderBuilder(ResourceLocation id, BlockTypeRegistry<T> reg) {
+        public SetFinderBuilder(Identifier id, BlockTypeRegistry<T> reg) {
             this.id = id;
             this.reg = reg;
         }
@@ -370,7 +370,7 @@ public abstract class BlockType {
             return this;
         }
 
-        public SetFinderBuilder<T> childItem(String childType, ResourceLocation childName) {
+        public SetFinderBuilder<T> childItem(String childType, Identifier childName) {
             return this.child(childType, () -> BuiltInRegistries.ITEM.getOptional(childName).orElseThrow());
         }
 
@@ -394,7 +394,7 @@ public abstract class BlockType {
                     Utils.idWithOptionalNamespace(childName, id.getNamespace()));
         }
 
-        public SetFinderBuilder<T> childBlock(String childType, ResourceLocation childName) {
+        public SetFinderBuilder<T> childBlock(String childType, Identifier childName) {
             return this.child(childType, () -> BuiltInRegistries.BLOCK.getOptional(childName).orElseThrow());
         }
 

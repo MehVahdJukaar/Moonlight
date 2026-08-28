@@ -1,36 +1,35 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
-import com.google.gson.JsonElement;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForeignConfigBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,12 +38,7 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
@@ -60,22 +54,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.platform.MoonlightForge.getCurrentBus;
+import java.util.function.Function;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 public class ClientHelperImpl {
-
-    public static void registerRenderType(Block block, RenderType... types) {
-        //from 0.64 we should register render types in out model json
-        if (types.length == 1) {
-            ItemBlockRenderTypes.setRenderLayer(block, types[0]);
-        } else {
-            var l = List.of(types);
-            ItemBlockRenderTypes.setRenderLayer(block, l::contains);
-        }
-    }
-
-    public static void registerFluidRenderType(Fluid fluid, RenderType type) {
-        ItemBlockRenderTypes.setRenderLayer(fluid, type);
-    }
 
     public static void addParticleRegistration(Consumer<ClientHelper.ParticleEvent> eventListener) {
         Moonlight.assertInitPhase();
@@ -114,47 +100,29 @@ public class ClientHelperImpl {
     public static void addBlockColorsRegistration(Consumer<ClientHelper.BlockColorEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        Consumer<RegisterColorHandlersEvent.Block> eventConsumer = event -> {
+        Consumer<RegisterColorHandlersEvent.BlockTintSources> eventConsumer = event -> {
             eventListener.accept(new ClientHelper.BlockColorEvent() {
                 @Override
-                public void register(BlockColor color, Block... block) {
-                    event.register(color, block);
+                public void register(List<BlockTintSource> tintSources, Block... blocks) {
+                    event.register(tintSources, blocks);
                 }
 
                 @Override
                 public int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint) {
-                    return event.getBlockColors().getColor(block, level, pos, tint);
+                    var source = event.getBlockColors().getTintSource(block, tint);
+                    return source == null ? -1 : source.colorInWorld(block, level, pos);
                 }
 
-            });
-        };
-        getCurrentBus().addListener(eventConsumer);
-    }
-
-    public static void addItemColorsRegistration(Consumer<ClientHelper.ItemColorEvent> eventListener) {
-        Moonlight.assertInitPhase();
-
-        Consumer<RegisterColorHandlersEvent.Item> eventConsumer = event -> {
-            eventListener.accept(new ClientHelper.ItemColorEvent() {
-                @Override
-                public void register(ItemColor color, ItemLike... items) {
-                    event.register(color, items);
-                }
-
-                @Override
-                public int getColor(ItemStack stack, int tint) {
-                    return event.getItemColors().getColor(stack, tint);
-                }
             });
         };
         getCurrentBus().addListener(eventConsumer);
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, ResourceLocation location) {
+    public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier location) {
         Moonlight.assertInitPhase();
 
-        Consumer<RegisterClientReloadListenersEvent> eventConsumer = event -> event.registerReloadListener(listener.get());
+        Consumer<AddClientReloadListenersEvent> eventConsumer = event -> event.addListener(location, listener.get());
         getCurrentBus().addListener(eventConsumer);
     }
 
@@ -163,25 +131,6 @@ public class ClientHelperImpl {
 
         Consumer<EntityRenderersEvent.RegisterLayerDefinitions> eventConsumer = event -> {
             eventListener.accept(event::registerLayerDefinition);
-        };
-        getCurrentBus().addListener(eventConsumer);
-    }
-
-    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
-        Moonlight.assertInitPhase();
-
-        Consumer<ModelEvent.RegisterAdditional> eventConsumer = event -> {
-            eventListener.accept(new ClientHelper.SpecialModelEvent() {
-                @Override
-                public void register(ModelResourceLocation modelLocation) {
-                    event.register(modelLocation);
-                }
-
-                @Override
-                public void register(ResourceLocation id) {
-                    event.register(ModelResourceLocation.standalone(id));
-                }
-            });
         };
         getCurrentBus().addListener(eventConsumer);
     }
@@ -195,13 +144,29 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
-    public static void addModelLoaderRegistration(Consumer<ClientHelper.ModelLoaderEvent> eventListener) {
+    public static void addFluidModelRegistration(Consumer<ClientHelper.FluidModelEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        Consumer<ModelEvent.RegisterGeometryLoaders> eventConsumer = event -> {
-            eventListener.accept((i, l) -> event.register(i, (IGeometryLoader<?>) l));
+        Consumer<RegisterFluidModelsEvent> eventConsumer = event -> {
+            eventListener.accept(event::register);
         };
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void addBlockModelRegistration(Consumer<ClientHelper.BlockModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterBlockStateModels> eventConsumer = event -> {
+            eventListener.accept((id, codec) -> event.registerModel(id, CustomUnbakedModelWrapper.wrap(codec)));
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,
+                                         @Nullable BlockPos pos, @Nullable BlockState state,
+                                         RandomSource random, List<BlockStateModelPart> parts) {
+        if (level == null || pos == null || state == null) model.collectParts(random, parts);
+        else model.collectParts(level, pos, state, random, parts);
     }
 
     public static void addItemDecoratorsRegistration(Consumer<ClientHelper.ItemDecoratorEvent> eventListener) {
@@ -226,27 +191,10 @@ public class ClientHelperImpl {
     }
 
 
-    public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        return sprite.getPixelRGBA(frameIndex, x, y);
-    }
-
-    public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
-        return modelManager.getModel(modelLocation);
-    }
 
     @Nullable
     public static Path getModIcon(String modId) {
-        var m = ModList.get().getModContainerById(modId);
-        if (m.isEmpty()) return null;
-        IModInfo mod = m.get().getModInfo();
-        IModFile file = mod.getOwningFile().getFile();
-        String logo = mod.getLogoFile().orElse(null);
-        if (logo == null || file == null) return null;
-        // split the way NeoForge's own mod list does, so a declaration with backslashes or a leading slash still lands
-        String[] parts = Arrays.stream(logo.split("[/\\\\]")).filter(p -> !p.isBlank()).toArray(String[]::new);
-        if (parts.length == 0) return null;
-        Path logoPath = file.findResource(parts);
-        return logoPath != null && Files.exists(logoPath) ? logoPath : null;
+        return PlatHelperImpl.getModIcon(modId);
     }
 
     @Nullable
@@ -264,7 +212,7 @@ public class ClientHelperImpl {
     }
 
     @Nullable
-    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+    public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
         return ForeignConfigBridge.createScreen(modId, parent, background);
     }
 
@@ -281,10 +229,6 @@ public class ClientHelperImpl {
         return ForeignConfigBridge.hasHiddenPerWorldConfig(modId);
     }
 
-    public static BlockModel parseBlockModel(JsonElement json) {
-        return ExtendedBlockModelDeserializer.INSTANCE.getAdapter(BlockModel.class).fromJsonTree(json);
-    }
-
     public static void addClientSetup(Runnable clientSetup) {
         Moonlight.assertInitPhase();
 
@@ -299,12 +243,11 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
-    public static void registerOptionalTexturePack(ResourceLocation folderName, Component displayName, boolean defaultEnabled) {
+    public static void registerOptionalTexturePack(Identifier folderName, Component displayName, boolean defaultEnabled) {
         Moonlight.assertInitPhase();
 
         RegHelper.registerResourcePack(PackType.CLIENT_RESOURCES,
                 () -> {
-                    IModFile file = ModList.get().getModFileById(folderName.getNamespace()).getFile();
                     PackLocationInfo locationInfo = new PackLocationInfo(
                             folderName.toString(),
                             displayName,
@@ -313,7 +256,8 @@ public class ClientHelperImpl {
                     );
                     try (PathPackResources pack = new PathPackResources(
                             locationInfo,
-                            file.findResource("resourcepacks/" + folderName.getPath()))) {
+                            PlatHelperImpl.findModResource(folderName.getNamespace(),
+                                    "resourcepacks/" + folderName.getPath()))) {
                         return Pack.readMetaAndCreate(
                                 locationInfo,
                                 new Pack.ResourcesSupplier() {
@@ -343,43 +287,32 @@ public class ClientHelperImpl {
         );
     }
 
-    public static void addShaderRegistration(Consumer<ClientHelper.ShaderEvent> eventListener) {
+    public static void addRenderPipelineRegistration(Consumer<ClientHelper.RenderPipelineEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        Consumer<RegisterShadersEvent> eventConsumer = event -> {
-            eventListener.accept((id, vertexFormat, setter) -> {
-                try {
-                    ShaderInstance shader = new ShaderInstance(event.getResourceProvider(), id, vertexFormat);
-                    event.registerShader(shader, setter);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to parse shader: " + id, e);
-                }
-            });
-        };
+        Consumer<RegisterRenderPipelinesEvent> eventConsumer = event ->
+                eventListener.accept(event::registerPipeline);
         getCurrentBus().addListener(eventConsumer);
     }
 
-    public static void addItemRenderersRegistration(Consumer<ClientHelper.ItemRendererEvent> eventListener) {
+    public static void addPictureInPictureRendererRegistration(Consumer<ClientHelper.PictureInPictureEvent> eventListener) {
         Moonlight.assertInitPhase();
 
-        Consumer<RegisterClientExtensionsEvent> eventConsumer = event -> {
-            eventListener.accept((item, renderer) -> {
-                var rend = renderer.getItemRenderer();
-                event.registerItem(new IClientItemExtensions() {
+        Consumer<RegisterPictureInPictureRenderersEvent> eventConsumer = event ->
+                eventListener.accept(new ClientHelper.PictureInPictureEvent() {
                     @Override
-                    public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                        if (rend != null) return rend;
-                        return IClientItemExtensions.super.getCustomRenderer();
+                    public <T extends PictureInPictureRenderState> void register(
+                            Class<T> stateClass, Function<MultiBufferSource.BufferSource, PictureInPictureRenderer<T>> factory) {
+                        event.register(stateClass, factory);
                     }
+                });
+        getCurrentBus().addListener(eventConsumer);
+    }
 
-                    @Override
-                    public void renderHelmetOverlay(ItemStack stack, Player player, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-                        renderer.renderHelmetOverlay(stack, player, guiGraphics, deltaTracker);
-                    }
+    public static void addSpecialModelRegistration(Consumer<ClientHelper.SpecialModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
 
-                }, item.asItem());
-            });
-        };
+        Consumer<RegisterSpecialModelRendererEvent> eventConsumer = event -> eventListener.accept(event::register);
         getCurrentBus().addListener(eventConsumer);
     }
 

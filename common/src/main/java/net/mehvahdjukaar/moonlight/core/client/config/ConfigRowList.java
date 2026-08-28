@@ -1,11 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -16,6 +19,7 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
 
     private boolean drawFooterSeparator = true;
     private int rowWidth = ROW_WIDTH;
+    private int topPadding;
 
     ConfigRowList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
@@ -23,8 +27,9 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
 
     void setRows(List<ConfigListRow> rows) {
         this.clearEntries();
+        if (this.topPadding > 0) this.addEntry(new SpacerRow(), this.topPadding);
         for (ConfigListRow row : rows) this.addEntry(row);
-        this.clampScrollAmount();
+        this.refreshScrollAmount();
     }
 
     @Nullable
@@ -43,28 +48,45 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
     }
 
     @Override
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
     }
 
-    // Blank space above the first row, to center them in a taller pane. Uses the list header, which we don't need
-    // otherwise, so clicks and scrolling stay lined up on their own
+    // blank space above the first row, to center them in a taller pane
     void setTopPadding(int padding) {
-        this.setRenderHeader(padding > 0, Math.max(0, padding));
+        this.topPadding = Math.max(0, padding);
     }
 
-    // off when the screen draws its own full-width separator instead (the split layout)
     void setDrawFooterSeparator(boolean draw) {
         this.drawFooterSeparator = draw;
     }
 
     @Override
-    protected void renderListSeparators(GuiGraphics graphics) {
-        // the top separator is owned by the screen's header bar, so only draw the footer one
+    protected void extractListSeparators(GuiGraphicsExtractor graphics) {
         if (!this.drawFooterSeparator) return;
-        ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
-        RenderSystem.disableBlend();
+        Identifier footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
+    }
+
+    private static class SpacerRow extends ConfigListRow {
+        @Override
+        public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
+        }
+
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return List.of();
+        }
+
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return List.of();
+        }
+
+        @Nullable
+        @Override
+        Component getTooltip(int mouseX, int mouseY) {
+            return null;
+        }
     }
 }

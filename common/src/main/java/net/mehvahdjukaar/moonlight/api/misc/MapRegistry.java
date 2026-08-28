@@ -15,7 +15,7 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -27,7 +27,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
 
     private final String name;
 
-    private final BiMap<ResourceLocation, T> map = HashBiMap.create();
+    private final BiMap<Identifier, T> map = HashBiMap.create();
     private final Reference2IntMap<T> tToId;
     private final List<T> idToT;
 
@@ -46,7 +46,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return new CodecMapRegistry<>("unnamed codec registry");
     }
 
-    public <B extends T> T register(ResourceLocation name, B value) {
+    public <B extends T> T register(Identifier name, B value) {
         if (map.containsKey(name)) {
             throw new IllegalStateException("Cannot register duplicate value " + name);
         }
@@ -56,7 +56,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
     }
 
     public <B extends T> T register(String name, B value) {
-        this.register(ResourceLocation.parse(name), value);
+        this.register(Identifier.parse(name), value);
         return value;
     }
 
@@ -75,21 +75,21 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
     }
 
     @Nullable
-    public T getValue(ResourceLocation name) {
+    public T getValue(Identifier name) {
         return this.map.get(name);
     }
 
     @Nullable
     public T getValue(String name) {
-        return this.getValue(ResourceLocation.parse(name));
+        return this.getValue(Identifier.parse(name));
     }
 
     @Nullable
-    public ResourceLocation getKey(T value) {
+    public Identifier getKey(T value) {
         return this.map.inverse().get(value);
     }
 
-    public Set<ResourceLocation> keySet() {
+    public Set<Identifier> keySet() {
         return this.map.keySet();
     }
 
@@ -97,11 +97,11 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return this.map.values();
     }
 
-    public T getValueOrDefault(ResourceLocation parse, T defaultType) {
+    public T getValueOrDefault(Identifier parse, T defaultType) {
         return this.map.getOrDefault(parse, defaultType);
     }
 
-    public Set<Map.Entry<ResourceLocation, T>> getEntries() {
+    public Set<Map.Entry<Identifier, T>> getEntries() {
         return this.map.entrySet();
     }
 
@@ -113,13 +113,13 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
         return this.map.size();
     }
 
-    public boolean containsKey(ResourceLocation name) {
+    public boolean containsKey(Identifier name) {
         return this.map.containsKey(name);
     }
 
     public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> ops, U json) {
-        return ResourceLocation.CODEC.decode(ops, json).flatMap(pair -> {
-            ResourceLocation id = pair.getFirst();
+        return Identifier.CODEC.decode(ops, json).flatMap(pair -> {
+            Identifier id = pair.getFirst();
             T value = this.getValue(id);
             return value == null ? DataResult.error(() -> "Could not find any entry with key '" + id + "' in registry [" + name + "] \n Known keys: " + this.keySet()) :
                     DataResult.success(Pair.of(value, pair.getSecond()));
@@ -127,7 +127,7 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
     }
 
     public <U> DataResult<U> encode(T object, DynamicOps<U> ops, U prefix) {
-        ResourceLocation id = this.getKey(object);
+        Identifier id = this.getKey(object);
         return id == null ? DataResult.error(() -> "Could not find element " + object + " in registry" + name) :
                 ops.mergeToPrimitive(prefix, ops.createString(id.toString()));
     }
@@ -155,12 +155,5 @@ public class MapRegistry<T> implements IdMap<T>, Codec<T> {
 
     public boolean contains(int id) {
         return this.byId(id) != null;
-    }
-
-
-    //seriously this especially shouldnt be used. Use a real Registry instead.
-    @Deprecated(forRemoval = true)
-    public StreamCodec<ByteBuf, T> getStreamCodec() {
-        return  ByteBufCodecs.fromCodec(this);
     }
 }

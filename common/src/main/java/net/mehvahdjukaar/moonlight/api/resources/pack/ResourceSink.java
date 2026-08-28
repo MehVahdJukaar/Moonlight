@@ -11,13 +11,14 @@ import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -46,7 +47,7 @@ public class ResourceSink {
 
     private final String packNamespace;
     private final String packId;
-    private final Map<ResourceLocation, byte[]> resources = new HashMap<>();
+    private final Map<Identifier, byte[]> resources = new HashMap<>();
     private final Map<TagKey<?>, SimpleTagBuilder> tags = new HashMap<>();
 
     public ResourceSink(String packNamespace, String packId) {
@@ -54,7 +55,7 @@ public class ResourceSink {
         this.packId = packId;
     }
 
-    protected void addBytes(ResourceLocation id, byte[] bytes) {
+    protected void addBytes(Identifier id, byte[] bytes) {
         this.resources.put(id, Preconditions.checkNotNull(bytes));
     }
 
@@ -63,7 +64,7 @@ public class ResourceSink {
         this.addBytes(resource.location, resource.data);
     }
 
-    private void addJson(ResourceLocation path, JsonElement json) {
+    private void addJson(Identifier path, JsonElement json) {
         try {
             this.addBytes(path, RPUtils.serializeJson(json).getBytes());
         } catch (IOException e) {
@@ -71,39 +72,20 @@ public class ResourceSink {
         }
     }
 
-    public void addJson(ResourceLocation location, JsonElement json, ResType resType) {
+    public void addJson(Identifier location, JsonElement json, ResType resType) {
         this.addJson(resType.getPath(location), json);
     }
 
-    public void addBytes(ResourceLocation location, byte[] bytes, ResType resType) {
+    public void addBytes(Identifier location, byte[] bytes, ResType resType) {
         this.addBytes(resType.getPath(location), bytes);
     }
 
 
-    @Deprecated(forRemoval = true)
-    public void addAndCloseTexture(ResourceLocation path, TextureImage image) {
-        addAndCloseTexture(path, image, true);
-    }
-
-    @Deprecated(forRemoval = true)
-    public void addAndCloseTexture(ResourceLocation path, TextureImage image, boolean isOnAtlas) {
-        try (image) {
-            addTexture(path, image, isOnAtlas);
-        } catch (Exception e) {
-            Moonlight.LOGGER.warn("Failed to add image {} to resource pack {}.", path, this, e);
-        }
-    }
-
     //equivalent safer version of the old method with same name
-    public void addAndCloseTexture(ResourceLocation path, Supplier<TextureImage> image) {
+    public void addAndCloseTexture(Identifier path, Supplier<TextureImage> image) {
         try (TextureImage img = image.get()) {
             addTexture(path, img);
         }
-    }
-
-    @Deprecated(forRemoval = true)
-    public void addTexture(ResourceLocation path, TextureImage image, boolean onAtlas) {
-        addTexture(path, image);
     }
 
     /**
@@ -112,14 +94,14 @@ public class ResourceSink {
      * Use it for textures such as entity textures of GUI.
      * You must close the texture yourself now
      */
-    public void addTexture(ResourceLocation path, TextureImage texture) {
+    public void addTexture(Identifier path, TextureImage texture) {
         try {
             NativeImage image = texture.getImage();
             if (!texture.isAllocated()) {
                 Moonlight.crashIfInDev("Tried to save a non allocated texture image at " + path + " \nDid you close it too early?");
                 return;
             }
-            this.addBytes(path, image.asByteArray(), ResType.TEXTURES);
+            this.addBytes(path, SpriteUtils.toPngBytes(image), ResType.TEXTURES);
             if (texture.getMcMeta() != null) {
                 this.addJson(path, texture.getMcMeta().toJson(), ResType.MCMETA);
             }
@@ -128,27 +110,28 @@ public class ResourceSink {
         }
     }
 
-    @Deprecated(forRemoval = true)
-    public void markNotClearable(ResourceLocation path) {
-    }
-
-    public void addBlockModel(ResourceLocation modelLocation, JsonElement model) {
+    public void addBlockModel(Identifier modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.BLOCK_MODELS);
     }
 
-    public void addItemModel(ResourceLocation modelLocation, JsonElement model) {
+    public void addItemModel(Identifier modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.ITEM_MODELS);
     }
 
-    public void addBlockState(ResourceLocation modelLocation, JsonElement model) {
+    /** itemId is the item id, not a model path. */
+    public void addItemModelDefinition(Identifier itemId, JsonElement definition) {
+        this.addJson(itemId, definition, ResType.ITEMS);
+    }
+
+    public void addBlockState(Identifier modelLocation, JsonElement model) {
         this.addJson(modelLocation, model, ResType.BLOCKSTATES);
     }
 
-    public void addLang(ResourceLocation langName, JsonElement language) {
+    public void addLang(Identifier langName, JsonElement language) {
         this.addJson(langName, language, ResType.LANG);
     }
 
-    public void addLang(ResourceLocation langName, LangBuilder builder) {
+    public void addLang(Identifier langName, LangBuilder builder) {
         this.addJson(langName, builder.build(), ResType.LANG);
     }
 
@@ -172,10 +155,10 @@ public class ResourceSink {
     }
 
     public void addLootTable(Block block, LootTable.Builder table) {
-        this.addLootTable(block.getLootTable().location(), table.build());
+        block.getLootTable().ifPresent(key -> this.addLootTable(key.identifier(), table.build()));
     }
 
-    public void addLootTable(ResourceLocation id, LootTable table) {
+    public void addLootTable(Identifier id, LootTable table) {
         this.addJson(id, LootDataType.TABLE.codec().encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
@@ -188,20 +171,20 @@ public class ResourceSink {
     }
 
     public void addRecipe(RecipeHolder<?> holder) {
-        addRecipe(holder.value(), holder.id());
+        addRecipe(holder.value(), holder.id().identifier());
     }
 
-    public void addRecipe(Recipe<?> recipe, ResourceLocation id) {
+    public void addRecipe(Recipe<?> recipe, Identifier id) {
         this.addRecipeNoAdvancement(recipe, id);
 
         //Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
-        // ResourceLocation advancementId = recipe.getAdvancementId();
+        // Identifier advancementId = recipe.getAdvancementId();
         //if (advancementId != null) {
         //  this.addJson(recipe.getAdvancementId(), recipe.serializeAdvancement(), ResType.ADVANCEMENTS);
         //}
     }
 
-    public void addRecipeNoAdvancement(Recipe<?> recipe, ResourceLocation id) {
+    public void addRecipeNoAdvancement(Recipe<?> recipe, Identifier id) {
         this.addJson(id, RPUtils.writeRecipe(recipe), ResType.RECIPES);
     }
 
@@ -212,7 +195,7 @@ public class ResourceSink {
         }
     }
 
-    public void addJsonUnlessPresent(ResourceManager manager, ResourceLocation path, ThrowingSupplier<JsonElement> jsonSupplier) {
+    public void addJsonUnlessPresent(ResourceManager manager, Identifier path, ThrowingSupplier<JsonElement> jsonSupplier) {
         if (!alreadyHasAssetAtLocation(manager, path)) {
             try {
                 this.addJson(path, jsonSupplier.get());
@@ -222,22 +205,11 @@ public class ResourceSink {
         }
     }
 
-    public boolean alreadyHasTextureAtLocation(ResourceManager manager, ResourceLocation res) {
+    public boolean alreadyHasTextureAtLocation(ResourceManager manager, Identifier res) {
         return alreadyHasAssetAtLocation(manager, res, ResType.TEXTURES);
     }
 
-    @Deprecated(forRemoval = true)
-    public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier) {
-        addTextureIfNotPresent(manager, relativePath, textureSupplier, true);
-    }
-
-    @Deprecated(forRemoval = true)
-    public void addTextureIfNotPresent(ResourceManager manager, String relativePath, Supplier<TextureImage> textureSupplier, boolean isOnAtlas) {
-        addTextureIfNotPresent(manager, (relativePath.contains(":") ? ResourceLocation.parse(relativePath) :
-                ResourceLocation.fromNamespaceAndPath(this.packNamespace, relativePath)), textureSupplier);
-    }
-
-    public void addTextureIfNotPresent(ResourceManager manager, ResourceLocation res, Supplier<TextureImage> textureSupplier) {
+    public void addTextureIfNotPresent(ResourceManager manager, Identifier res, Supplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
             try (TextureImage textureImage = textureSupplier.get()) {
                 this.addTexture(res, textureImage);
@@ -247,7 +219,7 @@ public class ResourceSink {
         }
     }
 
-    public void addTextureUnlessPresent(ResourceManager manager, ResourceLocation res, ThrowingSupplier<TextureImage> textureSupplier) {
+    public void addTextureUnlessPresent(ResourceManager manager, Identifier res, ThrowingSupplier<TextureImage> textureSupplier) {
         if (!alreadyHasTextureAtLocation(manager, res)) {
             try (TextureImage textureImage = textureSupplier.get()) {
                 this.addTexture(res, textureImage);
@@ -257,11 +229,11 @@ public class ResourceSink {
         }
     }
 
-    public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res, ResType type) {
+    public boolean alreadyHasAssetAtLocation(ResourceManager manager, Identifier res, ResType type) {
         return alreadyHasAssetAtLocation(manager, type.getPath(res));
     }
 
-    public boolean alreadyHasAssetAtLocation(ResourceManager manager, ResourceLocation res) {
+    public boolean alreadyHasAssetAtLocation(ResourceManager manager, Identifier res) {
         var resource = manager.getResource(res);
         return resource.filter(value -> !value.sourcePackId().equals(this.packId)).isPresent();
     }
@@ -286,7 +258,7 @@ public class ResourceSink {
     }
 
     public void addSimilarJsonResource(ResourceManager manager, StaticResource resource, Function<String, String> textTransform, Function<String, String> pathTransform) throws NoSuchElementException {
-        ResourceLocation fullPath = resource.location;
+        Identifier fullPath = resource.location;
 
         //calculates new path
         StringBuilder builder = new StringBuilder();
@@ -298,7 +270,7 @@ public class ResourceSink {
             } else builder.append(partial[i]);
         }
         //adds modified under my namespace
-        ResourceLocation newRes = ResourceLocation.fromNamespaceAndPath(this.packNamespace, builder.toString());
+        Identifier newRes = Identifier.fromNamespaceAndPath(this.packNamespace, builder.toString());
         if (!alreadyHasAssetAtLocation(manager, newRes)) {
             String fullText = resource.asString();
             fullText = textTransform.apply(fullText);
@@ -307,7 +279,7 @@ public class ResourceSink {
         }
     }
 
-    public void copyResource(ResourceManager manager, ResourceLocation from, ResourceLocation to, boolean lenient) {
+    public void copyResource(ResourceManager manager, Identifier from, Identifier to, boolean lenient) {
         var resource = manager.getResource(from);
         if (resource.isPresent()) {
             var s = StaticResource.of(resource.get(), from);
@@ -321,8 +293,8 @@ public class ResourceSink {
         }
     }
 
-    public <T extends BlockType> void addBlockTypeSwapRecipe(ResourceManager manager, ResourceLocation originalRecipeId,
-                                                             T originalMat, T destinationMat, ResourceLocation baseID) {
+    public <T extends BlockType> void addBlockTypeSwapRecipe(ResourceManager manager, Identifier originalRecipeId,
+                                                             T originalMat, T destinationMat, Identifier baseID) {
         StaticResource originalResource = StaticResource.getOrThrow(manager,
                 ResType.RECIPES.getPath(originalRecipeId));
         JsonObject originalJson = originalResource.toJson();
@@ -338,17 +310,10 @@ public class ResourceSink {
                 }
             }
         }
-        if (!alreadyHasAssetAtLocation(manager, newRecipe.id())) this.addJson(newRecipe.id(), newJson, ResType.RECIPES);
+        Identifier newRecipeId = newRecipe.id().identifier();
+        if (!alreadyHasAssetAtLocation(manager, newRecipeId)) this.addJson(newRecipeId, newJson, ResType.RECIPES);
     }
 
-    /**
-     * Utility method to add models overrides in a non-destructive way. Provided overrides will be added on top of whatever model is currently provided by vanilla or mod resources. IE: crossbows
-     */
-    public void appendModelOverride(ResourceManager manager, ResourceLocation modelRes,
-                                    Consumer<RPUtils.OverrideAppender> modelConsumer) {
-        JsonElement json = RPUtils.makeModelOverride(manager, modelRes, modelConsumer);
-        this.addItemModel(modelRes, json);
-    }
 
     // a bit ugly here, also it means resource sink is not reusable in other contexts that much
     public static void acceptSinks(IEditablePackResources pack, Collection<ResourceSink> sinks) {
@@ -374,9 +339,9 @@ public class ResourceSink {
                     builder.merge(it.next());
                 }
 
-                ResourceLocation tagId = builder.getId();
-                ResourceLocation loc = ResType.TAGS.getPath(tagId.withPath(
-                        key.registry().location().getPath() + "/" + tagId.getPath()));
+                Identifier tagId = builder.getId();
+                Identifier loc = ResType.TAGS.getPath(tagId.withPath(
+                        key.registry().identifier().getPath() + "/" + tagId.getPath()));
 
                 dummy.addJson(loc, builder.serializeToJson(), ResType.GENERIC);
             }
@@ -385,7 +350,7 @@ public class ResourceSink {
     }
 
     public void appendItemToEnchantment(ResourceManager manager, ResourceKey<Enchantment> ench, Item... items) {
-        ResourceLocation id = ench.location();
+        Identifier id = ench.identifier();
         try (var model = manager.getResourceOrThrow(ResType.ENCHANTMENTS.getPath(id)).open()) {
             JsonObject json = RPUtils.deserializeJson(model);
             JsonElement supportedItems = json.get("supported_items");

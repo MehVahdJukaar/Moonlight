@@ -17,7 +17,7 @@ public class NetworkHelperImplClient {
     }
 
     public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
-        // The marker is the only half of an optional payload the server advertises; see PresenceMarker.
+        // see PresenceMarker
         return ClientPlayNetworking.canSend(PresenceMarker.idOf(type));
     }
 

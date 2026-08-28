@@ -99,7 +99,7 @@ public class ParticleTrailEmitter {
 
 
     /**
-     * Returns the segment percentage (t in [0, 1]) along the segment p1→p2 where the first intersection
+     * Returns the segment percentage (t in [0, 1]) along the segment p1->p2 where the first intersection
      * with the sphere occurs. Returns null if no intersection on the segment.
      */
     private static Double intersectSphereSegment(Vec3 center, double radius, Vec3 start, Vec3 end) {
@@ -136,7 +136,6 @@ public class ParticleTrailEmitter {
         return new Builder();
     }
 
-    // === Builder Class ===
     public static class Builder {
         private double idealSpacing = 0.5;
         private int maxParticlesPerTick = 5;

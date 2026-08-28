@@ -6,7 +6,7 @@ import net.mehvahdjukaar.moonlight.api.resources.textures.SpriteUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -19,8 +19,7 @@ import java.util.Locale;
 
 public final class ModIcons {
 
-    /** A loaded icon texture plus its pixel size (icons aren't always square). */
-    public record Icon(ResourceLocation texture, int width, int height) {
+    public record Icon(Identifier texture, int width, int height) {
     }
 
     private static final Map<String, Optional<Icon>> CACHE = new HashMap<>();
@@ -41,8 +40,8 @@ public final class ModIcons {
             if (path == null) path = guessIcon(modId);
             if (path == null) return Optional.empty();
             NativeImage image = SpriteUtils.readImage(Files.readAllBytes(path));
-            ResourceLocation id = Moonlight.res("mod_icon/" + modId.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
-            Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(image));
+            Identifier id = Moonlight.res("mod_icon/" + modId.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
+            Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(() -> "Mod icon " + modId, image));
             return Optional.of(new Icon(id, image.getWidth(), image.getHeight()));
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to load mod icon for {}", modId, e);

@@ -1,6 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.map;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import net.mehvahdjukaar.moonlight.api.map.CustomMapData;
+import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecorationType;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
@@ -11,8 +16,13 @@ import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -47,22 +57,17 @@ public class MapDataInternal {
     //map markers
 
     public static final ResourceKey<Registry<MLMapDecorationType<?, ?>>> MAP_DECORATION_REGISTRY_KEY = ResourceKey.createRegistryKey(Moonlight.res("map_marker"));
-    public static final ResourceLocation GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
+    public static final Identifier GENERIC_STRUCTURE_ID = Moonlight.res("generic_structure");
     private static final MapRegistry<Supplier<MLSpecialMapDecorationType<?, ?>>> CODE_TYPES_FACTORIES = new MapRegistry<>("code_map_decoration_types_factories");
-
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getGenericStructure() {
-        return getOrDefault(GENERIC_STRUCTURE_ID);
-    }
 
     /**
      * Call before mod setup. Register a code-defined map marker type. You will still need to add a related json file
      */
-    public static void registerCustomType(ResourceLocation id, Supplier<MLSpecialMapDecorationType<?, ?>> decorationType) {
+    public static void registerCustomType(Identifier id, Supplier<MLSpecialMapDecorationType<?, ?>> decorationType) {
         CODE_TYPES_FACTORIES.register(id, decorationType);
     }
 
-    public static MLSpecialMapDecorationType<?, ?> createCustomType(ResourceLocation factoryID) {
+    public static MLSpecialMapDecorationType<?, ?> createCustomType(Identifier factoryID) {
         var factory = Objects.requireNonNull(CODE_TYPES_FACTORIES.getValue(factoryID),
                 "No map decoration type with id: " + factoryID);
         var specialType = factory.get();
@@ -70,28 +75,16 @@ public class MapDataInternal {
         return specialType;
     }
 
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getAssociatedType(Holder<Structure> structure) {
-        for (var v : getValues()) {
-            Optional<HolderSet<Structure>> associatedStructure = v.getAssociatedStructure();
-            if (associatedStructure.isPresent() && associatedStructure.get().contains(structure)) {
-                return v;
-            }
-        }
-        return getGenericStructure();
-    }
-
-
     public static Holder<MLMapDecorationType<?, ?>> getDecorationFoStructure(Level level, Holder<Structure> structure) {
         Registry<MLMapDecorationType<?, ?>> reg = getMapDecorationRegistry(level.registryAccess());
-        var matched = reg.holders()
+        var matched = reg.listElements()
                 .filter(
                         h -> h.value().getAssociatedStructure()
                                 .map(s -> s.contains(structure))
                                 .orElse(false)
                 ).findFirst();
 
-        return matched.orElseGet(() -> reg.getHolder(GENERIC_STRUCTURE_ID).orElseThrow());
+        return matched.orElseGet(() -> reg.get(GENERIC_STRUCTURE_ID).orElseThrow());
     }
 
     @ApiStatus.Internal
@@ -101,58 +94,12 @@ public class MapDataInternal {
                 MLMapDecorationType.DIRECT_CODEC, MLMapDecorationType.DIRECT_CODEC);
     }
 
-    @Deprecated(forRemoval = true)
-    public static Registry<MLMapDecorationType<?, ?>> hackyGetRegistry() {
-        return Utils.hackyGetRegistryAccess().registryOrThrow(MAP_DECORATION_REGISTRY_KEY);
-    }
-
-
     public static Registry<CustomMapData.Type<?, ?>> getMapDataRegistry() {
         return CUSTOM_MAP_DATA_REGISTRY;
     }
 
     public static Registry<MLMapDecorationType<?, ?>> getMapDecorationRegistry(RegistryAccess registryAccess) {
-        return registryAccess.registryOrThrow(MAP_DECORATION_REGISTRY_KEY);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Registry<MLMapDecorationType<?, ?>> getRegistry(RegistryAccess registryAccess) {
-        return getMapDecorationRegistry(registryAccess);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Collection<MLMapDecorationType<?, ?>> getValues() {
-        return hackyGetRegistry().stream().toList();
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Set<Map.Entry<ResourceKey<MLMapDecorationType<?, ?>>, MLMapDecorationType<?, ?>>> getEntries() {
-        return hackyGetRegistry().entrySet();
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static MLMapDecorationType<? extends MLMapDecoration, ?> getOrDefault(String id) {
-        return getOrDefault(ResourceLocation.parse(id));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static MLMapDecorationType<?, ?> getOrDefault(ResourceLocation id) {
-        var reg = hackyGetRegistry();
-        var r = reg.get(id);
-        if (r == null) return reg.get(GENERIC_STRUCTURE_ID);
-        return r;
-    }
-
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static Holder<MLMapDecorationType<?, ?>> getHolder(ResourceLocation id) {
-        return hackyGetRegistry().getHolder(id).orElse(null);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Optional<MLMapDecorationType<?, ?>> getOptional(ResourceLocation id) {
-        return hackyGetRegistry().getOptional(id);
+        return registryAccess.lookupOrThrow(MAP_DECORATION_REGISTRY_KEY);
     }
 
     public static Set<MLMapMarker<?>> getDynamicServer(Player player, MapId mapId, MapItemSavedData data) {
@@ -201,5 +148,73 @@ public class MapDataInternal {
         DYNAMIC_SERVER.add(event);
     }
 
+    private static final String MARKERS_KEY = "customMarkers";
+
+    /** Vanilla's codec with markers and custom data added as extra nbt keys. */
+    public static final Codec<MapItemSavedData> EXPANDED_CODEC = expand(MapItemSavedData.CODEC);
+
+    private static Codec<MapItemSavedData> expand(Codec<MapItemSavedData> vanilla) {
+        return new Codec<>() {
+            @Override
+            public <T> DataResult<Pair<MapItemSavedData, T>> decode(DynamicOps<T> ops, T input) {
+                return vanilla.decode(ops, input).map(pair -> {
+                    if (ops.convertTo(NbtOps.INSTANCE, input) instanceof CompoundTag tag) {
+                        loadCustomData(tag, pair.getFirst());
+                    }
+                    return pair;
+                });
+            }
+
+            @Override
+            public <T> DataResult<T> encode(MapItemSavedData input, DynamicOps<T> ops, T prefix) {
+                return vanilla.encode(input, ops, prefix).flatMap(encoded -> {
+                    CompoundTag extra = new CompoundTag();
+                    saveCustomData(extra, input);
+                    if (extra.isEmpty()) return DataResult.success(encoded);
+                    T converted = NbtOps.INSTANCE.convertTo(ops, extra);
+                    return ops.getMap(converted).flatMap(entries -> ops.mergeToMap(encoded, entries));
+                });
+            }
+        };
+    }
+
+    private static void saveCustomData(CompoundTag tag, MapItemSavedData data) {
+        if (!(data instanceof ExpandedMapData expanded)) return;
+        HolderLookup.Provider registries = Utils.hackyGetRegistryAccess();
+
+        var markers = expanded.ml$getCustomMarkers();
+        if (!markers.isEmpty()) {
+            MLMapMarker.assertCanSerialize(registries);
+            RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+            ListTag list = new ListTag();
+            for (MLMapMarker<?> marker : markers.values()) {
+                if (marker.shouldSave()) {
+                    list.add(MLMapMarker.CODEC.encodeStart(ops, marker).getOrThrow());
+                }
+            }
+            if (!list.isEmpty()) tag.put(MARKERS_KEY, list);
+        }
+        expanded.ml$getCustomData().values().forEach(d -> d.save(tag, registries));
+    }
+
+    private static void loadCustomData(CompoundTag tag, MapItemSavedData data) {
+        if (!(data instanceof ExpandedMapData expanded)) return;
+        HolderLookup.Provider registries = Utils.hackyGetRegistryAccess();
+
+        ListTag list = tag.getListOrEmpty(MARKERS_KEY);
+        if (!list.isEmpty()) {
+            MLMapMarker.assertCanSerialize(registries);
+            RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+            for (Tag element : list) {
+                MLMapMarker.CODEC.parse(ops, element)
+                        .resultOrPartial(s -> Moonlight.LOGGER.warn("Failed to parse moonlight map marker: '{}'", s))
+                        .ifPresent(marker -> {
+                            expanded.ml$getCustomMarkers().put(marker.getMarkerUniqueId(), marker);
+                            expanded.ml$addCustomMarker(marker);
+                        });
+            }
+        }
+        expanded.ml$getCustomData().values().forEach(d -> d.load(tag, registries));
+    }
 
 }

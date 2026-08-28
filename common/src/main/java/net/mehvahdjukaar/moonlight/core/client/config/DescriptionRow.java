@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
@@ -24,11 +24,11 @@ class DescriptionRow extends ConfigListRow {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
-                       int mouseX, int mouseY, boolean hovering, float partialTick) {
+    public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        int top = this.getContentY(), left = this.getX(), width = this.getWidth(), height = this.getContentHeight();
         int y = top + 1;
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, left + ARROW_WIDTH + 2, y, DESCRIPTION);
+            graphics.text(font, line, left + ARROW_WIDTH + 2, y, DESCRIPTION);
             y += font.lineHeight;
         }
     }

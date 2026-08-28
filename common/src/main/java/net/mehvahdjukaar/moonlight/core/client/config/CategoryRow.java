@@ -6,7 +6,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -55,8 +56,8 @@ class CategoryRow extends ConfigListRow {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
-                       int mouseX, int mouseY, boolean hovering, float partialTick) {
+    public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
+        int top = this.getContentY(), left = this.getX(), width = this.getWidth(), height = this.getContentHeight();
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
         boolean enabled = view.isCategoryEnabled(category);
@@ -67,7 +68,7 @@ class CategoryRow extends ConfigListRow {
         button.setWidth(buttonWidth);
         button.setY(top);
         button.setHeight(height);
-        button.render(graphics, mouseX, mouseY, partialTick);
+        button.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int iconX = left + 6;
         int textLeft = iconX + ROW_ICON + 6;
@@ -80,7 +81,7 @@ class CategoryRow extends ConfigListRow {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, category.icon(), iconX, iconY, iconAnim.phase(), enabled);
         } else {
-            graphics.blitSprite(MoonlightIcons.FOLDER, iconX, iconY, ROW_ICON, ROW_ICON);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.FOLDER, iconX, iconY, ROW_ICON, ROW_ICON);
         }
         Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
@@ -90,7 +91,7 @@ class CategoryRow extends ConfigListRow {
             toggle.active = view.areAncestorsEnabled(category); // can't enable a sub-feature of a disabled feature
             toggle.setX(left + width - CONTROL_HEIGHT);
             toggle.setY(cy);
-            toggle.render(graphics, mouseX, mouseY, partialTick);
+            toggle.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
     }
 

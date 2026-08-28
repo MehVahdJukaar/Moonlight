@@ -6,23 +6,16 @@
   "client": [
     "ClientHooksMixin",
     "ClientLanguagesMixin",
-    "ItemMixin",
-    "SelfCustomBakedModel",
-    "SelfCustomModelLoaderMixin",
-    "SelfExtraModelDataProvider",
-    "SelfModFluidRendererPropertiesMixin"
+    "SelfExtraModelDataProvider"
   ],
   "mixins": [
-    "BeeGoalMixin",
-    "ConditionHackMixin",
     "ConfigTrackerMixin",
     "ContextAwareReloadListenerAccessor",
     "FireBlockMixin",
     "HoldingPlayerMixin",
     "MinecraftServerMixin",
     "PistonStructureResolverMixin",
-    "SelfEntitySpawnDataMixin",
-    "SelfModFlowingFluidMixin"
+    "SelfEntitySpawnDataMixin"
   ],
   "injectors": {
     "defaultRequire": 1

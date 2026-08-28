@@ -10,9 +10,9 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import org.apache.http.annotation.Experimental;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 
 public class ConfigBuilderImpl extends ConfigBuilder {
 
-    public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
+    public static ConfigBuilder create(Identifier name, ConfigType type) {
         return new ConfigBuilderImpl(name, type);
     }
 
@@ -34,7 +34,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     private final Deque<JsonConfigCategory> categoryStack = new ArrayDeque<>();
 
-    public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
+    public ConfigBuilderImpl(Identifier name, ConfigType type) {
         super(name, type);
         categoryStack.push(mainCategory);
     }
@@ -171,7 +171,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return config;
     }
 
-    @Experimental
+    @ApiStatus.Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
         var config = new FloatConfigValue(name, defaultValue, min, max, pendingMeta());
@@ -285,7 +285,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> rawCodec) {
-        // a SchemaCodec IS a Codec and writes the same thing, so wrapping it costs nothing and gets us a real form
+        // same wire format, wrapping just adds the editable row
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(

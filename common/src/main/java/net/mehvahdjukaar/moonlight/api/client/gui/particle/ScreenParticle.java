@@ -1,19 +1,19 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.particle;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 
 import java.util.List;
 
 public class ScreenParticle {
 
-    private final List<ResourceLocation> sprites;
+    private final List<Identifier> sprites;
 
     private float x;
     private float y;
@@ -32,29 +32,26 @@ public class ScreenParticle {
     private float lifetime = 1;
     private float age;
 
-    protected ScreenParticle(List<ResourceLocation> sprites, float x, float y) {
+    protected ScreenParticle(List<Identifier> sprites, float x, float y) {
         this.sprites = sprites;
         this.x = x;
         this.y = y;
     }
 
-    /** A particle drawing the given GUI sprite, stretched to its current size. */
-    public static ScreenParticle sprite(ResourceLocation sprite, float x, float y) {
+    public static ScreenParticle sprite(Identifier sprite, float x, float y) {
         return new ScreenParticle(List.of(sprite), x, y);
     }
 
-    /** A particle playing the given GUI sprites as an animation, spread evenly over its lifetime. */
-    public static ScreenParticle animated(List<ResourceLocation> frames, float x, float y) {
+    /** The frames are spread evenly over the particle's lifetime. */
+    public static ScreenParticle animated(List<Identifier> frames, float x, float y) {
         if (frames.isEmpty()) throw new IllegalArgumentException("Animated screen particle needs at least one frame");
         return new ScreenParticle(List.copyOf(frames), x, y);
     }
 
-    /** A particle drawing one sprite picked at random out of the given ones. */
-    public static ScreenParticle randomSprite(List<ResourceLocation> choices, RandomSource random, float x, float y) {
+    public static ScreenParticle randomSprite(List<Identifier> choices, RandomSource random, float x, float y) {
         return sprite(choices.get(random.nextInt(choices.size())), x, y);
     }
 
-    /** A particle drawing a plain square. Cheap, and needs no assets. */
     public static ScreenParticle square(float x, float y) {
         return new ScreenParticle(List.of(), x, y);
     }
@@ -65,7 +62,7 @@ public class ScreenParticle {
         return this;
     }
 
-    /** Downward acceleration in px/s^2. Negative floats the particle up. */
+    /** In px/s^2. */
     public ScreenParticle gravity(float gravity) {
         this.gravity = gravity;
         return this;
@@ -147,7 +144,7 @@ public class ScreenParticle {
         return true;
     }
 
-    public void render(GuiGraphics graphics) {
+    public void render(GuiGraphicsExtractor graphics) {
         float t = this.age / this.lifetime;
         float size = Mth.lerp(t, this.startSize, this.endSize);
         if (size <= 0) return;
@@ -157,26 +154,24 @@ public class ScreenParticle {
         }
         if (alpha <= 0) return;
 
-        PoseStack pose = graphics.pose();
-        pose.pushPose();
-        pose.translate(this.x, this.y, 0);
-        if (this.rotation != 0) pose.mulPose(Axis.ZP.rotationDegrees(this.rotation));
+        int color = ARGB.color(Mth.floor(alpha * 255), this.tint);
+        Matrix3x2fStack pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate(this.x, this.y);
+        if (this.rotation != 0) pose.rotate(this.rotation * Mth.DEG_TO_RAD);
         // the quad is authored as a unit square centered on the origin, so size and rotation are pure transforms and
         // nothing has to be rounded to whole pixels
-        pose.scale(size, size, 1);
-        pose.translate(-0.5f, -0.5f, 0);
+        pose.scale(size, size);
+        pose.translate(-0.5f, -0.5f);
         if (this.sprites.isEmpty()) {
-            graphics.fill(0, 0, 1, 1, FastColor.ARGB32.color(Mth.floor(alpha * 255), this.tint));
+            graphics.fill(0, 0, 1, 1, color);
         } else {
-            graphics.setColor(FastColor.ARGB32.red(this.tint) / 255f, FastColor.ARGB32.green(this.tint) / 255f,
-                    FastColor.ARGB32.blue(this.tint) / 255f, alpha);
-            graphics.blitSprite(this.currentFrame(t), 0, 0, 1, 1);
-            graphics.setColor(1, 1, 1, 1);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.currentFrame(t), 0, 0, 1, 1, color);
         }
-        pose.popPose();
+        pose.popMatrix();
     }
 
-    private ResourceLocation currentFrame(float lifeFraction) {
+    private Identifier currentFrame(float lifeFraction) {
         int frames = this.sprites.size();
         if (frames == 1) return this.sprites.getFirst();
         return this.sprites.get(Mth.clamp(Mth.floor(lifeFraction * frames), 0, frames - 1));

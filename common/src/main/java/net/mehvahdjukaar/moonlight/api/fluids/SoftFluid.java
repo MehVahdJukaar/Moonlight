@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
-import net.mehvahdjukaar.moonlight.api.misc.Triplet;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
@@ -19,7 +18,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
@@ -50,25 +49,29 @@ public class SoftFluid {
 
     //client only
 
-    private final ResourceLocation stillTexture;
-    private final ResourceLocation flowingTexture;
+    // only a fallback when useTexturesFrom is set, see SoftFluidColors
+    private final Identifier stillTexture;
+    private final Identifier flowingTexture;
+    private final int tintColor;
     @Nullable
-    private final ResourceLocation useTexturesFrom;
+    private final Identifier useTexturesFrom;
     private final int luminosity;
     private final int emissivity;
-    private final int tintColor;
     //determines to which textures to apply tintColor
     private final TintMethod tintMethod;
 
     //populated with reload listener. Includes tintColor information
     protected int averageTextureTint = -1;
+    // client only, null until the first resource reload
+    @Nullable
+    protected Appearance resolvedAppearance = null;
 
-    protected SoftFluid(ResourceLocation still, ResourceLocation flowing,
+    protected SoftFluid(Identifier still, Identifier flowing,
                         Component name, int luminosity, int emissivity,
                         int color, TintMethod tintMethod,
                         FoodProvider food, HolderSet<DataComponentType<?>> components,
                         FluidContainerList containers, HolderSet<Fluid> equivalent,
-                        Optional<ResourceLocation> textureFrom) {
+                        Optional<Identifier> textureFrom) {
 
         this.tintMethod = tintMethod;
         this.equivalentFluids = equivalent;
@@ -80,58 +83,41 @@ public class SoftFluid {
         this.preservedComponentsFromItem = components;
 
         this.useTexturesFrom = textureFrom.orElse(null);
-
-        int tint = color;
-
-        Triplet<ResourceLocation, ResourceLocation, Integer> renderingData;
-        if (this.useTexturesFrom != null && PlatHelper.getPhysicalSide().isClient()) {
-            var data = getRenderingData(useTexturesFrom);
-            if (data != null) {
-                still = data.left();
-                flowing = data.middle();
-                tint = data.right();
-            }
-        }
         this.stillTexture = still;
         this.flowingTexture = flowing;
-        this.tintColor = tint;
+        this.tintColor = color;
 
         this.isGenerated = false;
     }
 
     //from vanilla fluid
     public SoftFluid(Holder<Fluid> fluid) {
-        var still = ResourceLocation.parse("block/water_still");
-        var flowing = ResourceLocation.parse("block/water_flowing");
         this.tintMethod = TintMethod.STILL_AND_FLOWING;
         this.containerList = new FluidContainerList();
         this.food = FoodProvider.EMPTY;
         this.preservedComponentsFromItem = HolderSet.empty();
 
-        //these textures are later overwritten by copy textures from;
-        this.useTexturesFrom = fluid.unwrapKey().get().location();
+        //the water textures are just a fallback, the real ones are copied off this fluid's model
+        this.useTexturesFrom = fluid.unwrapKey().get().identifier();
         this.equivalentFluids = HolderSet.direct(fluid);
         var pair = getFluidSpecificAttributes(fluid.value());
         this.name = pair.getSecond() == null ? Component.literal("generic fluid") : pair.getSecond();
         this.luminosity = pair.getFirst();
         this.emissivity = pair.getFirst();
 
-        int tint = -1;
-
-        Triplet<ResourceLocation, ResourceLocation, Integer> renderingData;
-        if (this.useTexturesFrom != null && PlatHelper.getPhysicalSide().isClient()) {
-            var data = getRenderingData(useTexturesFrom);
-            if (data != null) {
-                still = data.left();
-                flowing = data.middle();
-                tint = data.right();
-            }
-        }
-        this.stillTexture = still;
-        this.flowingTexture = flowing;
-        this.tintColor = tint;
+        this.stillTexture = Identifier.parse("block/water_still");
+        this.flowingTexture = Identifier.parse("block/water_flowing");
+        this.tintColor = -1;
 
         this.isGenerated = true;
+    }
+
+    public record Appearance(Identifier still, Identifier flowing, int tint) {
+    }
+
+    @ApiStatus.Internal
+    public void setResolvedAppearance(@Nullable Appearance appearance) {
+        this.resolvedAppearance = appearance;
     }
 
 
@@ -146,7 +132,7 @@ public class SoftFluid {
     }
 
     @Nullable
-    public ResourceLocation getTextureOverride() {
+    public Identifier getTextureOverride() {
         return useTexturesFrom;
     }
 
@@ -203,11 +189,6 @@ public class SoftFluid {
         return this.equivalentFluids.contains(fluid);
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean isEmptyFluid() {
-        return this == SoftFluidRegistry.empty();
-    }
-
     /**
      * gets filled item category if container can be emptied
      *
@@ -249,11 +230,16 @@ public class SoftFluid {
      * @return tint color. default is -1 (white) so effectively no tint
      */
     public int getTintColor() {
-        return tintColor;
+        return resolvedAppearance != null ? resolvedAppearance.tint() : tintColor;
     }
 
     public int getAverageTextureTintColor() {
         return averageTextureTint;
+    }
+
+    @ApiStatus.Internal
+    public void setAverageTextureTint(int color) {
+        this.averageTextureTint = color;
     }
 
     /**
@@ -270,12 +256,12 @@ public class SoftFluid {
         return this.tintColor != -1;
     }
 
-    public ResourceLocation getFlowingTexture() {
-        return flowingTexture;
+    public Identifier getFlowingTexture() {
+        return resolvedAppearance != null ? resolvedAppearance.flowing() : flowingTexture;
     }
 
-    public ResourceLocation getStillTexture() {
-        return stillTexture;
+    public Identifier getStillTexture() {
+        return resolvedAppearance != null ? resolvedAppearance.still() : stillTexture;
     }
 
     public boolean isFood() {
@@ -333,15 +319,15 @@ public class SoftFluid {
             Component::getString
     );
 
-    //Direct codec
+    //writes what the definition declared, never the resolved appearance
     public static final Codec<SoftFluid> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-            ResourceLocation.CODEC.fieldOf("still_texture").forGetter(SoftFluid::getStillTexture),
-            ResourceLocation.CODEC.fieldOf("flowing_texture").forGetter(SoftFluid::getFlowingTexture),
+            Identifier.CODEC.fieldOf("still_texture").forGetter(s -> s.stillTexture),
+            Identifier.CODEC.fieldOf("flowing_texture").forGetter(s -> s.flowingTexture),
             TRANSLATABLE_COMPONENT.optionalFieldOf("translation_key", Component.translatable("fluid.moonlight.generic_fluid"))
                     .forGetter(SoftFluid::getTranslatedName),
             Codec.intRange(0, 15).optionalFieldOf("luminosity", 0).forGetter(SoftFluid::getLuminosity),
             Codec.intRange(0, 15).optionalFieldOf("emissivity", 0).forGetter(SoftFluid::getEmissivity),
-            ColorUtils.CODEC.optionalFieldOf("color", -1).forGetter(SoftFluid::getTintColor),
+            ColorUtils.CODEC.optionalFieldOf("color", -1).forGetter(s -> s.tintColor),
             TintMethod.CODEC.optionalFieldOf("tint_method", TintMethod.STILL_AND_FLOWING).forGetter(SoftFluid::getTintMethod),
             FoodProvider.CODEC.optionalFieldOf("food", FoodProvider.EMPTY).forGetter(SoftFluid::getFoodProvider),
             CodecUtils.lenientHomogeneousList(Registries.DATA_COMPONENT_TYPE)
@@ -350,7 +336,7 @@ public class SoftFluid {
             FluidContainerList.CODEC.optionalFieldOf("containers", new FluidContainerList()).forGetter(SoftFluid::getContainerList),
             CodecUtils.lenientHomogeneousList(Registries.FLUID).optionalFieldOf("equivalent_fluids", HolderSet.empty())
                     .forGetter(s -> s.equivalentFluids),
-            ResourceLocation.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
+            Identifier.CODEC.optionalFieldOf("use_texture_from").forGetter(s -> Optional.ofNullable(s.getTextureOverride()))
     ).apply(instance, SoftFluid::new));
 
 
@@ -358,14 +344,6 @@ public class SoftFluid {
     @PlatformImpl
     public static Pair<Integer, Component> getFluidSpecificAttributes(Fluid fluid) {
         throw new AssertionError(); //fabric gets nothing here :/
-    }
-
-    //this is client only!
-    @ApiStatus.Internal
-    @Nullable
-    @PlatformImpl
-    public static Triplet<ResourceLocation, ResourceLocation, Integer> getRenderingData(ResourceLocation useTexturesFrom) {
-        throw new AssertionError();
     }
 
     public enum Capacity implements StringRepresentable {

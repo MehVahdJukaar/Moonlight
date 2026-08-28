@@ -48,16 +48,6 @@ public abstract class DynamicRenderedItemDisplayTile extends ItemDisplayTile imp
         return isFancy;
     }
 
-    /**
-     * Must be called in your TESR shouldRender method.
-     *
-     * @return true if the block should render with TESR
-     */
-    @Deprecated(forRemoval = true)
-    public boolean shouldRenderFancy(Vec3 cameraPos) {
-        return shouldRenderFancy();
-    }
-
     public boolean shouldRenderFancy() {
         if (isNeverFancy()) return false;
 

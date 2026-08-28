@@ -6,7 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
@@ -21,7 +21,7 @@ public class ForeignConfigHolder extends ModConfigHolder {
     private final ConfigCategory root;
     private final Component readableName;
 
-    ForeignConfigHolder(ResourceLocation id, ConfigType type, ModConfigSpec spec, ConfigCategory root, Component readableName) {
+    ForeignConfigHolder(Identifier id, ConfigType type, ModConfigSpec spec, ConfigCategory root, Component readableName) {
         super(id, "toml", FMLPaths.CONFIGDIR.get(), type, null, false);
         this.spec = spec;
         this.root = root;
@@ -56,7 +56,7 @@ public class ForeignConfigHolder extends ModConfigHolder {
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
+    public Screen makeScreen(Screen parent, @Nullable Identifier background) {
         return new MoonlightConfigScreen(this, root, parent, background);
     }
 }

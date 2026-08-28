@@ -1,14 +1,17 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public interface Popup {
 
     /** Draw the popup. Called by the host after everything else, so it floats on top. */
-    void renderPopup(GuiGraphics graphics, int mouseX, int mouseY);
+    void renderPopup(GuiGraphicsExtractor graphics, int mouseX, int mouseY);
 
     /** @return true if this click was consumed (including outside clicks that should dismiss the popup). */
-    default boolean popupMouseClicked(double mouseX, double mouseY, int button) {
+    default boolean popupMouseClicked(MouseButtonEvent event, boolean doubleClick) {
         return false;
     }
 
@@ -16,11 +19,11 @@ public interface Popup {
         return false;
     }
 
-    default boolean popupKeyPressed(int key, int scanCode, int modifiers) {
+    default boolean popupKeyPressed(KeyEvent event) {
         return false;
     }
 
-    default boolean popupCharTyped(char c, int modifiers) {
+    default boolean popupCharTyped(CharacterEvent event) {
         return false;
     }
 

@@ -12,7 +12,8 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -22,7 +23,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class MoonlightConfigScreen extends ConfigPageScreen {
 
-    // reused so leaving repeatedly refreshes one toast instead of stacking duplicates
+    // one id so leaving repeatedly doesn't stack toasts
     private static final SystemToast.SystemToastId RELOAD_TOAST_ID = new SystemToast.SystemToastId();
 
     private final ConfigEditSession session;
@@ -41,7 +42,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     @Nullable
     private final MoonlightConfigScreen parentPage; // null = root level
     @Nullable
-    private final ResourceLocation background;
+    private final Identifier background;
 
     // top-bar geometry: title centered on the first line, breadcrumb + search on the second
     private static final int SIDE_MARGIN = 14;
@@ -56,17 +57,17 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     private String searchQuery = "";
 
     public MoonlightConfigScreen(ModConfigHolder holder, ConfigCategory root, Screen returnScreen,
-                                 @Nullable ResourceLocation background) {
+                                 @Nullable Identifier background) {
         this(root, null, new ConfigEditSession(holder, returnScreen), background);
     }
 
     public static Screen create(ModConfigHolder holder, ConfigCategory root, Screen returnScreen,
-                                @Nullable ResourceLocation background) {
+                                @Nullable Identifier background) {
         return new MoonlightConfigScreen(holder, root, returnScreen, background);
     }
 
     private MoonlightConfigScreen(ConfigCategory category, @Nullable MoonlightConfigScreen parentPage,
-                                  ConfigEditSession session, @Nullable ResourceLocation background) {
+                                  ConfigEditSession session, @Nullable Identifier background) {
         // the header keeps the config's own name on every sub-screen; the breadcrumb is what tracks the category
         super(session.holder().getReadableName());
         this.category = category;
@@ -154,8 +155,8 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     private void confirmResetAll() {
         this.minecraft.setScreen(new ConfirmScreen(confirmed -> {
             if (confirmed) {
-                resetAllToDefaults(this.category);
-                session.apply(); // writes straight through, like the per-row reset + Save
+                stageAllDefaults(this.category);
+                session.apply();        // reset writes straight through, like the per-row reset + Save
                 session.clearPending();
             }
             this.minecraft.setScreen(this); // re-inits, so rows re-read the (now saved) values
@@ -163,10 +164,10 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
                 Component.translatable("gui.moonlight.config.reset_all.message")));
     }
 
-    private void resetAllToDefaults(ConfigCategory cat) {
+    private void stageAllDefaults(ConfigCategory cat) {
         for (ConfigNode e : cat.entries()) {
             if (e instanceof ConfigCategory sub) {
-                resetAllToDefaults(sub);
+                stageAllDefaults(sub);
             } else if (e instanceof ConfigOption<?> v && !(v instanceof ConfigOption.UnsupportedValue)) {
                 session.put(v, v.defaultValue());
             }
@@ -275,26 +276,26 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         if (reload != ConfigReloadType.NONE) {
             Component message = Component.translatable(reload == ConfigReloadType.GAME_RESTART
                     ? "gui.moonlight.config.reload_needed.game" : "gui.moonlight.config.reload_needed.world");
-            this.minecraft.getToasts().addToast(SystemToast.multiline(this.minecraft, RELOAD_TOAST_ID,
+            this.minecraft.getToastManager().addToast(SystemToast.multiline(this.minecraft, RELOAD_TOAST_ID,
                     Component.translatable("gui.moonlight.config.reload_needed.title"), message));
         }
         this.minecraft.setScreen(session.returnScreen());
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         // header chrome belongs in the background layer, drawn before the widgets by super.render. The row list is
         // scissored below HEADER so rows slide under the bar cleanly
         GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
-        graphics.blitSprite(MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
+        graphics.centeredText(this.font, this.title, this.width / 2, 7, ConfigGuiColors.TITLE);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - 2,
                 this.searchBox.getY() + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         renderOverlayOrTooltip(graphics, mouseX, mouseY);
     }
 }

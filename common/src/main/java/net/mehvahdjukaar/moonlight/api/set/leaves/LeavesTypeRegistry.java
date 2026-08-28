@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.set.leaves;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import org.jetbrains.annotations.Nullable;
@@ -14,36 +14,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     public static final LeavesTypeRegistry INSTANCE = new LeavesTypeRegistry();
 
-    /// USE {@link VanillaLeavesTypes#OAK}
-    @Deprecated(forRemoval = true)
-    public static LeavesType OAK_TYPE = VanillaLeavesTypes.OAK;
-/// USE {@link LeavesTypeRegistry}.{@link LeavesTypeRegistry#INSTANCE}
-    @Deprecated(forRemoval = true)
-    public static Collection<LeavesType> getTypes() {
-        return INSTANCE.getValues();
-    }
-
-    /// USE {@link VanillaLeavesTypes}.woodTypeId, <br>For example "spruce", then use VanillaLeavesTypes.SPRUCE
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static LeavesType getValue(ResourceLocation leavesTypeId) {
-        return INSTANCE.get(leavesTypeId);
-    }
-
-    /// USE {@link VanillaLeavesTypes}.woodTypeId, <br>For example "spruce", then use VanillaLeavesTypes.SPRUCE
-    @Deprecated(forRemoval = true)
-    @Nullable
-    public static LeavesType getValue(String leavesTypeId) {
-        return INSTANCE.get(ResourceLocation.parse(leavesTypeId));
-    }
-
-    @Deprecated(forRemoval = true)
-    public static LeavesType fromNBT(String name) {
-        return INSTANCE.getFromNBT(name);
-    }
-
-
-    private final Map<ResourceLocation, ResourceLocation> specialLeavesToWood = new HashMap<>();
+    private final Map<Identifier, Identifier> specialLeavesToWood = new HashMap<>();
     private final Map<LeavesType, WoodType> leavesToWood = new IdentityHashMap<>();
 
     public LeavesTypeRegistry() {
@@ -74,7 +45,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     //returns if this block is the base plank block
     @Override
-    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, ResourceLocation baseId) {
+    public Optional<LeavesType> detectTypeFromBlock(Block baseBlock, Identifier baseId) {
         String name = null;
         String path = baseId.getPath();
         //needs to contain planks in its name
@@ -86,7 +57,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
         String namespace = baseId.getNamespace();
         if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
             if (baseBlock instanceof LeavesBlock) {
-                ResourceLocation id = baseId.withPath(name);
+                Identifier id = baseId.withPath(name);
                 if (!valuesReg.containsKey(id)) return Optional.of(new LeavesType(id, baseBlock));
             }
         }
@@ -106,8 +77,8 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
         // add wood to leaves mapping. we know this runs after wood types are registered
         for (var l : this.getValues()) {
-            ResourceLocation leavesId = l.id;
-            ResourceLocation id = specialLeavesToWood.getOrDefault(leavesId, leavesId);
+            Identifier leavesId = l.id;
+            Identifier id = specialLeavesToWood.getOrDefault(leavesId, leavesId);
             WoodType o = WoodTypeRegistry.INSTANCE.get(id);
             String path = id.getPath();
             String namespace = id.getNamespace();
@@ -140,16 +111,16 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
     // Adds a mapping from leaves type to wood type.
     // Used for non-conventional wood types or leaves types that don't have a log
-    public void addLeavesToWoodMapping(ResourceLocation leavesTypeId, ResourceLocation woodTypeId) {
+    public void addLeavesToWoodMapping(Identifier leavesTypeId, Identifier woodTypeId) {
         specialLeavesToWood.put(leavesTypeId, woodTypeId);
     }
 
     public void addLeavesToWoodMapping(String leavedId, String woodId) {
-        addLeavesToWoodMapping(ResourceLocation.parse(leavedId), ResourceLocation.parse(woodId));
+        addLeavesToWoodMapping(Identifier.parse(leavedId), Identifier.parse(woodId));
     }
 
     public void addLeavesToWoodMapping(String modId, String leavesTypeName, String woodTypeName) {
-        addLeavesToWoodMapping(ResourceLocation.fromNamespaceAndPath(modId, leavesTypeName), ResourceLocation.fromNamespaceAndPath(modId, woodTypeName));
+        addLeavesToWoodMapping(Identifier.fromNamespaceAndPath(modId, leavesTypeName), Identifier.fromNamespaceAndPath(modId, woodTypeName));
     }
 
     @Override
@@ -158,7 +129,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     //shorthand for add finder. Gives a builder-like object that's meant to be configured inline
-    public LeavesType.Finder addSimpleFinder(ResourceLocation typeId) {
+    public LeavesType.Finder addSimpleFinder(Identifier typeId) {
         LeavesType.Finder finder = new LeavesType.Finder(typeId);
         this.addFinder(finder);
         return finder;
@@ -166,11 +137,11 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
 
 
     public LeavesType.Finder addSimpleFinder(String typeId) {
-        return addSimpleFinder(ResourceLocation.parse(typeId));
+        return addSimpleFinder(Identifier.parse(typeId));
     }
 
     public LeavesType.Finder addSimpleFinder(String namespace, String name) {
-        return addSimpleFinder(ResourceLocation.fromNamespaceAndPath(namespace, name));
+        return addSimpleFinder(Identifier.fromNamespaceAndPath(namespace, name));
     }
 
 }

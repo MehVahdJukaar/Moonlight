@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.moonlight.core.network;
 
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
-import net.mehvahdjukaar.moonlight.api.misc.DynamicHolder;
+import net.mehvahdjukaar.moonlight.api.fluids.client.SoftFluidColors;
 import net.mehvahdjukaar.moonlight.api.misc.HolderRef;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fluid.SoftFluidInternal;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -28,12 +28,12 @@ public class ClientBoundFinalizeFluidsMessage implements Message {
 
     }
 
-    @ClientOnly
     @Override
     public void handle(Context context) {
-        SoftFluidInternal.postInitClient(Objects.requireNonNull(context.getPlayer().level()).registryAccess());
+        RegistryAccess registryAccess = Objects.requireNonNull(context.getPlayer().level()).registryAccess();
+        SoftFluidInternal.postInitClient(registryAccess);
+        SoftFluidColors.onFluidsSynced(registryAccess);
         //just incase
-        DynamicHolder.clearCache();
         HolderRef.clearCache();
     }
 

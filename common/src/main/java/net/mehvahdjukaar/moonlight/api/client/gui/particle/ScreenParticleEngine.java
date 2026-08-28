@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.particle;
 
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 
 import java.util.ArrayList;
@@ -30,11 +30,11 @@ public class ScreenParticleEngine implements Renderable {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         this.renderAndTick(graphics);
     }
 
-    public void renderAndTick(GuiGraphics graphics) {
+    public void renderAndTick(GuiGraphicsExtractor graphics) {
         long now = Util.getMillis();
         float dt = this.lastMs < 0 ? 0 : Math.min((now - this.lastMs) / 1000f, 0.1f); // clamp screen-reopen gaps
         this.lastMs = now;

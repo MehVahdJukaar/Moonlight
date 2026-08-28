@@ -26,8 +26,8 @@ public abstract class MinecraftServerMixin {
     // we need here for DATAPACK REGISTRIES
 
     //should fire right before add reload listener, before packs are reloaded and listeners called
-    @Inject(method = "lambda$reloadResources$29",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
+    @Inject(method = "lambda$reloadResources$1",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Ljava/util/List;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;Lnet/minecraft/server/permissions/PermissionSet;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
                     shift = At.Shift.BEFORE))
     private void moonlight$serverDynamicPackEarlyReload(ImmutableList immutableList, CallbackInfoReturnable<CompletionStage> cir,
                                                         @Local CloseableResourceManager manager) {

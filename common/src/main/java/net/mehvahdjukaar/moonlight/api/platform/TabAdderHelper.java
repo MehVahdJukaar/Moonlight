@@ -5,7 +5,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -63,7 +63,7 @@ public class TabAdderHelper {
 
     public static boolean anyItemTagExists(String... tags) {
         for (var t : tags) {
-            if (BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(t))).isPresent()) {
+            if (BuiltInRegistries.ITEM.get(TagKey.create(Registries.ITEM, Identifier.parse(t))).isPresent()) {
                 return true;
             }
         }
@@ -109,7 +109,7 @@ public class TabAdderHelper {
     }
 
     private static Optional<Item> find(String itemId) {
-        return BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId));
+        return BuiltInRegistries.ITEM.getOptional(Identifier.parse(itemId));
     }
 
     private static void unwrap(Supplier<?>[] items, Consumer<ItemStack[]> action) {

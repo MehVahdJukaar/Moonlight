@@ -26,7 +26,6 @@ public class TextureCollager {
 
         String debugInfo = "Source='" + source.debugPath + "', Dest='" + destination.debugPath + "'";
 
-        // --- Fail fast sanity checks ---
         if (source.frameCount() <= 0) {
             throw new IllegalStateException("Source TextureImage has no frames: " + debugInfo);
         }
@@ -69,7 +68,6 @@ public class TextureCollager {
                 int scaledTargetW = Math.round(op.targetW * scaleTargetX);
                 int scaledTargetH = Math.round(op.targetH * scaleTargetY);
 
-                // --- Validate bounds with debug logging ---
                 if (scaledSourceW <= 0 || scaledSourceH <= 0) {
                     throw new IllegalStateException("Scaled source rectangle invalid: " +
                             scaledSourceW + "x" + scaledSourceH + " - " + debugInfo + ", op=" + op);

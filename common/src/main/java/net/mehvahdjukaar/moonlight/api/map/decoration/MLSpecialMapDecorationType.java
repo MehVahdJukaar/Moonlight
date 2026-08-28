@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.ApiStatus;
@@ -21,11 +21,11 @@ import org.jetbrains.annotations.Nullable;
 public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M extends MLMapMarker<D>> extends MLMapDecorationType<D, M> {
 
     static final Codec<MLSpecialMapDecorationType<?, ?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("custom_type").forGetter(MLSpecialMapDecorationType::getCustomFactoryID)
+            Identifier.CODEC.fieldOf("custom_type").forGetter(MLSpecialMapDecorationType::getCustomFactoryID)
     ).apply(instance, MapDataInternal::createCustomType));
 
     @ApiStatus.Internal
-    public ResourceLocation factoryID;
+    public Identifier factoryID;
 
 
     //creates marker from world
@@ -82,7 +82,7 @@ public final class MLSpecialMapDecorationType<D extends MLMapDecoration, M exten
     }
 
     @Override
-    public ResourceLocation getCustomFactoryID() {
+    public Identifier getCustomFactoryID() {
         return factoryID;
     }
 

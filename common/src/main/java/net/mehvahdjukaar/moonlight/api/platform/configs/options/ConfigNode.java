@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.options;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ public abstract class ConfigNode {
     @Nullable
     private ConfigCategory parent;
     @Nullable
-    private ResourceLocation icon;
+    private Identifier icon;
 
     protected ConfigNode(Component title, @Nullable Component description) {
         this.title = title;
@@ -41,12 +41,12 @@ public abstract class ConfigNode {
     }
 
     @ApiStatus.Internal
-    public void setIcon(@Nullable ResourceLocation icon) {
+    public void setIcon(@Nullable Identifier icon) {
         this.icon = icon;
     }
 
     @Nullable
-    public ResourceLocation icon() {
+    public Identifier icon() {
         return icon;
     }
 

@@ -14,7 +14,6 @@ import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
-import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.api.util.DispenserHelper;
 import net.mehvahdjukaar.moonlight.core.commands.BackCommand;
 import net.mehvahdjukaar.moonlight.core.commands.ModCommands;
@@ -29,7 +28,8 @@ import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.set.DebugBlockTypes;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
@@ -39,7 +39,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.logging.log4j.LogManager;
@@ -65,8 +65,8 @@ public class Moonlight {
     private static final Set<String> DEPENDENTS = new HashSet<>();
     private static boolean verboseLogging = false;
 
-    public static ResourceLocation res(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    public static Identifier res(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 
     //called on mod creation
@@ -78,7 +78,6 @@ public class Moonlight {
         //MoonlightEventsHelper.addListener( BlockSetInternal::addTranslations, AfterLanguageLoadEvent.class);
         HardcodedBlockTypes.init();
         MoonlightRegistry.init();
-        ItemListingManager.init();
 
         ModNetworking.init();
         ModCommands.init();
@@ -92,7 +91,6 @@ public class Moonlight {
         PlatHelper.addCommonSetup(Moonlight::commonSetup);
         PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReloadOrDataSync);
 
-        PlatHelper.addServerReloadListener(ItemListingManager::new, Moonlight.res("villager_trade"));
         PlatHelper.addServerReloadListener((e)->BlocksColorInternal.INSTANCE, Moonlight.res("blocks_color"));
         addGlobalDatapackLoader();
 
@@ -144,10 +142,11 @@ public class Moonlight {
     @EventCalled
     public static void onPlayerCloned(Player oldPlayer, Player newPlayer, boolean wasDeath) {
         BackCommand.onPlayerCloned(oldPlayer, newPlayer);
-        if (wasDeath && !oldPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+        if (wasDeath && oldPlayer.level() instanceof ServerLevel serverLevel
+                && !serverLevel.getGameRules().get(GameRules.KEEP_INVENTORY)) {
             var inv = oldPlayer.getInventory();
             int i = 0;
-            for (var v : inv.items) {
+            for (var v : inv.getNonEquipmentItems()) {
                 if (v != ItemStack.EMPTY) {
                     IDropItemOnDeathEvent e = IDropItemOnDeathEvent.create(v, oldPlayer, false);
                     MoonlightEventsHelper.postEvent(e, IDropItemOnDeathEvent.class);
@@ -183,10 +182,7 @@ public class Moonlight {
     @EventCalled
     private static void afterDataReloadOrDataSync(RegistryAccess registryAccess, boolean client) {
         EARLY_REGISTRY_ACCESS.set(new WeakReference<>(registryAccess));
-        RegistryAccessJsonReloadListener.runReloads(registryAccess);
         DynamicResourcesInternals.clearAfterReload(PackType.SERVER_DATA);
-        DynamicHolder.clearCache();
-
         HolderRef.clearCache();
         DispenserHelper.reload(registryAccess, client);
     }

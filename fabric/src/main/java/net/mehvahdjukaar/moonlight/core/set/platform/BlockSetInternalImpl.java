@@ -45,7 +45,7 @@ public class BlockSetInternalImpl {
 
     public static void registerDynamicOrdered(List<? extends ResourceKey<? extends Registry<?>>> regs) {
         for (var id : regs) {
-            Registry<?> registry = BuiltInRegistries.REGISTRY.get((ResourceKey) id);
+            Registry<?> registry = BuiltInRegistries.REGISTRY.getValue((ResourceKey) id);
             var q = QUEUES_OLD.get(registry);
             if (q != null) {
                 for (var e : q.entrySet()) {

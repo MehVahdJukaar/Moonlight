@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.util.FileDownloadUtils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -15,23 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Loads and caches mod icons fetched from a URL (for mods that aren't installed, so their jar isn't around to pull an
- * icon from like {@link ModIcons} does). The bytes are downloaded off-thread; the {@link DynamicTexture} is created and
- * registered on the render thread. Callers get {@code null} until the icon is ready (or forever, if it failed) and
- * should draw a fallback in the meantime. Any format stb reads works (png, gif, jpeg, ...); animated gifs show their
- * first frame.
- */
+// icons fetched from a url for mods that aren't installed. Downloaded off thread, texture created on the render
+// thread. Null until ready (or forever if it failed)
 public final class RemoteIconCache {
 
     // Optional is present-and-empty for "gave up", absent-from-map for "not requested / still loading".
     private static final Map<String, Optional<ModIcons.Icon>> CACHE = new ConcurrentHashMap<>();
 
-    /**
-     * @param key a stable id for this icon (the mod id), used both for caching and the texture path
-     * @param url where to fetch the PNG from
-     * @return the loaded icon, or {@code null} while it's loading or if it failed
-     */
     @Nullable
     public static ModIcons.Icon get(String key, String url) {
         Optional<ModIcons.Icon> cached = CACHE.get(key);
@@ -51,9 +41,9 @@ public final class RemoteIconCache {
                 Minecraft mc = Minecraft.getInstance();
                 mc.execute(() -> {
                     try {
-                        ResourceLocation id = Moonlight.res("remote_mod_icon/"
+                        Identifier id = Moonlight.res("remote_mod_icon/"
                                 + key.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
-                        mc.getTextureManager().register(id, new DynamicTexture(image));
+                        mc.getTextureManager().register(id, new DynamicTexture(id::toString, image));
                         CACHE.put(key, Optional.of(new ModIcons.Icon(id, image.getWidth(), image.getHeight())));
                     } catch (Exception e) {
                         image.close();

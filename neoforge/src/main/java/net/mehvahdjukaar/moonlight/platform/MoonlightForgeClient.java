@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.platform;
 
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
-import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
@@ -11,7 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.Input;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -41,7 +40,6 @@ public class MoonlightForgeClient {
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         FakeLevelManager.invalidateAll();
         DynamicTextureRenderer.clearCache();
-        RenderedTexturesManager.clearCache();
         var player = event.getPlayer();
         if (player != null) SidedInstance.clearAll(player.registryAccess());
     }
@@ -78,10 +76,10 @@ public class MoonlightForgeClient {
         if (mc.player != null) {
             Entity riddenEntity = mc.player.getVehicle();
             if (riddenEntity instanceof IControllableVehicle listener) {
-                Input movementInput = event.getInput();
-                listener.onInputUpdate(movementInput.left, movementInput.right,
-                        movementInput.up, movementInput.down,
-                        mc.options.keySprint.isDown(), movementInput.jumping);
+                Input keyPresses = event.getInput().keyPresses;
+                listener.onInputUpdate(keyPresses.left(), keyPresses.right(),
+                        keyPresses.forward(), keyPresses.backward(),
+                        mc.options.keySprint.isDown(), keyPresses.jump());
             }
         }
     }

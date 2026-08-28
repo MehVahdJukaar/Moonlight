@@ -11,9 +11,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
-// Wraps a raw ModConfigSpec.ConfigValue so the rest of the code can use it through TrackedConfigValue and not care
-// which loader it's on. map/unmap convert between what's stored and what's handed out, so colours, json and beans
-// look the same as plain values from the outside. The reload flags are passed in once, at construction
+// view over a raw ModConfigSpec.ConfigValue, map/unmap convert the stored raw type
 abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
     private final ConfigMetadata meta;
@@ -124,10 +122,8 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         C raw = unmap(value);
         boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
         original.set(raw);
-        // NeoForge's ConfigValue.set() doesn't refresh its own cache for worldRestart/gameRestart values, so
-        // original.get() would keep giving the old value and pollChanged() would undo the one we just wrote on the
-        // next read, making the screen snap back after Save. Clearing the cache makes it re-read what we wrote, like
-        // on Fabric where a set takes effect right away and the reload icon is only a hint
+        // NeoForge's ConfigValue.set() skips refreshing its own cache for worldRestart/gameRestart values, so
+        // original.get() would return the stale value and pollChanged() would revert the set, so clear the cache
         original.clearCache();
         cachedRaw = raw;
         cachedValue = value;

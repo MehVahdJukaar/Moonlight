@@ -4,9 +4,9 @@ import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 // Shared sizing constants and drawing helpers for the config screen widgets, in one place so the screen,
@@ -30,7 +30,7 @@ final class ConfigScreenLayout {
 
     // the reload/restart hint sprite for a value, or null when it applies immediately
     @Nullable
-    static ResourceLocation reloadIcon(ConfigReloadType type) {
+    static Identifier reloadIcon(ConfigReloadType type) {
         return switch (type) {
             case WORLD_RELOAD -> MoonlightIcons.WORLD_RELOAD;
             case GAME_RESTART -> MoonlightIcons.GAME_RESTART;
@@ -39,7 +39,7 @@ final class ConfigScreenLayout {
     }
 
     // the paper "config file" sprite for a config's type: client, server-synced or common
-    static ResourceLocation configFileIcon(ConfigType type) {
+    static Identifier configFileIcon(ConfigType type) {
         return switch (type) {
             case CLIENT -> MoonlightIcons.CONFIG_CLIENT;
             case COMMON_SYNCED -> MoonlightIcons.CONFIG_SERVER;
@@ -48,9 +48,9 @@ final class ConfigScreenLayout {
     }
 
     // left-aligned single-line text hard-clipped to [minX, maxX], for row subtitles
-    static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
+    static void drawClipped(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int y, int maxX, int color) {
         graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
-        graphics.drawString(font, text, minX, y, color);
+        graphics.text(font, text, minX, y, color);
         graphics.disableScissor();
     }
 }

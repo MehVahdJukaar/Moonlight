@@ -5,11 +5,11 @@ import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.metadata.MetadataSectionType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +29,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     protected final PackType packType;
     protected final PackMetadataSection metadata;
     protected final Set<String> namespaces = new HashSet<>();
-    protected final Map<ResourceLocation, byte[]> resources = new ConcurrentHashMap<>();
+    protected final Map<Identifier, byte[]> resources = new ConcurrentHashMap<>();
     protected final Map<String, byte[]> rootResources = new ConcurrentHashMap<>();
     protected final ResourceLocationSearchTrie searchTrie = new ResourceLocationSearchTrie();
 
@@ -42,7 +42,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
         this.packType = type;
         this.hidden = hidden;
         this.metadata = new PackMetadataSection(Component.translatable("message.moonlight.runtime"),
-                SharedConstants.getCurrentVersion().getPackVersion(packType), Optional.empty());
+                SharedConstants.getCurrentVersion().packVersion(packType).minorRange());
 
     }
 
@@ -59,9 +59,9 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
+    public <T> T getMetadataSection(MetadataSectionType<T> type) {
         try {
-            return serializer == PackMetadataSection.TYPE ? (T) this.metadata : null;
+            return type == PackMetadataSection.forPackType(this.packType) ? (T) this.metadata : null;
         } catch (Exception exception) {
             return null;
         }
@@ -96,7 +96,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     }
 
     @Override
-    public IoSupplier<InputStream> getResource(PackType type, ResourceLocation id) {
+    public IoSupplier<InputStream> getResource(PackType type, Identifier id) {
 
         var res = this.resources.get(id);
         if (res != null) {
@@ -131,7 +131,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     }
 
     @Override
-    public void addResource(ResourceLocation id, byte[] bytes) {
+    public void addResource(Identifier id, byte[] bytes) {
         synchronized (this) {
             this.namespaces.add(id.getNamespace());
             this.resources.put(id, bytes);
@@ -140,7 +140,7 @@ public class InMemoryPackResources extends AbstractPackResources implements IEdi
     }
 
     @Override
-    public void removeResource(ResourceLocation id) {
+    public void removeResource(Identifier id) {
         synchronized (this) {
             this.resources.remove(id);
             this.searchTrie.remove(id);

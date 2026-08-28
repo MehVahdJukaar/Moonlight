@@ -14,7 +14,7 @@ import java.util.HashSet;
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin {
 
-    @ModifyExpressionValue(method = "openFresh",
+    @ModifyExpressionValue(method = "openCreateWorldScreen",
             at = @At(value = "NEW", target = "([Lnet/minecraft/server/packs/repository/RepositorySource;)Lnet/minecraft/server/packs/repository/PackRepository;"))
     private static PackRepository ml$addExtraDatapacks(PackRepository original) {
 

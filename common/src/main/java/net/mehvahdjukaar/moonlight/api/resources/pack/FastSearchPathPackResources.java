@@ -9,8 +9,8 @@ import com.google.common.base.Stopwatch;
 import com.mojang.logging.LogUtils;
 import net.mehvahdjukaar.moonlight.api.misc.ResourceLocationSearchTrie;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.FileUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FileUtil;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -71,14 +71,14 @@ public class FastSearchPathPackResources extends AbstractPackResources {
                     String namespace = rel.substring(0, slash);
                     String pathWithinNs = rel.substring(slash + 1);
 
-                    if (!ResourceLocation.isValidNamespace(namespace)) {
+                    if (!Identifier.isValidNamespace(namespace)) {
                         // Match vanilla behavior: warn and skip invalid namespaces
                         LOGGER.warn("Non [a-z0-9_.-] character in namespace {} in pack {}, ignoring",
                                 namespace, this.root);
                         return;
                     }
 
-                    ResourceLocation rl = ResourceLocation.tryBuild(namespace, pathWithinNs);
+                    Identifier rl = Identifier.tryBuild(namespace, pathWithinNs);
                     if (rl != null) {
                         this.searchTrie.insert(rl);
                     }
@@ -102,7 +102,7 @@ public class FastSearchPathPackResources extends AbstractPackResources {
 
 
     @Nullable
-    public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
+    public IoSupplier<InputStream> getResource(PackType packType, Identifier location) {
         if (this.packType != packType) return null;
         if(this.searchTrie.search(ResourceLocationSearchTrie.getResPath(location)).isEmpty()){
             return null;
@@ -112,7 +112,7 @@ public class FastSearchPathPackResources extends AbstractPackResources {
     }
 
     @Nullable
-    private static IoSupplier<InputStream> getResource(ResourceLocation location, Path path) {
+    private static IoSupplier<InputStream> getResource(Identifier location, Path path) {
         return FileUtil.decomposePath(location.getPath()).mapOrElse((list) -> {
             Path path2 = FileUtil.resolvePath(path, list);
             return returnFileIfExists(path2);

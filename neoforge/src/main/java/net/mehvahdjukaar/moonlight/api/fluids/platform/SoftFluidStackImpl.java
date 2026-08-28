@@ -23,11 +23,6 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         return this.isSameFluidSameComponents(SoftFluidStackImpl.fromForgeFluid(fluidStack, ra));
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean isFluidEqual(FluidStack fluidStack) {
-        return this.isSameFluidSameComponents(SoftFluidStackImpl.fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess()));
-    }
-
     public static FluidStack toForgeFluid(SoftFluidStack softFluid) {
         FluidStack stack = new FluidStack(softFluid.fluid().getVanillaFluid(), bottlesToMB(softFluid.getCount()));
         if (!stack.isEmpty()) {
@@ -43,11 +38,6 @@ public class SoftFluidStackImpl extends SoftFluidStack {
      */
     public FluidStack toForgeFluid() {
         return toForgeFluid(this);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static SoftFluidStack fromForgeFluid(FluidStack fluidStack) {
-        return fromForgeFluid(fluidStack, Utils.hackyGetRegistryAccess());
     }
 
     public static SoftFluidStack fromForgeFluid(FluidStack fluidStack, HolderLookup.Provider ra) {

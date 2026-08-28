@@ -81,10 +81,10 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         return aabb.move(pos.getX() + d0 * this.direction.getStepX(), pos.getY() + d0 * this.direction.getStepY(), pos.getZ() + d0 * this.direction.getStepZ());
     }
 
-    @Inject(method = "finalTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;)V",
+    @Inject(method = "finalTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;)V",
             shift = At.Shift.AFTER))
     public void onFinishedShortPulse(CallbackInfo ci) {
-        if (!level.isClientSide && this.movedState.getBlock() instanceof IPistonMotionReact pr) {
+        if (!level.isClientSide() && this.movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, worldPosition,
                     new ClientBoundOnPistonMovedBlockMessage(this.worldPosition, this.movedState, this.direction, this.extending));
             pr.onMoved(this.level, this.worldPosition, this.movedState, this.direction, this.extending);
@@ -95,7 +95,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
             shift = At.Shift.AFTER), require = 1)
     private static void onFinishedMoving(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
         BlockState movedState = blockEntity.getMovedState();
-        if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
+        if (!level.isClientSide() && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,
                     new ClientBoundOnPistonMovedBlockMessage(pos, movedState,
                             blockEntity.getDirection(), blockEntity.isExtending()));
@@ -104,11 +104,11 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
         }
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;)V",
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;)V",
             shift = At.Shift.AFTER), require = 1)
     private static void onFinishedMoving2(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
         BlockState movedState = blockEntity.getMovedState();
-        if (!level.isClientSide && movedState.getBlock() instanceof IPistonMotionReact pr) {
+        if (!level.isClientSide() && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,
                     new ClientBoundOnPistonMovedBlockMessage(pos, movedState,
                             blockEntity.getDirection(), blockEntity.isExtending()));

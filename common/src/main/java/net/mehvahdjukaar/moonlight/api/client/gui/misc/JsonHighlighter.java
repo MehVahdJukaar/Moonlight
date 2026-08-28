@@ -4,11 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 
 import java.util.Arrays;
 
-/**
- * Tiny JSON colorer, one line at a time, for SyntaxEditBox. Pretty printed JSON keeps every string on its own line,
- * so reading each line on its own is enough: strings, numbers, true/false/null and the brackets and commas each get
- * their own color.
- */
+/** Line by line JSON highlighter for SyntaxEditBox. */
 public final class JsonHighlighter implements SyntaxHighlighter {
 
     public static final JsonHighlighter INSTANCE = new JsonHighlighter();

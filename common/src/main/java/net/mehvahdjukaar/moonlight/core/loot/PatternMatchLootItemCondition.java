@@ -2,12 +2,10 @@ package net.mehvahdjukaar.moonlight.core.loot;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -29,8 +27,8 @@ public record PatternMatchLootItemCondition(List<Pattern> patterns) implements L
     }
 
     @Override
-    public LootItemConditionType getType() {
-        return MoonlightRegistry.PATTERN_MATCH_CONDITION.get();
+    public MapCodec<? extends LootItemCondition> codec() {
+        return CODEC;
     }
 
 }

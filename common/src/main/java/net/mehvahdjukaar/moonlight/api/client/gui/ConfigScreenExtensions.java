@@ -1,11 +1,11 @@
 package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public final class ConfigScreenExtensions {
 
     public interface Overlay {
-        void render(GuiGraphics graphics, Panel panel, int mouseX, int mouseY, float partialTick);
+        void render(GuiGraphicsExtractor graphics, Panel panel, int mouseX, int mouseY, float partialTick);
 
         default boolean mouseClicked(Panel panel, double mouseX, double mouseY, int button) {
             return false;
@@ -68,19 +68,19 @@ public final class ConfigScreenExtensions {
         return SHOWCASES.get(modId);
     }
 
-    private static final Map<ResourceLocation, Supplier<ItemStack>> ICON_OVERRIDES = new HashMap<>();
+    private static final Map<Identifier, Supplier<ItemStack>> ICON_OVERRIDES = new HashMap<>();
 
     /**
      * Ties a config icon(...) id to a stack of your choice instead of the usual item/block lookup. Call it after
      * registries are frozen.
      */
-    public static void registerIcon(ResourceLocation id, Supplier<ItemStack> stack) {
+    public static void registerIcon(Identifier id, Supplier<ItemStack> stack) {
         ICON_OVERRIDES.put(id, stack);
     }
 
     @ApiStatus.Internal
     @Nullable
-    public static Supplier<ItemStack> iconOverride(ResourceLocation id) {
+    public static Supplier<ItemStack> iconOverride(Identifier id) {
         return ICON_OVERRIDES.get(id);
     }
 

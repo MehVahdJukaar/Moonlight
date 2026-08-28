@@ -7,7 +7,7 @@ import net.mehvahdjukaar.moonlight.api.util.FilesHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
@@ -26,7 +26,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public void addResource(ResourceLocation id, byte[] bytes) {
+    public void addResource(Identifier id, byte[] bytes) {
         try {
             // Write to the actual resource file path (not the root directory)
             Path resPath = RPUtils.getResourcePath(this.path, id, this.packType);
@@ -37,7 +37,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
     }
 
     @Override
-    public void removeResource(ResourceLocation id) {
+    public void removeResource(Identifier id) {
         Path resPath = RPUtils.getResourcePath(this.path, id, this.packType);
         try {
             deleteRecursively(resPath);

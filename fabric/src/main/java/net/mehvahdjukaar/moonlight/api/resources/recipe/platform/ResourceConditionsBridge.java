@@ -6,17 +6,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
-import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ResourceConditionsBridge {
 
@@ -25,7 +22,6 @@ public class ResourceConditionsBridge {
         try {
             ResourceConditions.register(ModLoadedCondition.TYPE);
             ResourceConditions.register(TagEmptyCondition.TYPE);
-            ResourceConditions.register(FALSE_TYPE);
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to register fabric conditions", e);
         }
@@ -38,7 +34,7 @@ public class ResourceConditionsBridge {
 
 
         public static final ResourceConditionType<ModLoadedCondition> TYPE = ResourceConditionType.create(
-                ResourceLocation.parse("fabric:mod_loaded"), ModLoadedCondition.CODEC);
+                Identifier.parse("fabric:mod_loaded"), ModLoadedCondition.CODEC);
 
         @Override
         public ResourceConditionType<?> getType() {
@@ -46,7 +42,7 @@ public class ResourceConditionsBridge {
         }
 
         @Override
-        public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+        public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryLookup) {
             return PlatHelper.isModLoaded(modIds);
         }
     }
@@ -58,7 +54,7 @@ public class ResourceConditionsBridge {
 
 
         public static final ResourceConditionType<TagEmptyCondition> TYPE = ResourceConditionType.create(
-                ResourceLocation.parse("fabric:tag_empty"), TagEmptyCondition.CODEC);
+                Identifier.parse("fabric:tag_empty"), TagEmptyCondition.CODEC);
 
         @Override
         public ResourceConditionType<?> getType() {
@@ -66,32 +62,17 @@ public class ResourceConditionsBridge {
         }
 
         @Override
-        public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+        public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryLookup) {
             if (registryLookup == null) {
                 //not ideal... idk why registryLookup would be null... dub fabric as usual
+                //no static tag view to fall back on, so we just fail the check
                 Moonlight.LOGGER.error("Registry Lookup was null, failing tag_empty resource condition check");
-                return !ResourceConditionsImpl.tagsPopulated(tag.registry().location(), List.of(tag.location()));
+                return false;
             }
-            var opt = registryLookup.lookupOrThrow(Registries.ITEM).get(tag);
+            var opt = registryLookup.lookup(Registries.ITEM)
+                    .flatMap(info -> info.getter().get(tag));
             return opt.isEmpty() || opt.get().stream().findAny().isEmpty();
         }
     }
-
-
-    public static final ResourceCondition FALSE = new ResourceCondition() {
-
-        @Override
-        public ResourceConditionType<?> getType() {
-            return FALSE_TYPE;
-        }
-
-        @Override
-        public boolean test(HolderLookup.@Nullable Provider registryLookup) {
-            return false;
-        }
-    };
-
-    public static final ResourceConditionType<ResourceCondition> FALSE_TYPE = ResourceConditionType.create(
-            ResourceLocation.parse("fabric:false"), MapCodec.unit(FALSE));
 
 }

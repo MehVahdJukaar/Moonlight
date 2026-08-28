@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.mehvahdjukaar.moonlight.api.worldgen.ISpecialSpawnsStructure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -24,12 +24,12 @@ public class ChunkGeneratorMixin {
 
     @Inject(method = "getMobsAt", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/levelgen/structure/Structure;spawnOverrides()Ljava/util/Map;"), cancellable = true)
-    private void ml$getSpecialSpawnsOverrides(Holder<Biome> biome, StructureManager structureManager, MobCategory category, BlockPos pos, CallbackInfoReturnable<WeightedRandomList<MobSpawnSettings.SpawnerData>> cir,
+    private void ml$getSpecialSpawnsOverrides(Holder<Biome> biome, StructureManager structureManager, MobCategory category, BlockPos pos, CallbackInfoReturnable<WeightedList<MobSpawnSettings.SpawnerData>> cir,
                                               @Local Structure structure, @Local Map.Entry<Structure, LongSet> entry) {
 
         LongSet chunkPosReferences = entry.getValue();
         if (structure instanceof ISpecialSpawnsStructure sps) {
-            WeightedRandomList<MobSpawnSettings.SpawnerData> specialSpawns = sps.ml$getSpecialSpawns(
+            WeightedList<MobSpawnSettings.SpawnerData> specialSpawns = sps.ml$getSpecialSpawns(
                     structureManager, structure, pos, chunkPosReferences, category);
             if (specialSpawns != null) {
                 cir.setReturnValue(specialSpawns);

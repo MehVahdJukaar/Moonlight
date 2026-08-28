@@ -122,7 +122,7 @@ public class ConfigHelper {
      * @param defaultSupplier The default instance of your config field. The given codec must be able to serialize this;
      *                        if it cannot, an exception will be intentionally thrown the first time the config attempts to load.
      *                        If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
-     * @return A reload-sensitive wrapper around your config object value. Use ConfigObject#get to get the most up-to-date object.
+     * @return A reload-sensitive wrapper around your config object value. Use ConfigObject.get to get the most up-to-date object.
      */
     public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
         return defineObject(builder, name, codec, defaultSupplier, ConfigMetadata.NONE);
@@ -231,7 +231,7 @@ public class ConfigHelper {
     }
 
     /**
-     * DynamicOps for using {@link Codec}s to load objects from configs.
+     * DynamicOps for using Codecs to load objects from configs.
      * Particularly helpful for loading maps or maplike objects.
      */
     public static class TomlConfigOps implements DynamicOps<Object> {

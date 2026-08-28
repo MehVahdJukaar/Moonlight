@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util;
 
 import com.google.common.base.Suppliers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public interface INamedSupplier<T> extends Supplier<T> {
 
     @Nullable
-    ResourceLocation getId();
+    Identifier getId();
 
     @Nullable
     T get();
@@ -22,11 +22,11 @@ public interface INamedSupplier<T> extends Supplier<T> {
         return t;
     }
 
-    static <T> INamedSupplier<T> memoize(ResourceLocation id, Supplier<T> supp) {
+    static <T> INamedSupplier<T> memoize(Identifier id, Supplier<T> supp) {
         var instance = Suppliers.memoize(supp::get);
         return new INamedSupplier<>() {
             @Override
-            public ResourceLocation getId() {
+            public Identifier getId() {
                 return id;
             }
 
