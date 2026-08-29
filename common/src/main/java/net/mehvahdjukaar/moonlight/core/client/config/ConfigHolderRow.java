@@ -27,14 +27,18 @@ class ConfigHolderRow extends ConfigListRow {
     private final Component subtitle;
     private final Identifier icon;
     private final List<AbstractWidget> children;
+    @Nullable
+    private final Component unavailableReason;
 
-    ConfigHolderRow(Component label, @Nullable Component subtitle,
-                    Identifier icon, Runnable onClick) {
+    ConfigHolderRow(Component label, @Nullable Component subtitle, Identifier icon,
+                    @Nullable Component unavailableReason, Runnable onClick) {
         this.label = label;
         this.subtitle = subtitle;
         this.icon = icon;
+        this.unavailableReason = unavailableReason;
         this.button = Button.builder(Component.empty(), b -> onClick.run())
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
+        this.button.active = unavailableReason == null;
         this.children = List.of(button);
     }
 
@@ -54,14 +58,19 @@ class ConfigHolderRow extends ConfigListRow {
         int editX = left + width - 8 - ROW_ICON;
         int textRight = editX - GAP;
 
+        boolean available = this.unavailableReason == null;
+        int labelColor = available ? CATEGORY : DESCRIPTION;
+        int subtitleColor = available ? TEXT : DISABLED;
+
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
         if (subtitle != null) {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, labelColor);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, subtitleColor);
         } else {
-            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, CATEGORY);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, labelColor);
         }
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.EDIT, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, available ? MoonlightIcons.EDIT : MoonlightIcons.NO,
+                editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
     }
 
     @Override
@@ -77,6 +86,6 @@ class ConfigHolderRow extends ConfigListRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        return null;
+        return unavailableReason;
     }
 }

@@ -227,10 +227,6 @@ public class ClientHelperImpl {
         return false;
     }
 
-    public static boolean hasHiddenPerWorldConfig(String modId) {
-        return false;
-    }
-
     public static void addClientSetup(Runnable clientSetup) {
         Moonlight.assertInitPhase();
 

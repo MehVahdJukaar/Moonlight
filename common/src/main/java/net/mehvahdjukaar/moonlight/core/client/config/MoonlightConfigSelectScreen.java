@@ -75,8 +75,8 @@ public class MoonlightConfigSelectScreen extends Screen {
     @Nullable
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable Identifier background) {
         if (holders.isEmpty()) return null;
-        // skip the list for a lone config unless an overlay or showcase needs this screen
-        if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
+        if (holders.size() == 1 && ConfigAvailability.of(holders.getFirst()).isEditable()
+                && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
                 && ConfigScreenExtensions.showcaseFor(modId) == null
                 && !ConfigScreenExtensions.hasFooterExtras(modId)) {
             return holders.getFirst().makeScreen(parent, background);
@@ -121,7 +121,8 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(TextHelper.getReadableName(h.getId().getPath()));
             Component subtitle = Component.literal(h.getFileName());
-            rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()),
+            ConfigAvailability availability = ConfigAvailability.of(h);
+            rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()), availability.reason(),
                     () -> this.minecraft.setScreen(h.makeScreen(this, background))));
         }
         this.list.setRows(rows);

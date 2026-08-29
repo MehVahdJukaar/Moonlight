@@ -35,6 +35,8 @@
   "gui.moonlight.config.list_remove": "Remove entry",
   "gui.moonlight.config.list_entry": "Entry %s",
   "gui.moonlight.config.edit": "Edit",
+  "gui.moonlight.config.unavailable.not_in_world": "This config belongs to a world. Load a world to edit it.",
+  "gui.moonlight.config.unavailable.server_controlled": "This config is set by the server you are connected to.",
   "gui.moonlight.config.reload.world": "Requires world reload",
   "gui.moonlight.config.reload.game": "Requires game restart",
   "gui.moonlight.config.json_hint": "Enter JSON…",
@@ -234,5 +236,14 @@
   "moonlight.configuration.general.convert_foreign_configs": "Convert Foreign Configs",
   "moonlight.configuration.general.convert_foreign_configs.description": "Also show tiles for other mods that don't use Moonlight and render their config directly in Moonlight's own screen (NeoForge only). Best-effort: options Moonlight can't represent are left to the mod's own screen. Implies show_all_mod_configs for the tile grid",
   "moonlight.configuration.general.config_item_carousel": "Config Item Carousel",
-  "moonlight.configuration.general.config_item_carousel.description": "Show a slowly panning strip of a mod's items on its config screen"
+  "moonlight.configuration.general.config_item_carousel.description": "Show a slowly panning strip of a mod's items on its config screen",
+  "moonlight.configuration.config_screen": "Config Screen",
+  "moonlight.configuration.config_screen.custom_config_screen": "Custom Config Screen",
+  "moonlight.configuration.config_screen.custom_config_screen.description": "Use Moonlight's config screen. When off, configs open the loader's screen instead: NeoForge's own (or Configured). Fabric has no such screen, so there configs can't be edited in game",
+  "moonlight.configuration.config_screen.show_all_mod_configs": "Show All Mod Configs",
+  "moonlight.configuration.config_screen.show_all_mod_configs.description": "Give every installed mod with a config screen a tile, not just the ones using Moonlight. Their own screen opens when clicked",
+  "moonlight.configuration.config_screen.convert_foreign_configs": "Convert Foreign Configs",
+  "moonlight.configuration.config_screen.convert_foreign_configs.description": "Draw other mods' configs inside Moonlight's screen instead of theirs (NeoForge only). GENERIC_ONLY covers just the mods that never wrote a screen of their own, ALWAYS covers every mod. Per world server configs are only shown while a world is open. Best effort: options we can't show are left as they are",
+  "moonlight.configuration.config_screen.config_item_carousel": "Config Item Carousel",
+  "moonlight.configuration.config_screen.config_item_carousel.description": "Show a slowly panning strip of a mod's items on its config screen"
 }
