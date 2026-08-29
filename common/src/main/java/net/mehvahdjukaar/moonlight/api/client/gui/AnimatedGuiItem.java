@@ -25,16 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
 
-/**
- * Draws an item in a GUI with a 3D transform and an optional tint. Each distinct item costs an offscreen
- * render target, so use it sparingly. Call register once during client setup.
- */
 public final class AnimatedGuiItem {
 
-    /**
-     * Applied inside the item's own display transform, so a rotation spins the model about its own axis.
-     * blockModel is true when the item renders as a 3D block instead of a flat sprite.
-     */
     @FunctionalInterface
     public interface Transform {
         void apply(Matrix4f pose, boolean blockModel);
@@ -44,13 +36,10 @@ public final class AnimatedGuiItem {
         ClientHelper.addPictureInPictureRendererRegistration(event -> event.register(State.class, Renderer::new));
     }
 
-    /** A tint of -1 leaves the colors alone. */
     public static void submit(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y, int size,
                               int tint, Transform transform) {
         if (stack.isEmpty()) return;
-        // target is twice the icon so a spinning block doesn't clip on its diagonal
         int pad = size / 2;
-        // neoforge adds submitPictureInPictureRenderState/peekScissorStack for this, vanilla has neither
         graphics.guiRenderState.addPicturesInPictureState(new State(stack, transform, tint,
                 x - pad, y - pad, x + size + pad, y + size + pad, size,
                 new Matrix3x2f(graphics.pose()), graphics.scissorStack.peek()));
@@ -85,7 +74,7 @@ public final class AnimatedGuiItem {
 
         @Override
         protected float getTranslateY(int height, int guiScale) {
-            return height / 2f; // the item sits in the middle of the target, not on its bottom edge
+            return height / 2f;
         }
 
         @Override
@@ -96,8 +85,9 @@ public final class AnimatedGuiItem {
                     mc.level, mc.player, 0);
             boolean blockModel = itemState.usesBlockLight();
 
-            Matrix4f local = new Matrix4f();
+            Matrix4f local = new Matrix4f().translate(0.5f, 0.5f, 0.5f);
             state.transform().apply(local, blockModel);
+            local.translate(-0.5f, -0.5f, -0.5f);
             for (int i = 0; i < itemState.activeLayerCount; i++) {
                 itemState.layers[i].localTransform.mul(local);
             }
@@ -118,7 +108,6 @@ public final class AnimatedGuiItem {
                 super.blitTexture(state, guiRenderState);
                 return;
             }
-            // same blit as super but tinted. premultiplied, so a grey tint darkens evenly
             guiRenderState.addBlitToCurrentLayer(new BlitRenderState(RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
                     TextureSetup.singleTexture(this.textureView, RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
                     state.pose(), state.x0(), state.y0(), state.x1(), state.y1(),

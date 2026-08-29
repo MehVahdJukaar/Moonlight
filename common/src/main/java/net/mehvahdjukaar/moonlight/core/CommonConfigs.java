@@ -32,6 +32,7 @@ public class CommonConfigs {
     public static final Supplier<String> GLOBAL_DATAPACKS_DIR;
     public static final Supplier<Boolean> FASTER_CACHE_SEARCH;
     public static final Supplier<Boolean> MULTI_THREADED_GENERATION;
+    public static final Supplier<Boolean> DUMP_GENERATED_RESOURCES;
 
     public static final ModConfigHolder CONFIG;
 
@@ -60,18 +61,26 @@ public class CommonConfigs {
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.COMMON_SYNCED);
         builder.push("general");
+        GLOBAL_DATAPACKS_DIR = builder.comment("Global datapack folder. A folder where you can store and load datapacks for all your worlds automatically. Set to empty string to disable")
+                .worldReload()
+                .define("global_datapacks_folder", "moonlight-global-datapacks");
+        builder.pop();
+
+        builder.push("dynamic_pack");
+        builder.comment("Settings for the resource and data packs that mods using this library generate at runtime");
         MULTI_THREADED_GENERATION = builder.comment("Enables multi-threaded generation for dynamic assets (if supported). This could improve performance on systems with more cores available.")
                 .define("multi_threaded_generation", true);
+        FASTER_CACHE_SEARCH = builder.comment("Makes the dynamic assets cache use a tree structure for indexing, drastically speeds up query time but could cost some ram.")
+                .define("faster_cache_search", true);
+        DUMP_GENERATED_RESOURCES = builder.comment("Writes every generated pack to ~/.minecraft/debug/generated_resource_pack so you can inspect its files. Always on in a dev environment")
+                .define("dump_generated_resources", false);
         EXTRA_DEBUG = builder.comment("ONLY for debugging purpose. Turns one some debug functionality like more logging or blocktypes_debug.txt, the file can be found in ~/.minecraft/debug/dynamic_registry_dump...")
                 .define("extra_debug", false);
         EXTRA_CHILDREN_DEBUG = builder.comment("Enable this will list each BlockTypes' Children. The List of BlockTypes' children will be also in the same file via EXTRA_DEBUG. NOTE: To enable this, EXTRA_DEBUG must be enabled, too.")
                 .define("extra_children_debug", false);
-        FASTER_CACHE_SEARCH = builder.comment("Makes the dynamic assets cache use a tree structure for indexing, drastically speeds up query time but could cost some ram.")
-                .define("faster_cache_search", true);
-        GLOBAL_DATAPACKS_DIR = builder.comment("Global datapack folder. A folder where you can store and load datapacks for all your worlds automatically. Set to empty string to disable")
-                .worldReload()
-                .define("global_datapacks_folder", "moonlight-global-datapacks");
+        builder.pop();
 
+        builder.push("general");
 
         if (PlatHelper.isDev()) {
             // Dev only playground for the native config screen: one of every control type, plus a check that

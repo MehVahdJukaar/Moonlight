@@ -24,9 +24,12 @@ public class ClientConfigs {
 
     static {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.MOD_ID, ConfigType.CLIENT);
-        builder.push("general");
+        builder.push("dynamic_pack");
         MERGE_PACKS = builder.comment("Merge all dynamic resource packs from all mods that use this library into a single pack")
                 .define("merge_dynamic_resource_packs", true);
+        builder.pop();
+
+        builder.push("general");
         LAZY_MAP_DATA = builder.comment("Prevents map texture from being upladed to GPU when only map markers have changed." +
                         "Could increase performance")
                 .define("lazy_map_upload", true);

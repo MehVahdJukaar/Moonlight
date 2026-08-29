@@ -202,7 +202,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
 
 
     protected boolean generateDebugResources() {
-        return PlatHelper.isDev();
+        return PlatHelper.isDev() || CommonConfigs.DUMP_GENERATED_RESOURCES.get();
     }
 
     protected abstract Collection<String> gatherSupportedNamespaces();
