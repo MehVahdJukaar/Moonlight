@@ -380,12 +380,6 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /** Whether the mod has a per-world server config that can't be read right now because no world is open. */
-    @PlatformImpl
-    public static boolean hasHiddenPerWorldConfig(String modId) {
-        throw new AssertionError();
-    }
-
     /**
      * Pack in /resources/resourcepacks
      */

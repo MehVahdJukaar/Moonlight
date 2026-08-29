@@ -35,6 +35,8 @@
   "gui.moonlight.config.list_remove": "Remove entry",
   "gui.moonlight.config.list_entry": "Entry %s",
   "gui.moonlight.config.edit": "Edit",
+  "gui.moonlight.config.unavailable.not_in_world": "This config belongs to a world. Load a world to edit it.",
+  "gui.moonlight.config.unavailable.server_controlled": "This config is set by the server you are connected to.",
   "gui.moonlight.config.reload.world": "Requires world reload",
   "gui.moonlight.config.reload.game": "Requires game restart",
   "gui.moonlight.config.json_hint": "Enter JSON…",

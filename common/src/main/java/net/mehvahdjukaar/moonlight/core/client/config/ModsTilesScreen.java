@@ -138,7 +138,7 @@ public class ModsTilesScreen extends Screen {
         return switch (ClientConfigs.CONVERT_FOREIGN_CONFIGS.get()) {
             case NEVER -> false;
             case ALWAYS -> true;
-            case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId) && !ClientHelper.hasHiddenPerWorldConfig(modId);
+            case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId);
         };
     }
 

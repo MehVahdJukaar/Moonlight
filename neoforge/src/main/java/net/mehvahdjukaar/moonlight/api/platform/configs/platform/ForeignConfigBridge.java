@@ -79,19 +79,11 @@ public final class ForeignConfigBridge {
         }
     }
 
-    public static boolean hasHiddenPerWorldConfig(String modId) {
-        for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
-            if (mc.getType() != ModConfig.Type.SERVER) continue;
-            if (!(mc.getSpec() instanceof ModConfigSpec spec) || !spec.isLoaded()) return true;
-        }
-        return false;
-    }
-
-    // cheap check, no tree building: does this mod expose a loaded, non-Moonlight spec?
     public static boolean hasConfig(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
-            if (mc.getSpec() instanceof ModConfigSpec spec && spec.isLoaded() && !spec.isEmpty()) return true;
+            if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
+            if (!spec.isLoaded() || !spec.isEmpty()) return true;
         }
         return false;
     }
@@ -103,8 +95,13 @@ public final class ForeignConfigBridge {
             // skip anything Moonlight itself created: those already have a real holder and native screen
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
             if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
-            // can't safely read/write an unloaded spec (e.g. a server config with no world open)
-            if (!spec.isLoaded()) continue;
+            // an unloaded spec (a server config with no world open) has no values to walk. List it anyway, with an
+            // empty tree: the select screen greys the row out and says why, instead of hiding the config entirely
+            if (!spec.isLoaded()) {
+                out.add(new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec,
+                        new ConfigCategory(Component.empty()), nameFor(modId, mc)));
+                continue;
+            }
             try {
                 ForeignConfigHolder holder = CACHE.get(mc);
                 if (holder == null) {
@@ -120,19 +117,29 @@ public final class ForeignConfigBridge {
     }
 
     private static ForeignConfigHolder build(String modId, ModConfig mc, ModConfigSpec spec) {
-        ConfigType type = switch (mc.getType()) {
+        ConfigCategory root = new ConfigCategory(Component.empty());
+        walk(spec, spec.getValues(), List.of(), root);
+        return new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec, root, nameFor(modId, mc));
+    }
+
+    private static ConfigType typeFor(ModConfig mc) {
+        return switch (mc.getType()) {
             case CLIENT -> ConfigType.CLIENT;
             case SERVER -> ConfigType.COMMON_SYNCED; // world bound, so it gets the server paper icon
             default -> ConfigType.COMMON;
         };
-        String typeName = mc.getType().name().toLowerCase(Locale.ROOT);
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, typeName);
+    }
 
-        ConfigCategory root = new ConfigCategory(Component.empty());
-        walk(spec, spec.getValues(), List.of(), root);
+    private static ResourceLocation idFor(String modId, ModConfig mc) {
+        return ResourceLocation.fromNamespaceAndPath(modId, typeName(mc));
+    }
 
-        Component name = Component.literal(PlatHelper.getModName(modId) + " - " + TextHelper.getReadableName(typeName));
-        return new ForeignConfigHolder(id, type, spec, root, name);
+    private static Component nameFor(String modId, ModConfig mc) {
+        return Component.literal(PlatHelper.getModName(modId) + " - " + TextHelper.getReadableName(typeName(mc)));
+    }
+
+    private static String typeName(ModConfig mc) {
+        return mc.getType().name().toLowerCase(Locale.ROOT);
     }
 
     private static void walk(ModConfigSpec spec, UnmodifiableConfig config, List<String> path, ConfigCategory parent) {

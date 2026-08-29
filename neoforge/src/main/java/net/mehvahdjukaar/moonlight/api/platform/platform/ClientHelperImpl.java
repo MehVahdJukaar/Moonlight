@@ -48,7 +48,6 @@ import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.locating.IModFile;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -274,11 +273,6 @@ public class ClientHelperImpl {
 
     public static boolean hasOnlyGenericConfigScreen(String modId) {
         return ForeignConfigBridge.hasOnlyGenericScreen(modId);
-    }
-
-    @ApiStatus.Internal
-    public static boolean hasHiddenPerWorldConfig(String modId) {
-        return ForeignConfigBridge.hasHiddenPerWorldConfig(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {

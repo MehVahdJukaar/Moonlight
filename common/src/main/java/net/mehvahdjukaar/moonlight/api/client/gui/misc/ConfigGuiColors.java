@@ -19,6 +19,7 @@ public final class ConfigGuiColors {
     public static final int TEXT = chat(ChatFormatting.WHITE);
     public static final int TEXT_SECONDARY = chat(ChatFormatting.GRAY);
     public static final int DESCRIPTION = chat(ChatFormatting.GRAY);
+    public static final int DISABLED = chat(ChatFormatting.DARK_GRAY);
     public static final int ERROR = chat(ChatFormatting.RED);
     public static final int TITLE = chat(ChatFormatting.GOLD);
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);

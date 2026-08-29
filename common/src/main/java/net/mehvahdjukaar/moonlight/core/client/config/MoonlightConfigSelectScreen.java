@@ -75,8 +75,9 @@ public class MoonlightConfigSelectScreen extends Screen {
     public static Screen create(String modId, List<ModConfigHolder> holders, Screen parent, @Nullable ResourceLocation background) {
         if (holders.isEmpty()) return null;
         // a lone config doesn't need a list to pick from, unless an overlay, showcase or footer button would be
-        // lost along with it
-        if (holders.size() == 1 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
+        // lost along with it. An unavailable config keeps the list too, so its greyed out row can say why
+        if (holders.size() == 1 && ConfigAvailability.of(holders.getFirst()).isEditable()
+                && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
                 && ConfigScreenExtensions.showcaseFor(modId) == null
                 && !ConfigScreenExtensions.hasFooterExtras(modId)) {
             return holders.getFirst().makeScreen(parent, background);
@@ -121,7 +122,8 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(TextHelper.getReadableName(h.getId().getPath()));
             Component subtitle = Component.literal(h.getFileName());
-            rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()),
+            ConfigAvailability availability = ConfigAvailability.of(h);
+            rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()), availability.reason(),
                     () -> this.minecraft.setScreen(h.makeScreen(this, background))));
         }
         this.list.setRows(rows);

@@ -34,8 +34,13 @@ public class ForeignConfigHolder extends ModConfigHolder {
     }
 
     @Override
+    public boolean isLoaded() {
+        return spec.isLoaded();
+    }
+
+    @Override
     public void forceLoad() {
-        // the owning mod already loaded it; the bridge only ever mirrors an already-loaded spec
+        // the owning mod owns the loading. A world bound spec only shows up as a disabled row until it does
     }
 
     @Override
@@ -57,6 +62,7 @@ public class ForeignConfigHolder extends ModConfigHolder {
     @Override
     @OnlyIn(Dist.CLIENT)
     public Screen makeScreen(Screen parent, @Nullable ResourceLocation background) {
+        if (!this.isLoaded()) return null;
         return new MoonlightConfigScreen(this, root, parent, background);
     }
 }
