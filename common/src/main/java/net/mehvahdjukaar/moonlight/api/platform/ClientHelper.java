@@ -8,6 +8,9 @@ import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
 import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
@@ -287,6 +290,21 @@ public class ClientHelper {
     @PlatformImpl
     public static Path getModIcon(String modId) {
         throw new AssertionError();
+    }
+
+    /**
+     * Builds the Moonlight native screen for a single config file. When the player turned Moonlight's config screens
+     * off this hands over to whatever screen the loader registered for that mod (NeoForge's extension point, or Mod
+     * Menu on Fabric). Null when neither is available or the config isn't loaded yet.
+     */
+    @Nullable
+    public static Screen makeConfigScreen(ModConfigHolder holder, Screen parent, @Nullable Identifier background) {
+        if (!holder.isLoaded()) return null;
+        if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
+            return getModConfigScreen(holder.getModId(), parent);
+        }
+        ConfigCategory root = holder.getConfigRoot();
+        return root == null ? null : MoonlightConfigScreen.create(holder, root, parent, background);
     }
 
     @Nullable

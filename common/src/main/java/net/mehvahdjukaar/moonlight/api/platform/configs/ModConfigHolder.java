@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs;
 
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
@@ -9,7 +8,6 @@ import net.minecraft.server.packs.PackType;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -143,16 +141,6 @@ public abstract class ModConfigHolder {
     }
 
     public abstract void loadFromBytes(InputStream stream, boolean readOnly);
-
-    @Nullable
-    @ClientOnly
-    public Screen makeScreen(Screen parent) {
-        return makeScreen(parent, null);
-    }
-
-    @Nullable
-    @ClientOnly
-    public abstract Screen makeScreen(Screen parent, @Nullable Identifier background);
 
     @Nullable
     public ConfigCategory getConfigRoot() {

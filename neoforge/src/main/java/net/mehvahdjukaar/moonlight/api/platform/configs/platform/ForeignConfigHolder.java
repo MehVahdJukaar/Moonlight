@@ -3,12 +3,8 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
@@ -55,14 +51,5 @@ public class ForeignConfigHolder extends ModConfigHolder {
 
     @Override
     public void loadFromBytes(InputStream stream, boolean readOnly) {
-        // foreign holders are never synced, so nothing ever pushes bytes at them
-    }
-
-    @Nullable
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public Screen makeScreen(Screen parent, @Nullable Identifier background) {
-        if (!this.isLoaded()) return null;
-        return new MoonlightConfigScreen(this, root, parent, background);
     }
 }

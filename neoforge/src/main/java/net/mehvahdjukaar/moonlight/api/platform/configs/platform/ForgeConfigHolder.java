@@ -11,15 +11,10 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
 import net.minecraft.util.Util;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ConfigTracker;
@@ -28,7 +23,6 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -131,21 +125,6 @@ public final class ForgeConfigHolder extends ModConfigHolder {
     @Override
     public ConfigCategory getConfigRoot() {
         return configRoot;
-    }
-
-    @Nullable
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public Screen makeScreen(Screen parent, @Nullable Identifier background) {
-        if (ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) {
-            var root = getConfigRoot();
-            return root == null ? null : new MoonlightConfigScreen(this, root, parent, background);
-        }
-        // custom screen disabled: defer to whatever config screen the loader (NeoForge / Configured) registered
-        return ModList.get().getModContainerById(this.getModId())
-                .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
-                        .map(factory -> factory.createScreen(container, parent)))
-                .orElse(null);
     }
 
     @ApiStatus.Internal

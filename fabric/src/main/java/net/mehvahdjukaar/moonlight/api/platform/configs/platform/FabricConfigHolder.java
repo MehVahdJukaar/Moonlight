@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -14,10 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
-import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -122,15 +117,6 @@ public final class FabricConfigHolder extends ModConfigHolder {
     public ConfigCategory getConfigRoot() {
         this.forceLoad();
         return configRoot;
-    }
-
-    @Override
-    @Environment(value = EnvType.CLIENT)
-    public Screen makeScreen(Screen parent, Identifier background) {
-        // fabric has no loader-side config screen to fall back on, so a disabled custom screen means no screen
-        if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) return null;
-        ConfigCategory root = getConfigRoot();
-        return root == null ? null : MoonlightConfigScreen.create(this, root, parent, background);
     }
 
     @Override

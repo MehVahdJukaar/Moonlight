@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
@@ -79,7 +80,7 @@ public class MoonlightConfigSelectScreen extends Screen {
                 && ConfigScreenExtensions.overlaysFor(modId).isEmpty()
                 && ConfigScreenExtensions.showcaseFor(modId) == null
                 && !ConfigScreenExtensions.hasFooterExtras(modId)) {
-            return holders.getFirst().makeScreen(parent, background);
+            return ClientHelper.makeConfigScreen(holders.getFirst(), parent, background);
         }
         return new MoonlightConfigSelectScreen(modId, holders, parent, background);
     }
@@ -123,7 +124,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             Component subtitle = Component.literal(h.getFileName());
             ConfigAvailability availability = ConfigAvailability.of(h);
             rows.add(new ConfigHolderRow(label, subtitle, configFileIcon(h.getConfigType()), availability.reason(),
-                    () -> this.minecraft.setScreen(h.makeScreen(this, background))));
+                    () -> this.minecraft.setScreen(ClientHelper.makeConfigScreen(h, this, background))));
         }
         this.list.setRows(rows);
         this.addRenderableWidget(this.list);
