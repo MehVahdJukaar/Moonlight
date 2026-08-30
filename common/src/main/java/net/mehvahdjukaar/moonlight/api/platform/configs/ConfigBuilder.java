@@ -108,12 +108,19 @@ public abstract class ConfigBuilder {
         Moonlight.addDependent(name.getNamespace());
     }
 
-    public final ModConfigHolder build() {
+    public final ModConfigHolder build(boolean collectTranslations) {
         flushPendingComment(); // a trailing after-comment has no define to claim it
         ModConfigHolder holder = buildHolder();
         holder.setFeatureToggles(getFeatureToggles());
+        if (collectTranslations) {
+            holder.setTranslationMap(translations, moonlightNames);
+        }
         ConfigLangExporter.exportInDev(name.getNamespace(), translations, moonlightNames);
         return holder;
+    }
+
+    public final ModConfigHolder build() {
+        return build(false);
     }
 
     private static String moonlightNamedKey(String name) {
