@@ -1,10 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.mehvahdjukaar.moonlight.api.item.ClientAnimationExtension;
 import net.mehvahdjukaar.moonlight.api.item.IThirdPersonSpecialItemRenderer;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
@@ -26,13 +28,16 @@ public abstract class PlayerItemInHandLayerMixin<S extends AvatarRenderState, M 
         super(renderLayerParent);
     }
 
-    @Inject(method = "submitArmWithItem", at = @At(value = "HEAD"), cancellable = true)
+    @SuppressWarnings("unchecked")
+    @Inject(method = "submitArmWithItem*", at = @At(value = "HEAD"), cancellable = true)
     private void moonlight$specialThirdPersonRenderer(S state, ItemStackRenderState item, ItemStack stack, HumanoidArm arm,
                                                       PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
                                                       int light, CallbackInfo ci) {
-        IThirdPersonSpecialItemRenderer provider = IThirdPersonSpecialItemRenderer.get(stack.getItem());
-        if (provider != null) {
-            provider.renderThirdPersonItem(this.getParentModel(), state, stack, arm, poseStack, submitNodeCollector, light);
+        ClientAnimationExtension ext = ClientAnimationExtension.get(stack.getItem());
+        IThirdPersonSpecialItemRenderer provider = ext == null ? null : ext.thirdPersonRenderer();
+        if (provider != null && this.getParentModel() instanceof HumanoidModel<?> model) {
+            provider.renderThirdPersonItem((HumanoidModel<AvatarRenderState>) model, state, stack, arm,
+                    poseStack, submitNodeCollector, light);
             ci.cancel();
         }
     }

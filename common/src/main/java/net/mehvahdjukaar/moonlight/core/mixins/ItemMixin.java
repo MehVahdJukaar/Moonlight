@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.item.ClientAnimationExtension;
 import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacement;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -34,7 +33,6 @@ public abstract class ItemMixin implements IExtendedItem {
     @Nullable
     private AdditionalItemPlacement moonlight$additionalBehavior;
 
-    @ClientOnly
     @Nullable
     @Unique
     ClientAnimationExtension moonlight$clientAnimationProvider;

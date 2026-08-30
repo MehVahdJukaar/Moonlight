@@ -6,9 +6,12 @@ import net.mehvahdjukaar.moonlight.core.misc.IExtendedItem;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 /**
- * Client only animation and rendering hooks attached to an item, one slot per interface. Use this instead of
- * implementing the interfaces on an item class that is common code.
+ * Client only animation and rendering hooks attached to an item, one slot per interface. The hook interfaces
+ * mention client classes in their signatures, so they must never be implemented by an item class: write a separate
+ * class for them and attach it here.
  */
 public final class ClientAnimationExtension {
 
@@ -21,9 +24,13 @@ public final class ClientAnimationExtension {
     @Nullable
     private IThirdPersonSpecialItemRenderer thirdPersonRenderer;
 
-    /** The object fills every slot whose interface it implements. Does nothing on a dedicated server. */
-    public static void attach(Item item, Object extension) {
+    /**
+     * The supplied object fills every slot whose interface it implements. Does nothing on a dedicated server, where
+     * the supplier is never called - pass a lambda so the extension class is only loaded on a physical client.
+     */
+    public static void attach(Item item, Supplier<Object> extensionSupplier) {
         if (!PlatHelper.getPhysicalSide().isClient()) return;
+        Object extension = extensionSupplier.get();
         IExtendedItem extendedItem = (IExtendedItem) item;
         ClientAnimationExtension ext = extendedItem.moonlight$getClientAnimationExtension();
         if (ext == null) {

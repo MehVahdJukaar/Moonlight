@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.core.network.platform;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
@@ -129,7 +128,6 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.extraBuf.clear();
     }
 
-    @ClientOnly
     private void clientSideStuff(Level world, Entity e) {
         ((ClientLevel) world).addEntity(e);
     }

@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.mehvahdjukaar.moonlight.api.item.ClientAnimationExtension;
 import net.mehvahdjukaar.moonlight.api.item.IFirstPersonAnimationProvider;
 import net.mehvahdjukaar.moonlight.api.item.IFirstPersonSpecialItemRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -26,7 +27,8 @@ public abstract class ItemInHandRendererMixin {
                                       InteractionHand hand, float swingProgress, ItemStack stack,
                                       float handHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
                                       int combinedLight, CallbackInfo ci) {
-        IFirstPersonAnimationProvider provider = IFirstPersonAnimationProvider.get(stack.getItem());
+        ClientAnimationExtension ext = ClientAnimationExtension.get(stack.getItem());
+        IFirstPersonAnimationProvider provider = ext == null ? null : ext.firstPersonAnimation();
         if (provider != null) {
             boolean mainHanded = hand == InteractionHand.MAIN_HAND;
             HumanoidArm arm = mainHanded ? player.getMainArm() : player.getMainArm().getOpposite();
@@ -42,7 +44,8 @@ public abstract class ItemInHandRendererMixin {
                                         float swingProgress, ItemStack stack, float equippedProgress,
                                         PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int combinedLight, CallbackInfo ci,
                                         @Local HumanoidArm arm) {
-        IFirstPersonSpecialItemRenderer provider = IFirstPersonSpecialItemRenderer.get(stack.getItem());
+        ClientAnimationExtension ext = ClientAnimationExtension.get(stack.getItem());
+        IFirstPersonSpecialItemRenderer provider = ext == null ? null : ext.firstPersonRenderer();
         if (provider != null) {
             if (provider.renderFirstPersonItem(player, stack, hand, arm, poseStack, partialTicks, pitch, swingProgress, equippedProgress,
                     submitNodeCollector, combinedLight, (ItemInHandRenderer) (Object) this)) {

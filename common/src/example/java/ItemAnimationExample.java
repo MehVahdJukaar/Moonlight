@@ -1,74 +1,29 @@
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.mehvahdjukaar.moonlight.api.item.IFirstPersonAnimationProvider;
-import net.mehvahdjukaar.moonlight.api.item.IThirdPersonAnimationProvider;
-import net.mehvahdjukaar.moonlight.api.item.IThirdPersonSpecialItemRenderer;
-import net.minecraft.client.model.ArmedModel;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.HeadedModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import net.mehvahdjukaar.moonlight.api.item.ClientAnimationExtension;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.consume_effects.UseAnim;
+import net.minecraft.world.entity.LivingEntity;
 
-// Implement these interfaces into your item to control its animation. Only do this in client only classes
-// Alternatively, and for items you don't own, call ClientAnimationExtension.attach(item, object) with an
-// object implementing any number of them
-public class ItemAnimationExample extends Item implements IFirstPersonAnimationProvider, IThirdPersonAnimationProvider, IThirdPersonSpecialItemRenderer {
+// The item itself stays common code. The hooks live in a separate class because their signatures mention client
+// classes, which don't exist on a dedicated server.
+public class ItemAnimationExample extends Item {
+
+    public ItemAnimationExample(Properties properties) {
+        super(properties);
+        // pass a lambda, not a method reference or a ready made instance: on a dedicated server the supplier is
+        // never called, so ItemAnimationExampleRenderer is never loaded there
+        ClientAnimationExtension.attach(this, () -> new ItemAnimationExampleRenderer(this));
+    }
 
     @Override
     public UseAnim getUseAnimation(ItemStack stack) {
-        // Using NONE, so we don't get any other animations onto of this.
-        // SPYGLASS can also be used as it doesn't have arm bob
+        // NONE so we don't get another animation on top of this one.
+        // SPYGLASS works too, it has no arm bob
         return UseAnim.NONE;
-    }
-
-    // First-person animation
-    @Override
-    public void animateItemFirstPerson(Player entity, ItemStack stack, InteractionHand hand, HumanoidArm arm, PoseStack matrixStack, float partialTicks, float pitch, float attackAnim, float handHeight) {
-        if (entity.isUsingItem() && entity.getUseItemRemainingTicks() > 0 && entity.getUsedItemHand() == hand) {
-            float timeLeft = stack.getUseDuration(entity) - (entity.getUseItemRemainingTicks() - partialTicks + 1.0F);
-            matrixStack.translate(0, 0, timeLeft * 0.04F);
-        }
-    }
-
-    // Third-person hand pose
-    @Override
-    public <T extends LivingEntity> boolean poseLeftArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand) {
-        if (entity.getUseItemRemainingTicks() > 0 && entity.getUseItem().getItem() == this) {
-            // Just sets some random angles
-            model.leftArm.yRot = 10;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public <T extends Player, M extends EntityModel<T> & ArmedModel & HeadedModel> void renderThirdPersonItem(M parentModel, LivingEntity entity, ItemStack stack, HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource bufferSource, int light) {
-        // This method mimics hat spyglass do when they render onto the player face instead of its hand. Override to render your item similarly, in player space instead of hand space
-    }
-
-    @Override
-    public <T extends LivingEntity> boolean poseRightArm(ItemStack stack, HumanoidModel<T> model, T entity, HumanoidArm mainHand) {
-        if (entity.getUseItemRemainingTicks() > 0 && entity.getUseItem().getItem() == this) {
-            model.rightArm.yRot = -10;
-            return true;
-        }
-        return false;
     }
 
     @Override
     public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
         return 72000;
     }
-
-    public ItemAnimationExample(Properties properties) {
-        super(properties);
-    }
-
-
 }
