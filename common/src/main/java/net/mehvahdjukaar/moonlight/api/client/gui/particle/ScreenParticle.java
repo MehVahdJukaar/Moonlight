@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.particle;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
@@ -168,10 +169,13 @@ public class ScreenParticle {
         if (this.sprites.isEmpty()) {
             graphics.fill(0, 0, 1, 1, FastColor.ARGB32.color(Mth.floor(alpha * 255), this.tint));
         } else {
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             graphics.setColor(FastColor.ARGB32.red(this.tint) / 255f, FastColor.ARGB32.green(this.tint) / 255f,
                     FastColor.ARGB32.blue(this.tint) / 255f, alpha);
             graphics.blitSprite(this.currentFrame(t), 0, 0, 1, 1);
             graphics.setColor(1, 1, 1, 1);
+            RenderSystem.disableBlend();
         }
         pose.popPose();
     }

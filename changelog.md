@@ -1,3 +1,1 @@
-- hotfix for a bug in last update
-- added ILoomItem, lets nonbanner items be used in a loom and draw their own preview
-- added TabAdderHelper
+- beta: 26.1.2 port. very wip
