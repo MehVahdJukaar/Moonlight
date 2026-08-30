@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -53,6 +54,7 @@ public abstract class ModConfigHolder {
     @Nullable
     private final Runnable changeCallback;
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
+    private Map<String, String> missingTranslations = new LinkedHashMap<>();
 
     protected ModConfigHolder(Identifier id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this(id, fileExtension, configDirectory, type, changeCallback, true);
@@ -86,6 +88,21 @@ public abstract class ModConfigHolder {
 
     public Map<String, Supplier<Boolean>> getFeatureToggles() {
         return this.featureToggles;
+    }
+
+    @ApiStatus.Internal
+    public void setTranslationMap(Map<String, String> translations, Map<String, String> alreadyTranslated) {
+        translations.forEach((key, name) -> {
+            if (!alreadyTranslated.containsKey(key)) this.missingTranslations.put(key, name);
+        });
+    }
+
+    public boolean hasMissingTranslations() {
+        return !this.missingTranslations.isEmpty();
+    }
+
+    public Map<String, String> getMissingTranslations() {
+        return this.missingTranslations;
     }
 
     protected void onRefresh() {
