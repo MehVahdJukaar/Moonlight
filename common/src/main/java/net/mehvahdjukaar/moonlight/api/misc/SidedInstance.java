@@ -16,7 +16,7 @@ import java.util.function.Function;
 // how to do that tho? we need a way we can then retrieve with a RegistryAccess or Level
 // Weak HashMap using HolderLookup.Provider as key? nope those can be subclasses and are very often, leading to more undeded instances
 // so we use a dummy object from one of the registries datapack registires...
-// Weak keys are NOT enough to make this reload safe on their own: almost every instance we store keeps the
+// IMPORTANT: weak keys are NOT enough to make this reload safe on their own: almost every instance we store keeps the
 // provider it was built from, and that provider owns the registry that owns our dummy key, so the value
 // resurrects its own key and the entry can never be collected. That's why clearAll() exists and is called
 // on server stop and client disconnect.
@@ -41,23 +41,18 @@ public class SidedInstance<T> {
         return instance;
     }
 
-    // dropped instances are rebuilt by the factory on the next get(), so this is only ever a cache flush
     @ApiStatus.Internal
     public static void clearAll() {
         for (var i : ALL) i.instances.invalidateAll();
     }
 
-    /**
-     * Drops every instance belonging to one logical side. Use this over {@link #clearAll()} when the other side
-     * is still running, e.g. a client disconnecting from an integrated server that hasn't stopped yet.
-     */
     @ApiStatus.Internal
     public static void clearAll(HolderLookup.Provider ra) {
         ChatType key;
         try {
             key = getDummyKey(ra);
         } catch (Exception e) {
-            return; //registries already gone, nothing we could match anyway
+            return;
         }
         for (var i : ALL) i.instances.invalidate(key);
     }
@@ -72,11 +67,7 @@ public class SidedInstance<T> {
     }
 
     public void invalidate(HolderLookup.Provider ra) {
-        ChatType dummyKey = getDummyKey(ra);
-        T instance = instances.getIfPresent(dummyKey);
-        if (instance != null) {
-            instances.invalidate(dummyKey);
-        }
+        instances.invalidate(getDummyKey(ra));
     }
 
     public void set(HolderLookup.Provider ra, T instance) {

@@ -126,12 +126,11 @@ public class Respriter {
                 targetPalettes, outputTexture.frameCount());
 
         outputTexture.forEachPixel(pixel -> {
-            // If there's a recoloring mask, sample it. Skip recoloring if mask is "off" at this pixel
             if (recoloringMask != null && FastColor.ABGR32.alpha(recoloringMask.sample(pixel.globalX, pixel.globalY)) != 0) {
-                return; // skip recoloring this pixel
+                return;
             }
             int newColor = colorRemapper.remapColor(pixel.frameIndex(), pixel.getValue());
-            if (newColor != Color2ColorMap.NO_MATCH) {
+            if (newColor != Color2ColorMap.NO_MATCH_MARKER) {
                 pixel.setValue(newColor);
             }
         });
@@ -163,7 +162,7 @@ public class Respriter {
      */
     private record Color2ColorMap(Int2IntMap map) {
         //palette colors are never fully transparent so 0 is free
-        static final int NO_MATCH = 0;
+        static final int NO_MATCH_MARKER = 0;
         static final Color2ColorMap EMPTY = new Color2ColorMap(Int2IntMaps.EMPTY_MAP);
 
         public int mapColor(int color) {
@@ -177,16 +176,14 @@ public class Respriter {
             toPalette.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (toPalette.size() != originalPalette.size()) {
                 Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette: {} vs required {}", toPalette.size(), originalPalette.size());
-                //provided swap palette had too little colors
                 return EMPTY;
             }
-            //now they should be the same size
             return new Color2ColorMap(zipToMap(originalPalette.getValues(), toPalette.getValues()));
         }
 
         private static Int2IntMap zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
             Int2IntMap map = new Int2IntOpenHashMap(keys.size());
-            map.defaultReturnValue(NO_MATCH);
+            map.defaultReturnValue(NO_MATCH_MARKER);
             for (int i = 0; i < keys.size(); i++) {
                 map.put(keys.get(i).value(), values.get(i).value());
             }

@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -120,8 +121,10 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @ApiStatus.Internal
-        public void setDependencies(List<BooleanValue> dependencies) {
-            this.dependencies = List.copyOf(dependencies);
+        public void addDependency(BooleanValue dependency) {
+            var next = new ArrayList<>(this.dependencies);
+            next.add(dependency);
+            this.dependencies = List.copyOf(next);
         }
     }
 

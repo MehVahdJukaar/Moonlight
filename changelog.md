@@ -1,1 +1,2 @@
-- beta: 26.1.2 port. very wip
+- respriter api improvements
+- config screen gutter icons refactor and additions
