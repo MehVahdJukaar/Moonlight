@@ -57,6 +57,7 @@ public class WoodType extends BlockType {
 
     public final Block planks;
     public final Block log;
+    private final boolean bambooLike;
 
     // like this so it can be called early. not too early tho as children might not be initialized
     //mega ugly. i cant initialize it immediately as mods might have not run setup yet
@@ -97,9 +98,31 @@ public class WoodType extends BlockType {
     }
 
     public WoodType(ResourceLocation id, Block baseBlock, Block logBlock) {
+        this(id, baseBlock, logBlock, defaultIsBambooLike(id));
+    }
+
+    public WoodType(ResourceLocation id, Block baseBlock, Block logBlock, boolean bambooLike) {
         super(id);
         this.planks = baseBlock;
         this.log = logBlock;
+        this.bambooLike = bambooLike;
+    }
+
+    /**
+     * Bamboo-like wood types use rafts instead of boats and have different model offsets.
+     * Defaults to true when "bamboo" appears in the wood type name (path), not the namespace.
+     */
+    public static boolean defaultIsBambooLike(ResourceLocation id) {
+        String name = id.getPath();
+        int slash = name.lastIndexOf('/');
+        if (slash >= 0) {
+            name = name.substring(slash + 1);
+        }
+        return name.contains("bamboo");
+    }
+
+    public boolean isBambooLike() {
+        return this.bambooLike;
     }
 
     @Override
@@ -128,7 +151,7 @@ public class WoodType extends BlockType {
     public Boat.Type toVanillaBoatOrOak() {
         var v = toVanillaBoat();
         if (v != null) return v;
-        if (this.id.getPath().contains("bamboo")) {
+        if (this.isBambooLike()) {
             return Boat.Type.BAMBOO;
         }
         return Boat.Type.OAK;
@@ -195,8 +218,13 @@ public class WoodType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
-        this.addChild(BOAT, this.findRelatedItem("boat", "raft"));
-        this.addChild(CHEST_BOAT, this.findRelatedItem("chest_boat", "chest_raft"));
+        if (this.isBambooLike()) {
+            this.addChild(BOAT, this.findRelatedItem("raft", "boat"));
+            this.addChild(CHEST_BOAT, this.findRelatedItem("chest_raft", "chest_boat"));
+        } else {
+            this.addChild(BOAT, this.findRelatedItem("boat", "raft"));
+            this.addChild(CHEST_BOAT, this.findRelatedItem("chest_boat", "chest_raft"));
+        }
         this.addChild(SAPLING, this.findRelatedEntry("sapling", BuiltInRegistries.ITEM));
         if (this.id.getNamespace().matches("tfc|afc")) { // Including unidue blocks' path
             this.addChild(STICK, this.findRelatedEntry("twig", BuiltInRegistries.BLOCK));
@@ -335,6 +363,8 @@ public class WoodType extends BlockType {
     public static class Finder extends SetFinderBuilder<WoodType> {
         private Supplier<Block> planksFinder;
         private Supplier<Block> logFinder;
+        @Nullable
+        private Boolean bambooLike;
 
         public Finder(ResourceLocation id) {
             super(id, WoodTypeRegistry.INSTANCE);
@@ -406,6 +436,14 @@ public class WoodType extends BlockType {
             return log(id.getPath() + suffix);
         }
 
+        /**
+         * Overrides the default bamboo-like detection ({@link WoodType#defaultIsBambooLike(ResourceLocation)}).
+         */
+        public Finder bambooLike(boolean bambooLike) {
+            this.bambooLike = bambooLike;
+            return this;
+        }
+
 
         @Override
         @ApiStatus.Internal
@@ -414,7 +452,8 @@ public class WoodType extends BlockType {
                 try {
                     Block plank = Preconditions.checkNotNull(planksFinder.get(), "Manual Finder - failed to find a plank block for {}", id);
                     Block log = Preconditions.checkNotNull(logFinder.get(), "Manual Finder - failed to find a log block for {}", id);
-                    var woodType = new WoodType(id, plank, log);
+                    boolean isBambooLike = this.bambooLike != null ? this.bambooLike : defaultIsBambooLike(id);
+                    var woodType = new WoodType(id, plank, log, isBambooLike);
                     childNames.forEach((key, value) -> {
                         try {
                             ItemLike obj = Preconditions.checkNotNull(value.get());
