@@ -36,6 +36,18 @@ public class PaletteColor implements Comparable<PaletteColor> {
         this.hcl = lab.asHCL();
     }
 
+    private PaletteColor(PaletteColor other) {
+        this.value = other.value;
+        this.color = other.color;
+        this.lab = other.lab;
+        this.hcl = other.hcl;
+        this.occurrence = other.occurrence;
+    }
+
+    public PaletteColor copy() {
+        return new PaletteColor(this);
+    }
+
     /**
      * @return integer color value
      */

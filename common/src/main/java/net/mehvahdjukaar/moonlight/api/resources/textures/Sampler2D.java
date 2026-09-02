@@ -71,10 +71,8 @@ public interface Sampler2D {
     }
 
     static Sampler2D paletted(Sampler2D base, Palette palette) {
-        return (x, y) -> {
-            int color = base.sample(x, y);
-            return palette.getColorClosestTo(new PaletteColor(color)).value();
-        };
+        var nearest = palette.nearestColorMapper();
+        return (x, y) -> nearest.applyAsInt(base.sample(x, y));
     }
 
     static Sampler2D offset(Sampler2D base, float ox, float oy) {

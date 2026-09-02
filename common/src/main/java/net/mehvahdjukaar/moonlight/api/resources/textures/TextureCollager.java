@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class TextureCollager {
     protected final int originFrameW;
@@ -129,6 +130,9 @@ public class TextureCollager {
                             "actualW=" + actualW + ", actualH=" + actualH + " - " + debugInfo + ", op=" + op);
                 }
 
+                IntUnaryOperator paletteSnapper = op.palettes == null ? null :
+                        op.palettes.get(Math.min(i, op.palettes.size() - 1)).nearestColorMapper();
+
                 for (int ty = 0; ty < actualH; ty++) {
                     for (int tx = 0; tx < actualW; tx++) {
                         float srcX = (tx + 0.5f);
@@ -136,9 +140,8 @@ public class TextureCollager {
 
                         int color = sampler.sample(srcX, srcY);
 
-                        if (op.palettes != null) {
-                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size() - 1);
-                            color = op.palettes.get(maxPaletteIndex).getColorClosestTo(new PaletteColor(color)).value();
+                        if (paletteSnapper != null) {
+                            color = paletteSnapper.applyAsInt(color);
                         }
 
                         if (op.blended) {

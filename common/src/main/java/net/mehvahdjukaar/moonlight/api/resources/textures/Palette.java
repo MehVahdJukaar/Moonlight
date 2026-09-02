@@ -1,5 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.MthUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
@@ -13,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.IntUnaryOperator;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Palette implements Set<PaletteColor> {
@@ -42,7 +48,9 @@ public class Palette implements Set<PaletteColor> {
      * Makes a copy of this palette
      */
     public Palette copy() {
-        return new Palette(new ArrayList<>(this.internal), tolerance);
+        Palette copy = new Palette(new ArrayList<>(this.internal));
+        copy.tolerance = this.tolerance;
+        return copy;
     }
 
     public static Palette empty() {
@@ -57,26 +65,60 @@ public class Palette implements Set<PaletteColor> {
     public void updateTolerance(float tolerance) {
         if (this.tolerance == tolerance) return;
         this.tolerance = tolerance;
-        if (tolerance == 0) return;
-        boolean recalculate;
-        do {
-            recalculate = false;
-            for (int i = 1; i < this.size(); i++) {
-                PaletteColor c0 = this.get(i - 1); //first
-                PaletteColor c1 = this.get(i); //second
-                if (c0.distanceTo(c1) <= tolerance) {
-                    Palette tempPal = new Palette(List.of(c0, c1));
-                    int after = i + 1;
-                    while (after < this.size() && tempPal.calculateAverage().distanceTo(this.get(after)) <= tolerance) {
-                        tempPal.addUnchecked(this.get(after));
-                        after++;
-                    }
-                    tempPal.getValues().forEach(this::remove);
-                    this.addUnchecked(tempPal.calculateAverage());
-                    recalculate = true;
-                }
+        if (tolerance == 0 || this.size() < 2) return;
+
+        //sorted by luminance, so colors close enough to merge are adjacent
+        List<PaletteColor> merged = new ArrayList<>(this.size());
+        RunningAverage run = new RunningAverage();
+        for (PaletteColor color : internal) {
+            if (run.isEmpty() || run.average().distTo(color.lab()) <= tolerance) {
+                run.accept(color);
+            } else {
+                merged.add(run.collapse());
+                run.accept(color);
             }
-        } while (recalculate);
+        }
+        if (!run.isEmpty()) merged.add(run.collapse());
+
+        internal.clear();
+        internal.addAll(merged);
+        this.sort();
+    }
+
+    private static class RunningAverage {
+        private PaletteColor single;
+        private float l, a, b, alpha;
+        private int count;
+        private int occurrence;
+
+        boolean isEmpty() {
+            return count == 0;
+        }
+
+        void accept(PaletteColor color) {
+            if (count == 0) single = color;
+            LABColor lab = color.lab();
+            l += lab.luminance();
+            a += lab.a();
+            b += lab.b();
+            alpha += lab.alpha();
+            occurrence += color.getOccurrence();
+            count++;
+        }
+
+        LABColor average() {
+            return new LABColor(l / count, a / count, b / count, alpha / count);
+        }
+
+        PaletteColor collapse() {
+            PaletteColor result = count == 1 ? single : new PaletteColor(average());
+            result.setOccurrence(occurrence);
+            l = a = b = alpha = 0;
+            count = 0;
+            occurrence = 0;
+            single = null;
+            return result;
+        }
     }
 
 
@@ -88,7 +130,7 @@ public class Palette implements Set<PaletteColor> {
         return internal;
     }
 
-    private void sort() {
+    public void sort() {
         Collections.sort(internal);
     }
 
@@ -114,6 +156,7 @@ public class Palette implements Set<PaletteColor> {
     public boolean addAll(@NotNull Collection<? extends PaletteColor> colors) {
         boolean added = false;
         for (var c : colors) {
+            if (c.rgb().alpha() == 0) continue;
             if (!hasColor(c)) {
                 internal.add(c);
                 added = true;
@@ -126,9 +169,17 @@ public class Palette implements Set<PaletteColor> {
         return false;
     }
 
+    /**
+     * Replaces the color at index without re-sorting. Does nothing if another color is already too close
+     */
     public void set(int index, PaletteColor color) {
         if (color.rgb().alpha() == 0) return;
-        if (!hasColor(color)) internal.set(index, color);
+        for (int i = 0; i < internal.size(); i++) {
+            if (i == index) continue;
+            PaletteColor c = internal.get(i);
+            if (tolerance == 0 ? c.value() == color.value() : c.distanceTo(color) <= tolerance) return;
+        }
+        internal.set(index, color);
     }
 
     public PaletteColor get(int index) {
@@ -140,7 +191,11 @@ public class Palette implements Set<PaletteColor> {
     }
 
     public boolean hasColor(int rgba) {
-        return this.hasColor(new PaletteColor(rgba), 0);
+        if (FastColor.ABGR32.alpha(rgba) == 0) return false;
+        for (PaletteColor c : internal) {
+            if (c.value() == rgba) return true;
+        }
+        return false;
     }
 
     public boolean hasColor(PaletteColor color) {
@@ -213,7 +268,7 @@ public class Palette implements Set<PaletteColor> {
      * @param slope percentage of palette. from 0 to 1
      */
     public PaletteColor getColorAtSlope(float slope) {
-        int index = Math.round((internal.size() - 1) * slope);
+        int index = Math.round((internal.size() - 1) * Mth.clamp(slope, 0, 1));
         return internal.get(index);
     }
 
@@ -242,6 +297,20 @@ public class Palette implements Set<PaletteColor> {
     }
 
     /**
+     * Memoized getColorClosestTo, for mapping every pixel of an image. Don't change the palette while one is in use
+     */
+    public IntUnaryOperator nearestColorMapper() {
+        Int2IntMap cache = new Int2IntOpenHashMap();
+        return color -> {
+            int cached = cache.get(color);
+            if (cached != 0) return cached;
+            int match = getColorClosestTo(new PaletteColor(color)).value();
+            cache.put(color, match);
+            return match;
+        };
+    }
+
+    /**
      * Adds or remove colors to match the target size
      */
     public void matchSize(int targetSize) {
@@ -265,8 +334,12 @@ public class Palette implements Set<PaletteColor> {
             PaletteColor first = this.get(0);
             this.add(first.getDarkened());
             this.add(first.getLightened());
+            if (this.size() == 1) {
+                Moonlight.LOGGER.warn("Could not expand single color palette {}", first);
+                return;
+            }
         }
-        if (this.size() == 2 && targetLumStep == null) {
+        if (this.size() == 2 && targetSize > 1 && targetLumStep == null) {
             var lightest = this.getLightest();
             var darkest = this.getDarkest();
             Palette other = Palette.fromArc(lightest.hcl(), darkest.hcl(), targetSize);
@@ -348,19 +421,8 @@ public class Palette implements Set<PaletteColor> {
      * Removes one color, the one that is closest to other colors
      */
     public PaletteColor reduce() {
-        int index = 0;
-        float minDelta = 10000;
-        float lastLum = this.get(0).luminance();
-        for (int i = 1; i < this.size(); i++) {
-            float l = this.get(i).luminance();
-            float dl = l - lastLum;
-            if (dl < minDelta) {
-                index = i;
-                minDelta = dl;
-            }
-            lastLum = l;
-        }
-        return this.remove(index);
+        if (this.size() < 2) return this.remove(0);
+        return this.remove(indexOfSmallestLuminanceStep());
     }
 
     /**
@@ -369,8 +431,20 @@ public class Palette implements Set<PaletteColor> {
      * @return newly added color
      */
     public PaletteColor reduceAndAverage() {
-        int index = 0;
-        float minDelta = 10000;
+        int index = indexOfSmallestLuminanceStep();
+        PaletteColor toRemove = this.get(index);
+        PaletteColor toRemove2 = this.get(index - 1);
+        this.remove(toRemove);
+        this.remove(toRemove2);
+        var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
+        newColor.setOccurrence(toRemove.getOccurrence() + toRemove2.getOccurrence());
+        this.addUnchecked(newColor);
+        return newColor;
+    }
+
+    private int indexOfSmallestLuminanceStep() {
+        int index = 1;
+        float minDelta = Float.MAX_VALUE;
         float lastLum = this.get(0).luminance();
         for (int i = 1; i < this.size(); i++) {
             float l = this.get(i).luminance();
@@ -381,14 +455,7 @@ public class Palette implements Set<PaletteColor> {
             }
             lastLum = l;
         }
-        PaletteColor toRemove = this.get(index);
-        PaletteColor toRemove2 = this.get(index - 1);
-        this.remove(toRemove);
-        this.remove(toRemove2);
-        var newColor = new PaletteColor(toRemove.lab().mixWith(toRemove2.lab()));
-        newColor.setOccurrence(toRemove.getOccurrence() * toRemove2.getOccurrence());
-        this.add(newColor);
-        return newColor;
+        return index;
     }
 
     /**
@@ -404,6 +471,7 @@ public class Palette implements Set<PaletteColor> {
             throw new UnsupportedOperationException("Luminance span must be between 0 and 1");
         float currentSpan = this.getLuminanceSpan();
         while (Mth.abs(currentSpan - targetLuminanceSpan) > 0.5 * this.getAverageLuminanceStep()) {
+            int sizeBefore = this.size();
             if (currentSpan < targetLuminanceSpan) {
                 if (this.getLightest().luminance() < 1 - this.getDarkest().luminance()) {
                     this.increaseUp();
@@ -411,6 +479,7 @@ public class Palette implements Set<PaletteColor> {
                     this.increaseDown();
                 }
             } else if (currentSpan > targetLuminanceSpan) {
+                if (this.size() <= 2) break;
                 if (this.getLightest().luminance() > 1 - this.getDarkest().luminance()) {
                     this.reduceUp();
                 } else {
@@ -419,6 +488,7 @@ public class Palette implements Set<PaletteColor> {
             } else {
                 break;
             }
+            if (sizeBefore == this.size()) break;
             currentSpan = this.getLuminanceSpan();
         }
     }
@@ -436,20 +506,26 @@ public class Palette implements Set<PaletteColor> {
         float currentMin = this.getDarkest().luminance();
         float currentMax = this.getLightest().luminance();
         while (Mth.abs(currentMin - minLuminance) > 0.5 * this.getAverageLuminanceStep()) {
+            int sizeBefore = this.size();
             if (currentMin < minLuminance) {
+                if (this.size() <= 2) break;
                 this.reduceDown();
             } else {
                 this.increaseDown();
             }
+            if (sizeBefore == this.size()) break;
             currentMin = this.getDarkest().luminance();
         }
 
         while (Mth.abs(currentMax - maxLuminance) > 0.5 * this.getAverageLuminanceStep()) {
+            int sizeBefore = this.size();
             if (currentMax > maxLuminance) {
+                if (this.size() <= 2) break;
                 this.reduceUp();
             } else {
                 this.increaseUp();
             }
+            if (sizeBefore == this.size()) break;
             currentMax = this.getLightest().luminance();
         }
     }
@@ -462,16 +538,73 @@ public class Palette implements Set<PaletteColor> {
      * @param newLuminanceStep you can see this as contrast between 2 colors.
      */
     public void matchLuminanceStep(float newLuminanceStep) {
-        float centerLuminance = getCenterLuminance();
         int size = this.size();
-        float lowerLuminance = centerLuminance - newLuminanceStep * size / 2;
-        var copy = this.copy();
-        for (int i = 0; i < size; i++) {
-            PaletteColor color = copy.get(i);
-            float newLum = lowerLuminance + i * newLuminanceStep;
-            this.remove(color);
-            this.addUnchecked(new PaletteColor(color.hcl().withLuminance(newLum)));
+        if (size < 2) return;
+        //n colors cover n - 1 steps, tighten the step if that overflows [0, 1]
+        float span = newLuminanceStep * (size - 1);
+        if (span > 1) {
+            newLuminanceStep = 1f / (size - 1);
+            span = 1;
         }
+        float lowerLuminance = Mth.clamp(getCenterLuminance() - span / 2, 0, 1 - span);
+
+        List<PaletteColor> rescaled = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            PaletteColor color = internal.get(i);
+            var moved = new PaletteColor(color.hcl().withLuminance(lowerLuminance + i * newLuminanceStep));
+            moved.setOccurrence(color.getOccurrence());
+            rescaled.add(moved);
+        }
+        internal.clear();
+        internal.addAll(rescaled);
+        this.sort();
+    }
+
+    /**
+     * Scales the contrast between neighboring colors, keeping size and center luminance
+     */
+    public void multiplyContrast(float factor) {
+        matchLuminanceStep(this.getAverageLuminanceStep() * factor);
+    }
+
+    /**
+     * Spreads the colors evenly over the given luminance span without adding or removing any
+     */
+    public void matchLuminanceSpan(float targetLuminanceSpan) {
+        if (this.size() < 2) return;
+        matchLuminanceStep(targetLuminanceSpan / (this.size() - 1));
+    }
+
+    public void shiftLuminance(float delta) {
+        transformColors(c -> new PaletteColor(c.hcl().withLuminance(c.hcl().luminance() + delta)));
+    }
+
+    public void multiplyChroma(float factor) {
+        transformColors(c -> new PaletteColor(c.hcl().withChroma(c.hcl().chroma() * factor)));
+    }
+
+    /**
+     * Replaces every color, keeping occurrences. Colors that end up identical collapse into one
+     */
+    public void transformColors(UnaryOperator<PaletteColor> transform) {
+        List<PaletteColor> transformed = new ArrayList<>(this.size());
+        for (PaletteColor color : internal) {
+            PaletteColor newColor = transform.apply(color);
+            newColor.setOccurrence(color.getOccurrence());
+            if (newColor.rgb().alpha() != 0 && !containsValue(transformed, newColor.value())) {
+                transformed.add(newColor);
+            }
+        }
+        internal.clear();
+        internal.addAll(transformed);
+        this.sort();
+    }
+
+    private static boolean containsValue(List<PaletteColor> colors, int value) {
+        for (PaletteColor c : colors) {
+            if (c.value() == value) return true;
+        }
+        return false;
     }
 
     /**
@@ -480,8 +613,9 @@ public class Palette implements Set<PaletteColor> {
      * @return How much luminance steps differ from eachother
      */
     public float getLuminanceStepVariationCoeff() {
-        List<Float> list = getLuminanceSteps();
         float mean = getAverageLuminanceStep();
+        if (this.size() < 3 || mean == 0) return 0;
+        List<Float> list = getLuminanceSteps();
         float sum = 0;
         for (var s : list) {
             sum += ((s - mean) * (s - mean));
@@ -507,6 +641,7 @@ public class Palette implements Set<PaletteColor> {
      * Calculates the average luminance different between each color. Ideally it should be somewhat constant
      */
     public float getAverageLuminanceStep() {
+        if (this.size() < 2) return 0;
         return this.getLuminanceSpan() / (this.size() - 1);
     }
 
@@ -546,7 +681,7 @@ public class Palette implements Set<PaletteColor> {
      */
     @Deprecated(forRemoval = true)
     public PaletteColor increaseInner() {
-        assert (this.size() < 2);
+        assert this.size() >= 2;
         int index = 1;
         //finds max delta lum and adds a color there
         float maxDelta = 0;
@@ -577,7 +712,8 @@ public class Palette implements Set<PaletteColor> {
      */
     public void resampleWithOneMore(float jitterFraction) {
         if (this.size() < 2) return;
-        Random rng = new Random(); // deterministic
+        //fixed seed, packs must come out the same every launch
+        Random rng = new Random(this.get(0).value());
 
         int newSize = this.size() + 1;
         float firstLum = this.get(0).luminance();
@@ -629,7 +765,7 @@ public class Palette implements Set<PaletteColor> {
      * Only works if it has at least 2 colors
      */
     public PaletteColor increaseUp() {
-        assert (this.size() < 2);
+        assert this.size() >= 2;
         float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor lightest = this.getLightest().hcl();
         HCLColor secondLightest = this.get(this.size() - 2).hcl();
@@ -644,7 +780,7 @@ public class Palette implements Set<PaletteColor> {
      * Only works if it has at least 2 colors
      */
     public PaletteColor increaseDown() {
-        assert (this.size() < 2);
+        assert this.size() >= 2;
         float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor darkest = this.getDarkest().hcl();
         HCLColor secondDarkest = this.get(1).hcl();
@@ -691,17 +827,18 @@ public class Palette implements Set<PaletteColor> {
      * Combines multiple palettes into one, preserving their occurrence getValues
      */
     public static Palette merge(Palette... palettes) {
-        if (palettes.length == 1) return new Palette(palettes[0].getValues());
-        Map<Integer, PaletteColor> map = new HashMap<>();
+        Map<Integer, PaletteColor> map = new LinkedHashMap<>();
         for (Palette p : palettes) {
             for (PaletteColor c : p.getValues()) {
-                int color = c.value();
-                if (map.containsKey(color)) {
-                    map.get(color).setOccurrence(map.get(color).getOccurrence() + c.getOccurrence());
-                } else map.put(color, c);
+                //copy so summing occurrences doesn't edit the given palettes
+                PaletteColor existing = map.get(c.value());
+                if (existing == null) {
+                    map.put(c.value(), c.copy());
+                } else {
+                    existing.setOccurrence(existing.getOccurrence() + c.getOccurrence());
+                }
             }
         }
-        if (map.isEmpty()) return new Palette(new ArrayList<>());
         return new Palette(map.values());
     }
 
@@ -800,12 +937,12 @@ public class Palette implements Set<PaletteColor> {
 
         List<Palette> palettes = new ArrayList<>();
 
-        List<Map<Integer, PaletteColor>> paletteBuilders = new ArrayList<>();
+        List<Int2ObjectMap<PaletteColor>> paletteBuilders = new ArrayList<>();
         textureImage.forEachPixel(pixel -> {
             int index = pixel.frameIndex();
             //when index changes, we add a completed palette
             if (paletteBuilders.size() <= index) {
-                paletteBuilders.add(new HashMap<>());
+                paletteBuilders.add(new Int2ObjectOpenHashMap<>());
             }
             var builder = paletteBuilders.get(index);
 
@@ -813,8 +950,11 @@ public class Palette implements Set<PaletteColor> {
                     maskImage.getFramePixel(index % maskFrames, pixel.frameX(), pixel.frameY())) == 0) {
                 int color = pixel.getValue();
                 if (FastColor.ABGR32.alpha(color) != 0) {
-                    var paletteColor = builder.computeIfAbsent(color,
-                            p -> new PaletteColor(color));
+                    var paletteColor = builder.get(color);
+                    if (paletteColor == null) {
+                        paletteColor = new PaletteColor(color);
+                        builder.put(color, paletteColor);
+                    }
                     paletteColor.setOccurrence(paletteColor.getOccurrence() + 1);
                 }
             }
