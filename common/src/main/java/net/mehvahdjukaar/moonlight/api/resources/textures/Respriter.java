@@ -120,7 +120,7 @@ public class Respriter {
                 return;
             }
             int newColor = colorRemapper.remapColor(pixel.frameIndex(), pixel.getValue());
-            if (newColor != Color2ColorMap.NO_MATCH_MARKER) {
+            if (newColor != Color2ColorMap.NO_MATCH) {
                 pixel.setValue(newColor);
             }
         });
@@ -152,7 +152,7 @@ public class Respriter {
      */
     private record Color2ColorMap(Int2IntMap map) {
         //palette colors are never fully transparent so 0 is free
-        static final int NO_MATCH_MARKER = 0;
+        static final int NO_MATCH = 0;
         static final Color2ColorMap EMPTY = new Color2ColorMap(Int2IntMaps.EMPTY_MAP);
 
         public int mapColor(int color) {
@@ -173,7 +173,7 @@ public class Respriter {
 
         private static Int2IntMap zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
             Int2IntMap map = new Int2IntOpenHashMap(keys.size());
-            map.defaultReturnValue(NO_MATCH_MARKER);
+            map.defaultReturnValue(NO_MATCH);
             for (int i = 0; i < keys.size(); i++) {
                 map.put(keys.get(i).value(), values.get(i).value());
             }
