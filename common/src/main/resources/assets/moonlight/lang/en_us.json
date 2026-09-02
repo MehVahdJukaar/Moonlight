@@ -39,6 +39,7 @@
   "gui.moonlight.config.unavailable.server_controlled": "This config is set by the server you are connected to.",
   "gui.moonlight.config.reload.world": "Requires world reload",
   "gui.moonlight.config.reload.game": "Requires game restart",
+  "gui.moonlight.config.disabled_by": "Disabled by %s",
   "gui.moonlight.config.json_hint": "Enter JSON…",
   "gui.moonlight.config.json_invalid": "Invalid JSON",
   "gui.moonlight.config.schema_invalid": "Invalid value: %s",

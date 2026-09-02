@@ -41,9 +41,7 @@ public abstract class ConfigBuilder {
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
-    // comment(...) may come before or after its define(...). It binds forward to the next define, falling back on the
-    // last one if nothing claims it. Forward-first stops an un-commented define (a feature() toggle) from stealing
-    // the before-comment of the value that follows it
+    // comment(...) may come before or after its define(...).
     @Nullable
     private String pendingComment;
     // handed out once only, so a grouped define like defineRange doesn't repeat it for each hidden value it makes
@@ -56,22 +54,20 @@ public abstract class ConfigBuilder {
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
     private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
-    // while set, define(...) and push(...) add nothing to the screen, so defineRange and friends show a single row
     protected boolean suppressUi = false;
 
-    // every feature()'s supplier, keyed by both short name and full dotted path
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
-    // raw category names, root first, so a feature's full path can be built
+    private static final Map<Supplier<?>, ConfigOption.BooleanValue> BOOLEAN_ROWS =
+            Collections.synchronizedMap(new IdentityHashMap<>());
+    private final List<PendingDependency> pendingDependencies = new ArrayList<>();
     private final Deque<String> categoryPath = new ArrayDeque<>();
 
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
-    // NeoForge only: when set, defineObject stores a json string instead of a native toml object
     protected boolean writeObjectsAsJson = false;
 
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
-    // set by icon(...), applied to and cleared by the next category push or defined option
     @Nullable
     private ResourceLocation pendingIcon;
 
@@ -384,7 +380,42 @@ public abstract class ConfigBuilder {
                 : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
-    // a still-pending comment at a section boundary (pop/build) was an "after" comment for the last value
+    private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanValue row) {
+    }
+
+    /**
+     * Makes the next feature() or mainFeature() depend on other config values
+     */
+    @SafeVarargs
+    public final ConfigBuilder dependsOn(Supplier<Boolean>... others) {
+        for (Supplier<Boolean> other : others) {
+            ConfigOption.BooleanValue row = BOOLEAN_ROWS.get(other);
+            if (row == null) {
+                if (PlatHelper.isDev()) {
+                    throw new IllegalArgumentException("dependsOn() takes a boolean config value that was already " +
+                            "defined in this config or in one built before it");
+                }
+                continue;
+            }
+            this.pendingDependencies.add(new PendingDependency(other, row));
+        }
+        return this;
+    }
+
+    private List<PendingDependency> pollDependencies() {
+        if (this.pendingDependencies.isEmpty()) return List.of();
+        List<PendingDependency> deps = List.copyOf(this.pendingDependencies);
+        this.pendingDependencies.clear();
+        return deps;
+    }
+
+    private static Supplier<Boolean> effectiveToggle(Supplier<Boolean> raw, Supplier<Boolean> ancestor,
+                                                     List<PendingDependency> dependencies) {
+        if (dependencies.isEmpty()) return () -> raw.get() && ancestor.get();
+        List<Supplier<Boolean>> required = dependencies.stream().map(PendingDependency::value).toList();
+        return () -> raw.get() && ancestor.get() && required.stream().allMatch(s -> Boolean.TRUE.equals(s.get()));
+    }
+
     protected void flushPendingComment() {
         if (this.suppressUi) return;
         if (this.pendingComment != null) {
@@ -393,7 +424,6 @@ public abstract class ConfigBuilder {
         }
     }
 
-    // Forge attaches a comment to the NEXT define, so hand out the pending before-comment once
     @Nullable
     protected String pollCommentToForward() {
         if (this.pendingComment != null && !this.pendingCommentForwarded) {
@@ -440,8 +470,6 @@ public abstract class ConfigBuilder {
     }
 
     protected void uiPush(Component title) {
-        // a comment(...) right before a push belongs to the category itself, not to its first value. Category
-        // descriptions aren't shown yet, so drop it instead of letting the first child claim it
         this.pendingComment = null;
         this.pendingCommentForwarded = false;
         if (this.suppressUi) return;
@@ -479,18 +507,20 @@ public abstract class ConfigBuilder {
         if (cat.gate() != null) {
             throw new IllegalStateException("category '" + currentCategory() + "' already has a mainFeature() toggle");
         }
+        List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
         // define() just recorded the matching BooleanValue as this category's last entry: adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
+        Supplier<Boolean> ancestor = this.gateStack.peek();
+        Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
         if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
             // explicit icon(...) wins, else infer from the category name. Mirrored so the category button and the
             // gate row share one icon
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
             if (cat.icon() == null) cat.setIcon(bv.icon());
+            bindFeature(bv, effective, dependencies);
         }
-        Supplier<Boolean> ancestor = this.gateStack.peek();
-        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
         this.gateStack.pop(); // replace the inherited gate with this category's own
         this.gateStack.push(effective);
         registerFeature(currentCategory(), currentCategoryPath(), effective);
@@ -507,15 +537,16 @@ public abstract class ConfigBuilder {
      * one or any parent feature is off. Pair it with icon(), like builder.icon("lever").feature("test_bool", true).
      */
     public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
+        List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(name, defaultEnabled);
-        // adopt the just-recorded BooleanValue so the client draws it as a check/cross toggle
+        Supplier<Boolean> ancestor = this.gateStack.peek();
+        Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
         List<ConfigNode> entries = this.uiStack.peek().entries();
         if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             bv.setFeature(true);
             if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
+            bindFeature(bv, effective, dependencies);
         }
-        Supplier<Boolean> ancestor = this.gateStack.peek();
-        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
         String path = this.categoryPath.isEmpty() ? name : currentCategoryPath() + "." + name;
         registerFeature(name, path, effective);
         return effective;
@@ -531,10 +562,17 @@ public abstract class ConfigBuilder {
     }
 
 
-    // resolved lazily on the client, so a name that isn't a real item/block simply shows no icon
     @Nullable
     private ResourceLocation inferFeatureIcon(String name) {
         return ResourceLocation.tryBuild(this.name.getNamespace(), name);
+    }
+
+    private static void bindFeature(ConfigOption.BooleanValue row, Supplier<Boolean> effective,
+                                    List<PendingDependency> dependencies) {
+        if (!dependencies.isEmpty()) {
+            row.setDependencies(dependencies.stream().map(PendingDependency::row).toList());
+        }
+        BOOLEAN_ROWS.put(effective, row);
     }
 
     // keyed by both short name and full dotted path, so a feature can be queried either way
@@ -553,8 +591,13 @@ public abstract class ConfigBuilder {
 
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
-        // the flags were already stamped onto each backing leaf as it was defined. Suppressed groups no-op here, so
-        // every leaf gets stamped before we clear them
+        if (!this.pendingDependencies.isEmpty()) {
+            this.pendingDependencies.clear();
+            if (PlatHelper.isDev()) {
+                throw new IllegalStateException("dependsOn() only applies to feature() and mainFeature()");
+            }
+        }
+        if (option instanceof ConfigOption.BooleanValue bv) BOOLEAN_ROWS.put(bv.handle(), bv);
         this.pendingReload = ConfigReloadType.NONE;
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
@@ -655,7 +698,6 @@ public abstract class ConfigBuilder {
             throw new AssertionError("Current config category was null. How?");
     }
 
-    // called by push() once the category is on the stack, so translationKey("") points at it
     protected void noteCategoryName(String category) {
         putName(this.translationKey(""), category);
     }

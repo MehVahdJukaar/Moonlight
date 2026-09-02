@@ -16,7 +16,6 @@ public final class MoonlightIcons {
     public static final ResourceLocation HEART = Moonlight.res("heart");
     public static final ResourceLocation DISCOVER_MODS = Moonlight.res("discover_mods");
 
-    // the gear, plus the paper sheets telling client, synced and common configs apart
     public static final ResourceLocation CONFIG = Moonlight.res("config");
     public static final ResourceLocation CONFIG_CLIENT = Moonlight.res("config_client");
     public static final ResourceLocation CONFIG_SERVER = Moonlight.res("config_server");
@@ -24,6 +23,7 @@ public final class MoonlightIcons {
 
     public static final ResourceLocation WORLD_RELOAD = Moonlight.res("world_reload");
     public static final ResourceLocation GAME_RESTART = Moonlight.res("game_restart");
+    public static final ResourceLocation WARNING = Moonlight.res("warning");
 
     public static final ResourceLocation SECTION_COLLAPSED = Moonlight.res("widget/section_collapsed");
     public static final ResourceLocation SECTION_EXPANDED = Moonlight.res("widget/section_expanded");

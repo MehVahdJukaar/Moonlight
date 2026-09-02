@@ -33,6 +33,8 @@ class OptionRow extends ConfigListRow {
     private final ConfigCategory owner; // the category this value lives under, for feature-gating greyout
     private final boolean isGate; // this value IS its category's feature() toggle (the "enabled" switch)
     private final boolean asToggle; // drawn as the check/cross feature toggle (a category gate, or a named feature leaf)
+    @Nullable
+    private final ConfigOption.BooleanValue feature; // same value as above, only set on toggle rows
     private final Component title;
     @Nullable
     private final Component description;
@@ -41,11 +43,10 @@ class OptionRow extends ConfigListRow {
     private final boolean editable;
     private final List<AbstractWidget> children;
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
+    private final GutterHints gutter = new GutterHints();
 
     // click region of the label/arrow column that toggles the description, refreshed each frame
     private int toggleX0, toggleX1, rowY0, rowY1;
-    // hover region of the reload/restart hint icon, if any
-    private int reloadIconX0 = -1, reloadIconX1 = -1;
 
     OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
         this(view, value, null);
@@ -62,6 +63,7 @@ class OptionRow extends ConfigListRow {
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
         this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
+        this.feature = asToggle ? (ConfigOption.BooleanValue) value : null;
         this.control = asToggle
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
                 : ConfigControllers.create(value, session, this::onEdited);
@@ -100,9 +102,9 @@ class OptionRow extends ConfigListRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        // greyed while the owning category's feature toggle (or an ancestor's) is off. The gate row itself only dims
-        // when an ancestor is off, so turning it off doesn't lock away its own switch
-        boolean contextEnabled = owner == null || (isGate ? view.areAncestorsEnabled(owner) : view.isCategoryEnabled(owner));
+        Component blockedBy = feature == null ? null : view.featureBlockedBy(feature);
+        boolean contextEnabled = blockedBy == null
+                && (owner == null || (isGate ? view.areAncestorsEnabled(owner) : view.isCategoryEnabled(owner)));
 
         int resetX = left + width - resetButton.getWidth();
         resetButton.setX(resetX);
@@ -127,7 +129,6 @@ class OptionRow extends ConfigListRow {
             if (!contextEnabled) graphics.setColor(1f, 1f, 1f, 1f);
             textLeft = left + ARROW_WIDTH;
         }
-        // decorative hover-animated icon before the label. Feature toggles draw theirs inside the control instead
         if (!asToggle && ConfigScreenIcons.has(value.icon())) {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, value.icon(), textLeft, top + (height - ROW_ICON) / 2,
@@ -136,15 +137,14 @@ class OptionRow extends ConfigListRow {
         }
         int textRight = controlX - GAP;
 
-        // pure decoration in the far-left gutter, never shifts the row content
-        this.reloadIconX0 = this.reloadIconX1 = -1;
+        gutter.begin(top, height);
+        if (blockedBy != null) {
+            gutter.add(graphics, left, MoonlightIcons.WARNING,
+                    Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
+        }
         ResourceLocation reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
         if (reloadIcon != null) {
-            int iconSize = 8; // native size of the world_reload / game_restart sprites
-            int iconX = left - iconSize - 3;
-            graphics.blitSprite(reloadIcon, iconX, top + (height - iconSize) / 2, iconSize, iconSize);
-            this.reloadIconX0 = iconX;
-            this.reloadIconX1 = iconX + iconSize;
+            gutter.add(graphics, left, reloadIcon, reloadTooltip(value.reloadType()));
         }
 
         boolean modified = !Objects.equals(session.currentRaw(value), value.get());
@@ -188,11 +188,7 @@ class OptionRow extends ConfigListRow {
     @Nullable
     @Override
     Component getGutterTooltip(int mouseX, int mouseY) {
-        // the reload/restart hint lives in the far-left gutter, outside the row's normal hover band
-        if (reloadIconX0 >= 0 && mouseX >= reloadIconX0 && mouseX <= reloadIconX1 && mouseY >= rowY0 && mouseY <= rowY1) {
-            return reloadTooltip(value.reloadType());
-        }
-        return null;
+        return gutter.tooltipAt(mouseX, mouseY);
     }
 
     private static Component reloadTooltip(ConfigReloadType type) {

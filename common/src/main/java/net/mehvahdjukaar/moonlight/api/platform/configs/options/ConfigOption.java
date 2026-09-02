@@ -90,12 +90,16 @@ public abstract class ConfigOption<T> extends ConfigNode {
         protected Stream<IConfigValue<?>> backingValues() {
             return Stream.of(this.handle);
         }
+
+        @ApiStatus.Internal
+        public IConfigValue<T> handle() {
+            return this.handle;
+        }
     }
 
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // renders as the check/cross toggle instead of the plain ON/OFF button. A category gate looks the same but is keyed
-        // off the owning category's gate() rather than this flag
         private boolean feature;
+        private List<BooleanValue> dependencies = List.of();
 
         public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
@@ -108,6 +112,16 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @ApiStatus.Internal
         public void setFeature(boolean feature) {
             this.feature = feature;
+        }
+
+        /** Other features that must be on for this one to do anything, in the order they were declared. */
+        public List<BooleanValue> dependencies() {
+            return dependencies;
+        }
+
+        @ApiStatus.Internal
+        public void setDependencies(List<BooleanValue> dependencies) {
+            this.dependencies = List.copyOf(dependencies);
         }
     }
 
@@ -122,7 +136,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    // the control registry keys on the exact class, hence the marker subclasses
     public static class IntSliderValue extends IntValue {
         public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
@@ -223,7 +236,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class ColorValue extends SimpleConfigOption<Integer> {
-        /** When false the color has no alpha channel: it's edited and stored as plain RGB. */
         public final boolean hasAlpha;
 
         public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {

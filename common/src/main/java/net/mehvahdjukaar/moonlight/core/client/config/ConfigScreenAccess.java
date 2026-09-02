@@ -4,6 +4,8 @@ import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 interface ConfigScreenAccess {
 
@@ -15,15 +17,39 @@ interface ConfigScreenAccess {
 
     void toggleExpanded(ConfigOption<?> value);
 
-    // called when a value's working copy changed, so the screen can refresh the Save counter
     void onValueEdited();
 
-    // whether a category is enabled given the current unsaved edits: its own feature toggle and every ancestor's
     boolean isCategoryEnabled(ConfigCategory category);
 
-    // as above, but ignoring the category's own feature toggle
     default boolean areAncestorsEnabled(ConfigCategory category) {
         ConfigCategory parent = category.parent();
+        return parent == null || isCategoryEnabled(parent);
+    }
+
+    @Nullable
+    default Component featureBlockedBy(ConfigOption.BooleanValue feature) {
+        ConfigOption.BooleanValue unmet = unmetDependency(feature);
+        if (unmet != null) return unmet.title();
+        ConfigCategory owner = feature.parent();
+        ConfigCategory from = owner != null && owner.gate() == feature ? owner.parent() : owner;
+        for (ConfigCategory c = from; c != null; c = c.parent()) {
+            ConfigOption.BooleanValue gate = c.gate();
+            if (gate != null && !Boolean.TRUE.equals(session().current(gate))) return c.title();
+        }
+        return null;
+    }
+
+    @Nullable
+    default ConfigOption.BooleanValue unmetDependency(ConfigOption.BooleanValue feature) {
+        for (ConfigOption.BooleanValue dependency : feature.dependencies()) {
+            if (!isFeatureOn(dependency)) return dependency;
+        }
+        return null;
+    }
+
+    private boolean isFeatureOn(ConfigOption.BooleanValue feature) {
+        if (!Boolean.TRUE.equals(session().current(feature))) return false;
+        ConfigCategory parent = feature.parent();
         return parent == null || isCategoryEnabled(parent);
     }
 }
