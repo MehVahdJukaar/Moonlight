@@ -362,9 +362,8 @@ public class Palette implements Set<PaletteColor> {
         boolean down = true;
         boolean canIncreaseDown = true;
         boolean canIncreaseUp = true;
-        int currentSize;
         maxTries = sizeDiff * 6;
-        while ((currentSize = this.size()) < targetSize && maxTries-- > 0) {
+        while (this.size() < targetSize && maxTries-- > 0) {
             //safeguard if palette is full
             //increase inner if it shouldn't increase outer or if it can't increase outer
             if ((!canIncreaseDown && !canIncreaseUp) ||
@@ -372,10 +371,9 @@ public class Palette implements Set<PaletteColor> {
                 increaseInner();
             } else {
                 //increase up and down every cycle
-                if (down) increaseDown();
-                else increaseUp();
+                PaletteColor added = down ? increaseDown() : increaseUp();
                 //if it didn't increase means we are at max luminance, probably white
-                if (currentSize == this.size()) {
+                if (added == null) {
                     if (down) canIncreaseDown = false;
                     else canIncreaseUp = false;
 
@@ -395,7 +393,7 @@ public class Palette implements Set<PaletteColor> {
      */
     private boolean shouldExpandRange(int targetSize, @Nullable Float targetStep) {
         if (targetStep == null) return false;
-        float targetRange = targetSize * targetStep;
+        float targetRange = (targetSize - 1) * targetStep;
         float currentRange = this.getLuminanceSpan();
         return currentRange < targetRange;
     }
@@ -758,31 +756,41 @@ public class Palette implements Set<PaletteColor> {
     /**
      * Adds a highlight color, lighter than the lightest color present
      * Only works if it has at least 2 colors
+     *
+     * @return the added color, or null if the palette already reached white and nothing could be added
      */
+    @Nullable
     public PaletteColor increaseUp() {
         assert this.size() >= 2;
         float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor lightest = this.getLightest().hcl();
         HCLColor secondLightest = this.get(this.size() - 2).hcl();
-        var cc = getNextColor(averageDeltaLum, lightest, secondLightest);
-        PaletteColor pl = new PaletteColor(cc);
-        this.addUnchecked(pl);
-        return pl;
+        return addNextColor(getNextColor(averageDeltaLum, lightest, secondLightest));
     }
 
     /**
      * Adds an outline color, darker than the darkest color present
      * Only works if it has at least 2 colors
+     *
+     * @return the added color, or null if the palette already reached black and nothing could be added
      */
+    @Nullable
     public PaletteColor increaseDown() {
         assert this.size() >= 2;
         float averageDeltaLum = this.getAverageLuminanceStep();
         HCLColor darkest = this.getDarkest().hcl();
         HCLColor secondDarkest = this.get(1).hcl();
-        var cc = getNextColor(-averageDeltaLum, darkest, secondDarkest);
-        PaletteColor pl = new PaletteColor(cc);
-        this.addUnchecked(pl);
-        return pl;
+        return addNextColor(getNextColor(-averageDeltaLum, darkest, secondDarkest));
+    }
+
+    @Nullable
+    private PaletteColor addNextColor(@Nullable HCLColor next) {
+        if (next == null) return null;
+        PaletteColor color = new PaletteColor(next);
+        if (this.hasColor(color.value())) return null;
+        int sizeBefore = this.size();
+        this.addUnchecked(color);
+        return this.size() > sizeBefore ? color : null;
     }
 
     private static boolean wasColorClipped(PaletteColor col) {
@@ -800,8 +808,10 @@ public class Palette implements Set<PaletteColor> {
         return (hcl.chroma() > 0f) && (isWhite || isBlack);
     }
 
+    @Nullable
     private HCLColor getNextColor(float lumIncrease, HCLColor source, HCLColor previous) {
         float newLum = source.luminance() + lumIncrease;
+        if (newLum <= 0 || newLum >= 1) return null;
         float h1 = source.hue();
         float c1 = source.chroma();
         float a1 = source.alpha();
@@ -813,9 +823,23 @@ public class Palette implements Set<PaletteColor> {
         float newH = h1 + hueIncrease * 0.5f;
         while (newH < 0) ++newH;
 
-        float newC = c1 + (c1 - c2);
+        //same for chroma, full rate pushes highlights out of gamut
+        float newC = Math.max(0, c1 + (c1 - c2) * 0.5f);
         float newA = a1 + (a1 - a2);
-        return new HCLColor(newH, newC, newLum, newA);
+        return fitChromaInGamut(new HCLColor(newH, newC, newLum, newA));
+    }
+
+    private static HCLColor fitChromaInGamut(HCLColor color) {
+        HCLColor fitted = color;
+        for (int i = 0; i < 12 && !isInGamut(fitted); i++) {
+            fitted = fitted.withChroma(fitted.chroma() * 0.8f);
+        }
+        return fitted;
+    }
+
+    private static boolean isInGamut(HCLColor color) {
+        //rgb clamps its channels so a clipped color doesn't survive the round trip
+        return color.asRGB().asHCL().distTo(color) < 0.005f;
     }
 
     /**
