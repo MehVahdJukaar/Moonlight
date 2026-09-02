@@ -64,6 +64,21 @@ public record McMetaFile(@NotNull AnimationMetadataSection animation, JsonObject
         return mostImportant;
     }
 
+    public boolean hasAnimation() {
+        return this.animation != null;
+    }
+
+    /**
+     * How many frames a texture must have for this animation's frame indices to be valid.
+     * 0 when there's no explicit frame list, meaning the animation just plays every frame in order
+     */
+    public int requiredFrameCount() {
+        if (animation == null) return 0;
+        int[] highest = {-1};
+        animation.forEachFrame((i, t) -> highest[0] = Math.max(highest[0], i));
+        return highest[0] + 1;
+    }
+
     public JsonObject toJson() {
         JsonObject obj = moddedStuff.deepCopy();
 
