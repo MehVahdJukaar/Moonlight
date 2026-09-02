@@ -34,6 +34,7 @@ class CategoryRow extends ConfigListRow {
     @Nullable
     private final Component tooltip;
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
+    private final GutterHints gutter = new GutterHints();
 
     CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
         this.view = view;
@@ -60,7 +61,14 @@ class CategoryRow extends ConfigListRow {
         int top = this.getContentY(), left = this.getX(), width = this.getWidth(), height = this.getContentHeight();
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        boolean enabled = view.isCategoryEnabled(category);
+        Component blockedBy = gate == null ? null : view.featureBlockedBy(gate);
+        boolean enabled = view.isCategoryEnabled(category); // already false when blockedBy is set
+
+        gutter.begin(top, height);
+        if (blockedBy != null) {
+            gutter.add(graphics, left, MoonlightIcons.WARNING,
+                    Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
+        }
 
         int buttonWidth = toggle != null ? width - CONTROL_HEIGHT - GAP : width;
         button.setMessage(Component.empty()); // we draw our own icon + label over the (empty) button background
@@ -88,7 +96,7 @@ class CategoryRow extends ConfigListRow {
 
         if (toggle != null && gate != null) {
             toggle.set(Boolean.TRUE.equals(view.session().current(gate)));
-            toggle.active = view.areAncestorsEnabled(category); // can't enable a sub-feature of a disabled feature
+            toggle.active = blockedBy == null; // can't enable a sub-feature of a disabled one, or one with an unmet dependency
             toggle.setX(left + width - CONTROL_HEIGHT);
             toggle.setY(cy);
             toggle.extractRenderState(graphics, mouseX, mouseY, partialTick);
@@ -109,5 +117,11 @@ class CategoryRow extends ConfigListRow {
     @Override
     Component getTooltip(int mouseX, int mouseY) {
         return tooltip;
+    }
+
+    @Nullable
+    @Override
+    Component getGutterTooltip(int mouseX, int mouseY) {
+        return gutter.tooltipAt(mouseX, mouseY);
     }
 }

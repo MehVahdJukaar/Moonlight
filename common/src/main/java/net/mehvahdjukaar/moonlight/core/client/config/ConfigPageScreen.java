@@ -46,7 +46,7 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
     @Override
     public boolean isCategoryEnabled(ConfigCategory category) {
         ConfigOption.BooleanValue gate = category.gate();
-        boolean own = gate == null || Boolean.TRUE.equals(session().current(gate));
+        boolean own = gate == null || (Boolean.TRUE.equals(session().current(gate)) && unmetDependency(gate) == null);
         ConfigCategory parent = category.parent();
         return own && (parent == null || isCategoryEnabled(parent));
     }
