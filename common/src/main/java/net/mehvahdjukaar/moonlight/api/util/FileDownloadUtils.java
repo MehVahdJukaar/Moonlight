@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
 /**
- * A resilient HTTP downloader with resuming, retries, and progress reporting.
+ * Http downloader that resumes partial files and retries on transient failures.
  */
 public final class FileDownloadUtils {
 
@@ -44,16 +43,13 @@ public final class FileDownloadUtils {
         }
 
         public boolean isRetryable() {
-            // Client errors are deterministic and won't change on retry -- except request timeout
-            // (408) and rate limiting (429), which may succeed after backoff.
+            //a 4xx wont change on a retry, aside from request timeout and rate limit
             if (statusCode >= 400 && statusCode < 500) {
                 return statusCode == 408 || statusCode == 429;
             }
             return true;
         }
     }
-
-    // Public API -------------------------------------------------------------
 
     public static void download(String urlStr, Path target) throws IOException {
         download(urlStr, target, null, null, null);
@@ -73,21 +69,18 @@ public final class FileDownloadUtils {
                                 @Nullable String userAgent,
                                 @Nullable ProgressCallback progressCallback,
                                 @Nullable RetryCallback retryCallback) throws IOException {
-
-        validateUrl(urlStr);
-
         Path tmp = target.resolveSibling(target.getFileName() + ".part");
-        long downloadedBytes = Files.exists(tmp) ? Files.size(tmp) : 0;
+        long resumeFrom = Files.exists(tmp) ? Files.size(tmp) : 0;
 
         Moonlight.LOGGER.info("Downloading {} ...", urlStr);
 
         int attempt = 0;
         while (true) {
             try {
-                downloadAttempt(urlStr, tmp, downloadedBytes, userAgent, progressCallback);
-                break; // success
+                long size = downloadAttempt(urlStr, tmp, resumeFrom, userAgent, progressCallback);
+                Moonlight.LOGGER.info("Downloaded {} bytes from {}", size, urlStr);
+                break;
             } catch (IOException e) {
-                // Deterministic failures (e.g. HTTP 403/404) can never succeed; don't waste retries.
                 if (e instanceof HttpStatusException hse && !hse.isRetryable()) {
                     Files.deleteIfExists(tmp);
                     throw e;
@@ -102,24 +95,20 @@ public final class FileDownloadUtils {
                     retryCallback.onRetry(attempt, MAX_ATTEMPTS, e);
                 }
                 try {
-                    Thread.sleep(1000L * attempt); // progressive backoff
+                    Thread.sleep(1000L * attempt); //progressive backoff
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new IOException("Download interrupted", ie);
                 }
-                downloadedBytes = Files.exists(tmp) ? Files.size(tmp) : 0;
+                //pick up from whatever made it to disk
+                resumeFrom = Files.exists(tmp) ? Files.size(tmp) : 0;
             }
         }
 
-        Moonlight.LOGGER.info("Downloaded {} bytes from {}", downloadedBytes, urlStr);
-
-
-        // Move the completed temporary file to the final destination
         moveFileAtomically(tmp, target);
     }
 
     public static byte[] readBytes(String urlStr) throws IOException {
-        validateUrl(urlStr);
         HttpURLConnection conn = createConnection(urlStr, 0, null);
         try {
             int code = conn.getResponseCode();
@@ -133,29 +122,14 @@ public final class FileDownloadUtils {
     }
 
     /**
-     * Fetches a URL fully into memory as a UTF-8 string.
+     * Fetches a URL fully into memory as a UTF-8 string
      */
     public static String readString(String urlStr) throws IOException {
         return new String(readBytes(urlStr), StandardCharsets.UTF_8);
     }
 
-    // Private helpers --------------------------------------------------------
-
-    private static void validateUrl(String urlStr) throws IOException {
+    public static void moveFileAtomically(Path source, Path target) throws IOException {
         try {
-            URI uri = new URI(urlStr);
-            String scheme = uri.getScheme();
-            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
-                throw new IOException("Unsupported protocol: " + scheme + ". Only HTTP/HTTPS are allowed.");
-            }
-        } catch (URISyntaxException e) {
-            throw new IOException("Malformed URL: " + urlStr, e);
-        }
-    }
-
-    private static void moveFileAtomically(Path source, Path target) throws IOException {
-        try {
-            // Try atomic move first (works on most local file systems)
             Files.move(source, target,
                     StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
@@ -167,54 +141,54 @@ public final class FileDownloadUtils {
 
     private static HttpURLConnection createConnection(String urlStr, long startOffset,
                                                       @Nullable String userAgent) throws IOException {
-        URL url = URI.create(urlStr).toURL();
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        URI uri;
+        try {
+            uri = new URI(urlStr);
+        } catch (URISyntaxException e) {
+            throw new IOException("Malformed URL: " + urlStr, e);
+        }
+        String scheme = uri.getScheme();
+        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+            throw new IOException("Unsupported protocol: " + scheme + ". Only HTTP/HTTPS are allowed.");
+        }
+
+        HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
         conn.setConnectTimeout(CONNECT_TIMEOUT);
         conn.setReadTimeout(READ_TIMEOUT);
-
         if (userAgent != null) {
             conn.setRequestProperty("User-Agent", userAgent);
         }
-
         if (startOffset > 0) {
             conn.setRequestProperty("Range", "bytes=" + startOffset + "-");
         }
         return conn;
     }
 
-    private static void downloadAttempt(String urlStr, Path tmp, long startOffset,
+    //returns the size the file ended up with
+    private static long downloadAttempt(String urlStr, Path tmp, long startOffset,
                                         @Nullable String userAgent,
                                         @Nullable ProgressCallback progressCallback) throws IOException {
         HttpURLConnection conn = createConnection(urlStr, startOffset, userAgent);
-        int responseCode;
-        long actualStartOffset = startOffset;
-        boolean rangeSupported = true;
-
         try {
-            responseCode = conn.getResponseCode();
+            int responseCode = conn.getResponseCode();
 
-            // If we requested a range but the server doesn't support it, restart from zero
+            //asked to resume but got a whole body back, so start over
             if (startOffset > 0 && responseCode != HttpURLConnection.HTTP_PARTIAL) {
                 Moonlight.LOGGER.info("Server does not support range requests (code {}). Restarting download from 0.", responseCode);
                 conn.disconnect();
-                rangeSupported = false;
-                actualStartOffset = 0;
                 conn = createConnection(urlStr, 0, userAgent);
                 responseCode = conn.getResponseCode();
+                startOffset = 0;
             }
-
             if (responseCode < 200 || responseCode >= 300) {
                 throw new HttpStatusException(responseCode, urlStr);
             }
 
-            // Determine expected total size
+            //on a 206 the length is just what's left, and startOffset is 0 in every other case
             long contentLength = conn.getContentLengthLong();
-            long totalExpected = (rangeSupported && responseCode == HttpURLConnection.HTTP_PARTIAL)
-                    ? contentLength + actualStartOffset
-                    : contentLength;
+            long totalExpected = contentLength < 0 ? -1 : contentLength + startOffset;
 
-            boolean append = rangeSupported && actualStartOffset > 0 && responseCode == HttpURLConnection.HTTP_PARTIAL;
-            StandardOpenOption[] writeOptions = append
+            StandardOpenOption[] writeOptions = startOffset > 0
                     ? new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
                     : new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING};
 
@@ -222,7 +196,7 @@ public final class FileDownloadUtils {
                  OutputStream out = Files.newOutputStream(tmp, writeOptions)) {
 
                 byte[] buffer = new byte[16384];
-                long downloaded = actualStartOffset;
+                long downloaded = startOffset;
                 int lastPercent = -1;
                 int bytesRead;
 
@@ -233,7 +207,7 @@ public final class FileDownloadUtils {
                     if (totalExpected > 0) {
                         int percent = (int) (downloaded * 100 / totalExpected);
                         if (percent != lastPercent) {
-                            Moonlight.LOGGER.info("Downloading {} ... {}%", tmp.getFileName(), percent);
+                            Moonlight.LOGGER.debug("Downloading {} ... {}%", tmp.getFileName(), percent);
                             if (progressCallback != null) {
                                 progressCallback.onProgress(percent);
                             }
@@ -243,12 +217,12 @@ public final class FileDownloadUtils {
                 }
             }
 
-            // Final size validation (only if we know the expected size)
-            if (totalExpected > 0 && Files.size(tmp) != totalExpected) {
+            long actual = Files.size(tmp);
+            if (totalExpected > 0 && actual != totalExpected) {
                 throw new IOException(String.format(
-                        "Incomplete download: expected %d bytes, got %d bytes", totalExpected, Files.size(tmp)));
+                        "Incomplete download: expected %d bytes, got %d bytes", totalExpected, actual));
             }
-
+            return actual;
         } finally {
             conn.disconnect();
         }

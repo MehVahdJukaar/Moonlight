@@ -548,8 +548,8 @@ public abstract class ConfigBuilder {
 
     private static void bindFeature(ConfigOption.BooleanValue row, Supplier<Boolean> effective,
                                     List<PendingDependency> dependencies) {
-        if (!dependencies.isEmpty()) {
-            row.setDependencies(dependencies.stream().map(PendingDependency::row).toList());
+        for (PendingDependency dependency : dependencies) {
+            row.addDependency(dependency.row());
         }
         BOOLEAN_ROWS.put(effective, row);
     }
