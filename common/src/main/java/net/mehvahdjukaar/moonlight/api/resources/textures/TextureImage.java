@@ -252,8 +252,9 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         for (int frameIdx = 0; frameIdx < frameCount; frameIdx++) {
             int xOff = getFrameStartX(frameIdx);
             int yOff = getFrameStartY(frameIdx);
-            for (int x = 0; x < frameWidth(); x++) {
-                for (int y = 0; y < frameHeight(); y++) {
+            //row major, same order as SpriteUtils.forEachPixel
+            for (int y = 0; y < frameHeight(); y++) {
+                for (int x = 0; x < frameWidth(); x++) {
                     pixel.frameIndex = frameIdx;
                     pixel.localX = x;
                     pixel.localY = y;
