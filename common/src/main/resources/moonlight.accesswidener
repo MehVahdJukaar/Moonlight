@@ -126,6 +126,9 @@ transitive-accessible method net/minecraft/client/renderer/texture/SpriteContent
 #paletted permutations: rebuild virtual repaletted sprites at gen time
 accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations createPaletteMapping ([I[I)Ljava/util/function/IntUnaryOperator;
 accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations loadPaletteEntryFromImage (Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/resources/Identifier;)[I
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations textures Ljava/util/List;
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations paletteKey Lnet/minecraft/resources/Identifier;
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations permutations Ljava/util/Map;
 
 #firework stuff
 

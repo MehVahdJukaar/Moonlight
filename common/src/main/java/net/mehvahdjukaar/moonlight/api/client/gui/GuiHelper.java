@@ -16,13 +16,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
+//General utility to render gui stuff.
 public final class GuiHelper {
 
-    // the tiling list background and footer shadow vanilla selection lists use. Those fields are private on
-    // AbstractSelectionList, so they're mirrored here for our custom-scrolled screens
     private static final Identifier MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_list_background.png");
     private static final Identifier INWORLD_MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
-    // Screen keeps the in-world menu background private, so mirror it here
     private static final Identifier INWORLD_MENU_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/inworld_menu_background.png");
 
     /** The top bar plus its bottom separator, no title. Same chrome as vanilla's header layouts, just taller. */
@@ -48,17 +46,16 @@ public final class GuiHelper {
         }
         renderHeaderBar(graphics, width, headerHeight);
         int gap = 2;
-        // centered as one block within the bar, separator excluded
         int top = (headerHeight - 2 - (2 * font.lineHeight + gap)) / 2;
         graphics.centeredText(font, title, width / 2, top, ConfigGuiColors.TITLE);
         graphics.centeredText(font, subtitle, width / 2, top + font.lineHeight + gap, ConfigGuiColors.DESCRIPTION);
     }
 
-    /**
-     * A left to right gradient, which fillGradient can't do. Drawn as 1px columns, so keep the span
-     * narrow (edge fades, highlights) instead of filling whole screens with it.
-     */
-    public static void fillGradientHorizontal(GuiGraphicsExtractor graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+    public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+        fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
+    }
+
+    public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         int steps = maxX - minX;
         if (steps <= 0) return;
         for (int i = 0; i < steps; i++) {
@@ -97,16 +94,18 @@ public final class GuiHelper {
                 icon.width(), icon.height(), icon.width(), icon.height());
     }
 
-    /** The tiling list background over a scroll panel, the way AbstractSelectionList draws it. */
-    public static void renderListBackground(GuiGraphicsExtractor graphics, int top, int bottom, int width, double scroll) {
+    public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
         Identifier bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, bg, 0, top, (float) width, (float) (bottom + (int) scroll),
-                width, bottom - top, 32, 32);
+        RenderSystem.enableBlend();
+        graphics.blit(bg, 0, top, (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
+        RenderSystem.disableBlend();
     }
 
-    public static void renderFooterSeparator(GuiGraphicsExtractor graphics, int bottom, int width) {
+    public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
         Identifier footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.enableBlend();
+        graphics.blit(footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.disableBlend();
     }
 
     /** Thin right-edge scrollbar for a custom-scrolled panel. No-op when everything fits. */
@@ -173,8 +172,7 @@ public final class GuiHelper {
         }
     }
 
-    // marquees the text if it overflows the band, returning false without drawing when it fits
-    private static boolean scrollIfOverflow(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {
+    private static boolean scrollIfOverflow(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {
         int overflow = font.width(text) - (maxX - minX);
         if (overflow <= 0) return false;
         double seconds = (double) Util.getMillis() / 1000.0;

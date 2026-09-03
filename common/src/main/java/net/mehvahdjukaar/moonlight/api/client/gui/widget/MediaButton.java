@@ -65,10 +65,6 @@ public class MediaButton {
         public String getSerializedName() { return name; }
     }
 
-    /**
-     * A button slot the remote allow-list can turn on and off. One per MediaIcon, except SERVER, which is a single
-     * slot whose icon depends on the host. A type not in the hub config's allow-list isn't drawn.
-     */
     public enum ButtonType implements StringRepresentable {
         YOUTUBE,
         TWITTER,
@@ -225,18 +221,17 @@ public class MediaButton {
                 Component.translatable("tooltip.moonlight.media.marketplace"));
     }
 
-    /**
-     * Old Akliz button. If the url is the old canonical akliz one it hands off to serverProvider(), or to an
-     * invisible button of the same size when no partner is set, so old layouts don't shift around. Any other url
-     * just gets a plain akliz button.
-     */
+    @Deprecated(forRemoval = true)
+    public static Button akliz(Screen parent, int x, int y, String url, String tooltip) {
+        return akliz(parent, x, y, url);
+    }
+
     public static Button akliz(Screen parent, int x, int y, String url) {
         MoonlightHubInfo.PartnerServerProvider oldInfo = MoonlightHubInfo.OLD_SIGNATURE.partnerServer();
         if (oldInfo != null && oldInfo.url().equals(url)) {
             Button sp = serverProvider(parent, x, y);
             return sp != null ? sp : placeholderButton(x, y);
         }
-        // plain akliz-branded button still belongs to the single SERVER slot
         if (!enabled(ButtonType.SERVER)) return placeholderButton(x, y);
         return create(parent, x, y, AKLIZ, url,
                 Component.translatable("tooltip.moonlight.media.akliz"));
@@ -265,7 +260,6 @@ public class MediaButton {
         };
     }
 
-    // the allow-list is keyed by button slot. A plain link has no slot, so it always shows
     private static boolean enabled(MediaIcon icon) {
         return switch (icon) {
             case CURSEFORGE -> enabled(ButtonType.CURSEFORGE);
@@ -304,7 +298,6 @@ public class MediaButton {
         return null;
     }
 
-    /** Invisible, inactive button with the same footprint as a sprite button. */
     private static Button placeholderButton(int x, int y) {
         Button b = Button.builder(CommonComponents.EMPTY, op -> {}).bounds(x, y, 20, 20).build();
         b.visible = false;
@@ -312,10 +305,6 @@ public class MediaButton {
         return b;
     }
 
-    /**
-     * Partner server button. Its icon, name and url come from the hub config fetched at startup. Null when no
-     * partner is set, in which case callers skip the slot or fall back to akliz().
-     */
     @Nullable
     public static Button serverProvider(Screen parent, int x, int y) {
         if (!enabled(ButtonType.SERVER)) return null;
