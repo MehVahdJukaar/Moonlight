@@ -55,9 +55,8 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
             return new TextureImage(i, metadata, relativePath.toString());
         } catch (Exception e) {
-            // The texture may be a virtual sprite produced by a vanilla paletted_permutations atlas source
-            // (no backing file on disk). Reconstruct it from its base + palette ingredients if so.
-            TextureImage virtual = PalettedPermutationsHelper.tryResolve(manager, relativePath);
+            //try paletted permutations
+            TextureImage virtual = PalettedPermutationsHelper.tryResolveImage(manager, relativePath);
             if (virtual != null) return virtual;
             throw new IOException("Failed to open texture at location " + relativePath + ": no such file");
         }

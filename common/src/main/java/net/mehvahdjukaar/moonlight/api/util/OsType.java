@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Simple operating system family detection based on the {@code os.name} system property.
- *
- * Intended purpose is run ffmpeg.
+ * Simple operating system level utilities
+ * Intended purpose is run things like ffmpeg.
  */
 public enum OsType {
     WINDOWS("windows"),
@@ -69,10 +68,6 @@ public enum OsType {
         return this == WINDOWS ? baseName + ".exe" : baseName;
     }
 
-    /**
-     * Looks for an executable on the user's PATH (plus the usual Homebrew dirs on mac).
-     * Takes the base name without extension, e.g. "ffmpeg". Returns null if not found.
-     */
     @Nullable
     public Path findExecutable(String baseName) {
         String fileName = executableName(baseName);
@@ -84,7 +79,7 @@ public enum OsType {
                     return candidate.toAbsolutePath();
                 }
             } catch (Exception ignored) {
-                // malformed PATH entry, skip
+                //malformed PATH entry, skip
             }
         }
         return null;
