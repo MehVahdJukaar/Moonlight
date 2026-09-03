@@ -1,8 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
-import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.*;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ItemCarouselWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.MediaButton;
@@ -11,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
-import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -87,7 +84,6 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        // a third of the screen for the mod's identity, clamped so the config rows keep a usable width either way
         this.leftPaneWidth = Mth.clamp(this.width / 3, 104, 170);
 
         int blockWidth = this.leftPaneWidth - 2 * PAD;
@@ -95,8 +91,6 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.customShowcase = showcase != null;
         boolean showcaseTakesCarousel = showcase != null && showcase.replacesCarousel();
         if (showcase != null) {
-            // custom showcase replaces the icon. The carousel goes too unless the
-            // showcase asked to only fill the icon square
             AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
                     this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? STRIP + 4 : 0));
             this.addRenderableWidget(widget);
@@ -136,7 +130,6 @@ public class MoonlightConfigSelectScreen extends Screen {
                 b -> this.minecraft.setScreen(new ModsTilesScreen(this, background))));
     }
 
-    // bottom of the two panes
     private int contentBottom() {
         return this.height - FOOTER;
     }
@@ -171,7 +164,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         int iconHeight = Math.min(ICON_MAX, textWidth);
 
         if (!this.customShowcase) {
-            ModIcons.Icon icon = ModIcons.get(this.modId);
+            Icon icon = ModIconCache.get(this.modId);
             if (icon != null) {
                 GuiHelper.renderModIcon(graphics, icon, PAD, this.iconTop(), textWidth, iconHeight);
             } else {
@@ -180,7 +173,6 @@ public class MoonlightConfigSelectScreen extends Screen {
                         ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.initialLetter(this.modId), MoonlightIcons.CONFIG);
             }
         }
-        // whatever fills the block above (carousel or mod showcase) is a widget, so it draws itself into this gap
         int y = this.leftPaneBottom + 8;
 
         if (this.authors.isEmpty()) return;
@@ -205,7 +197,6 @@ public class MoonlightConfigSelectScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
-        // dividers on top of the widget layer, else the list's own background paints over them
         int bottom = this.contentBottom();
         GuiHelper.renderVerticalSeparator(graphics, this.leftPaneWidth, HEADER, bottom);
         GuiHelper.renderFooterSeparator(graphics, bottom, this.width);
@@ -214,7 +205,6 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
             overlay.render(graphics, panel, mouseX, mouseY, partialTick);
         }
-        // row tooltip on top of everything
         ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);

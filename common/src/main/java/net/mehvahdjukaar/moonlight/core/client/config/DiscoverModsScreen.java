@@ -1,12 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.ModCatalogAPI;
-import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
-import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.*;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.core.client.RemoteIconCache;
+import net.mehvahdjukaar.moonlight.core.client.RemoteImagesCache;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
@@ -30,7 +27,6 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class DiscoverModsScreen extends Screen {
 
-
     private static final int SIDE_MARGIN = 24;
     private static final int MAX_CONTENT_W = 320;
     private static final int ROW_H = 48;
@@ -52,11 +48,10 @@ public class DiscoverModsScreen extends Screen {
     private final List<Item> items = new ArrayList<>();
 
     private LoadingDotsWidget loadingWidget;
-    private int builtFrom = -1; // how many mods had landed when the item list was built
+    private int builtModCount = -1;
 
     private double scroll;
     private int maxScroll;
-    // recomputed each layout pass, shared by render + click
     private int contentTop, contentBottom, rowX, contentW;
 
     public DiscoverModsScreen(Screen parent) {
@@ -64,13 +59,12 @@ public class DiscoverModsScreen extends Screen {
     }
 
     private DiscoverModsScreen(Screen parent, List<ModCatalogAPI.Catalog> catalogs) {
-        super(titleFor(catalogs));
+        super(createTitle(catalogs));
         this.parent = parent;
         this.catalogs = catalogs;
     }
 
-    // one author gets their name in the title, several share the screen so it goes generic and each gets a section
-    private static Component titleFor(List<ModCatalogAPI.Catalog> catalogs) {
+    private static Component createTitle(List<ModCatalogAPI.Catalog> catalogs) {
         if (catalogs.size() == 1) {
             return Component.translatable("gui.moonlight.config.discover_title_by", catalogs.getFirst().author());
         }
@@ -98,7 +92,7 @@ public class DiscoverModsScreen extends Screen {
     @Override
     protected void init() {
         for (ModCatalogAPI.Catalog c : catalogs) c.onScreenOpened();
-        this.builtFrom = -1;
+        this.builtModCount = -1;
         this.items.clear();
 
         this.loadingWidget = new LoadingDotsWidget(this.font, Component.translatable("gui.moonlight.config.discover_loading"));
@@ -139,7 +133,7 @@ public class DiscoverModsScreen extends Screen {
                 this.items.add(new Row(e, installed, desc));
             }
         }
-        this.builtFrom = modCount();
+        this.builtModCount = modCount();
     }
 
     private void computeLayout() {
@@ -179,14 +173,12 @@ public class DiscoverModsScreen extends Screen {
 
         int mods = modCount();
         if (mods > 0) {
-            // catalogs land one at a time, so rebuild whenever another one shows up
-            if (mods != this.builtFrom) buildItems();
+            if (mods != this.builtModCount) buildItems();
             renderItems(graphics, mouseX, mouseY);
         } else if (!anyLoading()) {
             graphics.centeredText(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
                     this.width / 2, (contentTop + contentBottom) / 2 - this.font.lineHeight / 2, ConfigGuiColors.DESCRIPTION);
         } else {
-            // still fetching: center the vanilla loading-dots animation in the panel
             this.loadingWidget.setPosition(0, contentTop);
             this.loadingWidget.setSize(this.width, contentBottom - contentTop);
             this.loadingWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
@@ -233,7 +225,6 @@ public class DiscoverModsScreen extends Screen {
 
         int textX = iconX + ICON_SIZE + ROW_INNER_PAD;
         int textRight = rowX + contentW - ROW_INNER_PAD;
-        // installed mods get a small check on the far right; leave room for it on the name line
         int nameRight = installed ? textRight - 12 : textRight;
 
         int nameColor = installed ? NAME_INSTALLED : NAME_MISSING;
@@ -254,9 +245,9 @@ public class DiscoverModsScreen extends Screen {
 
     private void renderIcon(GuiGraphicsExtractor graphics, Row row, int iconX, int iconY, boolean installed) {
         // installed mods pull the icon straight from their jar; the rest fetch it from the catalog url
-        ModIcons.Icon icon = ModIcons.get(row.data().modId());
+        Icon icon = ModIconCache.get(row.data().modId());
         if (icon == null && row.data().iconUrl() != null) {
-            icon = RemoteIconCache.get(row.data().modId(), row.data().iconUrl());
+            icon = RemoteImagesCache.get(row.data().modId(), row.data().iconUrl());
         }
         if (icon != null) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, icon.texture(), iconX, iconY, 0f, 0f, ICON_SIZE, ICON_SIZE,
@@ -267,7 +258,6 @@ public class DiscoverModsScreen extends Screen {
         }
     }
 
-    // no icon yet (missing, downloading or failed): a dark tile with the mod's initial, dimmed if not installed
     private void renderFallbackIcon(GuiGraphicsExtractor graphics, Row row, int iconX, int iconY, boolean installed) {
         GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, ICON_SIZE,
                 installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B,

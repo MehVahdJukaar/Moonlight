@@ -1,7 +1,9 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.google.common.base.Preconditions;
+import net.mehvahdjukaar.moonlight.api.integration.SableCompat;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
+import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -400,7 +402,10 @@ public final class MthUtils {
 
     public static BlockHitResult collideWithSweptAABB(Entity entity, Vec3 movement, double maxStep) {
         AABB aabb = entity.getBoundingBox();
-        return collideWithSweptAABB(entity.position(), aabb, movement, entity.level(), maxStep);
+        BlockHitResult hit = collideWithSweptAABB(entity.position(), aabb, movement, entity.level(), maxStep);
+        //we sweep in the entity's own space, so blocks sitting on a sublevel are somewhere else entirely
+        if (!CompatHandler.SABLE) return hit;
+        return SableCompat.sweepIncludingSubLevels(entity, movement, maxStep, hit);
     }
 
     /**
