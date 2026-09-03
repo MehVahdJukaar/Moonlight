@@ -1,8 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.Icon;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.ModIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.ModIconCache;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
@@ -34,8 +35,6 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class ModsTilesScreen extends Screen {
 
-    // mods that don't use Moonlight's config system but that we still surface here, opened via the loader's own
-    // config screen (NeoForge screen extension, or Mod Menu on Fabric). Only shown when such a screen exists
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
 
     private static final int GRID_PAD = 8;
@@ -99,8 +98,6 @@ public class ModsTilesScreen extends Screen {
         for (String modId : EXTRA_MODS) {
             if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
         }
-        // converting foreign configs implies showing every mod's tile so they can be reached. In that mode a mod also
-        // qualifies if it only has a raw loader config we can convert, without a screen of its own
         boolean convert = ClientConfigs.CONVERT_FOREIGN_CONFIGS.get().isOn();
         if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get() || convert) {
             for (String modId : PlatHelper.getInstalledMods()) {
@@ -117,8 +114,6 @@ public class ModsTilesScreen extends Screen {
                 ? new ModsTilesScreen(null, null)
                 : ModsTilesScreen.configScreenFor(modId, null, null);
         if (screen == null) return false;
-        // tell() and not execute(): the packet is handled on the client thread where execute() runs inline, and
-        // ChatScreen closes itself right after the command is sent, which would wipe the screen we just set
         Minecraft mc = Minecraft.getInstance();
         mc.tell(() -> mc.setScreen(screen));
         return true;
@@ -266,7 +261,7 @@ public class ModsTilesScreen extends Screen {
 
         int iconX = x + (CARD_W - ICON_SIZE) / 2;
         int iconY = y + CARD_PAD;
-        ModIcons.Icon icon = ModIcons.get(entry.modId());
+        Icon icon = ModIconCache.get(entry.modId());
         if (icon != null) {
             GuiHelper.renderModIcon(graphics, icon, x + ICON_SIDE_PAD, iconY, CARD_W - 2 * ICON_SIDE_PAD, ICON_SIZE);
         } else {

@@ -7,6 +7,7 @@ common {
 }
 
 val sable_version_comp: String by extra
+val sable_companion_version: String by extra
 val codecui_version: String by extra
 
 dependencies {
@@ -24,7 +25,7 @@ dependencies {
 
     modCompileOnly("curse.maven:configured-457570:7122913") // v2.6.2
 
-    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0")
+    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
 }
 tasks.named("copyAccessTransformersPublications") {

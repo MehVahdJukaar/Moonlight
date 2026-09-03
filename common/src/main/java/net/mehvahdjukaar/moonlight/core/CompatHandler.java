@@ -17,6 +17,17 @@ public class CompatHandler {
     public static final boolean POLYMER = PlatHelper.isModLoaded("polymer-core");
     public static final boolean CONFIGURED = PlatHelper.isModLoaded("configured");
     public static final boolean VEIL = PlatHelper.isModLoaded("veil");
+    //the companion lib is a separate jar so we cant just check for the mod id
+    public static final boolean SABLE = classExists("dev.ryanhcode.sable.companion.SableCompanion");
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
     private static int compareVersions(String version1, String version2) {
         if (version2.contains("-")) {

@@ -17,11 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Locale;
 
-public final class ModIcons {
-
-    /** A loaded icon texture plus its pixel size (icons aren't always square). */
-    public record Icon(ResourceLocation texture, int width, int height) {
-    }
+public final class ModIconCache {
 
     private static final Map<String, Optional<Icon>> CACHE = new HashMap<>();
 
@@ -32,7 +28,7 @@ public final class ModIcons {
 
     @Nullable
     public static Icon get(String modId) {
-        return CACHE.computeIfAbsent(modId, ModIcons::load).orElse(null);
+        return CACHE.computeIfAbsent(modId, ModIconCache::load).orElse(null);
     }
 
     private static Optional<Icon> load(String modId) {

@@ -89,7 +89,7 @@ public final class GuiHelper {
     }
 
     /** A mod icon at its real aspect ratio, scaled to fit and centered inside the given box. */
-    public static void renderModIcon(GuiGraphics graphics, ModIcons.Icon icon, int x, int y, int maxWidth, int maxHeight) {
+    public static void renderModIcon(GuiGraphics graphics, ModIconCache.Icon icon, int x, int y, int maxWidth, int maxHeight) {
         int h = maxHeight;
         int w = Math.round(maxHeight * (icon.width() / (float) icon.height()));
         if (w > maxWidth) {
