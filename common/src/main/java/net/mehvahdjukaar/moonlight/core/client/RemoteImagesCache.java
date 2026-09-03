@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,7 +29,7 @@ public final class RemoteImagesCache {
         Optional<Icon> cached = CACHE.get(key);
         if (cached != null) return cached.orElse(null);
         // reserve the slot so only the first caller starts a download
-        if (Objects.requireNonNull(CACHE.putIfAbsent(key, Optional.empty())).isEmpty()) {
+        if (CACHE.putIfAbsent(key, Optional.empty()) == null) {
             startLoad(key, url);
         }
         return null;
