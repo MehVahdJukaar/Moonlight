@@ -32,18 +32,15 @@ public class RandomTeleportCommand {
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
         return Commands.literal("tpr")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-                // /tpr
                 .executes(c -> teleportRandom(
                         c,
                         List.of(c.getSource().getEntityOrException()),
                         Optional.empty()))
-                // /tpr <radius>
                 .then(Commands.argument("radius", DoubleArgumentType.doubleArg(0.0))
                         .executes(c -> teleportRandom(
                                 c,
                                 List.of(c.getSource().getEntityOrException()),
                                 Optional.of(DoubleArgumentType.getDouble(c, "radius"))))
-                        // /tpr <radius> <targets>
                         .then(Commands.argument("targets", EntityArgument.entities())
                                 .executes(c -> teleportRandom(
                                         c,
@@ -51,7 +48,6 @@ public class RandomTeleportCommand {
                                         Optional.of(DoubleArgumentType.getDouble(c, "radius"))))
                         )
                 )
-                // /tpr <targets>
                 .then(Commands.argument("targets", EntityArgument.entities())
                         .executes(c -> teleportRandom(
                                 c,
@@ -66,14 +62,11 @@ public class RandomTeleportCommand {
         var source = context.getSource();
         ServerLevel level = source.getLevel();
         RandomSource random = level.getRandom();
-
         WorldBorder border = level.getWorldBorder();
 
-        // Compute bounds to sample from (xMin,xMax,zMin,zMax)
         double xMin, xMax, zMin, zMax;
 
         if (optRadius.isPresent()) {
-            // radius around the command source (if no source entity, center on world border center)
             double radius = optRadius.get();
             double centerX;
             double centerZ;
@@ -90,7 +83,6 @@ public class RandomTeleportCommand {
             zMin = centerZ - radius;
             zMax = centerZ + radius;
         } else {
-            // use world border full bounds (center +/- size/2)
             double centerX = border.getCenterX();
             double centerZ = border.getCenterZ();
             double half = border.getSize() / 2.0;
@@ -100,41 +92,27 @@ public class RandomTeleportCommand {
             zMax = centerZ + half;
         }
 
-        // Clamp sample bounds to the world border bounds so we never sample outside it.
-        // WorldBorder often exposes min/max; if present they will be used via getMinX/getMaxX etc.
-        // To be robust across mappings we clamp sample coordinates after generation using border.clamp(...)
         Set<Relative> set = EnumSet.noneOf(Relative.class);
         set.add(Relative.X_ROT);
         set.add(Relative.Y_ROT);
 
         for (Entity entity : targets) {
-            // pick x and z uniformly inside computed bounds rectangle
             double sampledX = xMin + random.nextDouble() * (xMax - xMin);
             double sampledZ = zMin + random.nextDouble() * (zMax - zMin);
 
-            // Clamp the sampled position to the world border to guarantee it's inside.
-            // Use border.clamp(x,y,z) which returns a Vec3 stuck inside the border shape.
             BlockPos clamped = border.clampToBounds(sampledX, 0.0, sampledZ);
             double x = clamped.getX();
             double z = clamped.getZ();
 
-            // Determine safe Y using a surface heightmap
-            int xi = Mth.floor(x);
-            int zi = Mth.floor(z);
-            // int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, xi, zi);
-            // double finalY = (double) y + 1.0;
             int finalY = 70;
-            // Validate bounds using the same check as in your template
             BlockPos blockPos = BlockPos.containing(x, finalY, z);
             if (!Level.isInSpawnableBounds(blockPos)) {
-                // If somehow out of spawnable bounds after clamping, throw same exception as template
                 throw INVALID_POSITION.create();
             }
 
             performTeleport(source, entity, level, x, finalY, z, set);
         }
 
-        // Keep *exact* feedback format from your template
         Vec3 example = targets.iterator().next().position();
         if (targets.size() == 1) {
             source.sendSuccess(
