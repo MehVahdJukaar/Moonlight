@@ -22,10 +22,9 @@ import java.util.function.IntUnaryOperator;
 public final class PalettedPermutationsHelper {
 
     private static volatile ResourceManager managerThatBuiltThisCache;
-    private static volatile Map<Identifier, PalettedSprite> allPalettedSprites;
+    private static volatile Map<Identifier, PalettedSprite> palettedSpritesByName;
 
-    private record PalettedSprite(Identifier base, Identifier paletteKey,
-                                  Identifier permutationPalette) {
+    private record PalettedSprite(Identifier base, Identifier paletteKey, Identifier permutationPalette) {
     }
 
     @Nullable
@@ -52,7 +51,7 @@ public final class PalettedPermutationsHelper {
 
     public static void invalidate() {
         managerThatBuiltThisCache = null;
-        allPalettedSprites = null;
+        palettedSpritesByName = null;
     }
 
     private static @Nullable PalettedSprite getPalettedSprite(ResourceManager manager, Identifier spriteId) {
@@ -60,14 +59,14 @@ public final class PalettedPermutationsHelper {
     }
 
     private static Map<Identifier, PalettedSprite> getAllPalettedSprites(ResourceManager manager) {
-        Map<Identifier, PalettedSprite> index = allPalettedSprites;
+        Map<Identifier, PalettedSprite> index = palettedSpritesByName;
         if (managerThatBuiltThisCache == manager && index != null) return index;
         synchronized (PalettedPermutationsHelper.class) {
-            if (managerThatBuiltThisCache != manager || allPalettedSprites == null) {
-                allPalettedSprites = scanPalettedSprites(manager);
+            if (managerThatBuiltThisCache != manager || palettedSpritesByName == null) {
+                palettedSpritesByName = scanPalettedSprites(manager);
                 managerThatBuiltThisCache = manager;
             }
-            return allPalettedSprites;
+            return palettedSpritesByName;
         }
     }
 
