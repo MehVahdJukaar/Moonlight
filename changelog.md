@@ -1,1 +1,3 @@
 - fixes some issues
+- api improvements
+- some compat with sable and its sublevels when it comes to collisions for our projectiles
