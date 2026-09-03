@@ -1,2 +1,2 @@
-- respriter api improvements
-- config screen gutter icons refactor and additions
+api improvements
+some compat with sable and its sublevels when it comes to collisions for our projectiles
