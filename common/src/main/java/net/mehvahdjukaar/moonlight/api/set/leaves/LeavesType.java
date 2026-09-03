@@ -72,7 +72,6 @@ public class LeavesType extends BlockType {
         }
         else {
             log = findRelatedEntry(LOG, BuiltInRegistries.BLOCK);
-
         }
         if (log != null) this.addChild(LOG, log);
 
@@ -135,18 +134,19 @@ public class LeavesType extends BlockType {
             if (PlatHelper.isModLoaded(id.getNamespace())) {
                 try {
                     Block leaves = Preconditions.checkNotNull(leavesFinder.get(), "Manual Finder - failed to find a leaf block for {}", id);
-                    var w = new LeavesType(id, leaves);
+                    var leavesType = new LeavesType(id, leaves);
                     childNames.forEach((key, value) -> {
                         try {
                             ItemLike obj = Preconditions.checkNotNull(value.get());
-                            w.addChild(key, obj);
+                            if (key.equals(LOG)) LeavesTypeRegistry.INSTANCE.addToLeavesToWoodMap(id, (Block) obj);
+                            leavesType.addChild(key, obj);
                         } catch (Exception e) {
-                            Moonlight.LOGGER.warn("Failed to find child for WoodType: {} - {}. Ignored! ERROR: {}", id, key, e.getMessage());
+                            Moonlight.LOGGER.warn("Failed to find child for LeavesType: {} - {}. Ignored! ERROR: {}", id, key, e.getMessage());
                         }
                     });
-                    return Optional.of(w);
+                    return Optional.of(leavesType);
                 } catch (Exception e) {
-                    Moonlight.LOGGER.warn("Failed to find custom WoodType:  {} - ", id, e);
+                    Moonlight.LOGGER.warn("Failed to find custom LeavesType:  {} - ", id, e);
                 }
             }
             return Optional.empty();

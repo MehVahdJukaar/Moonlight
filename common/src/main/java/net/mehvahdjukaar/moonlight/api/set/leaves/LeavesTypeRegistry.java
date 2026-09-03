@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.set.leaves;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -96,18 +97,29 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
                 namespace.matches("dynamictrees|dt\\w+") || path.contains("hanging");
     }
 
+    /// Add LeavesType's associated WoodType via LOG to SpecialLeavesToWood
+    public void addToLeavesToWoodMap(ResourceLocation leavesType, Block log) {
+        if (log != null) {
+            ResourceLocation logId = Utils.getID(log);
+            String[] words = logId.getPath().split("_");
+            String nameWood = (words.length == 3) ? words[0] +"_"+ words[1] : words[0];
+            ResourceLocation woodTypeId = new ResourceLocation(logId.getNamespace(), nameWood);
+            specialLeavesToWood.put(leavesType, woodTypeId);
+        }
+    }
 
     @Override
     public void finalizeAndFreeze() {
         super.finalizeAndFreeze();
 
         // add wood to leaves mapping. we know this runs after wood types are registered
-        for (var l : this.getValues()) {
-            ResourceLocation leavesId = l.id;
-            ResourceLocation id = specialLeavesToWood.getOrDefault(leavesId, leavesId);
-            WoodType woodType = WoodTypeRegistry.INSTANCE.get(id);
-            String path = id.getPath();
-            String namespace = id.getNamespace();
+        for (LeavesType leavesType : this.getValues()) {
+            ResourceLocation leavesId = leavesType.id;
+            ResourceLocation woodTypeId = specialLeavesToWood.getOrDefault(leavesId, leavesId);
+            WoodType woodType = WoodTypeRegistry.INSTANCE.get(woodTypeId);
+            String path = woodTypeId.getPath();
+            String namespace = woodTypeId.getNamespace();
+
             if (woodType == null) {
                 for (WoodType w : WoodTypeRegistry.INSTANCE.getValues()) {
                     if (w.id.getPath().equals(path)) {
@@ -129,8 +141,8 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
                 }
             }
             if (woodType != null) {
-                leavesToWood.put(l, woodType);
-                l.addChild(LOG, woodType.log);
+                leavesToWood.put(leavesType, woodType);
+                leavesType.addChild(LOG, woodType.log);
             }
         }
     }
