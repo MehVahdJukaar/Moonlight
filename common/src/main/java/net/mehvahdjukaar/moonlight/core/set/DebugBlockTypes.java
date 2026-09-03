@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.set;
 
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
+import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.set.leaves.LeavesType;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
@@ -47,15 +49,22 @@ public class DebugBlockTypes {
 
                     // Step 1.5: collect all possible child keys
                     Set<String> allChildKeys = new TreeSet<>(); // TreeSet = alphabetical order
-                    for (var entry : reg.getValues()) {
+                    for (BlockType entry : reg.getValues()) {
                         allChildKeys.addAll(entry.getChildren().stream()
                                 .map(Map.Entry::getKey)
                                 .toList());
                     }
 
                     // Step 2: list children for each block type in deterministic order
-                    for (var entry : reg.getValues()) {
+                    for (BlockType entry : reg.getValues()) {
                         builder.append("[").append(entry.getId().toString()).append("]").append(System.lineSeparator());
+
+                        if (entry instanceof LeavesType leavesType) {
+                            Object value = leavesType.getAssociatedWoodType();
+                            builder.append("  - ").append("associated-woodtype").append(" = ")
+                                    .append(value != null ? formatValue(value) : "MISSING")
+                                    .append(System.lineSeparator());
+                        }
 
                         if (allChildKeys.isEmpty()) {
                             builder.append("  (no children)").append(System.lineSeparator());
