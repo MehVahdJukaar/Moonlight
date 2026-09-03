@@ -15,6 +15,7 @@ neoForge {
 }
 
 val codecui_version: String by extra
+val sable_companion_version: String by extra
 
 dependencies {
     implementation("net.mehvahdjukaar:codecui-neoforge:${codecui_version}")
@@ -25,6 +26,7 @@ dependencies {
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")
+    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
     modImplementation("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")

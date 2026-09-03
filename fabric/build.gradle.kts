@@ -10,6 +10,7 @@ fabric {
 val cloth_version: String by extra
 val cca_version: String by extra
 val codecui_version: String by extra
+val sable_companion_version: String by extra
 dependencies {
 
     modImplementation("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
@@ -19,6 +20,7 @@ dependencies {
     modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
+    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-fabric-1.21.1:${sable_companion_version}")
 
     modCompileOnly("me.shedaniel.cloth:cloth-config-fabric:${cloth_version}")
     modCompileOnly("curse.maven:yacl-667299:5424169")
