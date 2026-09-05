@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,17 @@ public class ConfigLangExporter {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final boolean ENABLED = Boolean.parseBoolean(System.getProperty(ENABLED_PROPERTY, "true"));
 
+    private static final Set<String> OPTED_OUT = new HashSet<>();
+
+    /**
+     * call this in your mod init if you don't want moonlight writing config lang keys into your en_us.json in dev
+     */
+    public static void disableFor(String modId) {
+        OPTED_OUT.add(modId);
+    }
+
     public static void exportInDev(String modId, Map<String, String> translations, Map<String, String> alreadyTranslated) {
-        if (!ENABLED || !PlatHelper.isDev()) return;
+        if (!ENABLED || OPTED_OUT.contains(modId) || !PlatHelper.isDev()) return;
         Map<String, String> missing = new LinkedHashMap<>();
         translations.forEach((key, name) -> {
             if (!alreadyTranslated.containsKey(key)) missing.put(key, name);

@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -271,11 +272,16 @@ public class RPUtils {
     }
 
     public static Recipe<?> readRecipe(JsonElement element) {
-        return Recipe.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow();
+        return Recipe.CODEC.parse(recipeOps(), element).getOrThrow();
     }
 
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
-        return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow();
+        return Recipe.CODEC.encodeStart(recipeOps(), recipe).getOrThrow();
+    }
+
+    //ingredients are holder sets now so they need a registry either way, plain JsonOps just fails
+    private static RegistryOps<JsonElement> recipeOps() {
+        return Utils.hackyGetRegistryAccess().createSerializationContext(JsonOps.INSTANCE);
     }
 
     public static Path getResourcePath(Path path, Identifier k, PackType packType) {
