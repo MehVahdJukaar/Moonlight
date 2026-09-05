@@ -11,7 +11,6 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
-// view over a raw ModConfigSpec.ConfigValue, map/unmap convert the stored raw type
 abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
     private final ConfigMetadata meta;
@@ -24,7 +23,6 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         this.meta = meta;
     }
 
-    // no conversion, the stored type is the exposed one
     public static <T> ForgeConfigValue<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
@@ -34,7 +32,6 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    // stored as a String, converted with a Codec. Used for colours and the like
     public static <T> ForgeConfigValue<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
@@ -48,13 +45,11 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    // stored as a String, handed out as a JsonElement
     public static ForgeConfigValue<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
             JsonElement map(String value) {
                 try {
-                    // stored string uses single quotes to avoid escaping issues, revert to double quotes for parsing
                     return JsonParser.parseString(value.replace("'", "\""));
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to parse JSON config value: " + value, e);
@@ -62,7 +57,6 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
             }
             @Override
             String unmap(JsonElement value) {
-                // store as compact string with single quotes
                 return value.toString().replace(" ", "").replace("\"", "'");
             }
         };
@@ -72,7 +66,6 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(String raw) {
-                // raw is stored with single quotes, restore double quotes and parse
                 JsonElement json = JsonParser.parseString(raw.replace("'", "\""));
                 return codec.decode(JsonOps.INSTANCE, json)
                         .getOrThrow()
@@ -82,7 +75,6 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
             @Override
             String unmap(T value) {
                 JsonElement json = codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow();
-                // store with single quotes to avoid escaping issues
                 return json.toString().replace(" ", "").replace("\"", "'");
             }
         };

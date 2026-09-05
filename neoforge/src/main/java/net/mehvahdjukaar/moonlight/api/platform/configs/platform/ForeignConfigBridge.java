@@ -37,15 +37,9 @@ import java.util.function.Supplier;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class ForeignConfigBridge {
 
-    // one holder per foreign ModConfig, so re-opening the screen reuses it (and keeps reading current values live)
     private static final Map<ModConfig, ForeignConfigHolder> CACHE = new WeakHashMap<>();
-
-    // ConfigTracker exposes no public "configs of mod X" accessor, so read its live registry field once
     private static final Map<String, List<ModConfig>> CONFIGS_BY_MOD = configsByModField();
-
-    // building a screen just to look at its class is not free, so each mod is asked once
     private static final Map<String, Boolean> GENERIC_SCREEN_CACHE = new HashMap<>();
-
     private static final String CONFIGURED_PACKAGE = "com.mrcrayfish.configured.";
 
     @Nullable
@@ -69,8 +63,6 @@ public final class ForeignConfigBridge {
         IConfigScreenFactory factory = container.getCustomExtension(IConfigScreenFactory.class).orElse(null);
         if (factory == null) return true;
         try {
-            // the factory is a lambda in the registering mod's class, so the only way to tell them apart is the
-            // screen it hands back. Building one is harmless, it's the init() call that does the work
             Screen screen = factory.createScreen(container, null);
             return screen instanceof ConfigurationScreen
                     || screen.getClass().getName().startsWith(CONFIGURED_PACKAGE);
@@ -92,11 +84,8 @@ public final class ForeignConfigBridge {
         List<ModConfig> configs = CONFIGS_BY_MOD.getOrDefault(modId, List.of());
         List<ModConfigHolder> out = new ArrayList<>();
         for (ModConfig mc : configs) {
-            // skip anything Moonlight itself created: those already have a real holder and native screen
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
             if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
-            // an unloaded spec (a server config with no world open) has no values to walk. List it anyway, with an
-            // empty tree: the select screen greys the row out and says why, instead of hiding the config entirely
             if (!spec.isLoaded()) {
                 out.add(new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec,
                         new ConfigCategory(Component.empty()), nameFor(modId, mc)));
@@ -125,7 +114,7 @@ public final class ForeignConfigBridge {
     private static ConfigType typeFor(ModConfig mc) {
         return switch (mc.getType()) {
             case CLIENT -> ConfigType.CLIENT;
-            case SERVER -> ConfigType.COMMON_SYNCED; // world bound, so it gets the server paper icon
+            case SERVER -> ConfigType.COMMON_SYNCED;
             default -> ConfigType.COMMON;
         };
     }
@@ -150,9 +139,10 @@ public final class ForeignConfigBridge {
             if (raw instanceof UnmodifiableConfig sub) {
                 ConfigCategory cat = new ConfigCategory(categoryTitle(spec, childPath, key));
                 String comment = spec.getLevelComment(childPath);
-                if (comment != null) cat.setDescription(Component.literal(comment));
+                cat.setDescription(Component.literal(comment));
                 walk(spec, sub, childPath, cat);
-                if (!cat.isEmpty()) parent.add(cat); // drop categories that produced no rows
+                // drop categories that produced no rows
+                if (!cat.isEmpty()) parent.add(cat);
             } else if (raw instanceof ModConfigSpec.ConfigValue<?> cv) {
                 ConfigOption<?> option = leaf(spec, cv);
                 if (option != null) parent.add(option);
@@ -171,13 +161,14 @@ public final class ForeignConfigBridge {
         Component desc = vs.getComment() != null ? Component.literal(vs.getComment()) : null;
         ConfigMetadata meta = new ConfigMetadata(reloadType(vs.restartType()), false);
 
-        Object sample = vs.getDefault() != null ? vs.getDefault() : cv.get();
+        vs.getDefault();
+        Object sample = vs.getDefault();
 
         if (sample instanceof Boolean b) {
             return new ConfigOption.BooleanValue(title, desc, wrap(cv, meta), b);
         }
         if (sample instanceof Enum<?> e) {
-            Enum<?>[] options = (Enum<?>[]) e.getDeclaringClass().getEnumConstants();
+            Enum<?>[] options = e.getDeclaringClass().getEnumConstants();
             return new ConfigOption.EnumValue(title, desc, wrap(cv, meta), e, options);
         }
         if (sample instanceof Integer i) {
@@ -210,7 +201,6 @@ public final class ForeignConfigBridge {
         return ForgeConfigValue.simple((ModConfigSpec.ConfigValue) cv, meta);
     }
 
-    // adapts a long-backed value to the int control; the range was already checked to fit
     private static IConfigValue<Integer> longAsInt(ModConfigSpec.ConfigValue<?> cvRaw, ConfigMetadata meta) {
         ModConfigSpec.ConfigValue<Long> cv = (ModConfigSpec.ConfigValue<Long>) cvRaw;
         return new IConfigValue<>() {
@@ -221,7 +211,7 @@ public final class ForeignConfigBridge {
 
             @Override
             public boolean setValue(Integer value) {
-                boolean changed = cv.get().longValue() != value.longValue();
+                boolean changed = cv.get() != value.longValue();
                 cv.set(value.longValue());
                 cv.clearCache();
                 return changed;
@@ -290,6 +280,7 @@ public final class ForeignConfigBridge {
         return out;
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, List<ModConfig>> configsByModField() {
         try {
             Field f = ConfigTracker.class.getDeclaredField("configsByMod");
