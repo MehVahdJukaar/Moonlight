@@ -15,6 +15,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
@@ -27,6 +31,8 @@ import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
@@ -86,6 +92,34 @@ public class ClientHelperImpl {
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void addEntityLayersRegistration(ClientHelper.EntityLayerEvent listener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<EntityRenderersEvent.AddLayers> eventConsumer = event -> {
+            var context = event.getContext();
+            for (var skin : event.getSkins()) {
+                if (event.getSkin(skin) instanceof LivingEntityRenderer<?, ?, ?> le) {
+                    listener.onRendererCreated(EntityType.PLAYER, le, new LayerAdderImpl(le), context);
+                }
+            }
+            for (var type : event.getEntityTypes()) {
+                if (event.getRenderer(type) instanceof LivingEntityRenderer<?, ?, ?> le) {
+                    listener.onRendererCreated((EntityType<? extends LivingEntity>) type, le, new LayerAdderImpl(le), context);
+                }
+            }
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    private record LayerAdderImpl(LivingEntityRenderer<?, ?, ?> renderer) implements ClientHelper.EntityLayerEvent.LayerAdder {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        @Override
+        public <S extends LivingEntityRenderState> void add(RenderLayer<S, ? extends EntityModel<S>> layer) {
+            ((LivingEntityRenderer) renderer).addLayer(layer);
+        }
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {

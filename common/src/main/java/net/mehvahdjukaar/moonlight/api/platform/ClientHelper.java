@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -34,6 +35,9 @@ import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -49,6 +53,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -195,6 +200,22 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addEntityRenderersRegistration(Consumer<EntityRendererEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface EntityLayerEvent {
+
+        void onRendererCreated(EntityType<? extends LivingEntity> type, LivingEntityRenderer<?, ?, ?> renderer,
+                               LayerAdder adder, EntityRendererProvider.Context context);
+
+        interface LayerAdder {
+            <S extends LivingEntityRenderState> void add(RenderLayer<S, ? extends EntityModel<S>> layer);
+        }
+    }
+
+    @PlatformImpl
+    public static void addEntityLayersRegistration(EntityLayerEvent listener) {
         throw new AssertionError();
     }
 
