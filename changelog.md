@@ -1,2 +1,2 @@
-api improvements
-some compat with sable and its sublevels when it comes to collisions for our projectiles
+- added api to add loom supported items
+- config improvements
