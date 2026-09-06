@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -32,6 +33,8 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -43,6 +46,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -196,6 +200,22 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addEntityRenderersRegistration(Consumer<EntityRendererEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface EntityLayerEvent {
+
+        void onRendererCreated(EntityType<? extends LivingEntity> type, LivingEntityRenderer<?, ?> renderer,
+                               LayerAdder adder, EntityRendererProvider.Context context);
+
+        interface LayerAdder {
+            <T extends LivingEntity> void add(RenderLayer<T, ? extends EntityModel<T>> layer);
+        }
+    }
+
+    @PlatformImpl
+    public static void addEntityLayersRegistration(EntityLayerEvent listener) {
         throw new AssertionError();
     }
 
