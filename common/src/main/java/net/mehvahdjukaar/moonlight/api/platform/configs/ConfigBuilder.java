@@ -16,10 +16,9 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.ConfigLangExporter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +35,8 @@ import java.util.regex.Pattern;
 public abstract class ConfigBuilder {
 
     protected final Map<String, String> translations = new LinkedHashMap<>();
-    // keys named by Moonlight rather than the mod, Moonlight translates these itself
+    // keys whose name Moonlight made up rather than the mod, mapped to that name. Moonlight translates those itself,
+    // so no mod has to
     private final Map<String, String> moonlightNames = new LinkedHashMap<>();
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
@@ -44,6 +44,7 @@ public abstract class ConfigBuilder {
     // comment(...) may come before or after its define(...).
     @Nullable
     private String pendingComment;
+    // handed out once only, so a grouped define like defineRange doesn't repeat it for each hidden value it makes
     private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
@@ -68,7 +69,7 @@ public abstract class ConfigBuilder {
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
     @Nullable
-    private Identifier pendingIcon;
+    private ResourceLocation pendingIcon;
 
     @FunctionalInterface
     protected interface CommentTarget {
@@ -76,18 +77,18 @@ public abstract class ConfigBuilder {
     }
 
     @PlatformImpl
-    public static ConfigBuilder create(Identifier name, ConfigType type) {
+    public static ConfigBuilder create(ResourceLocation name, ConfigType type) {
         throw new AssertionError();
     }
 
     public static ConfigBuilder create(String modId, ConfigType type) {
-        return create(Identifier.fromNamespaceAndPath(modId, type.getDefaultName()), type);
+        return create(ResourceLocation.fromNamespaceAndPath(modId, type.getDefaultName()), type);
     }
 
-    private final Identifier name;
+    private final ResourceLocation name;
     protected final ConfigType type;
 
-    protected ConfigBuilder(Identifier name, ConfigType type) {
+    protected ConfigBuilder(ResourceLocation name, ConfigType type) {
         this.name = name;
         this.type = type;
         this.uiStack.push(this.uiRoot);
@@ -124,7 +125,7 @@ public abstract class ConfigBuilder {
 
     protected abstract ModConfigHolder buildHolder();
 
-    public Identifier getName() {
+    public ResourceLocation getName() {
         return name;
     }
 
@@ -132,13 +133,24 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
-    /** NeoForge only. */
+    /** Stops moonlight from writing missing config lang keys into your en_us.json when running in dev. */
+    public <T extends ConfigBuilder> T disableLangExport() {
+        ConfigLangExporter.disableFor(name.getNamespace());
+        return (T) this;
+    }
+
+    /** Stores defineObject values as a json string rather than a native toml object. NeoForge only. */
     public <T extends ConfigBuilder> T writeObjectsAsJson() {
         this.writeObjectsAsJson = true;
         return (T) this;
     }
 
-    /** Applies to the next defined value, like worldReload. */
+    @Deprecated(forRemoval = true)
+    public <T extends ConfigBuilder> T setWriteJsons() {
+        return writeObjectsAsJson();
+    }
+
+    /** Marks the next defined value as one that affects dynamic resource/data packs. Sticky until then, like worldReload(). */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
         return (T) this;
@@ -156,7 +168,10 @@ public abstract class ConfigBuilder {
         return defineColor(name, defaultValue, true);
     }
 
-    /** Without hasAlpha the value is plain RGB. */
+    /**
+     * An int color, edited as a hex field. With hasAlpha it's an ARGB color (#AARRGGBB), without it the alpha is
+     * dropped and it's a plain RGB color (#2A77EA).
+     */
     public abstract Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha);
 
     public abstract Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max);
@@ -187,35 +202,35 @@ public abstract class ConfigBuilder {
         return defineChoiceInternal(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
-    public Supplier<Identifier> defineRegistry(String name, Identifier defaultValue, Registry<?> registry) {
+    public Supplier<ResourceLocation> defineRegistry(String name, ResourceLocation defaultValue, Registry<?> registry) {
         Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);
-        return () -> Identifier.parse(handle.get());
+        return () -> ResourceLocation.parse(handle.get());
     }
 
-    public Supplier<Item> defineItem(String name, Identifier defaultValue) {
+    public Supplier<Item> defineItem(String name, ResourceLocation defaultValue) {
         Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),
-                id -> Utils.displayStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(id))));
-        return () -> BuiltInRegistries.ITEM.getValue(Identifier.parse(handle.get()));
+                id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
+        return () -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(handle.get()));
     }
 
-    public Supplier<Block> defineBlock(String name, Identifier defaultValue) {
+    public Supplier<Block> defineBlock(String name, ResourceLocation defaultValue) {
         Supplier<String> handle = defineChoiceInternal(name, defaultValue.toString(), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
-                id -> Utils.displayStack(BuiltInRegistries.BLOCK.getValue(Identifier.parse(id))));
-        return () -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(handle.get()));
+                id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
+        return () -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(handle.get()));
     }
 
     private static List<String> registryIds(Registry<?> registry) {
-        return registry.keySet().stream().map(Identifier::toString).sorted().toList();
+        return registry.keySet().stream().map(ResourceLocation::toString).sorted().toList();
     }
 
-    private static List<String> idStrings(List<Identifier> ids) {
-        return ids.stream().map(Identifier::toString).toList();
+    private static List<String> idStrings(List<ResourceLocation> ids) {
+        return ids.stream().map(ResourceLocation::toString).toList();
     }
 
-    public static final Predicate<Object> REGISTRY_ID_CHECK = o -> o instanceof String s && Identifier.tryParse(s) != null;
+    public static final Predicate<Object> REGISTRY_ID_CHECK = o -> o instanceof String s && ResourceLocation.tryParse(s) != null;
 
     protected abstract Supplier<List<String>> defineListInternal(String name, List<String> defaultValue,
                                                                  Predicate<Object> entryValidator,
@@ -227,7 +242,11 @@ public abstract class ConfigBuilder {
         return defineListInternal(name, defaultValue, o -> o instanceof String s && copy.contains(s), () -> copy, null);
     }
 
-    /** Like defineList but the options are only lazily resolved suggestions. Any entry passing entryValidator is kept. */
+    /**
+     * Like defineList, but the suggestions are read lazily, so options that only exist later (after registration for
+     * instance) still show up. Entries aren't limited to them: anything entryValidator accepts is kept, so regex
+     * patterns or ids that aren't loaded yet don't get dropped.
+     */
     public Supplier<List<String>> defineSuggestionList(String name, List<String> defaultValue,
                                                        Supplier<List<String>> suggestions,
                                                        Predicate<Object> entryValidator,
@@ -235,24 +254,24 @@ public abstract class ConfigBuilder {
         return defineListInternal(name, defaultValue, entryValidator, suggestions, icon);
     }
 
-    public Supplier<List<Identifier>> defineRegistryList(String name, List<Identifier> defaultValue, Registry<?> registry) {
+    public Supplier<List<ResourceLocation>> defineRegistryList(String name, List<ResourceLocation> defaultValue, Registry<?> registry) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(registry), null);
-        return () -> handle.get().stream().map(Identifier::parse).toList();
+        return () -> handle.get().stream().map(ResourceLocation::parse).toList();
     }
 
-    public Supplier<List<Item>> defineItemList(String name, List<Identifier> defaultValue) {
+    public Supplier<List<Item>> defineItemList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.ITEM),
-                id -> Utils.displayStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(id))));
-        return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.getValue(Identifier.parse(id))).toList();
+                id -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))));
+        return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
     }
 
-    public Supplier<List<Block>> defineBlockList(String name, List<Identifier> defaultValue) {
+    public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
-                id -> Utils.displayStack(BuiltInRegistries.BLOCK.getValue(Identifier.parse(id))));
-        return () -> handle.get().stream().map(id -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id))).toList();
+                id -> new ItemStack(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id)).asItem()));
+        return () -> handle.get().stream().map(id -> BuiltInRegistries.BLOCK.get(ResourceLocation.parse(id))).toList();
     }
 
     private static class RegexPatternValue implements Supplier<Pattern> {
@@ -302,8 +321,8 @@ public abstract class ConfigBuilder {
         return defineObject(name, () -> def, Codec.unboundedMap(Codec.STRING, Codec.STRING));
     }
 
-    public Supplier<Map<Identifier, Identifier>> defineIDMap(String name, Map<Identifier, Identifier> def) {
-        return defineObject(name, () -> def, Codec.unboundedMap(Identifier.CODEC, Identifier.CODEC));
+    public Supplier<Map<ResourceLocation, ResourceLocation>> defineIDMap(String name, Map<ResourceLocation, ResourceLocation> def) {
+        return defineObject(name, () -> def, Codec.unboundedMap(ResourceLocation.CODEC, ResourceLocation.CODEC));
     }
 
     public abstract Supplier<JsonElement> defineJson(String name, JsonElement defaultValue);
@@ -322,10 +341,9 @@ public abstract class ConfigBuilder {
     }
 
 
-    public Supplier<Identifier> define(String name, Identifier defaultValue) {
-        // stored and screen-edited as a validated string; the returned supplier just parses it
+    public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
         Supplier<String> handle = define(name, defaultValue.toString(), REGISTRY_ID_CHECK);
-        return () -> Identifier.parse(handle.get());
+        return () -> ResourceLocation.parse(handle.get());
     }
 
     public Component description(String name) {
@@ -346,7 +364,7 @@ public abstract class ConfigBuilder {
     }
 
     public ConfigBuilder comment(String comment) {
-        // an unclaimed previous comment belonged to the last define
+        // a new comment means the previous one had no define of its own, so it was an "after" comment: flush it first
         if (this.pendingComment != null) applyComment(this.pendingComment);
         this.pendingComment = comment;
         this.pendingCommentForwarded = false;
@@ -357,15 +375,15 @@ public abstract class ConfigBuilder {
         return comment(String.join("\n", comment));
     }
 
-    public ConfigBuilder icon(Identifier id) {
+    public ConfigBuilder icon(ResourceLocation id) {
         this.pendingIcon = id;
         return this;
     }
 
     public ConfigBuilder icon(String id) {
         return icon(id.indexOf(':') >= 0
-                ? Identifier.parse(id)
-                : Identifier.fromNamespaceAndPath(this.name.getNamespace(), id));
+                ? ResourceLocation.parse(id)
+                : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
     private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanValue row) {
@@ -423,6 +441,11 @@ public abstract class ConfigBuilder {
 
     public ConfigBuilder pop(int count) {
         for (int i = 0; i < count; i++) pop();
+        return this;
+    }
+
+    @Deprecated(forRemoval = true)
+    public ConfigBuilder translation(String translationKey) {
         return this;
     }
 
@@ -492,13 +515,14 @@ public abstract class ConfigBuilder {
         }
         List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
-        // define() just recorded the BooleanValue, adopt it as the gate row
+        // define() just recorded the matching BooleanValue as this category's last entry: adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
         if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
-            // explicit icon wins, else infer from the category name. category button and gate row share it
+            // explicit icon(...) wins, else infer from the category name. Mirrored so the category button and the
+            // gate row share one icon
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
             if (cat.icon() == null) cat.setIcon(bv.icon());
             bindFeature(bv, effective, dependencies);
@@ -514,7 +538,10 @@ public abstract class ConfigBuilder {
     }
 
 
-    /** Boolean drawn as a check/cross switch. The returned supplier is ANDed with every ancestor feature. */
+    /**
+     * A named on/off feature. Draws as a check/cross switch instead of an ON/OFF button, and the supplier reads false if this
+     * one or any parent feature is off. Pair it with icon(), like builder.icon("lever").feature("test_bool", true).
+     */
     public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
         List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(name, defaultEnabled);
@@ -542,8 +569,8 @@ public abstract class ConfigBuilder {
 
 
     @Nullable
-    private Identifier inferFeatureIcon(String name) {
-        return Identifier.tryBuild(this.name.getNamespace(), name);
+    private ResourceLocation inferFeatureIcon(String name) {
+        return ResourceLocation.tryBuild(this.name.getNamespace(), name);
     }
 
     private static void bindFeature(ConfigOption.BooleanValue row, Supplier<Boolean> effective,
@@ -582,6 +609,7 @@ public abstract class ConfigBuilder {
         this.uiStack.peek().add(option);
     }
 
+    /** Root of the screen tree. Ready once build() has run. */
     public ConfigCategory getUiRoot() {
         return this.uiRoot;
     }
@@ -608,6 +636,7 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
+    /** A Vec3 shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);
@@ -625,6 +654,7 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
+    /** A Vec3i shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);
@@ -663,7 +693,8 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    // Forge needs the flag before the next define. Fabric reads pendingReload at record time instead
+    // Forge needs the flag before the next define. Fabric keeps it on its own value object and reads pendingReload
+    // at record time, so it doesn't override this
     protected void forwardReloadFlag(ConfigReloadType type) {
     }
 
