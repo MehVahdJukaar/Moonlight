@@ -1,8 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
-    id "com.matthewprenger.cursegradle" version "1.4.0"
-    id "com.modrinth.minotaur" version "2.8.10"
+    id "com.hypherionmc.modutils.modpublisher" version "2.2.3" apply false
     id "com.possible-triangle.publishing" version "1.2.67" apply false
 }
 
@@ -27,8 +26,7 @@ allprojects {
 
         mavenLocal()
 
-        maven { url "https://maven.parchmentmc.org" }
-
+        maven { url = "https://maven.parchmentmc.org" }
         maven {
             url = "https://www.cursemaven.com"
             allowInsecureProtocol = true
@@ -37,7 +35,6 @@ allprojects {
             name = 'Ladysnake Mods'
             url = 'https://maven.ladysnake.org/releases'
         }
-
         maven { url 'https://jitpack.io' }
 
     }
@@ -56,8 +53,7 @@ allprojects {
 subprojects {
     apply plugin: "dev.architectury.loom"
 //    apply plugin: "io.github.juuxel.loom-quiltflower"
-    apply plugin: "com.matthewprenger.cursegradle"
-    apply plugin: "com.modrinth.minotaur"
+    apply plugin: "com.hypherionmc.modutils.modpublisher"
 
 
     loom {
@@ -81,53 +77,42 @@ subprojects {
     var changelogText = changelogFile.exists() ? changelogFile.text : ""
     def mcVersions = listGameVersions(minecraft_min_version, minecraft_max_version)
 
-    if (env.MODRINTH_TOKEN) {
-        modrinth {
-            projectId = mod_id
-            uploadFile = tasks.remapJar
-            additionalFiles.add(tasks.remapSourcesJar)
-            gameVersions = mcVersions
-            if (modLoader == "forge") {
-                loaders = [modLoader, "neoforge"]
-            } else {
-                loaders = [modLoader]
-            }
-            changelog = changelogText
-            versionNumber = mod_version + "-" + modLoader
-            versionType = "release"
+    publisher {
+        apiKeys {
+            modrinth env.MODRINTH_TOKEN ?: ""
+            curseforge env.CURSEFORGE_TOKEN ?: ""
+        }
 
-            if (modLoader == "fabric") {
-                dependencies {
-                    required.project "fabric-api"
-                }
+//        setDebug(true) // Only for testing
+
+        setModrinthID(modrinth_id)
+        setCurseID(curseforge_id)
+
+        setGameVersions(mcVersions)
+        setChangelog(changelogText)
+        setProjectVersion("${mod_version}-${modLoader}")
+        setVersionType(release_type)
+        setCurseEnvironment("both")
+
+        setArtifact(tasks.remapJar)
+        addAdditionalFile(tasks.remapSourcesJar)
+
+        if (modLoader == "fabric") {
+            setLoaders(modLoader)
+            setDisplayName("${mod_id}-${mod_version}-fabric")
+            modrinthDepends {
+                required("fabric-api")
+            }
+
+            curseDepends {
+                required("fabric-api")
             }
         }
-    }
-
-    if (env.CURSEFORGE_TOKEN) {
-        curseforge {
-            apiKey = env.CURSEFORGE_TOKEN
-            project {
-                id = rootProject.project_id
-                changelog = changelogText
-                changelogType = 'markdown'
-                releaseType = 'release'
-                for (var ver : mcVersions) {
-                    addGameVersion ver
-                }
-                addGameVersion modLoader.capitalize()
-                if (modLoader == "forge") {
-                    addGameVersion "NeoForge"
-                }
-                mainArtifact(tasks.remapJar)
-                addArtifact(tasks.remapSourcesJar)
-
-                if (modLoader == "fabric") {
-                    relations {
-                        requiredDependency "fabric-api"
-                    }
-                }
-            }
+        //!! FORGE
+        else {
+            setLoaders(modLoader, "neoforge")
+            setDisplayName("${mod_id}-${mod_version}-forge")
+            // modrinthDepends / curseDepends are not needed
         }
     }
 
