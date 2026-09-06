@@ -1,2 +1,4 @@
-- minor fixes
-- minor changes to media buttons
+- **luminous_nether**: Removed childkey, STICK - it's not needed anymore
+- **WoodType**: Added isBambooLike (Backported from 1.21)
+- **Palette**: Updated first half of methods' code (Backported from 1.21)
+- **McMetaFile**: Added 2 methods (Backported from 1.21)
