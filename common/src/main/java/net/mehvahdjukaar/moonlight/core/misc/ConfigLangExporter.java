@@ -34,6 +34,11 @@ public class ConfigLangExporter {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final boolean ENABLED = Boolean.parseBoolean(System.getProperty(ENABLED_PROPERTY, "true"));
+    private static final Set<String> OPTED_OUT = new HashSet<>();
+
+    public static void disableFor(String modId) {
+        OPTED_OUT.add(modId);
+    }
 
     private static final Set<String> OPTED_OUT = new HashSet<>();
 

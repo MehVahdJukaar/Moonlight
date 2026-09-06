@@ -1,10 +1,14 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.mehvahdjukaar.moonlight.api.client.LoomItemRenderer;
 import net.mehvahdjukaar.moonlight.api.item.ILoomItem;
+import net.mehvahdjukaar.moonlight.core.misc.LoomSlotIcons;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -19,6 +23,7 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -28,8 +33,32 @@ import java.util.function.Supplier;
 @Mixin(LoomScreen.class)
 public abstract class LoomScreenMixin extends AbstractContainerScreen<LoomMenu> {
 
+    @Unique
+    private final CyclingSlotBackground moonlight$bannerSlotIcons = new CyclingSlotBackground(0);
+
     protected LoomScreenMixin(LoomMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (LoomSlotIcons.hasCustom()) this.moonlight$bannerSlotIcons.tick(LoomSlotIcons.get());
+    }
+
+    @WrapWithCondition(method = "extractBackground", at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"))
+    private boolean moonlight$skipVanillaBannerIcon(GuiGraphicsExtractor graphics, RenderPipeline pipeline,
+                                                    Identifier sprite, int x, int y, int width, int height) {
+        return !LoomSlotIcons.hasCustom();
+    }
+
+    @Inject(method = "extractBackground", at = @At("TAIL"))
+    private void moonlight$cycleBannerSlotIcons(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                                float partialTicks, CallbackInfo ci) {
+        if (LoomSlotIcons.hasCustom()) {
+            this.moonlight$bannerSlotIcons.render(this.menu, graphics, partialTicks, this.leftPos, this.topPos);
+        }
     }
 
     @ModifyExpressionValue(method = "extractBackground", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
