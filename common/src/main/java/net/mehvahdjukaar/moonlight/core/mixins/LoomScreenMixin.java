@@ -6,15 +6,20 @@ import net.mehvahdjukaar.moonlight.api.item.ILoomItem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Supplier;
 
@@ -31,13 +36,30 @@ public abstract class LoomScreenMixin extends AbstractContainerScreen<LoomMenu> 
     private BannerPatternLayers moonlight$customLoomPreview(BannerPatternLayers patterns, GuiGraphics graphics,
                                                             float partialTicks, int mouseX, int mouseY) {
         ItemStack banner = this.menu.getBannerSlot().getItem();
-        if (!(banner.getItem() instanceof ILoomItem custom)) return patterns;
-        Supplier<LoomItemRenderer> factory = custom.getLoomRenderer();
-        if (factory == null) return patterns;
-        boolean skipVanilla = factory.get().render(graphics, banner, this.menu.getResultSlot().getItem(),
+        LoomItemRenderer renderer = moonlight$rendererFor(banner);
+        if (renderer == null) return patterns;
+        boolean skipVanilla = renderer.render(graphics, banner, this.menu.getResultSlot().getItem(),
                 patterns, this.leftPos, this.topPos, partialTicks);
         graphics.flush();
         return skipVanilla ? null : patterns;
+    }
+
+    @Inject(method = "renderPattern", at = @At("HEAD"), cancellable = true)
+    private void moonlight$customPatternIcon(GuiGraphics graphics, Holder<BannerPattern> pattern, int x, int y,
+                                             CallbackInfo ci) {
+        LoomItemRenderer renderer = moonlight$rendererFor(this.menu.getBannerSlot().getItem());
+        if (renderer == null) return;
+        if (renderer.renderPatternIcon(graphics, this.menu.getBannerSlot().getItem(), pattern, x, y)) {
+            graphics.flush();
+            ci.cancel();
+        }
+    }
+
+    @Nullable
+    private static LoomItemRenderer moonlight$rendererFor(ItemStack stack) {
+        if (!(stack.getItem() instanceof ILoomItem custom)) return null;
+        Supplier<LoomItemRenderer> factory = custom.getLoomRenderer();
+        return factory == null ? null : factory.get();
     }
 
     @ModifyExpressionValue(method = "renderBg", at = @At(value = "INVOKE",

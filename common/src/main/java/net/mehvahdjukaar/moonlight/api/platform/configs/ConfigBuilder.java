@@ -133,6 +133,12 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
+    /** Stops moonlight from writing missing config lang keys into your en_us.json when running in dev. */
+    public <T extends ConfigBuilder> T disableLangExport() {
+        ConfigLangExporter.disableFor(name.getNamespace());
+        return (T) this;
+    }
+
     /** Stores defineObject values as a json string rather than a native toml object. NeoForge only. */
     public <T extends ConfigBuilder> T writeObjectsAsJson() {
         this.writeObjectsAsJson = true;
