@@ -1,6 +1,7 @@
 import net.mehvahdjukaar.moonlight.api.client.LoomItemRenderer;
 import net.mehvahdjukaar.moonlight.api.item.ILoomItem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
@@ -40,17 +41,17 @@ public class LoomItemExample extends Item implements ILoomItem {
 
         // called every frame the screen is up. patterns is null when theres nothing to preview yet
         @Override
-        public boolean render(GuiGraphics graphics, ItemStack bannerSlotStack, ItemStack result,
+        public boolean render(GuiGraphicsExtractor graphics, ItemStack bannerSlotStack, ItemStack result,
                               BannerPatternLayers patterns, int leftPos, int topPos, float partialTicks) {
             if (patterns == null) return false;
             //vanilla hangs its flag around 139, 52 from the gui corner
-            graphics.renderItem(result, leftPos + 131, topPos + 44);
+            AnimatedGuiItem.submit(graphics, result, leftPos + 131, topPos + 44, 16, -1, (pose, blockModel) -> {});
             return true; //drew it ourselves, dont run the vanilla one on top
         }
 
         // one of the 16 little buttons in the pattern grid. box is 5 by 10 at x + 4, y + 2
         @Override
-        public boolean renderPatternIcon(GuiGraphics graphics, ItemStack bannerSlotStack,
+        public boolean renderPatternIcon(GuiGraphicsExtractor graphics, ItemStack bannerSlotStack,
                                          Holder<BannerPattern> pattern, int x, int y) {
             return false; //false keeps the vanilla white on gray flags
         }
