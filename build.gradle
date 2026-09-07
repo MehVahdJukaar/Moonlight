@@ -96,6 +96,9 @@ subprojects {
 
         setArtifact(tasks.remapJar)
         addAdditionalFile(tasks.remapSourcesJar)
+        addAdditionalFile {
+            fileType "sources-jar"
+        }
 
         if (modLoader == "fabric") {
             setLoaders(modLoader)
