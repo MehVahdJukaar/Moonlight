@@ -11,19 +11,8 @@ public interface IModelPartExtension {
 
     int moonlight$getTextHeight();
 
-    //Best-effort
-    @Nullable
     static ModelPart getRootPart(EntityModel<?> model) {
-        if (model instanceof AgeableListModelAccessor al) {
-            for (ModelPart v : al.moonlight$invokeBodyParts()) {
-                return v;
-            }
-        } else if (model instanceof HierarchicalModel<?> m) {
-            return m.root();
-        } else if (model instanceof RootModel m) {
-            return m.root();
-        }
-        return null;
+        return model.root();
     }
 
     static int[] getTextureSize(EntityModel<?> model) {

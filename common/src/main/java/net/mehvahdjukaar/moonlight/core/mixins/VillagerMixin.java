@@ -19,7 +19,7 @@ public abstract class VillagerMixin extends AbstractVillager {
     }
 
     @Inject(method = ("registerBrainGoals"), at = @At("RETURN"))
-    protected void reg(Brain<Villager> pVillagerBrain, CallbackInfo ci) {
+    protected void ml$addExtraBrainGoals(Brain<Villager> pVillagerBrain, CallbackInfo ci) {
         VillagerAIInternal.onRegisterBrainGoals(pVillagerBrain, this);
     }
 

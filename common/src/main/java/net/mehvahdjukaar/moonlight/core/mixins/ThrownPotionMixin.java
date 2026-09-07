@@ -24,12 +24,12 @@ public abstract class ThrownPotionMixin extends ThrowableItemProjectile {
     }
 
     @Inject(method = "dowseFire", at = @At("TAIL"))
-    public void moonlight$extinguishILightables(BlockPos pos, CallbackInfo ci, @Local BlockState state) {
-        if (state.getBlock() instanceof ILightable l) {
+    public void moonlight$extinguishILightables(BlockPos pos, CallbackInfo ci, @Local BlockState blockState) {
+        if (blockState.getBlock() instanceof ILightable l) {
             Entity entity = this.getOwner();
             boolean canAct = entity == null || entity instanceof Player || PlatHelper.isMobGriefingOn(level(), entity);
             if (canAct) {
-                l.tryExtinguish(this, state, pos, level());
+                l.tryExtinguish(this, blockState, pos, level());
             }
         }
     }

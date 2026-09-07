@@ -94,11 +94,11 @@ public final class PalettedPermutationsHelper {
     }
 
     private static void addPermutations(PalettedPermutations source, Map<Identifier, PalettedSprite> map) {
-        for (var perm : source.permutations.entrySet()) {
-            String suffix = "_" + perm.getKey();
-            for (Identifier base : source.textures) {
+        for (var perm : source.permutations().entrySet()) {
+            String suffix = source.separator() + perm.getKey();
+            for (Identifier base : source.textures()) {
                 // last wins, same as vanilla Output.add
-                map.put(base.withSuffix(suffix), new PalettedSprite(base, source.paletteKey, perm.getValue()));
+                map.put(base.withSuffix(suffix), new PalettedSprite(base, source.paletteKey(), perm.getValue()));
             }
         }
     }

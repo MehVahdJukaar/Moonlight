@@ -36,12 +36,6 @@ public class ConfigLangExporter {
     private static final boolean ENABLED = Boolean.parseBoolean(System.getProperty(ENABLED_PROPERTY, "true"));
     private static final Set<String> OPTED_OUT = new HashSet<>();
 
-    public static void disableFor(String modId) {
-        OPTED_OUT.add(modId);
-    }
-
-    private static final Set<String> OPTED_OUT = new HashSet<>();
-
     /**
      * call this in your mod init if you don't want moonlight writing config lang keys into your en_us.json in dev
      */

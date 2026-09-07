@@ -32,6 +32,8 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void initializeDirty(MapItemSavedData mapItemSavedData, Player player, CallbackInfo ci) {
+        //grabbing it here since the outer class ref is a synthetic field we cant shadow
+        moonlight$mapData = mapItemSavedData;
         //just to be sure. we HAVE to send this on the very first update packet
         moonlight$customMarkersDirty = true;
         for (var v : ((ExpandedMapData) mapItemSavedData).ml$getCustomData().values()) {
@@ -59,9 +61,8 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
     @Shadow
     private boolean dirtyData;
 
-    @Shadow
-    @Final
-    MapItemSavedData field_132;
+    @Unique
+    private MapItemSavedData moonlight$mapData;
 
     @Inject(method = "nextUpdatePacket", at = @At("HEAD"), cancellable = true)
     public void checkLocked(MapId mapId, CallbackInfoReturnable<@Nullable Packet<?>> cir) {
@@ -71,7 +72,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
 
     @ModifyReturnValue(method = "nextUpdatePacket", at = @At("TAIL"))
     public Packet<?> addExtraPacketData(@Nullable Packet<?> packet, MapId mapId) {
-        MapItemSavedData data = this.field_132;
+        MapItemSavedData data = this.moonlight$mapData;
         ExpandedMapData ed = ((ExpandedMapData) data);
 
         boolean updateData = false;
@@ -109,7 +110,7 @@ public abstract class HoldingPlayerMixin implements IHoldingPlayerExtension {
             // creates a new packet or modify existing one
             if (packet == null) {
                 packet = new ClientboundMapItemDataPacket(mapId,
-                        field_132.scale, field_132.locked, Optional.empty(), Optional.empty());
+                        data.scale, data.locked, Optional.empty(), Optional.empty());
             }
             IMapDataPacketExtension ep = ((IMapDataPacketExtension) packet);
 

@@ -51,11 +51,7 @@ public final class GuiHelper {
         graphics.centeredText(font, subtitle, width / 2, top + font.lineHeight + gap, ConfigGuiColors.DESCRIPTION);
     }
 
-    public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
-        fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
-    }
-
-    public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
+    public static void fillGradientHorizontal(GuiGraphicsExtractor graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         int steps = maxX - minX;
         if (steps <= 0) return;
         for (int i = 0; i < steps; i++) {
@@ -94,18 +90,15 @@ public final class GuiHelper {
                 icon.width(), icon.height(), icon.width(), icon.height());
     }
 
-    public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
+    public static void renderListBackground(GuiGraphicsExtractor graphics, int top, int bottom, int width, double scroll) {
         Identifier bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
-        RenderSystem.enableBlend();
-        graphics.blit(bg, 0, top, (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
-        RenderSystem.disableBlend();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, bg, 0, top,
+                (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
     }
 
-    public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
+    public static void renderFooterSeparator(GuiGraphicsExtractor graphics, int bottom, int width) {
         Identifier footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
-        RenderSystem.disableBlend();
+        graphics.blit(RenderPipelines.GUI_TEXTURED, footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
     }
 
     /** Thin right-edge scrollbar for a custom-scrolled panel. No-op when everything fits. */
@@ -172,7 +165,7 @@ public final class GuiHelper {
         }
     }
 
-    private static boolean scrollIfOverflow(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {
+    private static boolean scrollIfOverflow(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {
         int overflow = font.width(text) - (maxX - minX);
         if (overflow <= 0) return false;
         double seconds = (double) Util.getMillis() / 1000.0;

@@ -60,30 +60,30 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
     @Inject(method = "tick", at = @At("TAIL"))
     private static void whileMoving(Level pLevel, BlockPos pPos, BlockState pState, PistonMovingBlockEntity tile, CallbackInfo info) {
         if (tile instanceof IExtendedPistonTile t) {
-            t.tickMovedBlock(pLevel, pPos);
+            t.moonlight$tickMovedBlock(pLevel, pPos);
         }
     }
 
     @Override
-    public void tickMovedBlock(Level level, BlockPos pos) {
+    public void moonlight$tickMovedBlock(Level level, BlockPos pos) {
         if (this.progressO < 1.0F) {
             Block b = this.movedState.getBlock();
             if (b instanceof IPistonMotionReact mr && mr.ticksWhileMoved()) {
-                AABB aabb = this.moveByPositionAndProgress(pos, Shapes.block().bounds());
+                AABB aabb = this.moonlight$moveByPositionAndProgress(pos, Shapes.block().bounds());
                 mr.moveTick(level, pos, this.movedState, aabb, (PistonMovingBlockEntity) (Object) this);
             }
         }
     }
 
     @Unique
-    private AABB moveByPositionAndProgress(BlockPos pos, AABB aabb) {
+    private AABB moonlight$moveByPositionAndProgress(BlockPos pos, AABB aabb) {
         double d0 = this.getExtendedProgress(this.progress);
         return aabb.move(pos.getX() + d0 * this.direction.getStepX(), pos.getY() + d0 * this.direction.getStepY(), pos.getZ() + d0 * this.direction.getStepZ());
     }
 
     @Inject(method = "finalTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;)V",
             shift = At.Shift.AFTER))
-    public void onFinishedShortPulse(CallbackInfo ci) {
+    public void ml£onFinishedShortPulse(CallbackInfo ci) {
         if (!level.isClientSide() && this.movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, worldPosition,
                     new ClientBoundOnPistonMovedBlockMessage(this.worldPosition, this.movedState, this.direction, this.extending));
@@ -93,7 +93,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;updateOrDestroy(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;I)V",
             shift = At.Shift.AFTER), require = 1)
-    private static void onFinishedMoving(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
+    private static void ml$onFinishedMoving(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
         BlockState movedState = blockEntity.getMovedState();
         if (!level.isClientSide() && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,
@@ -106,7 +106,7 @@ public abstract class PistonBlockEntityMixin extends BlockEntity implements IBlo
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;neighborChanged(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/world/level/redstone/Orientation;)V",
             shift = At.Shift.AFTER), require = 1)
-    private static void onFinishedMoving2(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
+    private static void ml$onFinishedMoving2(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity, CallbackInfo ci) {
         BlockState movedState = blockEntity.getMovedState();
         if (!level.isClientSide() && movedState.getBlock() instanceof IPistonMotionReact pr) {
             NetworkHelper.sendToAllClientPlayersInDefaultRange((ServerLevel) level, pos,

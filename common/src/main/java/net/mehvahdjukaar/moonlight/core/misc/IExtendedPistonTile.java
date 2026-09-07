@@ -5,5 +5,5 @@ import net.minecraft.world.level.Level;
 
 public interface IExtendedPistonTile {
 
-    void tickMovedBlock(Level level, BlockPos pos);
+    void moonlight$tickMovedBlock(Level level, BlockPos pos);
 }

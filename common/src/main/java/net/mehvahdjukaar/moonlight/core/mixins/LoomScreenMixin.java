@@ -1,7 +1,8 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.mehvahdjukaar.moonlight.api.client.LoomItemRenderer;
 import net.mehvahdjukaar.moonlight.api.item.ILoomItem;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -57,7 +59,7 @@ public abstract class LoomScreenMixin extends AbstractContainerScreen<LoomMenu> 
     private void moonlight$cycleBannerSlotIcons(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
                                                 float partialTicks, CallbackInfo ci) {
         if (LoomSlotIcons.hasCustom()) {
-            this.moonlight$bannerSlotIcons.render(this.menu, graphics, partialTicks, this.leftPos, this.topPos);
+            this.moonlight$bannerSlotIcons.extractRenderState(this.menu, graphics, partialTicks, this.leftPos, this.topPos);
         }
     }
 
@@ -74,15 +76,14 @@ public abstract class LoomScreenMixin extends AbstractContainerScreen<LoomMenu> 
         return skipVanilla ? null : patterns;
     }
 
-    @Inject(method = "renderPattern", at = @At("HEAD"), cancellable = true)
-    private void moonlight$customPatternIcon(GuiGraphicsExtractor graphics, Holder<BannerPattern> pattern, int x, int y,
-                                             CallbackInfo ci) {
+    @WrapWithCondition(method = "extractBackground", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/screens/inventory/LoomScreen;extractBannerOnButton(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V"))
+    private boolean moonlight$customPatternIcon(LoomScreen instance, GuiGraphicsExtractor graphics, int x, int y,
+                                                TextureAtlasSprite sprite, @Local Holder<BannerPattern> pattern) {
         ItemStack banner = this.menu.getBannerSlot().getItem();
         LoomItemRenderer renderer = moonlight$rendererFor(banner);
-        if (renderer == null) return;
-        if (renderer.renderPatternIcon(graphics, banner, pattern, x, y)) {
-            ci.cancel();
-        }
+        if (renderer == null) return true;
+        return !renderer.renderPatternIcon(graphics, banner, pattern, x, y);
     }
 
     @Nullable

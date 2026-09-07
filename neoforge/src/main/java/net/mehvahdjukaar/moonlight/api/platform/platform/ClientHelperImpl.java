@@ -101,7 +101,7 @@ public class ClientHelperImpl {
         Consumer<EntityRenderersEvent.AddLayers> eventConsumer = event -> {
             var context = event.getContext();
             for (var skin : event.getSkins()) {
-                if (event.getSkin(skin) instanceof LivingEntityRenderer<?, ?, ?> le) {
+                if (event.getPlayerRenderer(skin) instanceof LivingEntityRenderer<?, ?, ?> le) {
                     listener.onRendererCreated(EntityType.PLAYER, le, new LayerAdderImpl(le), context);
                 }
             }

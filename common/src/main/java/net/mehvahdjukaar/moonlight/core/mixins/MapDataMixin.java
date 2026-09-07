@@ -30,6 +30,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -54,7 +55,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Final
     @Shadow
-    Map<String, net.minecraft.world.level.saveddata.maps.MapDecoration> decorations;
+    private Map<String, MapDecoration> decorations;
 
     @Shadow
     @Final
@@ -251,7 +252,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Inject(method = "checkBanners", at = @At("TAIL"))
-    public void checkCustomDeco(BlockGetter world, int x, int z, CallbackInfo ci) {
+    public void ml$checkCustomDeco(BlockGetter world, int x, int z, CallbackInfo ci) {
         if(!(world instanceof LevelAccessor la)){
             return;
         }
@@ -278,7 +279,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
     }
 
     @Inject(method = "<init>(IIBZZZLnet/minecraft/resources/ResourceKey;)V", at = @At("TAIL"))
-    public void initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
+    public void ml$initCustomData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3,
                                ResourceKey<Level> resourceKey, CallbackInfo ci) {
         for (var d : MapDataInternal.getMapDataRegistry()) {
             moonlight$customData.put(d, d.factory().get());

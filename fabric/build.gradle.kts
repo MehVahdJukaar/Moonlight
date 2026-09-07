@@ -20,7 +20,8 @@ dependencies {
     modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
-    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-fabric-1.21.1:${sable_companion_version}")
+    //fabric jar is still intermediary so it wont remap on 26.1. common one is mojmap already
+    compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
     modImplementation("com.terraformersmc:modmenu:${modmenu_version}")
     //modCompileOnly("curse.maven:super-better-grass-911433:4744836")

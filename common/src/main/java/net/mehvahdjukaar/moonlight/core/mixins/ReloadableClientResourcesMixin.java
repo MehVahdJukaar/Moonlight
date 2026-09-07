@@ -30,8 +30,6 @@ public abstract class ReloadableClientResourcesMixin {
     @Shadow
     private CloseableResourceManager resources;
 
-    @Shadow public abstract Stream<PackResources> listPacks();
-
     //should fire right before add reload listener, before packs are reloaded and listeners called
     @WrapOperation(method = "createReload", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;create(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/server/packs/resources/ReloadInstance;"))
     private ReloadInstance moonlight$clientDynamicPackEarlyReload(ResourceManager resourceManager,

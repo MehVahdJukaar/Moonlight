@@ -86,7 +86,7 @@ public class ClientHelperImpl {
     public static void addEntityLayersRegistration(ClientHelper.EntityLayerEvent listener) {
         Moonlight.assertInitPhase();
 
-        LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, context) ->
+        LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) ->
                 listener.onRendererCreated(type, renderer, helper::register, context));
     }
 
