@@ -21,7 +21,7 @@ public final class ModIconCache {
 
     private static final Map<String, Optional<Icon>> CACHE = new HashMap<>();
 
-    // plenty of mods never declare a logo, but most of them still ship one of these somewhere in the jar
+    //mods dont declare their darn logo...
     private static final List<String> GUESSED_ICON_PATHS = List.of(
             "icon.png", "logo.png", "%s.png", "%s-icon.png", "%s_icon.png", "%s-logo.png", "%s_logo.png",
             "assets/%s/icon.png", "assets/%s/logo.png", "pack.png");
