@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.math;
 
 import com.google.common.base.Preconditions;
-import net.mehvahdjukaar.moonlight.api.integration.SableCompat;
+import net.mehvahdjukaar.moonlight.core.integration.SableCompat;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.BaseColor;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.minecraft.core.BlockPos;

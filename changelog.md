@@ -1,2 +1,2 @@
-- added api to add loom supported items
-- config improvements
+- misc 26.1 fixes
+- including an important one on fabric
