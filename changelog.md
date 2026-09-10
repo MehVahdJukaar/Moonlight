@@ -1,5 +1,2 @@
-- added api to add loom supported items
-- config improvements
-- fixes some issues
-- api improvements
-- some compat with sable and its sublevels when it comes to collisions for our projectiles
+- misc 26.1 fixes
+- including an important one on fabric
