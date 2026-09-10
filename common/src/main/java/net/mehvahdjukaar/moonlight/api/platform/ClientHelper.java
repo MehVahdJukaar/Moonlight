@@ -60,6 +60,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -270,7 +271,7 @@ public class ClientHelper {
     }
 
     //Use the "special_models" folder instead since that's auto loaded
-    @Deprecated
+    @ApiStatus.Internal
     @PlatformImpl
     public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();

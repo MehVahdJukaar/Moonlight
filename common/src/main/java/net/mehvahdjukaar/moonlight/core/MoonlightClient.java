@@ -13,7 +13,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.*;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
 import net.mehvahdjukaar.moonlight.core.client.OurModsList;
-import net.mehvahdjukaar.moonlight.core.client.SimpleSpecialModelsLoader;
+import net.mehvahdjukaar.moonlight.core.client.SpecialModelsFolder;
 import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
@@ -62,11 +62,7 @@ public class MoonlightClient {
             event.register(MoonlightRegistry.SPAWN_BOX_BLOCK_ENTITY.get(), SpawnBoxBlockEntityRenderer::new);
         });
 
-        var specialModels = new SimpleSpecialModelsLoader();
-        ClientHelper.addClientReloadListener(() -> specialModels, Moonlight.res("special_models_loader"));
-        ClientHelper.addSpecialModelRegistration(specialModelEvent -> {
-            specialModels.getSpecialModels().forEach(specialModelEvent::register);
-        });
+        ClientHelper.addSpecialModelRegistration(event -> SpecialModelsFolder.scan().forEach(event::register));
 
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
     }
