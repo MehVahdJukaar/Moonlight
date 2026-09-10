@@ -253,9 +253,21 @@ public class PlatHelperImpl {
         var container = ModList.get().getModContainerById(modId).orElse(null);
         if (container == null) return null;
         IModInfo info = container.getModInfo();
-        String logo = info.getLogoFile().orElse(null);
-        if (logo == null || logo.isBlank()) return null;
-        return findResourcePath(info.getOwningFile().getFile(), logo);
+        //iconFile is the square one since 26.2. logoFile is the wide banner now, so it's only a fallback
+        String icon = modImageFile(info, "iconFile");
+        if (icon == null) icon = info.getLogoFile().filter(s -> !s.isBlank()).orElse(null);
+        if (icon == null) icon = modImageFile(info, "logoFile");
+        if (icon == null) icon = modImageFile(info, "bannerFile");
+        if (icon == null) return null;
+        return findResourcePath(info.getOwningFile().getFile(), icon);
+    }
+
+    @Nullable
+    private static String modImageFile(IModInfo info, String key) {
+        return info.getConfig().<String>getConfigElement(key)
+                .or(() -> info.getOwningFile().getConfig().getConfigElement(key))
+                .filter(s -> !s.isBlank())
+                .orElse(null);
     }
 
     @Nullable
