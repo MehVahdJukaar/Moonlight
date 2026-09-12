@@ -32,6 +32,7 @@ subprojects {
     }
 
     repositories {
+        mavenLocal() // codecui 1.4.5 isnt on nexus yet
         nexus()
     }
 

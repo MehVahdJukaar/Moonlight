@@ -69,7 +69,8 @@ class OptionRow extends ConfigListRow {
                 : ConfigControllers.create(value, session, this::onEdited);
 
         this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                MoonlightIcons.RESET, 12, 12, b -> rollback());
+                MoonlightIcons.RESET, 12, 12, b -> rollback())
+                .offIcon(MoonlightIcons.RESET_OFF);
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
         this.children = List.of(control.widget(), resetButton);

@@ -7,16 +7,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-/**
- * A button with a sprite drawn to the LEFT of its label. The label works exactly like a vanilla button's, centered
- * and scrolling when too long, and the icon goes just left of it, or in the middle when there is no label. Vanilla's
- * SpriteIconButton only does icon on the right or icon alone, so this covers "[icon] Label".
- */
 public class IconButton extends Button {
 
     private static final int PAD = 4;
 
     private final ResourceLocation sprite;
+    private ResourceLocation offSprite;
     private final int spriteWidth;
     private final int spriteHeight;
     private boolean drawBackground = true;
@@ -27,6 +23,12 @@ public class IconButton extends Button {
         this.sprite = sprite;
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
+    }
+
+    /** Swaps in a different sprite while the button is disabled, instead of dimming the normal one. */
+    public IconButton offIcon(ResourceLocation sprite) {
+        this.offSprite = sprite;
+        return this;
     }
 
     /** Drops the button background/label: just the icon, centered, with a faint hover highlight. */
@@ -44,9 +46,8 @@ public class IconButton extends Button {
         int iconY = this.getY() + (this.getHeight() - this.spriteHeight) / 2;
         int iconX;
         if (drawBackground) {
-            super.renderWidget(graphics, mouseX, mouseY, partialTick); // background + vanilla-centered label
+            super.renderWidget(graphics, mouseX, mouseY, partialTick);
             if (hasText()) {
-                // vanilla centers the label on the button's midpoint; drop the icon just left of the text's left edge
                 Font font = Minecraft.getInstance().font;
                 int textLeft = this.getX() + (this.getWidth() - font.width(this.getMessage())) / 2;
                 iconX = Math.max(this.getX() + PAD, textLeft - PAD - this.spriteWidth);
@@ -59,8 +60,10 @@ public class IconButton extends Button {
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }
-        if (!this.active) graphics.setColor(0.5f, 0.5f, 0.5f, 1f); // dim the icon to match the disabled button
-        graphics.blitSprite(this.sprite, iconX, iconY, this.spriteWidth, this.spriteHeight);
-        if (!this.active) graphics.setColor(1f, 1f, 1f, 1f);
+        boolean off = !this.active && this.offSprite != null;
+        boolean dim = !this.active && !off;
+        if (dim) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
+        graphics.blitSprite(off ? this.offSprite : this.sprite, iconX, iconY, this.spriteWidth, this.spriteHeight);
+        if (dim) graphics.setColor(1f, 1f, 1f, 1f);
     }
 }

@@ -9,6 +9,7 @@ public final class MoonlightIcons {
     public static final ResourceLocation NO = Moonlight.res("no");
     public static final ResourceLocation SAVE = Moonlight.res("save");
     public static final ResourceLocation RESET = Moonlight.res("reset");
+    public static final ResourceLocation RESET_OFF = Moonlight.res("reset_off");
     public static final ResourceLocation DELETE = Moonlight.res("delete");
     public static final ResourceLocation EDIT = Moonlight.res("edit");
     public static final ResourceLocation SEARCH = Moonlight.res("search");
