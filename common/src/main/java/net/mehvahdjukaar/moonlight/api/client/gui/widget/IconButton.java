@@ -10,12 +10,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
 
-/** A Button with a sprite to the left of its label, or centered when there is no label. */
 public class IconButton extends Button {
 
     private static final int PAD = 4;
 
     private final Identifier sprite;
+    private Identifier offSprite;
     private final int spriteWidth;
     private final int spriteHeight;
     private boolean drawBackground = true;
@@ -30,6 +30,12 @@ public class IconButton extends Button {
         this.sprite = sprite;
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
+    }
+
+    /** Swaps in a different sprite while the button is disabled, instead of dimming the normal one. */
+    public IconButton offIcon(Identifier sprite) {
+        this.offSprite = sprite;
+        return this;
     }
 
     /** Drops the button background/label: just the icon, centered, with a faint hover highlight. */
@@ -50,7 +56,6 @@ public class IconButton extends Button {
             this.extractDefaultSprite(graphics);
             this.extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
             if (hasText()) {
-                // vanilla centers the label on the button's midpoint; drop the icon just left of the text's left edge
                 Font font = Minecraft.getInstance().font;
                 int textLeft = this.getX() + (this.getWidth() - font.width(this.getMessage())) / 2;
                 iconX = Math.max(this.getX() + PAD, textLeft - PAD - this.spriteWidth);
@@ -63,7 +68,9 @@ public class IconButton extends Button {
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }
-        int tint = this.active ? CommonColors.WHITE : CommonColors.GRAY;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, iconX, iconY, this.spriteWidth, this.spriteHeight, tint);
+        boolean useOffSprite = !this.active && this.offSprite != null;
+        int tint = this.active || useOffSprite ? CommonColors.WHITE : CommonColors.GRAY;
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, useOffSprite ? this.offSprite : this.sprite,
+                iconX, iconY, this.spriteWidth, this.spriteHeight, tint);
     }
 }

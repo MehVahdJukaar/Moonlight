@@ -9,6 +9,7 @@ public final class MoonlightIcons {
     public static final Identifier NO = Moonlight.res("no");
     public static final Identifier SAVE = Moonlight.res("save");
     public static final Identifier RESET = Moonlight.res("reset");
+    public static final Identifier RESET_OFF = Moonlight.res("reset_off");
     public static final Identifier DELETE = Moonlight.res("delete");
     public static final Identifier EDIT = Moonlight.res("edit");
     public static final Identifier SEARCH = Moonlight.res("search");
