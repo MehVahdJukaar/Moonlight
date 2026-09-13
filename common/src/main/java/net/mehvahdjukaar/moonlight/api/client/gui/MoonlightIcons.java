@@ -15,6 +15,8 @@ public final class MoonlightIcons {
     public static final Identifier FOLDER = Moonlight.res("folder");
     public static final Identifier HEART = Moonlight.res("heart");
     public static final Identifier DISCOVER_MODS = Moonlight.res("discover_mods");
+    public static final Identifier CALENDAR = Moonlight.res("calendar");
+    public static final Identifier CLOCK = Moonlight.res("clock");
 
     public static final Identifier CONFIG = Moonlight.res("config");
     public static final Identifier CONFIG_CLIENT = Moonlight.res("config_client");
@@ -29,4 +31,5 @@ public final class MoonlightIcons {
     public static final Identifier SECTION_EXPANDED = Moonlight.res("widget/section_expanded");
     public static final Identifier CHAT_BUBBLE_BODY = Moonlight.res("widget/chat_bubble_body");
     public static final Identifier CHAT_BUBBLE_TAIL = Moonlight.res("widget/chat_bubble_tail");
+    public static final Identifier CLOCK_FACE = Moonlight.res("widget/clock_face");
 }
