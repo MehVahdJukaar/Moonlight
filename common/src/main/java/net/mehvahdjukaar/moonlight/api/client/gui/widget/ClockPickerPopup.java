@@ -60,10 +60,12 @@ public class ClockPickerPopup extends AnchoredPopup {
     }
 
     private static int[] modeLayout(Font font, int centerX) {
-        int digits = font.width("00"), colon = font.width(":"), meridiem = font.width("AM");
-        int total = digits + 2 + colon + 2 + digits + 6 + meridiem;
+        int digitsW = font.width("00");
+        int colonW = font.width(":");
+        int amW = font.width("AM");
+        int total = digitsW + 2 + colonW + 2 + digitsW + 6 + amW;
         int start = centerX - (total - 1) / 2;
-        return new int[]{start, start + digits + 2, start + digits + 2 + colon + 2, start + total - meridiem};
+        return new int[]{start, start + digitsW + 2, start + digitsW + 2 + colonW + 2, start + total - amW};
     }
 
     @Override

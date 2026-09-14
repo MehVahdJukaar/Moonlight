@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 public class BooleanToggleWidget extends AbstractButton {
 
     private static final int ICON_SIZE = 12;
-    private static final int ITEM_SIZE = 16; // decorative item drawn next to the symbol
+    private static final int ITEM_SIZE = 16;
     private static final int ITEM_GAP = 2;
 
     private final Identifier onIcon;
@@ -62,7 +62,6 @@ public class BooleanToggleWidget extends AbstractButton {
         this.extractDefaultSprite(graphics);
         int cy = getY() + getHeight() / 2;
         boolean hasIcon = iconRenderer != null && iconRenderer.available();
-        // center the [item?][symbol] group as a whole so the symbol stays put when no icon is present
         int groupWidth = hasIcon ? ITEM_SIZE + ITEM_GAP + ICON_SIZE : ICON_SIZE;
         int x = getX() + (getWidth() - groupWidth) / 2;
         if (hasIcon) {
