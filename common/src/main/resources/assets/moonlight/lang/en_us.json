@@ -240,5 +240,13 @@
   "moonlight.configuration.config_screen.convert_foreign_configs": "Convert Foreign Configs",
   "moonlight.configuration.config_screen.convert_foreign_configs.description": "Draw other mods' configs inside Moonlight's screen instead of theirs (NeoForge only). GENERIC_ONLY covers just the mods that never wrote a screen of their own, ALWAYS covers every mod. Per world server configs are only shown while a world is open. Best effort: options we can't show are left as they are",
   "moonlight.configuration.config_screen.config_item_carousel": "Config Item Carousel",
-  "moonlight.configuration.config_screen.config_item_carousel.description": "Show a slowly panning strip of a mod's items on its config screen"
+  "moonlight.configuration.config_screen.config_item_carousel.description": "Show a slowly panning strip of a mod's items on its config screen",
+  "moonlight.configuration.test_date": "Test Date",
+  "moonlight.configuration.test_date.month": "Month",
+  "moonlight.configuration.test_date.day": "Day",
+  "moonlight.configuration.test_category.test_date": "Test Date",
+  "moonlight.configuration.test_time": "Test Time",
+  "moonlight.configuration.test_time.hour": "Hour",
+  "moonlight.configuration.test_time.minute": "Minute",
+  "moonlight.configuration.test_category.test_time": "Test Time"
 }

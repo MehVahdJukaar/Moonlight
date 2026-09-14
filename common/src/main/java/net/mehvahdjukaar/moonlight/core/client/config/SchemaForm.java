@@ -20,6 +20,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,7 +106,7 @@ final class SchemaForm {
                 yield s -> new JsonPrimitive(parseLongOr(s.current(opt), v));
             }
             case Schema.Color c -> {
-                int rgb = asColor(seed, 0xFFFFFFFF);
+                int rgb = asColor(seed, CommonColors.WHITE);
                 var opt = new ConfigOption.ColorValue(title, null, new MemoryConfigValue<>(rgb), rgb, c.hasAlpha());
                 parent.add(opt);
                 yield s -> {

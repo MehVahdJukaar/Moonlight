@@ -7,32 +7,39 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+
 //General utility to render gui stuff.
 public final class GuiHelper {
 
-    private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
-    private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
-    private static final ResourceLocation INWORLD_MENU_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_background.png");
+    private static boolean inWorld() {
+        return Minecraft.getInstance().level != null;
+    }
+
+    private static ResourceLocation menuBackground() {
+        return inWorld() ? Screen.INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND;
+    }
+
+    public static boolean isMouseOver(double mouseX, double mouseY, int x, int y, int width, int height) {
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
 
     /** The top bar plus its bottom separator, no title. Same chrome as vanilla's header layouts, just taller. */
     public static void renderHeaderBar(GuiGraphics graphics, int width, int headerHeight) {
-        boolean inWorld = Minecraft.getInstance().level != null;
-        Screen.renderMenuBackgroundTexture(graphics, inWorld ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND,
-                0, 0, 0f, 0f, width, headerHeight - 2);
-        ResourceLocation separator = inWorld ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(separator, 0, headerHeight - 2, 0f, 0f, width, 2, 32, 2);
-        RenderSystem.disableBlend();
+        Screen.renderMenuBackgroundTexture(graphics, menuBackground(), 0, 0, 0f, 0f, width, headerHeight - 2);
+        renderSeparator(graphics, 0, headerHeight - 2, width);
     }
 
     /** The header bar with the gold screen title centered in it. */
@@ -70,13 +77,18 @@ public final class GuiHelper {
 
     /** The plain menu background the header bar uses, over an arbitrary rect, tiling still aligned to the screen. */
     public static void renderMenuBand(GuiGraphics graphics, int x, int y, int width, int height) {
-        ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND;
-        Screen.renderMenuBackgroundTexture(graphics, bg, x, y, x, y, width, height);
+        Screen.renderMenuBackgroundTexture(graphics, menuBackground(), x, y, x, y, width, height);
     }
 
-    /** The 2px separator sprite of the header/footer bands, usable as a divider anywhere. */
     public static void renderSeparator(GuiGraphics graphics, int x, int y, int width) {
-        ResourceLocation sprite = Minecraft.getInstance().level != null ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
+        ResourceLocation sprite = inWorld() ? Screen.INWORLD_HEADER_SEPARATOR : Screen.HEADER_SEPARATOR;
+        RenderSystem.enableBlend();
+        graphics.blit(sprite, x, y, 0f, 0f, width, 2, 32, 2);
+        RenderSystem.disableBlend();
+    }
+
+    public static void renderFooterSeparator(GuiGraphics graphics, int x, int y, int width) {
+        ResourceLocation sprite = inWorld() ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
         RenderSystem.enableBlend();
         graphics.blit(sprite, x, y, 0f, 0f, width, 2, 32, 2);
         RenderSystem.disableBlend();
@@ -101,16 +113,9 @@ public final class GuiHelper {
     }
 
     public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
-        ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
+        ResourceLocation bg = inWorld() ? AbstractSelectionList.INWORLD_MENU_LIST_BACKGROUND : AbstractSelectionList.MENU_LIST_BACKGROUND;
         RenderSystem.enableBlend();
         graphics.blit(bg, 0, top, (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
-        RenderSystem.disableBlend();
-    }
-
-    public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
-        ResourceLocation footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(footer, 0, bottom, 0f, 0f, width, 2, 32, 2);
         RenderSystem.disableBlend();
     }
 
@@ -122,7 +127,7 @@ public final class GuiHelper {
         int thumbH = Math.max(16, trackH * trackH / (trackH + maxScroll));
         int thumbY = top + (int) ((trackH - thumbH) * (scroll / maxScroll));
         graphics.fill(trackX, top, trackX + 3, top + trackH, 0x40000000);
-        graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, 0xFFB0B0B0);
+        graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, ConfigGuiColors.SCROLLBAR_THUMB);
     }
 
     /**
@@ -132,7 +137,7 @@ public final class GuiHelper {
     public static void renderInitialTile(GuiGraphics graphics, Font font, String name, int x, int y, int size,
                                          int tileColor, int letterColor, ResourceLocation gearIcon) {
         graphics.fill(x, y, x + size, y + size, tileColor);
-        graphics.renderOutline(x, y, size, size, 0xFF000000);
+        graphics.renderOutline(x, y, size, size, CommonColors.BLACK);
         String trimmed = name.trim();
         if (trimmed.isEmpty()) {
             int g = size >= 26 ? 16 : 8; // the gear is 16x16, so only whole steps of it stay on the pixel grid
@@ -145,7 +150,48 @@ public final class GuiHelper {
         graphics.drawString(font, initial, tx, ty, letterColor, false);
     }
 
-    /** The vanilla button click sound, for clickable things that aren't widgets and can't play it themselves. */
+    public static Locale currentLocale() {
+        String code = Minecraft.getInstance().getLanguageManager().getSelected();
+        return Locale.forLanguageTag(code.replace('_', '-'));
+    }
+
+    // centers the visible glyphs in the box. Font#width counts the trailing spacing column and lineHeight the
+    // descender row, so centering on those lands a pixel off
+    public static void renderTextCenteredIn(GuiGraphics graphics, Font font, String text, int x, int y, int w, int h, int color) {
+        int glyphW = font.width(text) - 1;
+        graphics.drawString(font, text, x + (w - glyphW) / 2, y + (h - 7) / 2, color, false);
+    }
+    //for diagonals
+    public static void renderChecker(GuiGraphics graphics, int x, int y, int w, int h) {
+        int cell = 4;
+        for (int yy = 0; yy < h; yy += cell) {
+            for (int xx = 0; xx < w; xx += cell) {
+                boolean light = (((xx / cell) + (yy / cell)) & 1) == 0;
+                graphics.fill(x + xx, y + yy, Math.min(x + xx + cell, x + w), Math.min(y + yy + cell, y + h),
+                        light ? ConfigGuiColors.CHECKER_LIGHT : ConfigGuiColors.CHECKER_DARK);
+            }
+        }
+    }
+
+    public static void renderLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
+        int dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+        int err = dx + dy;
+        while (true) {
+            graphics.fill(x0, y0, x0 + 1, y0 + 1, color);
+            if (x0 == x1 && y0 == y1) return;
+            int e2 = 2 * err;
+            if (e2 >= dy) {
+                err += dy;
+                x0 += sx;
+            }
+            if (e2 <= dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
     public static void playClickSound() {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
     }
@@ -158,10 +204,6 @@ public final class GuiHelper {
         return TextHelper.formatNumber(v);
     }
 
-    /**
-     * Left aligned text that scrolls back and forth when it doesn't fit its box, like vanilla's
-     * AbstractWidget.renderScrollingString, which we can't call.
-     */
     public static void renderScrollingText(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {
@@ -169,13 +211,24 @@ public final class GuiHelper {
         }
     }
 
-    /** Like renderScrollingText, but centered while the text fits and only scrolling once it doesn't. */
     public static void renderScrollingTextCentered(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {
             int cx = minX + (maxX - minX - font.width(text)) / 2; // fits: centered
             graphics.drawString(font, text, cx, textY, color);
         }
+    }
+
+    public static void renderClippedText(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int y, int color) {
+        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
+        graphics.drawString(font, text, minX, y, color);
+        graphics.disableScissor();
+    }
+
+    public static void renderClippedTextCentered(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int y, int color) {
+        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
+        graphics.drawCenteredString(font, text, (minX + maxX) / 2, y, color);
+        graphics.disableScissor();
     }
 
     private static boolean scrollIfOverflow(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {

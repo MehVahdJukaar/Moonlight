@@ -718,7 +718,6 @@ public class Palette implements Set<PaletteColor> {
         float lastLum = this.get(this.size() - 1).luminance();
         float span = lastLum - firstLum;
 
-        // Ideal step size in luminance
         float idealStep = span / (newSize - 1);
 
         List<PaletteColor> newPalette = new ArrayList<>();

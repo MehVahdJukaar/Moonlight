@@ -16,6 +16,8 @@ public final class MoonlightIcons {
     public static final ResourceLocation FOLDER = Moonlight.res("folder");
     public static final ResourceLocation HEART = Moonlight.res("heart");
     public static final ResourceLocation DISCOVER_MODS = Moonlight.res("discover_mods");
+    public static final ResourceLocation CALENDAR = Moonlight.res("calendar");
+    public static final ResourceLocation CLOCK = Moonlight.res("clock");
 
     public static final ResourceLocation CONFIG = Moonlight.res("config");
     public static final ResourceLocation CONFIG_CLIENT = Moonlight.res("config_client");
@@ -30,4 +32,5 @@ public final class MoonlightIcons {
     public static final ResourceLocation SECTION_EXPANDED = Moonlight.res("widget/section_expanded");
     public static final ResourceLocation CHAT_BUBBLE_BODY = Moonlight.res("widget/chat_bubble_body");
     public static final ResourceLocation CHAT_BUBBLE_TAIL = Moonlight.res("widget/chat_bubble_tail");
+    public static final ResourceLocation CLOCK_FACE = Moonlight.res("widget/clock_face");
 }

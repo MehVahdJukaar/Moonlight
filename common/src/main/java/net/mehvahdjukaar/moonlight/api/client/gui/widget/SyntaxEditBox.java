@@ -18,10 +18,6 @@ import net.minecraft.network.chat.Component;
  */
 public class SyntaxEditBox extends MultiLineEditBox {
 
-    // shared palette, forced opaque (these are drawn with an explicit alpha)
-    private static final int TEXT_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
-    private static final int PLACEHOLDER_COLOR = 0xFF000000 | ConfigGuiColors.DESCRIPTION;
-    private static final int CURSOR_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
     private static final int SELECTION_COLOR = 0xFF2A4A80; // structural, not themed
 
     private final Font font;
@@ -48,7 +44,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         String value = this.textField.value();
         if (value.isEmpty() && !this.isFocused()) {
             graphics.drawWordWrap(this.font, this.placeholder, this.getX() + this.innerPadding(),
-                    this.getY() + this.innerPadding(), this.width - this.totalInnerPadding(), PLACEHOLDER_COLOR);
+                    this.getY() + this.innerPadding(), this.width - this.totalInnerPadding(), ConfigGuiColors.DESCRIPTION);
             return;
         }
 
@@ -67,7 +63,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         for (MultilineTextField.StringView line : this.textField.iterateLines()) {
             if (this.withinContentAreaTopBottom(y, y + lineHeight)) {
                 String lineText = value.substring(line.beginIndex(), line.endIndex());
-                graphics.drawString(this.font, this.highlighter.highlightLine(lineText), textX, y, TEXT_COLOR);
+                graphics.drawString(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.TEXT);
             }
             if (!placedCursor && cursor >= line.beginIndex() && cursor <= line.endIndex()) {
                 cursorX = textX + this.font.width(value.substring(line.beginIndex(), cursor));
@@ -79,9 +75,9 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
         if (showCursor && placedCursor && this.withinContentAreaTopBottom(cursorY, cursorY + lineHeight)) {
             if (cursor >= value.length()) {
-                graphics.drawString(this.font, "_", cursorX, cursorY, CURSOR_COLOR);
+                graphics.drawString(this.font, "_", cursorX, cursorY, ConfigGuiColors.TEXT);
             } else {
-                graphics.fill(cursorX, cursorY - 1, cursorX + 1, cursorY + lineHeight, CURSOR_COLOR);
+                graphics.fill(cursorX, cursorY - 1, cursorX + 1, cursorY + lineHeight, ConfigGuiColors.TEXT);
             }
         }
     }

@@ -3,14 +3,10 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-// Shared sizing constants and drawing helpers for the config screen widgets, in one place so the screen,
-// list, rows and control providers all agree on the grid.
+//Shared sizing constants
 final class ConfigScreenLayout {
 
     static final int HEADER = 44;
@@ -28,7 +24,6 @@ final class ConfigScreenLayout {
 
     static final int DESC_LINES_PER_ROW = 2;
 
-    // the reload/restart hint sprite for a value, or null when it applies immediately
     @Nullable
     static ResourceLocation reloadIcon(ConfigReloadType type) {
         return switch (type) {
@@ -38,19 +33,11 @@ final class ConfigScreenLayout {
         };
     }
 
-    // the paper "config file" sprite for a config's type: client, server-synced or common
     static ResourceLocation configFileIcon(ConfigType type) {
         return switch (type) {
             case CLIENT -> MoonlightIcons.CONFIG_CLIENT;
             case COMMON_SYNCED -> MoonlightIcons.CONFIG_SERVER;
             case COMMON -> MoonlightIcons.CONFIG_COMMON;
         };
-    }
-
-    // left-aligned single-line text hard-clipped to [minX, maxX], for row subtitles
-    static void drawClipped(GuiGraphics graphics, Font font, Component text, int minX, int y, int maxX, int color) {
-        graphics.enableScissor(minX, y - 1, maxX, y + font.lineHeight + 1);
-        graphics.drawString(font, text, minX, y, color);
-        graphics.disableScissor();
     }
 }

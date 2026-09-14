@@ -14,8 +14,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-// One entry of a list page: the row the entry would normally get, rendered slightly narrower with a delete button in
-// the freed space. Purely a decorator, it owns no editing state, so every control behaves as on a normal page.
 class ListEntryRow extends ConfigListRow {
 
     private final ConfigListRow inner;
@@ -25,8 +23,7 @@ class ListEntryRow extends ConfigListRow {
 
     ListEntryRow(ConfigListRow inner, boolean canRemove, Runnable onRemove) {
         this.inner = inner;
-        this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                MoonlightIcons.DELETE, 12, 12, b -> onRemove.run());
+        this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.DELETE, b -> onRemove.run());
         this.remove.active = canRemove;
         this.remove.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.list_remove")));
 
@@ -51,8 +48,6 @@ class ListEntryRow extends ConfigListRow {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // the wrapped row gets first go (OptionRow toggles its description on a label click); only if it passes does
-        // the default child dispatch run, so nothing is handled twice
         return inner.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
     }
 

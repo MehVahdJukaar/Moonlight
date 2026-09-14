@@ -17,6 +17,10 @@ public class IconButton extends Button {
     private final int spriteHeight;
     private boolean drawBackground = true;
 
+    public IconButton(int x, int y, int width, int height, Component message, ResourceLocation sprite, OnPress onPress) {
+        this(x, y, width, height, message, sprite, 12, 12, onPress);
+    }
+
     public IconButton(int x, int y, int width, int height, Component message, ResourceLocation sprite,
                       int spriteWidth, int spriteHeight, OnPress onPress) {
         super(x, y, width, height, message, onPress, DEFAULT_NARRATION);

@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 
-import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

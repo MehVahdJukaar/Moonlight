@@ -1,11 +1,9 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -47,8 +45,6 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
         return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
     }
 
-    // Blank space above the first row, to center them in a taller pane. Uses the list header, which we don't need
-    // otherwise, so clicks and scrolling stay lined up on their own
     void setTopPadding(int padding) {
         this.setRenderHeader(padding > 0, Math.max(0, padding));
     }
@@ -62,9 +58,6 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
     protected void renderListSeparators(GuiGraphics graphics) {
         // the top separator is owned by the screen's header bar, so only draw the footer one
         if (!this.drawFooterSeparator) return;
-        ResourceLocation footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-        RenderSystem.enableBlend();
-        graphics.blit(footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
-        RenderSystem.disableBlend();
+        GuiHelper.renderFooterSeparator(graphics, this.getX(), this.getBottom(), this.getWidth());
     }
 }

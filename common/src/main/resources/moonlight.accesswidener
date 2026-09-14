@@ -200,3 +200,7 @@ accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
 accessible field net/minecraft/client/gui/components/MultiLineEditBox textField Lnet/minecraft/client/gui/components/MultilineTextField;
 accessible class net/minecraft/client/gui/components/MultilineTextField$StringView
 accessible method net/minecraft/client/gui/components/MultilineTextField$StringView <init> (II)V
+accessible field net/minecraft/client/gui/components/EditBox SPRITES Lnet/minecraft/client/gui/components/WidgetSprites;
+accessible field net/minecraft/client/gui/screens/Screen INWORLD_MENU_BACKGROUND Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList MENU_LIST_BACKGROUND Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList INWORLD_MENU_LIST_BACKGROUND Lnet/minecraft/resources/ResourceLocation;

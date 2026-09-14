@@ -16,6 +16,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -354,6 +357,73 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Override
         protected Stream<IConfigValue<?>> backingValues() {
             return storedValuesOf(xHandle, yHandle, zHandle);
+        }
+    }
+
+    public static class DateValue extends ConfigOption<MonthDay> {
+        public final Supplier<Integer> monthHandle;
+        public final Supplier<Integer> dayHandle;
+
+        public DateValue(Component title, @Nullable Component description, Supplier<Integer> monthHandle,
+                         Supplier<Integer> dayHandle, MonthDay defaultValue) {
+            super(title, description, defaultValue);
+            this.monthHandle = monthHandle;
+            this.dayHandle = dayHandle;
+        }
+
+        public static MonthDay of(int month, int day) {
+            Month m = Month.of(Math.clamp(month, 1, 12));
+            return MonthDay.of(m, Math.clamp(day, 1, m.maxLength()));
+        }
+
+        @Override
+        public MonthDay get() {
+            return of(monthHandle.get(), dayHandle.get());
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            MonthDay d = (MonthDay) value;
+            holder.manuallySetValue(monthHandle, d.getMonthValue());
+            holder.manuallySetValue(dayHandle, d.getDayOfMonth());
+        }
+
+        @Override
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(monthHandle, dayHandle);
+        }
+    }
+
+    public static class TimeValue extends ConfigOption<LocalTime> {
+        public final Supplier<Integer> hourHandle;
+        public final Supplier<Integer> minuteHandle;
+
+        public TimeValue(Component title, @Nullable Component description, Supplier<Integer> hourHandle,
+                         Supplier<Integer> minuteHandle, LocalTime defaultValue) {
+            super(title, description, defaultValue);
+            this.hourHandle = hourHandle;
+            this.minuteHandle = minuteHandle;
+        }
+
+        public static LocalTime of(int hour, int minute) {
+            return LocalTime.of(Math.clamp(hour, 0, 23), Math.clamp(minute, 0, 59));
+        }
+
+        @Override
+        public LocalTime get() {
+            return of(hourHandle.get(), minuteHandle.get());
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            LocalTime t = (LocalTime) value;
+            holder.manuallySetValue(hourHandle, t.getHour());
+            holder.manuallySetValue(minuteHandle, t.getMinute());
+        }
+
+        @Override
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(hourHandle, minuteHandle);
         }
     }
 

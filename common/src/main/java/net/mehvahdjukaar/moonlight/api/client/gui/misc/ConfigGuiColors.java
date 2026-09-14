@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.misc;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.util.CommonColors;
 
 import java.util.Map;
 import java.util.Objects;
@@ -8,11 +9,16 @@ import java.util.Objects;
 public final class ConfigGuiColors {
 
     public static int chat(ChatFormatting color) {
-        return Objects.requireNonNull(color.getColor());
+        return 0xFF000000 | Objects.requireNonNull(color.getColor());
     }
 
     // structural chrome, deliberately not themeable
     public static final int HEADER_SEPARATOR = 0xFF101012; // our own inner bands; header/footer use the vanilla sprites
+    public static final int HOVER_HIGHLIGHT = 0x40FFFFFF; // translucent wash over a hovered popup row/cell
+    public static final int POPUP_BG = 0xFF101010; // opaque so the rows behind never bleed through
+    public static final int SCROLLBAR_THUMB = 0xFFB0B0B0;
+    public static final int CHECKER_LIGHT = 0xFFBBBBBB; // behind translucent colors so alpha reads
+    public static final int CHECKER_DARK = 0xFF6E6E6E;
 
     // core text
     public static final int LABEL = chat(ChatFormatting.WHITE);
@@ -29,10 +35,10 @@ public final class ConfigGuiColors {
     // cards of the mod grids (mods hub, discover mods)
     public static final int TILE_BG = 0xFF1B1B20;
     public static final int TILE_BG_HOVER = 0xFF2C2C34;
-    public static final int TILE_OUTLINE = 0xFF000000;
-    public static final int TILE_OUTLINE_HOVER = 0xFF000000 | CATEGORY;
+    public static final int TILE_OUTLINE = CommonColors.BLACK;
+    public static final int TILE_OUTLINE_HOVER = CATEGORY;
     // mods that aren't ours: their config is either the loader's own screen or one we converted on the fly
-    public static final int TILE_OUTLINE_HOVER_FOREIGN = 0xFF000000 | chat(ChatFormatting.AQUA);
+    public static final int TILE_OUTLINE_HOVER_FOREIGN = chat(ChatFormatting.AQUA);
     public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
 
     // the bright chat colors, picked from the mod id so a mod without a logo always gets the same one
@@ -41,7 +47,7 @@ public final class ConfigGuiColors {
             ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE, ChatFormatting.WHITE
     };
 
-    // mods with no icon but a color everyone knows them by. Quark and Zeta both paint their menu button 0x48DDBC
+    // mods with no icon but a color everyone knows them by. hacky
     private static final Map<String, Integer> BRAND_COLORS = Map.of(
             "quark", 0xFF48DDBC,
             "zeta", 0xFF48DDBC);

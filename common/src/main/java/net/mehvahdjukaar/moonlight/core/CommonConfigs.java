@@ -21,6 +21,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.ResourceLocation;
 
+import java.time.LocalTime;
+import java.time.MonthDay;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -35,8 +37,6 @@ public class CommonConfigs {
 
     public static final ModConfigHolder CONFIG;
 
-    // Dev-only demo for defineObject (below): a codec that carries a CodecUI schema, so the native config screen can
-    // build a real form for it instead of the "edit file" placeholder. Declared before the static block that uses it.
     private static final SchemaCodec<Nested> NESTED_SCHEMA = SchemaRecord.create(Nested.class, i -> i.group(
             i.field("x", SchemaCodecs.intRange(-16, 16), Nested::x),
             i.field("weight", SchemaCodecs.doubleRange(0, 1), Nested::weight),
@@ -93,6 +93,8 @@ public class CommonConfigs {
             builder.comment("A min/max range shown as two fields on one row").defineRange("test_range", Range.of(2, 8), 0, 10);
             builder.comment("A Vec3 shown as three x/y/z fields on one row").defineVec3("test_vec3", new Vec3(0.5, 1.0, -0.5), -10, 10);
             builder.comment("A Vec3i shown as three x/y/z integer fields on one row").defineVec3i("test_vec3i", new Vec3i(1, 2, 3), -16, 16);
+            builder.comment("A month and day, edited as a MM/DD field").defineDate("test_date", MonthDay.of(12, 25));
+            builder.comment("An hour and minute, edited as a HH:MM field").defineTime("test_time", LocalTime.of(18, 30));
             builder.comment("An enum, edited as a cycle button").define("test_enum", Direction.NORTH);
             builder.comment("A value picked from a dropdown list")
                     .defineDropdown("test_dropdown", "medium", List.of("potato", "low", "medium", "high", "ultra", "extreme", "overkill", "ludicrous", "maximum"));

@@ -4,8 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
+import net.mehvahdjukaar.moonlight.api.client.gui.FrameClock;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -89,22 +89,19 @@ public final class ConfigScreenIcons {
     private static void animate(PoseStack pose, BakedModel model, float phase) {
         if (phase <= 0) return;
         if (model.usesBlockLight()) {
-            pose.mulPose(Axis.YP.rotationDegrees(phase * 10f)); // 0..360 over a period -> continuous spin while hovered
+            pose.mulPose(Axis.YP.rotationDegrees(phase * 10f));
         } else {
-            float scale = 1 + 0.1f * Mth.sin(phase * Mth.DEG_TO_RAD * 20f); // gentle throb for flat items
+            float scale = 1 + 0.1f * Mth.sin(phase * Mth.DEG_TO_RAD * 20f);
             pose.scale(scale, scale, scale);
         }
     }
 
     public static final class Anim {
+        private final FrameClock clock = new FrameClock();
         private float phase;
-        private long lastMs = -1;
 
         public void update(boolean hovered) {
-            long now = Util.getMillis();
-            float dt = lastMs < 0 ? 0 : Math.min((now - lastMs) / 1000f, 0.1f); // clamp big gaps (e.g. screen reopen)
-            lastMs = now;
-            phase += (hovered ? 20f : -40f) * dt; // +1/-2 per 1/20s tick, expressed as a per-second rate
+            phase += (hovered ? 20f : -40f) * clock.advance(); // +1/-2 per 1/20s tick, expressed as a per-second rate
             if (phase < 0) phase = 0;
             else if (phase > PERIOD) phase -= PERIOD;
         }

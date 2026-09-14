@@ -197,7 +197,7 @@ public class MoonlightConfigSelectScreen extends Screen {
 
         int bottom = this.contentBottom();
         GuiHelper.renderVerticalSeparator(graphics, this.leftPaneWidth, HEADER, bottom);
-        GuiHelper.renderFooterSeparator(graphics, bottom, this.width);
+        GuiHelper.renderFooterSeparator(graphics, 0, bottom, this.width);
 
         ConfigScreenExtensions.Panel panel = overlayPanel();
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {

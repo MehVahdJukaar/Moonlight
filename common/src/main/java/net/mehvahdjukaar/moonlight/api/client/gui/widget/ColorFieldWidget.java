@@ -65,7 +65,6 @@ public class ColorFieldWidget extends CompositeWidget {
         return hasAlpha ? c : c & 0xFFFFFF;
     }
 
-    // an alpha-less color has zeroed alpha bits, so the preview has to force it opaque to show anything
     private int opaqueIfNeeded(int c) {
         return hasAlpha ? c : c | 0xFF000000;
     }
