@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -74,7 +75,6 @@ public class BooleanToggleWidget extends AbstractButton {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
         this.defaultButtonNarrationText(narrationElementOutput);
-        narrationElementOutput.add(net.minecraft.client.gui.narration.NarratedElementType.USAGE,
-                value ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
+        narrationElementOutput.add(NarratedElementType.USAGE, value ? CommonComponents.OPTION_ON : CommonComponents.OPTION_OFF);
     }
 }

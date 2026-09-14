@@ -17,11 +17,6 @@ import net.minecraft.util.Util;
  */
 public class SyntaxEditBox extends MultiLineEditBox {
 
-    // shared palette, forced opaque (these are drawn with an explicit alpha)
-    private static final int TEXT_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
-    private static final int PLACEHOLDER_COLOR = 0xFF000000 | ConfigGuiColors.DESCRIPTION;
-    private static final int CURSOR_COLOR = 0xFF000000 | ConfigGuiColors.TEXT;
-
     private final Font font;
     private final Component placeholder;
     private final SyntaxHighlighter highlighter;
@@ -29,8 +24,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
     public SyntaxEditBox(Font font, int x, int y, int width, int height, Component placeholder,
                          SyntaxHighlighter highlighter) {
-        // ctor is access widened
-        super(font, x, y, width, height, placeholder, placeholder, TEXT_COLOR, true, CURSOR_COLOR, true, true);
+        super(font, x, y, width, height, placeholder, placeholder, ConfigGuiColors.TEXT, true, ConfigGuiColors.TEXT, true, true);
         this.font = font;
         this.placeholder = placeholder;
         this.highlighter = highlighter;
@@ -47,7 +41,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         String value = this.textField.value();
         if (value.isEmpty() && !this.isFocused()) {
             graphics.textWithWordWrap(this.font, this.placeholder, this.getInnerLeft(), this.getInnerTop(),
-                    this.width - this.totalInnerPadding(), PLACEHOLDER_COLOR);
+                    this.width - this.totalInnerPadding(), ConfigGuiColors.DESCRIPTION);
             return;
         }
 
@@ -66,7 +60,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         for (MultilineTextField.StringView line : this.textField.iterateLines()) {
             if (this.withinContentAreaTopBottom(y, y + lineHeight)) {
                 String lineText = value.substring(line.beginIndex(), line.endIndex());
-                graphics.text(this.font, this.highlighter.highlightLine(lineText), textX, y, TEXT_COLOR);
+                graphics.text(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.TEXT);
             }
             if (!placedCursor && cursor >= line.beginIndex() && cursor <= line.endIndex()) {
                 cursorX = textX + this.font.width(value.substring(line.beginIndex(), cursor));
@@ -78,9 +72,9 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
         if (showCursor && placedCursor && this.withinContentAreaTopBottom(cursorY, cursorY + lineHeight)) {
             if (cursor >= value.length()) {
-                TextCursorUtils.extractAppendCursor(graphics, this.font, cursorX, cursorY, CURSOR_COLOR, true);
+                TextCursorUtils.extractAppendCursor(graphics, this.font, cursorX, cursorY, ConfigGuiColors.TEXT, true);
             } else {
-                TextCursorUtils.extractInsertCursor(graphics, cursorX, cursorY, CURSOR_COLOR, lineHeight);
+                TextCursorUtils.extractInsertCursor(graphics, cursorX, cursorY, ConfigGuiColors.TEXT, lineHeight);
             }
         }
     }

@@ -13,7 +13,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
-import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 
 public class Vec3ControlWidget extends CompositeWidget {
 
@@ -42,7 +41,6 @@ public class Vec3ControlWidget extends CompositeWidget {
         this.onChange = onChange;
 
         Font font = Minecraft.getInstance().font;
-        // construct each box at (roughly) its final width so setValue doesn't scroll a short number out of view
         int third = Math.max(1, (width - 2 * INNER_GAP) / 3);
         this.xBox = makeBox(font, third, height, x);
         this.yBox = makeBox(font, third, height, y);

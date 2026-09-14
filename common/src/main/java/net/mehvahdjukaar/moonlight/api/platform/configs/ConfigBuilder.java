@@ -26,6 +26,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalTime;
+import java.time.MonthDay;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -646,6 +648,38 @@ public abstract class ConfigBuilder {
         recordOption(node);
         noteDefined(name, node, null);
         return () -> new Vec3i(xHandle.get(), yHandle.get(), zHandle.get());
+    }
+
+    public Supplier<MonthDay> defineDate(String name, MonthDay defaultValue) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Integer> monthHandle = define("month", defaultValue.getMonthValue(), 1, 12);
+        Supplier<Integer> dayHandle = define("day", defaultValue.getDayOfMonth(), 1, 31);
+        pop();
+        this.suppressUi = false;
+
+        putName(this.translationKey(name), name);
+        ConfigOption.DateValue node = new ConfigOption.DateValue(
+                description(name), null, monthHandle, dayHandle, defaultValue);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> ConfigOption.DateValue.of(monthHandle.get(), dayHandle.get());
+    }
+
+    public Supplier<LocalTime> defineTime(String name, LocalTime defaultValue) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Integer> hourHandle = define("hour", defaultValue.getHour(), 0, 23);
+        Supplier<Integer> minuteHandle = define("minute", defaultValue.getMinute(), 0, 59);
+        pop();
+        this.suppressUi = false;
+
+        putName(this.translationKey(name), name);
+        ConfigOption.TimeValue node = new ConfigOption.TimeValue(
+                description(name), null, hourHandle, minuteHandle, defaultValue);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> ConfigOption.TimeValue.of(hourHandle.get(), minuteHandle.get());
     }
 
     public ConfigBuilder onChange(Runnable callback) {

@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -58,12 +59,11 @@ public class ColorFieldWidget extends CompositeWidget {
     }
 
     private int sanitize(int c) {
-        return hasAlpha ? c : c & 0xFFFFFF;
+        return hasAlpha ? c : ARGB.transparent(c);
     }
 
-    // an alpha-less color has zeroed alpha bits, so the preview has to force it opaque to show anything
     private int opaqueIfNeeded(int c) {
-        return hasAlpha ? c : c | 0xFF000000;
+        return hasAlpha ? c : ARGB.opaque(c);
     }
 
     public void setColor(int c) {

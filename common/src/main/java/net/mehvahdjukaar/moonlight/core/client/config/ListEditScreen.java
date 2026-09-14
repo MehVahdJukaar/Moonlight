@@ -157,8 +157,7 @@ class ListEditScreen extends Screen implements PopupHost {
                 this.box = b;
                 this.editor = b;
             }
-            this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                    MoonlightIcons.DELETE, 12, 12, btn -> {
+            this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.DELETE, btn -> {
                 working.remove(index);
                 rebuildRows();
             });

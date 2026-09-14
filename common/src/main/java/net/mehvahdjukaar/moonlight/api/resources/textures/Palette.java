@@ -673,7 +673,7 @@ public class Palette implements Set<PaletteColor> {
         return c;
     }
 
-    private PaletteColor increaseInner() {
+    public PaletteColor increaseInner() {
         assert this.size() >= 2;
         int index = 1;
         //finds max delta lum and adds a color there
@@ -713,7 +713,6 @@ public class Palette implements Set<PaletteColor> {
         float lastLum = this.get(this.size() - 1).luminance();
         float span = lastLum - firstLum;
 
-        // Ideal step size in luminance
         float idealStep = span / (newSize - 1);
 
         List<PaletteColor> newPalette = new ArrayList<>();

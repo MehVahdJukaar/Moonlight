@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.screen;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorFieldWidget;
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorSwatchWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -11,15 +11,11 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
-/**
- * A saturation/value square with a hue slider next to it and an alpha slider below, plus a hex field and a preview
- * underneath. Colors are ARGB ints. With hasAlpha false the alpha slider is hidden and colors are plain RGB. Done
- * sends the picked color to onApply.
- */
 public class ColorPickerScreen extends Screen {
 
     private static final int GAP = 4;
@@ -100,7 +96,7 @@ public class ColorPickerScreen extends Screen {
 
     private int currentColor() {
         int argb = ColorUtils.hsvToArgb(hue, sat, val, Math.round(alpha * 255));
-        return hasAlpha ? argb : argb & 0xFFFFFF;
+        return hasAlpha ? argb : ARGB.transparent(argb);
     }
 
     private void syncControl() {
@@ -121,17 +117,17 @@ public class ColorPickerScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
-        if (inside(mouseX, mouseY, svX, svY, svSize, svSize)) {
+        if (GuiHelper.isMouseOver(mouseX, mouseY, svX, svY, svSize, svSize)) {
             dragging = DRAG_SV;
             updateDrag(mouseX, mouseY);
             return true;
         }
-        if (inside(mouseX, mouseY, hueX, hueY, hueW, hueH)) {
+        if (GuiHelper.isMouseOver(mouseX, mouseY, hueX, hueY, hueW, hueH)) {
             dragging = DRAG_HUE;
             updateDrag(mouseX, mouseY);
             return true;
         }
-        if (inside(mouseX, mouseY, alphaX, alphaY, alphaW, alphaH)) {
+        if (GuiHelper.isMouseOver(mouseX, mouseY, alphaX, alphaY, alphaW, alphaH)) {
             dragging = DRAG_ALPHA;
             updateDrag(mouseX, mouseY);
             return true;
@@ -166,10 +162,6 @@ public class ColorPickerScreen extends Screen {
         syncControl();
     }
 
-    private static boolean inside(double mx, double my, int x, int y, int w, int h) {
-        return mx >= x && mx < x + w && my >= y && my < y + h;
-    }
-
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
@@ -181,13 +173,12 @@ public class ColorPickerScreen extends Screen {
     }
 
     private void renderSvSquare(GuiGraphicsExtractor graphics) {
-        // one vertical gradient per column: full value at top -> black at bottom, saturation increasing rightwards
         for (int i = 0; i < svSize; i++) {
             float s = (float) i / svSize;
             int top = ColorUtils.hsvToArgb(hue, s, 1f, 255);
-            graphics.fillGradient(svX + i, svY, svX + i + 1, svY + svSize, top, 0xFF000000);
+            graphics.fillGradient(svX + i, svY, svX + i + 1, svY + svSize, top, CommonColors.BLACK);
         }
-        graphics.outline(svX - 1, svY - 1, svSize + 2, svSize + 2, 0xFF000000);
+        graphics.outline(svX - 1, svY - 1, svSize + 2, svSize + 2, CommonColors.BLACK);
         int cxp = svX + Math.round(sat * svSize);
         int cyp = svY + Math.round((1 - val) * svSize);
         ring(graphics, cxp, cyp);
@@ -197,25 +188,24 @@ public class ColorPickerScreen extends Screen {
         for (int i = 0; i < hueH; i++) {
             graphics.fill(hueX, hueY + i, hueX + hueW, hueY + i + 1, ColorUtils.hsvToArgb((float) i / hueH, 1, 1, 255));
         }
-        graphics.outline(hueX - 1, hueY - 1, hueW + 2, hueH + 2, 0xFF000000);
+        graphics.outline(hueX - 1, hueY - 1, hueW + 2, hueH + 2, CommonColors.BLACK);
         int y = hueY + Math.round(hue * hueH);
-        graphics.fill(hueX - 2, y - 1, hueX + hueW + 2, y + 1, 0xFFFFFFFF);
+        graphics.fill(hueX - 2, y - 1, hueX + hueW + 2, y + 1, CommonColors.WHITE);
     }
 
     private void renderAlphaBar(GuiGraphicsExtractor graphics) {
-        ColorSwatchWidget.renderChecker(graphics, alphaX, alphaY, alphaW, alphaH);
-        int rgb = currentColor() & 0x00FFFFFF;
+        GuiHelper.renderChecker(graphics, alphaX, alphaY, alphaW, alphaH);
+        int rgb = currentColor();
         for (int i = 0; i < alphaW; i++) {
-            int a = Math.round((float) i / alphaW * 255);
-            graphics.fill(alphaX + i, alphaY, alphaX + i + 1, alphaY + alphaH, (a << 24) | rgb);
+            graphics.fill(alphaX + i, alphaY, alphaX + i + 1, alphaY + alphaH, ARGB.color((float) i / alphaW, rgb));
         }
-        graphics.outline(alphaX - 1, alphaY - 1, alphaW + 2, alphaH + 2, 0xFF000000);
+        graphics.outline(alphaX - 1, alphaY - 1, alphaW + 2, alphaH + 2, CommonColors.BLACK);
         int x = alphaX + Math.round(alpha * alphaW);
-        graphics.fill(x - 1, alphaY - 2, x + 1, alphaY + alphaH + 2, 0xFFFFFFFF);
+        graphics.fill(x - 1, alphaY - 2, x + 1, alphaY + alphaH + 2, CommonColors.WHITE);
     }
 
     private static void ring(GuiGraphicsExtractor graphics, int cx, int cy) {
-        graphics.outline(cx - 3, cy - 3, 6, 6, 0xFFFFFFFF);
-        graphics.outline(cx - 4, cy - 4, 8, 8, 0xFF000000);
+        graphics.outline(cx - 3, cy - 3, 6, 6, CommonColors.WHITE);
+        graphics.outline(cx - 4, cy - 4, 8, 8, CommonColors.BLACK);
     }
 }

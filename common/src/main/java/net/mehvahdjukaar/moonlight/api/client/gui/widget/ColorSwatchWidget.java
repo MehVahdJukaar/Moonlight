@@ -1,11 +1,13 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -37,9 +39,9 @@ public class ColorSwatchWidget extends AbstractWidget {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        renderChecker(graphics, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2);
+        GuiHelper.renderChecker(graphics, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2);
         graphics.fill(getX() + 1, getY() + 1, getX() + getWidth() - 1, getY() + getHeight() - 1, color);
-        int border = onPress != null && isHovered() ? 0xFFFFFFFF : 0xFF000000;
+        int border = onPress != null && isHovered() ? CommonColors.WHITE : CommonColors.BLACK;
         graphics.outline(getX(), getY(), getWidth(), getHeight(), border);
     }
 
@@ -50,17 +52,5 @@ public class ColorSwatchWidget extends AbstractWidget {
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-    }
-
-    /** A grey checkerboard, drawn behind translucent colors so alpha reads clearly. */
-    public static void renderChecker(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
-        int cell = 4;
-        for (int yy = 0; yy < h; yy += cell) {
-            for (int xx = 0; xx < w; xx += cell) {
-                boolean light = (((xx / cell) + (yy / cell)) & 1) == 0;
-                graphics.fill(x + xx, y + yy, Math.min(x + xx + cell, x + w), Math.min(y + yy + cell, y + h),
-                        light ? 0xFFBBBBBB : 0xFF6E6E6E);
-            }
-        }
     }
 }

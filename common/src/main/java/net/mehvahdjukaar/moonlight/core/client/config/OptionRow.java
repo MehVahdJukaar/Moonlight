@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigControl;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.util.CommonColors;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -32,7 +34,7 @@ class OptionRow extends ConfigListRow {
     private final ConfigEditSession session;
     private final ConfigOption<?> value;
     @Nullable
-    private final ConfigCategory owner; // the category this value lives under, for feature-gating greyout
+    private final ConfigCategory owner;
     private final boolean isGate; // this value IS its category's feature() toggle (the "enabled" switch)
     private final boolean asToggle; // drawn as the check/cross feature toggle (a category gate, or a named feature leaf)
     @Nullable
@@ -47,7 +49,6 @@ class OptionRow extends ConfigListRow {
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
     private final GutterHints gutter = new GutterHints();
 
-    // click region of the label/arrow column that toggles the description, refreshed each frame
     private int toggleX0, toggleX1, rowY0, rowY1;
 
     OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
@@ -70,8 +71,7 @@ class OptionRow extends ConfigListRow {
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
                 : ConfigControllers.create(value, session, this::onEdited);
 
-        this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(),
-                MoonlightIcons.RESET, 12, 12, b -> rollback());
+        this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.RESET, b -> rollback());
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
         this.children = List.of(control.widget(), resetButton);
@@ -127,7 +127,7 @@ class OptionRow extends ConfigListRow {
             Identifier arrow = expanded ? MoonlightIcons.SECTION_EXPANDED : MoonlightIcons.SECTION_COLLAPSED;
             int arrowSize = 7;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, arrow, left + 2, top + (height - arrowSize) / 2,
-                    arrowSize, arrowSize, contextEnabled ? 0xFFFFFFFF : 0xFF808080);
+                    arrowSize, arrowSize, contextEnabled ? CommonColors.WHITE : CommonColors.GRAY);
             textLeft = left + ARROW_WIDTH;
         }
         if (!asToggle && ConfigScreenIcons.has(value.icon())) {
@@ -160,10 +160,8 @@ class OptionRow extends ConfigListRow {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        double mouseX = event.x(), mouseY = event.y();
-        int button = event.button();
-        if (hasDescription() && button == 0
-                && mouseX >= toggleX0 && mouseX < toggleX1 && mouseY >= rowY0 && mouseY < rowY1) {
+        boolean overLabel = GuiHelper.isMouseOver(event.x(), event.y(), toggleX0, rowY0, toggleX1 - toggleX0, rowY1 - rowY0);
+        if (hasDescription() && event.button() == InputConstants.MOUSE_BUTTON_LEFT && overLabel) {
             GuiHelper.playClickSound();
             view.toggleExpanded(value);
             return true;
@@ -184,7 +182,6 @@ class OptionRow extends ConfigListRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        // description is revealed by expanding the row, not as a tooltip
         return null;
     }
 

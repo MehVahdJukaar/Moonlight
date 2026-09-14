@@ -1,14 +1,12 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -52,7 +50,6 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
         return this.getX() + this.width / 2 + this.getRowWidth() / 2 + 6;
     }
 
-    // blank space above the first row, to center them in a taller pane
     void setTopPadding(int padding) {
         this.topPadding = Math.max(0, padding);
     }
@@ -64,8 +61,7 @@ class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
     @Override
     protected void extractListSeparators(GuiGraphicsExtractor graphics) {
         if (!this.drawFooterSeparator) return;
-        Identifier footer = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, footer, this.getX(), this.getBottom(), 0f, 0f, this.getWidth(), 2, 32, 2);
+        GuiHelper.renderFooterSeparator(graphics, this.getX(), this.getBottom(), this.getWidth());
     }
 
     private static class SpacerRow extends ConfigListRow {

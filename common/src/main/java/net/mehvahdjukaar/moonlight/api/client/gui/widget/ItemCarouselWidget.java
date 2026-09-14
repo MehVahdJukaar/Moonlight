@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
-import net.minecraft.util.Util;
+import net.mehvahdjukaar.moonlight.api.client.gui.FrameClock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -38,7 +38,7 @@ public class ItemCarouselWidget extends AbstractWidget {
     private static final int ICON = 16;
     private static final int SPACE_BETWEEN_ICONS = 6;
     private static final int CELL = ICON + SPACE_BETWEEN_ICONS;
-    private static final float SPEED = 14f;        // px per second
+    private static final float SPEED = 14f;
     private static final float SCROLL_IMPULSE = 220f;  // px per second added by one wheel notch
     private static final float MAX_FLING = 900f;
     private static final float FLING_DECAY = 4f;   // fraction of the fling shed per second
@@ -56,7 +56,7 @@ public class ItemCarouselWidget extends AbstractWidget {
     private double offset;
     private float speed = SPEED;
     private float fling;
-    private long lastMs = -1;
+    private final FrameClock clock = new FrameClock();
     private int hoveredIndex = -1;
 
     public ItemCarouselWidget(int x, int y, int width, int height, List<ItemStack> items) {
@@ -104,7 +104,6 @@ public class ItemCarouselWidget extends AbstractWidget {
 
     private static boolean hasNoModel(ItemStack stack) {
         Identifier modelId = stack.get(DataComponents.ITEM_MODEL);
-        // the model manager would log a warning for a missing model
         return modelId == null || !Minecraft.getInstance().getModelManager().bakedItemStackModels.containsKey(modelId);
     }
 
@@ -163,9 +162,7 @@ public class ItemCarouselWidget extends AbstractWidget {
     }
 
     private void advance(boolean hovered) {
-        long now = Util.getMillis();
-        float dt = this.lastMs < 0 ? 0 : Math.min((now - this.lastMs) / 1000f, 0.1f); // clamp screen-reopen gaps
-        this.lastMs = now;
+        float dt = this.clock.advance();
         this.speed = Mth.lerp(Math.min(1f, dt * 6f), this.speed, hovered ? 0f : SPEED);
         this.fling = Mth.lerp(Math.min(1f, dt * FLING_DECAY), this.fling, 0f);
         double moved = (this.offset + (this.speed + this.fling) * dt) % this.span;

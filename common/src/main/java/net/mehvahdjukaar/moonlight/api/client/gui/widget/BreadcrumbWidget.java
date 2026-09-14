@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -25,14 +26,13 @@ public class BreadcrumbWidget extends AbstractWidget {
     public record Crumb(Component label, Screen target, boolean current) {
     }
 
-    private static final String SEP = " › ";
+    public static final String SEPARATOR = " › ";
     private static final String ELLIPSIS = "…";
 
     private final Font font;
     private final List<Crumb> crumbs;
     private final Consumer<Screen> onNavigate;
 
-    // per-crumb text bounds, recomputed each render for hit-testing (-1 = collapsed/off-screen, not clickable)
     private final int[] crumbX0;
     private final int[] crumbX1;
 
@@ -54,11 +54,11 @@ public class BreadcrumbWidget extends AbstractWidget {
         boolean first = true;
         for (int i : computeVisibleCrumbs(getWidth())) {
             if (!first) {
-                graphics.text(font, SEP, x, y, CRUMB_SEPARATOR);
-                x += font.width(SEP);
+                graphics.text(font, SEPARATOR, x, y, CRUMB_SEPARATOR);
+                x += font.width(SEPARATOR);
             }
             first = false;
-            if (i < 0) { // ellipsis placeholder for the collapsed middle
+            if (i < 0) {
                 graphics.text(font, ELLIPSIS, x, y, CRUMB_SEPARATOR);
                 x += font.width(ELLIPSIS);
                 continue;
@@ -78,7 +78,7 @@ public class BreadcrumbWidget extends AbstractWidget {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
         int button = event.button();
-        if (this.active && this.visible && button == 0) {
+        if (this.active && this.visible && button == InputConstants.MOUSE_BUTTON_LEFT) {
             Screen target = crumbAt(mouseX, mouseY);
             if (target != null) {
                 GuiHelper.playClickSound();
@@ -111,7 +111,6 @@ public class BreadcrumbWidget extends AbstractWidget {
         for (int i = 0; i < n; i++) full.add(i);
         if (n <= 2 || trailWidth(full) <= maxWidth) return full;
 
-        // hide as few middle crumbs as possible to make it fit: root, then ELLIPSIS, then the last few crumbs
         for (int tailCount = n - 2; tailCount >= 1; tailCount--) {
             List<Integer> display = new ArrayList<>();
             display.add(0);
@@ -123,7 +122,7 @@ public class BreadcrumbWidget extends AbstractWidget {
     }
 
     private int trailWidth(List<Integer> display) {
-        int sep = font.width(SEP);
+        int sep = font.width(SEPARATOR);
         int total = 0;
         for (int k = 0; k < display.size(); k++) {
             if (k > 0) total += sep;

@@ -19,6 +19,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
+import java.time.LocalTime;
+import java.time.MonthDay;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,7 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 // Client side registry turning a server safe ConfigOption into an editing ConfigControl. The screen just calls
 // create() and never branches on value type, so a new control means registering a provider here instead
 public final class ConfigControllers {
-
+//TODO:  expose api
     private static final Map<Class<?>, ConfigControl.Provider<?>> PROVIDERS = new HashMap<>();
 
     public static <O extends ConfigOption<?>> void register(Class<O> type, ConfigControl.Provider<O> provider) {
@@ -62,7 +64,7 @@ public final class ConfigControllers {
         @SuppressWarnings("unchecked")
         Class<ConfigOption.EnumValue<?>> enumClass =
                 (Class<ConfigOption.EnumValue<?>>) (Class<?>) ConfigOption.EnumValue.class;
-        register(enumClass, (o, s, onChange) -> enumControl(o, s, onChange));
+        register(enumClass, ConfigControllers::enumControl);
 
         register(ConfigOption.StringValue.class, (o, s, onChange) ->
                 textField(s.current(o), String::valueOf, str -> {
@@ -93,7 +95,7 @@ public final class ConfigControllers {
                                 s.put(o, picked);
                                 onChange.run();
                             })));
-            return new ConfigControl<Integer>(w, w::setColor);
+            return new ConfigControl<>(w, w::setColor);
         });
 
         // plain numbers get a stepper field, slider subtypes get a slider
@@ -153,6 +155,26 @@ public final class ConfigControllers {
             return new ConfigControl<Vec3i>(w, vv -> w.setValues(vv.getX(), vv.getY(), vv.getZ()));
         });
 
+        register(ConfigOption.DateValue.class, (o, s, onChange) -> {
+            MonthDay c = s.current(o);
+            NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, "/", c.getMonthValue(), c.getDayOfMonth(),
+                    MoonlightIcons.CALENDAR, DatePickerPopup::new, (m, d) -> {
+                        s.put(o, MonthDay.of(m, d));
+                        onChange.run();
+                    });
+            return new ConfigControl<MonthDay>(w, v -> w.setValues(v.getMonthValue(), v.getDayOfMonth()));
+        });
+
+        register(ConfigOption.TimeValue.class, (o, s, onChange) -> {
+            LocalTime c = s.current(o);
+            NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, ":", c.getHour(), c.getMinute(),
+                    MoonlightIcons.CLOCK, ClockPickerPopup::new, (h, m) -> {
+                        s.put(o, LocalTime.of(h, m));
+                        onChange.run();
+                    });
+            return new ConfigControl<LocalTime>(w, v -> w.setValues(v.getHour(), v.getMinute()));
+        });
+
         register(ConfigOption.DropdownValue.class, (o, s, onChange) -> {
             DropdownWidget w = new DropdownWidget(CONTROL_WIDTH, CONTROL_HEIGHT, o.options.get(), o.icon, s.current(o), val -> {
                 s.put(o, val);
@@ -162,7 +184,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.ListValue.class, (o, s, onChange) -> {
-            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), MoonlightIcons.EDIT, 12, 12, b ->
+            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(new ListEditScreen(o, s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
@@ -172,12 +194,12 @@ public final class ConfigControllers {
 
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
-                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, 12, 12, b ->
+                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.current(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     })));
-            return new ConfigControl<Object>(button, v -> {
+            return new ConfigControl<>(button, v -> {
             });
         });
 
@@ -187,7 +209,7 @@ public final class ConfigControllers {
                 (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
         register(schemaClass, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
-                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, 12, 12, b ->
+                    Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(SchemaEditScreen.create(o, s, onChange)));
             return new ConfigControl<>(button, v -> {
             });
@@ -221,11 +243,11 @@ public final class ConfigControllers {
             s.put(o, val);
             onChange.run();
         }, iconRenderer);
-        return new ConfigControl<Boolean>(w, w::set);
+        return new ConfigControl<>(w, w::set);
     }
 
     private static <E extends Enum<E>> ConfigControl<E> enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {
-        CycleButton<E> w = CycleButton.<E>builder(x -> Component.literal(x.name()), s.current(o))
+        CycleButton<E> w = CycleButton.builder(x -> Component.literal(x.name()), s.current(o))
                 .withValues(o.options)
                 .displayOnlyValue()
                 .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {
@@ -268,7 +290,7 @@ public final class ConfigControllers {
                 box.setTextColor(ERROR);
             }
         });
-        return new ConfigControl<Object>(box, v -> box.setValue(display.apply(v)));
+        return new ConfigControl<>(box, v -> box.setValue(display.apply(v)));
     }
 
     private static Component listLabel(List<String> list) {

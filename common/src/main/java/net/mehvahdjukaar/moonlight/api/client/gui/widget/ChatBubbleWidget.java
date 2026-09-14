@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 
 /**
  * A rounded chat bubble: white inside, black outline, fixed height, width follows the text. Add it to a screen like
@@ -15,8 +16,7 @@ import net.minecraft.network.chat.Component;
  */
 public class ChatBubbleWidget extends AbstractWidget {
 
-
-    public static final int HEIGHT = 12;
+    private static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
     private static final int TAIL_HEIGHT = 5;
     private static final int TAIL_TIP = 3;
@@ -27,7 +27,7 @@ public class ChatBubbleWidget extends AbstractWidget {
     private static final long BOB_PERIOD_MS = 2200L;
 
     private final Font font;
-    private int textColor = 0xFF000000;
+    private int textColor = CommonColors.BLACK;
     private boolean animated = false;
 
     public ChatBubbleWidget(int x, int y, Component message) {

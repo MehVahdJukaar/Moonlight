@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.client.gui.*;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -38,9 +40,6 @@ public class DiscoverModsScreen extends Screen {
     private static final int LINE = 11;
     private static final int MAX_DESC_LINES = 2;
 
-    private static final int NAME_INSTALLED = ConfigGuiColors.LABEL;
-    private static final int NAME_MISSING = ConfigGuiColors.TEXT_SECONDARY;
-    private static final int DESC_INSTALLED = ConfigGuiColors.DESCRIPTION;
     private static final int DESC_MISSING = 0xFF6A6A78;
 
     private final Screen parent;
@@ -184,7 +183,7 @@ public class DiscoverModsScreen extends Screen {
             this.loadingWidget.extractRenderState(graphics, mouseX, mouseY, partialTick);
         }
 
-        GuiHelper.renderFooterSeparator(graphics, contentBottom, this.width);
+        GuiHelper.renderFooterSeparator(graphics, 0, contentBottom, this.width);
     }
 
     private void renderItems(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -198,7 +197,7 @@ public class DiscoverModsScreen extends Screen {
                 if (item instanceof Section section) {
                     renderSection(graphics, section, y);
                 } else if (item instanceof Row row) {
-                    boolean hover = inViewport && mouseX >= rowX && mouseX < rowX + contentW && mouseY >= y && mouseY < y + h;
+                    boolean hover = inViewport && GuiHelper.isMouseOver(mouseX, mouseY, rowX, y, contentW, h);
                     renderRow(graphics, row, y, hover);
                 }
             }
@@ -227,11 +226,11 @@ public class DiscoverModsScreen extends Screen {
         int textRight = rowX + contentW - ROW_INNER_PAD;
         int nameRight = installed ? textRight - 12 : textRight;
 
-        int nameColor = installed ? NAME_INSTALLED : NAME_MISSING;
+        int nameColor = installed ? ConfigGuiColors.LABEL : ConfigGuiColors.TEXT_SECONDARY;
         GuiHelper.renderScrollingText(graphics, this.font, Component.literal(row.data().name()),
                 textX, nameRight, y + 6, LINE, nameColor);
 
-        int descColor = installed ? DESC_INSTALLED : DESC_MISSING;
+        int descColor = installed ? ConfigGuiColors.DESCRIPTION : DESC_MISSING;
         int descY = y + 6 + LINE;
         for (FormattedCharSequence line : row.descLines()) {
             graphics.text(this.font, line, textX, descY, descColor);
@@ -252,7 +251,7 @@ public class DiscoverModsScreen extends Screen {
         if (icon != null) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, icon.texture(), iconX, iconY, 0f, 0f, ICON_SIZE, ICON_SIZE,
                     icon.width(), icon.height(), icon.width(), icon.height(),
-                    installed ? 0xFFFFFFFF : ARGB.white(0.35f));
+                    installed ? CommonColors.WHITE : ARGB.white(0.35f));
         } else {
             renderFallbackIcon(graphics, row, iconX, iconY, installed);
         }
@@ -276,8 +275,7 @@ public class DiscoverModsScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
-        int button = event.button();
-        if (button == 0 && mouseY >= contentTop && mouseY < contentBottom) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && mouseY >= contentTop && mouseY < contentBottom) {
             Row clicked = rowAt(mouseX, mouseY);
             if (clicked != null && openModPage(clicked.data())) return true;
         }

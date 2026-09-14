@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 
 /** A Button with a sprite to the left of its label, or centered when there is no label. */
 public class IconButton extends Button {
@@ -17,6 +18,10 @@ public class IconButton extends Button {
     private final int spriteWidth;
     private final int spriteHeight;
     private boolean drawBackground = true;
+
+    public IconButton(int x, int y, int width, int height, Component message, Identifier sprite, OnPress onPress) {
+        this(x, y, width, height, message, sprite, 12, 12, onPress);
+    }
 
     public IconButton(int x, int y, int width, int height, Component message, Identifier sprite,
                       int spriteWidth, int spriteHeight, OnPress onPress) {
@@ -57,7 +62,7 @@ public class IconButton extends Button {
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }
-        int tint = this.active ? 0xFFFFFFFF : 0xFF808080;
+        int tint = this.active ? CommonColors.WHITE : CommonColors.GRAY;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, this.sprite, iconX, iconY, this.spriteWidth, this.spriteHeight, tint);
     }
 }

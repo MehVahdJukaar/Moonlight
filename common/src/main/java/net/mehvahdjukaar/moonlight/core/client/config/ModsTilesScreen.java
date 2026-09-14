@@ -1,22 +1,21 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.client.gui.Icon;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModIconCache;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.SearchBoxWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
-import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -52,15 +51,9 @@ public class ModsTilesScreen extends Screen {
     private static final int CARD_GAP = 6;
     private static final int SIDE_MARGIN = 24;
 
-    private static final int VERSION_COLOR = ConfigGuiColors.DESCRIPTION;
-
-    private static final int SEARCH_WIDTH = 110;
-    private static final int SEARCH_HEIGHT = 14;
-    private static final int SEARCH_ICON_SIZE = 12;
-    private static final int SEARCH_ICON_GAP = 2;
     private static final int TITLE_SEARCH_GAP = 5;
     // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
-    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (LINE + TITLE_SEARCH_GAP + SEARCH_HEIGHT)) / 2;
+    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (LINE + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
     private static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + LINE + TITLE_SEARCH_GAP;
 
     private final Screen parent;
@@ -69,12 +62,11 @@ public class ModsTilesScreen extends Screen {
     private final List<Entry> allEntries = new ArrayList<>();
     private final List<Entry> entries = new ArrayList<>(); // allEntries minus whatever the search filters out
     @Nullable
-    private EditBox searchBox;
+    private SearchBoxWidget searchBox;
     private String searchQuery = "";
 
     private double scroll;
     private int maxScroll;
-    // recomputed each layout pass, shared by render + click
     private int cols, contentTop, contentBottom;
 
     public ModsTilesScreen(Screen parent, @Nullable Identifier background) {
@@ -159,10 +151,10 @@ public class ModsTilesScreen extends Screen {
         applyFilter();
 
         this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 140, 20,
-                Component.translatable("gui.moonlight.config.discover_mods"), MoonlightIcons.DISCOVER_MODS, 12, 12,
+                Component.translatable("gui.moonlight.config.discover_mods"), MoonlightIcons.DISCOVER_MODS,
                 b -> this.minecraft.setScreen(new DiscoverModsScreen(this))));
         IconButton openFolder = new IconButton(this.width / 2 - 10, this.height - 28, 20, 20,
-                CommonComponents.EMPTY, MoonlightIcons.FOLDER, 12, 12, b -> openConfigFolder());
+                CommonComponents.EMPTY, MoonlightIcons.FOLDER, b -> openConfigFolder());
         openFolder.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.open_folder")));
         this.addRenderableWidget(openFolder);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
@@ -173,17 +165,12 @@ public class ModsTilesScreen extends Screen {
         Util.getPlatform().openPath(PlatHelper.getGamePath().resolve("config"));
     }
 
-    private EditBox makeSearchBox() {
-        Component label = Component.translatable("gui.moonlight.config.search");
-        EditBox box = new EditBox(this.font, (this.width - SEARCH_WIDTH) / 2, SEARCH_Y, SEARCH_WIDTH, SEARCH_HEIGHT, label);
-        box.setHint(label.copy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY));
-        box.setValue(this.searchQuery); // before the responder, so a resize doesn't jump the grid back to the top
-        box.setResponder(query -> {
+    private SearchBoxWidget makeSearchBox() {
+        return new SearchBoxWidget(this.font, (this.width - SearchBoxWidget.WIDTH) / 2, SEARCH_Y, this.searchQuery, query -> {
             this.searchQuery = query;
             this.scroll = 0;
             applyFilter();
         });
-        return box;
     }
 
     private void applyFilter() {
@@ -229,8 +216,6 @@ public class ModsTilesScreen extends Screen {
         } else {
             GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
             graphics.centeredText(this.font, this.title, this.width / 2, TITLE_Y_WITH_SEARCH, ConfigGuiColors.TITLE);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.SEARCH, this.searchBox.getX() - SEARCH_ICON_SIZE - SEARCH_ICON_GAP,
-                    SEARCH_Y + (SEARCH_HEIGHT - SEARCH_ICON_SIZE) / 2, SEARCH_ICON_SIZE, SEARCH_ICON_SIZE);
         }
     }
 
@@ -246,12 +231,12 @@ public class ModsTilesScreen extends Screen {
         for (int i = 0; i < entries.size(); i++) {
             int x = cardX(i), y = cardY(i);
             if (y + CARD_H < contentTop || y > contentBottom) continue;
-            boolean hover = inViewport && mouseX >= x && mouseX < x + CARD_W && mouseY >= y && mouseY < y + CARD_H;
+            boolean hover = inViewport && GuiHelper.isMouseOver(mouseX, mouseY, x, y, CARD_W, CARD_H);
             renderCard(graphics, entries.get(i), x, y, hover);
         }
         graphics.disableScissor();
 
-        GuiHelper.renderFooterSeparator(graphics, contentBottom, this.width);
+        GuiHelper.renderFooterSeparator(graphics, 0, contentBottom, this.width);
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
     }
 
@@ -270,18 +255,11 @@ public class ModsTilesScreen extends Screen {
             renderFallbackIcon(graphics, entry, iconX, iconY);
         }
 
-        int textCenter = x + CARD_W / 2;
         int nameY = iconY + ICON_SIZE + ICON_TEXT_GAP;
         GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.LABEL);
         if (entry.version() != null) {
-            drawClippedCentered(graphics, entry.version(), textCenter, nameY + LINE + NAME_VER_GAP, x + 4, x + CARD_W - 4, VERSION_COLOR);
+            GuiHelper.renderClippedTextCentered(graphics, this.font, entry.version(), x + 4, x + CARD_W - 4, nameY + LINE + NAME_VER_GAP, ConfigGuiColors.DESCRIPTION);
         }
-    }
-
-    private void drawClippedCentered(GuiGraphicsExtractor graphics, Component text, int centerX, int y, int minX, int maxX, int color) {
-        graphics.enableScissor(minX, y - 1, maxX, y + this.font.lineHeight + 1);
-        graphics.centeredText(this.font, text, centerX, y, color);
-        graphics.disableScissor();
     }
 
     private void renderFallbackIcon(GuiGraphicsExtractor graphics, Entry entry, int iconX, int iconY) {
@@ -302,11 +280,10 @@ public class ModsTilesScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
-        int button = event.button();
-        if (button == 0 && mouseY >= contentTop && mouseY < contentBottom) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && mouseY >= contentTop && mouseY < contentBottom) {
             for (int i = 0; i < entries.size(); i++) {
                 int x = cardX(i), y = cardY(i);
-                if (mouseX >= x && mouseX < x + CARD_W && mouseY >= y && mouseY < y + CARD_H) {
+                if (GuiHelper.isMouseOver(mouseX, mouseY, x, y, CARD_W, CARD_H)) {
                     String modId = entries.get(i).modId();
                     Screen s = configScreenFor(modId, this, background);
                     if (s != null) {

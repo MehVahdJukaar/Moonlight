@@ -65,7 +65,7 @@ class ConfigHolderRow extends ConfigListRow {
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
         if (subtitle != null) {
             GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, labelColor);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, subtitleColor);
+            GuiHelper.renderClippedText(graphics, font, subtitle, textLeft, textRight, top + 5 + font.lineHeight, subtitleColor);
         } else {
             GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, labelColor);
         }

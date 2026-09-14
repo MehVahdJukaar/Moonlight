@@ -2,12 +2,13 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
+import net.mehvahdjukaar.moonlight.api.client.gui.FrameClock;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -19,8 +20,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public final class ConfigScreenIcons {
-
-    private static final int ICON_SIZE = 16;
 
     private static final Map<Identifier, ItemStack> CACHE = new HashMap<>();
     private static boolean cacheIsDisplayOnly;
@@ -42,7 +41,6 @@ public final class ConfigScreenIcons {
 
     private static ItemStack compute(Identifier id) {
         Supplier<ItemStack> override = ConfigScreenExtensions.iconOverride(id);
-        // overrides build real stacks, which needs components bound. Before that fall through to the plain lookup
         if (override != null && Utils.areItemComponentsBound()) {
             ItemStack s = override.get();
             if (s != null && !s.isEmpty()) return s;
@@ -79,9 +77,9 @@ public final class ConfigScreenIcons {
         ItemStack stack = resolve(id);
         if (stack.isEmpty()) return false;
         if (phase <= 0 && lit) {
-            graphics.item(stack, x, y); // the cheap path: no transform, no tint, straight through the item atlas
+            graphics.item(stack, x, y);
         } else {
-            AnimatedGuiItem.submit(graphics, stack, x, y, ICON_SIZE, lit ? -1 : DISABLED_TINT,
+            AnimatedGuiItem.submit(graphics, stack, x, y, 16, lit ? CommonColors.WHITE : DISABLED_TINT,
                     (pose, blockModel) -> animate(pose, blockModel, phase));
         }
         return true;
@@ -90,21 +88,18 @@ public final class ConfigScreenIcons {
     private static void animate(Matrix4f pose, boolean blockModel, float phase) {
         if (phase <= 0) return;
         if (blockModel) {
-            pose.rotateY(phase * 10f * Mth.DEG_TO_RAD); // 0..360 over a period -> continuous spin while hovered
+            pose.rotateY(phase * 10f * Mth.DEG_TO_RAD);
         } else {
-            pose.scale(1 + 0.1f * Mth.sin(phase * Mth.DEG_TO_RAD * 20f)); // gentle throb for flat items
+            pose.scale(1 + 0.1f * Mth.sin(phase * Mth.DEG_TO_RAD * 20f));
         }
     }
 
     public static final class Anim {
+        private final FrameClock clock = new FrameClock();
         private float phase;
-        private long lastMs = -1;
 
         public void update(boolean hovered) {
-            long now = Util.getMillis();
-            float dt = lastMs < 0 ? 0 : Math.min((now - lastMs) / 1000f, 0.1f); // clamp big gaps (e.g. screen reopen)
-            lastMs = now;
-            phase += (hovered ? 20f : -40f) * dt; // +1/-2 per 1/20s tick, expressed as a per-second rate
+            phase += (hovered ? 20f : -40f) * clock.advance(); // +1/-2 per 1/20s tick, expressed as a per-second rate
             if (phase < 0) phase = 0;
             else if (phase > PERIOD) phase -= PERIOD;
         }

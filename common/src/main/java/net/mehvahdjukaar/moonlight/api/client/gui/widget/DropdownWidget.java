@@ -1,9 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.mehvahdjukaar.moonlight.api.client.gui.AnchoredPopup;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
-import net.mehvahdjukaar.moonlight.api.client.gui.Popup;
-import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -15,6 +14,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -26,44 +26,35 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class DropdownWidget extends AbstractWidget implements Popup {
+public class DropdownWidget extends AbstractWidget {
 
     private static final int MAX_VISIBLE = 8;
 
     private final List<String> options;
     @Nullable
-    private final Function<String, ItemStack> icon;
+    private final Function<String, ItemStack> iconGetter;
     private final Map<String, ItemStack> iconCache = new HashMap<>();
     private final int itemHeight;
     private String value;
     private final Consumer<String> onChange;
 
-    private boolean open;
-    private int scrollOffset;
-    private List<String> filtered;
-    @Nullable
-    private OverlayLayer layer;
     private final EditBox searchBox;
+    private final ListPopup popup;
 
     public DropdownWidget(int width, int height, List<String> options, @Nullable Function<String, ItemStack> icon,
                           String value, Consumer<String> onChange) {
         super(0, 0, width, height, Component.literal(value));
         this.options = options;
-        this.icon = icon;
+        this.iconGetter = icon;
         this.value = value;
         this.onChange = onChange;
-        this.filtered = options;
         this.itemHeight = icon != null ? 18 : 14;
+        this.popup = new ListPopup();
 
         this.searchBox = new EditBox(font(), 0, 0, width, height, Component.empty());
         this.searchBox.setBordered(false);
         this.searchBox.setTextColor(ConfigGuiColors.TEXT);
-        this.searchBox.setResponder(query -> {
-            String q = query.trim().toLowerCase(Locale.ROOT);
-            this.filtered = q.isEmpty() ? options
-                    : options.stream().filter(o -> o.toLowerCase(Locale.ROOT).contains(q)).toList();
-            this.scrollOffset = 0;
-        });
+        this.searchBox.setResponder(popup::filter);
     }
 
     public void setValue(String v) {
@@ -79,7 +70,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
     }
 
     private ItemStack iconFor(String id) {
-        return iconCache.computeIfAbsent(id, icon);
+        return iconCache.computeIfAbsent(id, iconGetter);
     }
 
     private int valueAreaWidth() {
@@ -89,10 +80,11 @@ public class DropdownWidget extends AbstractWidget implements Popup {
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int x = getX(), y = getY(), w = getWidth(), h = getHeight();
-        int border = (open || isFocused()) ? 0xFFFFFFFF : 0xFFA0A0A0;
+        boolean open = popup.isOpen();
+        int border = (open || isFocused()) ? CommonColors.WHITE : CommonColors.LIGHT_GRAY;
         Font font = font();
 
-        graphics.fill(x, y, x + w, y + h, 0xFF000000);
+        graphics.fill(x, y, x + w, y + h, CommonColors.BLACK);
 
         int arrowBox = h;
         int sepX = x + w - arrowBox;
@@ -104,7 +96,7 @@ public class DropdownWidget extends AbstractWidget implements Popup {
             this.searchBox.extractRenderState(graphics, mouseX, mouseY, partialTick);
         } else {
             int textX = x + 4;
-            if (icon != null) {
+            if (iconGetter != null) {
                 graphics.fakeItem(iconFor(value), x + 2, y + (h - 16) / 2);
                 textX = x + 2 + 18;
             }
@@ -119,176 +111,156 @@ public class DropdownWidget extends AbstractWidget implements Popup {
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        if (open) {
-            close();
-        } else if (Minecraft.getInstance().screen instanceof PopupHost h) {
-            this.layer = h.getOverlayLayer();
-            this.open = true;
-            this.filtered = options;
-            this.searchBox.setValue("");
-            this.searchBox.setHint(Component.literal(value));
-            this.searchBox.setFocused(true);
-            this.layer.open(this); // floats this popup, closing any other
-            int selected = filtered.indexOf(value);
-            scrollOffset = selected < 0 ? 0 : Mth.clamp(selected - visibleCount() + 1, 0, maxScroll());
-        }
-    }
-
-    public void close() {
-        if (layer != null) {
-            layer.close(this); // triggers onPopupClosed()
-        } else {
-            onPopupClosed();
-        }
-    }
-
-    @Override
-    public void onPopupClosed() {
-        this.open = false;
-        this.searchBox.setFocused(false);
-        this.layer = null;
-    }
-
-    private int visibleCount() {
-        return popupRect()[4];
-    }
-
-    private int maxScroll() {
-        return Math.max(0, filtered.size() - visibleCount());
-    }
-
-    // {x, y, w, h, visible} of the open popup. Opens downward when it fits, else toward the side with more room, and
-    // caps the visible row count to what that side holds so a dropdown opened mid-screen shrinks instead of running off
-    private int[] popupRect() {
-        int w = getWidth();
-        int x = getX();
-        int desired = Mth.clamp(filtered.size(), 1, MAX_VISIBLE);
-        int below = getY() + getHeight();
-        int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
-        int margin = 2;
-        int fitBelow = Math.max(1, (screenH - margin - below) / itemHeight);
-        int fitAbove = Math.max(1, (getY() - margin) / itemHeight);
-        boolean down;
-        if (desired <= fitBelow) down = true;
-        else if (desired <= fitAbove) down = false;
-        else down = fitBelow >= fitAbove;
-        int visible = Math.min(desired, down ? fitBelow : fitAbove);
-        int h = visible * itemHeight;
-        int y = down ? below : getY() - h;
-        return new int[]{x, y, w, h, visible};
-    }
-
-    @Override
-    public void renderPopup(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        if (!open) return;
-        int[] r = popupRect();
-        int x = r[0], y = r[1], w = r[2], h = r[3];
-        Font font = font();
-
-        // float the whole popup above the list rows and their item icons
-        graphics.nextStratum();
-
-        graphics.fill(x, y, x + w, y + h, 0xFF101010); // fully opaque so text behind never bleeds through
-
-        if (filtered.isEmpty()) {
-            graphics.text(font, Component.translatable("gui.moonlight.config.no_matches"),
-                    x + 4, y + (itemHeight - font.lineHeight) / 2 + 1, ConfigGuiColors.DESCRIPTION);
-        }
-
-        int visible = r[4];
-        boolean hasScrollbar = filtered.size() > visible;
-        int textRight = x + w - (hasScrollbar ? 6 : 4);
-        for (int i = 0; i < visible; i++) {
-            int idx = scrollOffset + i;
-            if (idx >= filtered.size()) break;
-            String opt = filtered.get(idx);
-            int iy = y + i * itemHeight;
-            boolean hover = mouseX >= x && mouseX < x + w && mouseY >= iy && mouseY < iy + itemHeight;
-            if (hover) graphics.fill(x + 1, iy, x + w - 1, iy + itemHeight, 0x40FFFFFF);
-            int textX = x + 4;
-            if (icon != null) {
-                graphics.fakeItem(iconFor(opt), x + 2, iy + (itemHeight - 16) / 2);
-                textX = x + 2 + 18;
-            }
-            int color = opt.equals(value) ? ConfigGuiColors.SELECTED : ConfigGuiColors.TEXT;
-            // scroll the hovered entry when it overflows, and clip the rest so nothing bleeds under the scrollbar
-            if (hover) {
-                GuiHelper.renderScrollingText(graphics, font, Component.literal(opt), textX, textRight, iy, itemHeight, color);
-            } else {
-                graphics.enableScissor(textX, iy, textRight, iy + itemHeight);
-                graphics.text(font, opt, textX, iy + (itemHeight - font.lineHeight) / 2 + 1, color);
-                graphics.disableScissor();
-            }
-        }
-
-        if (hasScrollbar) {
-            int trackX = x + w - 4;
-            int thumbH = Math.max(8, h * visible / filtered.size());
-            int thumbY = y + (h - thumbH) * scrollOffset / maxScroll();
-            graphics.fill(trackX, y, trackX + 2, y + h, 0xFF000000);
-            graphics.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, 0xFFB0B0B0);
-        }
-
-        graphics.outline(x, y, w, h, 0xFFFFFFFF); // drawn last so the border is unbroken
-    }
-
-    // called by the host on any click while open. Always consumes
-    @Override
-    public boolean popupMouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (!open) return false;
-        double mouseX = event.x(), mouseY = event.y();
-        // clicking in the value/search area just moves the caret, so keep the popup open
-        if (mouseX >= getX() && mouseX < getX() + valueAreaWidth() && mouseY >= getY() && mouseY < getY() + getHeight()) {
-            this.searchBox.mouseClicked(event, doubleClick);
-            return true;
-        }
-        int[] r = popupRect();
-        int x = r[0], y = r[1], w = r[2], h = r[3];
-        if (mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h) {
-            int idx = scrollOffset + (int) ((mouseY - y) / itemHeight);
-            if (idx >= 0 && idx < filtered.size()) select(filtered.get(idx));
-        }
-        close();
-        return true;
-    }
-
-    @Override
-    public boolean popupMouseScrolled(double mouseX, double mouseY, double delta) {
-        if (!open || filtered.size() <= visibleCount()) return false;
-        int[] r = popupRect();
-        if (mouseX < r[0] || mouseX >= r[0] + r[2] || mouseY < r[1] || mouseY >= r[1] + r[3]) return false;
-        this.scrollOffset = Mth.clamp(scrollOffset - (int) Math.signum(delta), 0, maxScroll());
-        return true;
-    }
-
-    @Override
-    public boolean popupKeyPressed(KeyEvent event) {
-        if (!open) return false;
-        int key = event.key();
-        if (key == 256) { // escape
-            close();
-            return true;
-        }
-        if (key == 257 || key == 335) { // enter
-            if (!filtered.isEmpty()) select(filtered.contains(value) ? value : filtered.getFirst());
-            close();
-            return true;
-        }
-        return this.searchBox.keyPressed(event);
-    }
-
-    @Override
-    public boolean popupCharTyped(CharacterEvent event) {
-        return open && this.searchBox.charTyped(event);
+        if (popup.isOpen()) popup.close();
+        else popup.open();
     }
 
     private void select(String v) {
-        GuiHelper.playClickSound(); // the popup is drawn by the overlay layer, so it gets no widget click sound
+        GuiHelper.playClickSound();
+        // the popup is drawn by the overlay layer, so it gets no widget click sound
         this.value = v;
         onChange.accept(v);
     }
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    }
+
+    private class ListPopup extends AnchoredPopup {
+
+        private List<String> filtered = options;
+        private int scrollOffset;
+
+        ListPopup() {
+            super(DropdownWidget.this, 0, 0);
+        }
+
+        @Override
+        protected void onOpened() {
+            this.filtered = options;
+            searchBox.setValue("");
+            searchBox.setHint(Component.literal(value));
+            searchBox.setFocused(true);
+            layout();
+            int selected = filtered.indexOf(value);
+            this.scrollOffset = selected < 0 ? 0 : Mth.clamp(selected - visibleCount() + 1, 0, maxScroll());
+        }
+
+        @Override
+        public void onPopupClosed() {
+            super.onPopupClosed();
+            searchBox.setFocused(false);
+        }
+
+        private void filter(String query) {
+            String q = query.trim().toLowerCase(Locale.ROOT);
+            this.filtered = q.isEmpty() ? options
+                    : options.stream().filter(o -> o.toLowerCase(Locale.ROOT).contains(q)).toList();
+            this.scrollOffset = 0;
+            layout();
+        }
+
+        // as tall as the rows it has, capped to the side of the anchor with more room when neither side holds them all
+        private void layout() {
+            this.width = getWidth();
+            int desired = Mth.clamp(filtered.size(), 1, MAX_VISIBLE);
+            int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+            int fitBelow = Math.max(1, (screenH - MARGIN - getY() - getHeight()) / itemHeight);
+            int fitAbove = Math.max(1, (getY() - MARGIN) / itemHeight);
+            int visible = desired <= fitBelow || desired <= fitAbove ? desired : Math.max(fitBelow, fitAbove);
+            this.height = visible * itemHeight;
+        }
+
+        private int visibleCount() {
+            return height / itemHeight;
+        }
+
+        private int maxScroll() {
+            return Math.max(0, filtered.size() - visibleCount());
+        }
+
+        @Override
+        protected void renderContent(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY) {
+            Font font = font();
+            if (filtered.isEmpty()) {
+                graphics.text(font, Component.translatable("gui.moonlight.config.no_matches"),
+                        x + 4, y + (itemHeight - font.lineHeight) / 2 + 1, ConfigGuiColors.DESCRIPTION);
+            }
+
+            int visible = visibleCount();
+            boolean hasScrollbar = filtered.size() > visible;
+            int textRight = x + width - (hasScrollbar ? 6 : 4);
+            for (int i = 0; i < visible; i++) {
+                int idx = scrollOffset + i;
+                if (idx >= filtered.size()) break;
+                String opt = filtered.get(idx);
+                int iy = y + i * itemHeight;
+                boolean hover = GuiHelper.isMouseOver(mouseX, mouseY, x, iy, width, itemHeight);
+                if (hover) graphics.fill(x + 1, iy, x + width - 1, iy + itemHeight, ConfigGuiColors.HOVER_HIGHLIGHT);
+                int textX = x + 4;
+                if (iconGetter != null) {
+                    graphics.fakeItem(iconFor(opt), x + 2, iy + (itemHeight - 16) / 2);
+                    textX = x + 2 + 18;
+                }
+                int color = opt.equals(value) ? ConfigGuiColors.SELECTED : ConfigGuiColors.TEXT;
+                if (hover) {
+                    GuiHelper.renderScrollingText(graphics, font, Component.literal(opt), textX, textRight, iy, itemHeight, color);
+                } else {
+                    graphics.enableScissor(textX, iy, textRight, iy + itemHeight);
+                    graphics.text(font, opt, textX, iy + (itemHeight - font.lineHeight) / 2 + 1, color);
+                    graphics.disableScissor();
+                }
+            }
+
+            if (hasScrollbar) {
+                int trackX = x + width - 4;
+                int thumbH = Math.max(8, height * visible / filtered.size());
+                int thumbY = y + (height - thumbH) * scrollOffset / maxScroll();
+                graphics.fill(trackX, y, trackX + 2, y + height, CommonColors.BLACK);
+                graphics.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, ConfigGuiColors.SCROLLBAR_THUMB);
+            }
+        }
+
+        @Override
+        protected void clickContent(double mouseX, double mouseY, int x, int y) {
+            int idx = scrollOffset + (int) ((mouseY - y) / itemHeight);
+            if (idx >= 0 && idx < filtered.size()) select(filtered.get(idx));
+            close();
+        }
+
+        // clicking in the search area just moves the caret, so keep the popup open
+        @Override
+        protected void clickOutside(MouseButtonEvent event, boolean doubleClick) {
+            if (GuiHelper.isMouseOver(event.x(), event.y(), getX(), getY(), valueAreaWidth(), getHeight())) {
+                searchBox.mouseClicked(event, doubleClick);
+            } else {
+                close();
+            }
+        }
+
+        @Override
+        public boolean popupMouseScrolled(double mouseX, double mouseY, double delta) {
+            if (filtered.size() <= visibleCount()) return false;
+            if (!GuiHelper.isMouseOver(mouseX, mouseY, x(), y(), width, height)) return false;
+            this.scrollOffset = Mth.clamp(scrollOffset - (int) Math.signum(delta), 0, maxScroll());
+            return true;
+        }
+
+        @Override
+        public boolean popupKeyPressed(KeyEvent event) {
+            if (super.popupKeyPressed(event)) return true;
+            int key = event.key();
+            if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) {
+                if (!filtered.isEmpty()) select(filtered.contains(value) ? value : filtered.getFirst());
+                close();
+                return true;
+            }
+            return searchBox.keyPressed(event);
+        }
+
+        @Override
+        public boolean popupCharTyped(CharacterEvent event) {
+            return searchBox.charTyped(event);
+        }
     }
 }

@@ -7,11 +7,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 
 public class PanningEditBox extends EditBox {
-
-    private static final Identifier TEXT_FIELD_SPRITE = Identifier.withDefaultNamespace("widget/text_field");
 
     private final Font font;
     private int textColor = ConfigGuiColors.TEXT;
@@ -38,7 +35,7 @@ public class PanningEditBox extends EditBox {
             return;
         }
         if (this.isBordered()) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TEXT_FIELD_SPRITE, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.isActive(), false), this.getX(), this.getY(), this.getWidth(), this.getHeight());
         }
         int textX = this.isBordered() ? this.getX() + 4 : this.getX();
         GuiHelper.renderScrollingText(graphics, this.font, Component.literal(this.getValue()),
