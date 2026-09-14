@@ -27,6 +27,10 @@ public class VillagerBrainEventInternal {
         this.villager = villager;
     }
 
+    public void registerMemory(MemoryModuleType<?> memoryModuleType) {
+        ((BrainAccessor<Villager>) brain).invokeRegisterMemory(memoryModuleType);
+    }
+
     /**
      * If possible do not access the villager brain directly. The whole porpouse of this is to makde adding activities work better
      * between mods without modifying the brain directly. Use the methods below
@@ -91,7 +95,13 @@ public class VillagerBrainEventInternal {
 
             var activityTaskSet = tasksWithSamePriority.computeIfAbsent(activity, (a) -> Sets.newLinkedHashSet());
 
-            activityTaskSet.add(task.getSecond());
+            var behavior = task.getSecond();
+            //not going through brain.addActivity since that overwrites the activity conditions, so register required memories ourselves
+            for (MemoryModuleType<?> required : behavior.getRequiredMemories()) {
+                ((BrainAccessor<Villager>) brain).invokeRegisterMemory(required);
+            }
+
+            activityTaskSet.add(behavior);
 
             return true;
 

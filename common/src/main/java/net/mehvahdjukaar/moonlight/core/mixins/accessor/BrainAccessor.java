@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.mixins.accessor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryMap;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -23,7 +24,10 @@ public interface BrainAccessor<E extends LivingEntity> {
     @Accessor("availableBehaviorsByPriority")
     Map<Integer, Map<Activity, Set<BehaviorControl<? super E>>>> getAvailableBehaviorsByPriority();
 
-    //brain memories only exist if registered up front, and setMemory throws on unregistered ones
+    //brain memories only exist if registered up front, setMemory silently does nothing on unregistered ones
     @Invoker("registerMemory")
     void invokeRegisterMemory(MemoryModuleType<?> memoryType);
+
+    @Invoker("setMemoryInternal")
+    <U> void invokeSetMemoryInternal(MemoryMap.Value<U> value);
 }

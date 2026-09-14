@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -32,6 +33,15 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      * @param activityPackage the play package itself that will be executed
      */
     void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage);
+
+    /**
+     * Registers a memory slot on the brain.
+     * Sensors and tasks added through this event already register what they require,
+     * so this is only for memories set from elsewhere
+     *
+     * @param memoryModuleType memory to register
+     */
+    void registerMemory(MemoryModuleType<?> memoryModuleType);
 
     /**
      * Adds a sensor to the villager

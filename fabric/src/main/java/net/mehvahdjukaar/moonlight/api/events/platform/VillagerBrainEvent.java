@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.events.IVillagerBrainEvent;
 import net.mehvahdjukaar.moonlight.core.misc.VillagerBrainEventInternal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -44,6 +45,11 @@ public class VillagerBrainEvent implements IVillagerBrainEvent {
      */
     public void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage) {
         this.internal.addOrReplaceActivity(activity, activityPackage);
+    }
+
+    @Override
+    public void registerMemory(MemoryModuleType<?> memoryModuleType) {
+        this.internal.registerMemory(memoryModuleType);
     }
 
     //this might be bad

@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillager {
@@ -18,9 +18,10 @@ public abstract class VillagerMixin extends AbstractVillager {
         super(entityType, level);
     }
 
-    @Inject(method = ("registerBrainGoals"), at = @At("RETURN"))
-    protected void ml$addExtraBrainGoals(Brain<Villager> pVillagerBrain, CallbackInfo ci) {
-        VillagerAIInternal.onRegisterBrainGoals(pVillagerBrain, this);
+    //makeBrain and not registerBrainGoals since we need the packed memories
+    @Inject(method = "makeBrain", at = @At("RETURN"))
+    protected void ml$addExtraBrainGoals(Brain.Packed packed, CallbackInfoReturnable<Brain<Villager>> cir) {
+        VillagerAIInternal.onBrainMade(cir.getReturnValue(), this, packed);
     }
 
 
