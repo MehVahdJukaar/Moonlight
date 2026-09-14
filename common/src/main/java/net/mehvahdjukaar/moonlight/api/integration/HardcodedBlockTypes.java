@@ -454,9 +454,6 @@ public class HardcodedBlockTypes {
         // ALEX'S CAVES - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
 
-        // Ars Elemental - REASON: Associated WoodType
-        leafReg.addSimpleFinder("ars_elemental", "yellow_archwood")
-                .childBlock(LOG, Identifier.parse("ars_nouveau:archwood_log"));
     }
 
 
