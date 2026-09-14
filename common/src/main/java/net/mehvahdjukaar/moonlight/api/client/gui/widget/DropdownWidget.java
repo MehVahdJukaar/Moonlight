@@ -50,7 +50,7 @@ public class DropdownWidget extends AbstractWidget {
 
         this.searchBox = new EditBox(font(), 0, 0, width, height, Component.empty());
         this.searchBox.setBordered(false);
-        this.searchBox.setTextColor(ConfigGuiColors.TEXT);
+        this.searchBox.setTextColor(ConfigGuiColors.FIELD_TEXT);
         this.searchBox.setResponder(popup::filter);
     }
 
@@ -97,8 +97,7 @@ public class DropdownWidget extends AbstractWidget {
                 graphics.renderFakeItem(iconFor(value), x + 2, y + (h - 16) / 2);
                 textX = x + 2 + 18;
             }
-            // scroll the value like an option-row label when it's wider than the box
-            GuiHelper.renderScrollingText(graphics, font, Component.literal(value), textX, sepX - 2, y, h, ConfigGuiColors.TEXT);
+            GuiHelper.renderScrollingText(graphics, font, Component.literal(value), textX, sepX - 2, y, h, ConfigGuiColors.FIELD_TEXT);
         }
 
         graphics.fill(sepX, y, sepX + 1, y + h, border); // separator, same color as the outline
@@ -114,7 +113,6 @@ public class DropdownWidget extends AbstractWidget {
 
     private void select(String v) {
         GuiHelper.playClickSound();
-        // the popup is drawn by the overlay layer, so it gets no widget click sound
         this.value = v;
         onChange.accept(v);
     }
@@ -157,7 +155,6 @@ public class DropdownWidget extends AbstractWidget {
             layout();
         }
 
-        // as tall as the rows it has, capped to the side of the anchor with more room when neither side holds them all
         private void layout() {
             this.width = getWidth();
             int desired = Mth.clamp(filtered.size(), 1, MAX_VISIBLE);
@@ -225,7 +222,6 @@ public class DropdownWidget extends AbstractWidget {
             close();
         }
 
-        // clicking in the search area just moves the caret, so keep the popup open
         @Override
         protected void clickOutside(double mouseX, double mouseY, int button) {
             if (GuiHelper.isMouseOver(mouseX, mouseY, getX(), getY(), valueAreaWidth(), getHeight())) {

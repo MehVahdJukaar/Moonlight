@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -60,7 +61,7 @@ public class IconButton extends Button {
             }
         } else {
             if (this.isHoveredOrFocused()) {
-                graphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 0x30FFFFFF);
+                graphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), ConfigGuiColors.HOVER_HIGHLIGHT);
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }

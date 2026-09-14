@@ -96,8 +96,8 @@ public final class GuiHelper {
 
     /** Same as renderSeparator but vertical. Vanilla's sprites are horizontal, so this one is drawn by hand. */
     public static void renderVerticalSeparator(GuiGraphics graphics, int x, int top, int bottom) {
-        graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.HEADER_SEPARATOR);
-        graphics.fill(x + 1, top, x + 2, bottom, 0x18FFFFFF);
+        graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.PANEL_BG);
+        graphics.fill(x + 1, top, x + 2, bottom, ConfigGuiColors.SEPARATOR_HIGHLIGHT);
     }
 
     /** A mod icon at its real aspect ratio, scaled to fit and centered inside the given box. */

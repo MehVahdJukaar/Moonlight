@@ -63,7 +63,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         for (MultilineTextField.StringView line : this.textField.iterateLines()) {
             if (this.withinContentAreaTopBottom(y, y + lineHeight)) {
                 String lineText = value.substring(line.beginIndex(), line.endIndex());
-                graphics.drawString(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.TEXT);
+                graphics.drawString(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.FIELD_TEXT);
             }
             if (!placedCursor && cursor >= line.beginIndex() && cursor <= line.endIndex()) {
                 cursorX = textX + this.font.width(value.substring(line.beginIndex(), cursor));
@@ -75,9 +75,9 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
         if (showCursor && placedCursor && this.withinContentAreaTopBottom(cursorY, cursorY + lineHeight)) {
             if (cursor >= value.length()) {
-                graphics.drawString(this.font, "_", cursorX, cursorY, ConfigGuiColors.TEXT);
+                graphics.drawString(this.font, "_", cursorX, cursorY, ConfigGuiColors.FIELD_TEXT);
             } else {
-                graphics.fill(cursorX, cursorY - 1, cursorX + 1, cursorY + lineHeight, ConfigGuiColors.TEXT);
+                graphics.fill(cursorX, cursorY - 1, cursorX + 1, cursorY + lineHeight, ConfigGuiColors.FIELD_TEXT);
             }
         }
     }

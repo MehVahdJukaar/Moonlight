@@ -4,6 +4,8 @@ import com.google.gson.JsonParser;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+
+import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.HEADER;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.JsonHighlighter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -18,7 +20,6 @@ import java.util.function.Consumer;
 
 public class JsonEditScreen extends Screen {
 
-    private static final int HEADER = 44;
     private static final int SIDE_MARGIN = 20;
     private static final int DESC_PAD_TOP = 6;
     private static final int DESC_PAD_BOTTOM = 8;
@@ -107,8 +108,8 @@ public class JsonEditScreen extends Screen {
     private void renderDescription(GuiGraphics graphics) {
         if (this.descriptionLines.isEmpty()) return;
         int bandBottom = HEADER + this.descriptionBlockHeight;
-        graphics.fill(0, HEADER, this.width, bandBottom, 0xFF121218);
-        graphics.fill(0, bandBottom - 1, this.width, bandBottom, ConfigGuiColors.HEADER_SEPARATOR);
+        graphics.fill(0, HEADER, this.width, bandBottom, ConfigGuiColors.PANEL_BG);
+        GuiHelper.renderSeparator(graphics, 0, bandBottom - 2, this.width);
         int y = HEADER + DESC_PAD_TOP;
         for (FormattedCharSequence line : this.descriptionLines) {
             graphics.drawString(this.font, line, SIDE_MARGIN, y, ConfigGuiColors.DESCRIPTION);

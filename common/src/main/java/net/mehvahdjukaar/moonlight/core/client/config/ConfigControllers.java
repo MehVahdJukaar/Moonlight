@@ -203,7 +203,6 @@ public final class ConfigControllers {
             });
         });
 
-        // codec objects declaring a CodecUI schema get a generated form instead of the placeholder
         @SuppressWarnings("unchecked")
         Class<ConfigOption.SchemaValue<?>> schemaClass =
                 (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
@@ -219,11 +218,8 @@ public final class ConfigControllers {
     }
 
 
-    // A category's feature() gate, drawn as check/cross sprites to match the inline toggle the parent screen shows next to
-    // the category button
     static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
         ResourceLocation icon = o.icon();
-        // decorative item drawn left of the check/cross symbol, when the id resolves to something
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
 
@@ -286,7 +282,7 @@ public final class ConfigControllers {
         box.setResponder(str -> {
             try {
                 commit.accept(str);
-                box.setTextColor(TEXT);
+                box.setTextColor(FIELD_TEXT);
             } catch (Exception ex) {
                 box.setTextColor(ERROR);
             }

@@ -148,7 +148,7 @@ class OptionRow extends ConfigListRow {
         }
 
         boolean modified = !Objects.equals(session.currentRaw(value), value.get());
-        int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : LABEL;
+        int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : TEXT;
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         this.toggleX0 = left;

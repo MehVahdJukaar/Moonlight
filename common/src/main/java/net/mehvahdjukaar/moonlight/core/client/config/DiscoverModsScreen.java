@@ -21,23 +21,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.FOOTER;
-import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.HEADER;
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
 public class DiscoverModsScreen extends Screen {
 
-    private static final int SIDE_MARGIN = 24;
     private static final int MAX_CONTENT_W = 320;
     private static final int ROW_H = 48;
     private static final int ROW_GAP = 4;
     private static final int SECTION_H = 18;
-    private static final int GRID_PAD = 8;
-    private static final int ICON_SIZE = 32;
     private static final int ROW_INNER_PAD = 8;
     private static final int LINE = 11;
     private static final int MAX_DESC_LINES = 2;
 
-    private static final int DESC_MISSING = 0xFF6A6A78;
 
     private final Screen parent;
     private final List<ModCatalogAPI.Catalog> catalogs;
@@ -112,8 +107,8 @@ public class DiscoverModsScreen extends Screen {
 
     private void buildItems() {
         this.items.clear();
-        this.contentW = Math.min(this.width - 2 * SIDE_MARGIN, MAX_CONTENT_W);
-        int textWidth = this.contentW - (ROW_INNER_PAD + ICON_SIZE + ROW_INNER_PAD) - ROW_INNER_PAD;
+        this.contentW = Math.min(this.width - 2 * GRID_SIDE_MARGIN, MAX_CONTENT_W);
+        int textWidth = this.contentW - (ROW_INNER_PAD + MOD_ICON_SIZE + ROW_INNER_PAD) - ROW_INNER_PAD;
         boolean sections = this.catalogs.size() > 1;
         for (ModCatalogAPI.Catalog catalog : this.catalogs) {
             if (catalog.mods().isEmpty()) continue;
@@ -206,7 +201,7 @@ public class DiscoverModsScreen extends Screen {
 
     private void renderSection(GuiGraphics graphics, Section section, int y) {
         int textY = y + SECTION_H - this.font.lineHeight - 2;
-        graphics.drawString(this.font, section.title(), rowX, textY, ConfigGuiColors.TEXT_SECONDARY);
+        graphics.drawString(this.font, section.title(), rowX, textY, ConfigGuiColors.DESCRIPTION);
         GuiHelper.renderSeparator(graphics, rowX, textY + this.font.lineHeight + 1, contentW);
     }
 
@@ -216,18 +211,18 @@ public class DiscoverModsScreen extends Screen {
 
         boolean installed = row.installed();
         int iconX = rowX + ROW_INNER_PAD;
-        int iconY = y + (ROW_H - ICON_SIZE) / 2;
+        int iconY = y + (ROW_H - MOD_ICON_SIZE) / 2;
         renderIcon(graphics, row, iconX, iconY, installed);
 
-        int textX = iconX + ICON_SIZE + ROW_INNER_PAD;
+        int textX = iconX + MOD_ICON_SIZE + ROW_INNER_PAD;
         int textRight = rowX + contentW - ROW_INNER_PAD;
         int nameRight = installed ? textRight - 12 : textRight;
 
-        int nameColor = installed ? ConfigGuiColors.LABEL : ConfigGuiColors.TEXT_SECONDARY;
+        int nameColor = installed ? ConfigGuiColors.TEXT : ConfigGuiColors.DESCRIPTION;
         GuiHelper.renderScrollingText(graphics, this.font, Component.literal(row.data().name()),
                 textX, nameRight, y + 6, LINE, nameColor);
 
-        int descColor = installed ? ConfigGuiColors.DESCRIPTION : DESC_MISSING;
+        int descColor = installed ? ConfigGuiColors.DESCRIPTION : ConfigGuiColors.DISABLED;
         int descY = y + 6 + LINE;
         for (FormattedCharSequence line : row.descLines()) {
             graphics.drawString(this.font, line, textX, descY, descColor);
@@ -250,7 +245,7 @@ public class DiscoverModsScreen extends Screen {
                 RenderSystem.enableBlend();
                 graphics.setColor(1f, 1f, 1f, 0.35f);
             }
-            graphics.blit(icon.texture(), iconX, iconY, ICON_SIZE, ICON_SIZE, 0f, 0f,
+            graphics.blit(icon.texture(), iconX, iconY, MOD_ICON_SIZE, MOD_ICON_SIZE, 0f, 0f,
                     icon.width(), icon.height(), icon.width(), icon.height());
             if (!installed) {
                 graphics.setColor(1f, 1f, 1f, 1f);
@@ -262,9 +257,9 @@ public class DiscoverModsScreen extends Screen {
     }
 
     private void renderFallbackIcon(GuiGraphics graphics, Row row, int iconX, int iconY, boolean installed) {
-        GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, ICON_SIZE,
-                installed ? ConfigGuiColors.TILE_ICON_BG : 0xFF25252B,
-                installed ? ConfigGuiColors.initialLetter(row.data().name()) : DESC_MISSING, MoonlightIcons.CONFIG);
+        GuiHelper.renderInitialTile(graphics, this.font, row.data().name(), iconX, iconY, MOD_ICON_SIZE,
+                installed ? ConfigGuiColors.TILE_ICON_BG : ConfigGuiColors.TILE_BG_HOVER,
+                installed ? ConfigGuiColors.initialLetter(row.data().name()) : ConfigGuiColors.DISABLED, MoonlightIcons.CONFIG);
     }
 
     @Override

@@ -37,18 +37,15 @@ public class ModsTilesScreen extends Screen {
 
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
 
-    private static final int GRID_PAD = 8;
 
     private static final int CARD_W = 88;
     private static final int CARD_PAD = 9;        // equal padding above the icon and below the last text line
     private static final int ICON_TEXT_GAP = 6;
     private static final int NAME_VER_GAP = 2;
-    private static final int ICON_SIZE = 32;      // icon slot height; square icons render at this, wider ones expand
     private static final int ICON_SIDE_PAD = 8;
     private static final int LINE = 9;            // vanilla font line height
-    private static final int CARD_H = CARD_PAD + ICON_SIZE + ICON_TEXT_GAP + LINE + NAME_VER_GAP + LINE + CARD_PAD;
+    private static final int CARD_H = CARD_PAD + MOD_ICON_SIZE + ICON_TEXT_GAP + LINE + NAME_VER_GAP + LINE + CARD_PAD;
     private static final int CARD_GAP = 6;
-    private static final int SIDE_MARGIN = 24;
 
     private static final int TITLE_SEARCH_GAP = 5;
     // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
@@ -184,7 +181,7 @@ public class ModsTilesScreen extends Screen {
     }
 
     private void computeLayout() {
-        int availWidth = this.width - 2 * SIDE_MARGIN;
+        int availWidth = this.width - 2 * GRID_SIDE_MARGIN;
         int maxCols = Math.max(1, (availWidth + CARD_GAP) / (CARD_W + CARD_GAP));
         int count = this.entries.size();
         int rows = (count + maxCols - 1) / maxCols;
@@ -245,17 +242,17 @@ public class ModsTilesScreen extends Screen {
         if (hover) outline = entry.ours() ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE_HOVER_FOREIGN;
         graphics.renderOutline(x, y, CARD_W, CARD_H, outline);
 
-        int iconX = x + (CARD_W - ICON_SIZE) / 2;
+        int iconX = x + (CARD_W - MOD_ICON_SIZE) / 2;
         int iconY = y + CARD_PAD;
         Icon icon = ModIconCache.get(entry.modId());
         if (icon != null) {
-            GuiHelper.renderModIcon(graphics, icon, x + ICON_SIDE_PAD, iconY, CARD_W - 2 * ICON_SIDE_PAD, ICON_SIZE);
+            GuiHelper.renderModIcon(graphics, icon, x + ICON_SIDE_PAD, iconY, CARD_W - 2 * ICON_SIDE_PAD, MOD_ICON_SIZE);
         } else {
             renderFallbackIcon(graphics, entry, iconX, iconY);
         }
 
-        int nameY = iconY + ICON_SIZE + ICON_TEXT_GAP;
-        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.LABEL);
+        int nameY = iconY + MOD_ICON_SIZE + ICON_TEXT_GAP;
+        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.TEXT);
         if (entry.version() != null) {
             GuiHelper.renderClippedTextCentered(graphics, this.font, entry.version(), x + 4, x + CARD_W - 4, nameY + LINE + NAME_VER_GAP, ConfigGuiColors.DESCRIPTION);
         }
@@ -263,7 +260,7 @@ public class ModsTilesScreen extends Screen {
 
     private void renderFallbackIcon(GuiGraphics graphics, Entry entry, int iconX, int iconY) {
         GuiHelper.renderInitialTile(graphics, this.font, entry.name().getString(),
-                iconX, iconY, ICON_SIZE, ConfigGuiColors.TILE_ICON_BG,
+                iconX, iconY, MOD_ICON_SIZE, ConfigGuiColors.TILE_ICON_BG,
                 ConfigGuiColors.initialLetter(entry.modId()), MoonlightIcons.CONFIG);
     }
 

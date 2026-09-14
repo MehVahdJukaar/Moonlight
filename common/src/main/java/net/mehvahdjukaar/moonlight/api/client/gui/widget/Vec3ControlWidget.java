@@ -67,9 +67,9 @@ public class Vec3ControlWidget extends CompositeWidget {
         Double px = parse(xBox);
         Double py = parse(yBox);
         Double pz = parse(zBox);
-        this.xBox.setTextColor(px != null ? TEXT : ERROR);
-        this.yBox.setTextColor(py != null ? TEXT : ERROR);
-        this.zBox.setTextColor(pz != null ? TEXT : ERROR);
+        this.xBox.setTextColor(px != null ? FIELD_TEXT : ERROR);
+        this.yBox.setTextColor(py != null ? FIELD_TEXT : ERROR);
+        this.zBox.setTextColor(pz != null ? FIELD_TEXT : ERROR);
         if (px != null && py != null && pz != null) {
             this.onChange.accept(px, py, pz);
         }

@@ -149,9 +149,9 @@ class ListEditScreen extends Screen implements PopupHost {
                 b.setValue(working.get(index));
                 b.setResponder(s -> {
                     working.set(index, s);
-                    b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.TEXT : ConfigGuiColors.ERROR);
+                    b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.FIELD_TEXT : ConfigGuiColors.ERROR);
                 });
-                b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.TEXT : ConfigGuiColors.ERROR);
+                b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.FIELD_TEXT : ConfigGuiColors.ERROR);
                 this.box = b;
                 this.editor = b;
             }

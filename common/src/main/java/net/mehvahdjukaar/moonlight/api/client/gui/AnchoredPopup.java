@@ -78,7 +78,7 @@ public abstract class AnchoredPopup implements Popup {
         // above the list rows and their item icons, which render at z 150
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 200);
-        graphics.fill(x, y, x + width, y + height, ConfigGuiColors.POPUP_BG);
+        graphics.fill(x, y, x + width, y + height, ConfigGuiColors.PANEL_BG);
         renderContent(graphics, x, y, mouseX, mouseY);
         graphics.renderOutline(x, y, width, height, CommonColors.WHITE);
         graphics.pose().popPose();

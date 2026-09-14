@@ -71,7 +71,6 @@ public final class ConfigScreenIcons {
         return true;
     }
 
-    private static final int PERIOD = 36; // phase wraps here: a full Y spin, or two pulse cycles
 
     public static boolean renderAnimated(GuiGraphics graphics, @Nullable ResourceLocation id, int x, int y,
                                          float phase, boolean lit) {
@@ -101,9 +100,11 @@ public final class ConfigScreenIcons {
         private float phase;
 
         public void update(boolean hovered) {
+             int period = 36;
+
             phase += (hovered ? 20f : -40f) * clock.advance(); // +1/-2 per 1/20s tick, expressed as a per-second rate
             if (phase < 0) phase = 0;
-            else if (phase > PERIOD) phase -= PERIOD;
+            else if (phase > period) phase -= period;
         }
 
         public float phase() {

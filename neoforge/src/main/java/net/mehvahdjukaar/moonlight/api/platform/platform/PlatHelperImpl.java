@@ -195,8 +195,7 @@ public class PlatHelperImpl {
     public static String getModSourcesUrl(String modId) {
         String custom = readModString(modId, "sources");
         if (custom != null) return custom;
-        // fall back: read the file-level issueTrackerURL from the raw config
-        // and strip a trailing /issues to recover the repo root
+        // fall back
         String issues = ModList.get().getModContainerById(modId)
                 .map(c -> c.getModInfo().getOwningFile().getConfig())
                 .flatMap(cfg -> cfg.<String>getConfigElement("issueTrackerURL"))
