@@ -403,7 +403,7 @@ public class HardcodedBlockTypes {
                 .leaves("dyna_leaves_red")
                 .equivalentWood("pokecube_legends:aged");
 
-        // REGIONS UNEXPLORED - REASON: Associated WoodType
+        // REGIONS UNEXPLORED - REASON: Associated WoodType - The WoodType wasn't detected on WoodType's side
         leafReg.addLeavesToWoodMapping("regions_unexplored", "bamboo", "bamboo");
 
         // THE TWILIGHT FOREST - REASON: Associated WoodType, Naming-Convention
