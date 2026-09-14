@@ -54,6 +54,8 @@ public class RegistryQueue<T> {
 
         private final ResourceKey<T> id;
         private Holder<T> holder = null;
+        // for ree entrance
+        private T valueBeingRegistered = null;
 
 
         public RegEntryHolder(ResourceLocation id, Supplier<T> factory, ResourceKey<Registry<T>> registry) {
@@ -79,14 +81,19 @@ public class RegistryQueue<T> {
         }
 
         void initialize(boolean throwMissingReg) {
-            if (this.holder != null) return;
+            if (this.holder != null || this.valueBeingRegistered != null) return;
             WritableRegistry writableRegistry = (WritableRegistry) BuiltInRegistries.REGISTRY.get(registryKey.location());
             if (writableRegistry == null) {
                 if (throwMissingReg)
                     throw new IllegalStateException("Registry not found: " + registryKey.location());
                 return;
             }
-            this.holder = writableRegistry.register(id, regSupplier.get(), RegistrationInfo.BUILT_IN);
+            this.valueBeingRegistered = regSupplier.get();
+            try {
+                this.holder = writableRegistry.register(id, this.valueBeingRegistered, RegistrationInfo.BUILT_IN);
+            } finally {
+                this.valueBeingRegistered = null;
+            }
             regSupplier = null;
             registryKey = null;
 
@@ -105,6 +112,7 @@ public class RegistryQueue<T> {
         public T value() {
             initialize(true);
             if (this.holder == null) {
+                if (this.valueBeingRegistered != null) return this.valueBeingRegistered;
                 throw new NullPointerException("Trying to access unbound value: " + this.id);
             }
 

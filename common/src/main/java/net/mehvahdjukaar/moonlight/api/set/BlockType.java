@@ -2,8 +2,8 @@ package net.mehvahdjukaar.moonlight.api.set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.util.INamedSupplier;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.set.BlockSetInternal;
@@ -150,7 +150,7 @@ public abstract class BlockType {
     }
 
     public String getReadableName() {
-        return LangBuilder.getReadableName(this.getTypeName());
+        return TextHelper.getReadableName(this.getTypeName());
     }
 
     public boolean isVanilla() {

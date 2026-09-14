@@ -3,11 +3,9 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.DropdownWidget;
 
 /**
- * A screen that can float {@link Popup}s above its content. It owns an {@link OverlayLayer}, forwards its
- * render/mouse/key/char events to it (first, so popups sit on top), and clears it in {@code init()}.
- * <p>
- * Widgets that need to escape a scissored parent (e.g. {@link DropdownWidget}) discover the host via
- * {@code Minecraft.getInstance().screen instanceof PopupHost} and open themselves through {@link #getOverlayLayer()}.
+ * A screen that can draw Popups above its own content. It owns an OverlayLayer, sends its render/mouse/key/char
+ * events there first so popups stay on top, and clears it in init(). Widgets that have to get out of a scissored
+ * parent find the host by instanceof-ing the current screen.
  */
 public interface PopupHost {
 

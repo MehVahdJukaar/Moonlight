@@ -1,6 +1,2 @@
-- added ConfigScreenExtensions.registerShowcase, letting a mod replace the icon + item carousel block on its config screen with a widget of its own
-- added a small screen particle system (ScreenParticle + ScreenParticleEngine): 2d sprites or quads with lifetime, gravity, spin, size and alpha fades
-- config screen mods button now grows on hover and slowly turns instead of taking a hover highlight
-- item carousel now pans sub pixel smooth and can be flicked with the scroll wheel
-- fixed dynamic rendered textures reading back the wrong buffer, which made cpu side post processing run on a blank image
-- fixed dynamic rendered textures losing their alpha channel when swapped to front
+- misc 26.1 fixes
+- including an important one on fabric

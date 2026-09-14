@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
@@ -8,21 +9,25 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -38,6 +43,11 @@ public final class ForeignConfigBridge {
     // ConfigTracker exposes no public "configs of mod X" accessor, so read its live registry field once
     private static final Map<String, List<ModConfig>> CONFIGS_BY_MOD = configsByModField();
 
+    // building a screen just to look at its class is not free, so each mod is asked once
+    private static final Map<String, Boolean> GENERIC_SCREEN_CACHE = new HashMap<>();
+
+    private static final String CONFIGURED_PACKAGE = "com.mrcrayfish.configured.";
+
     @Nullable
     public static Screen createScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
         List<ModConfigHolder> holders = holdersFor(modId);
@@ -46,12 +56,34 @@ public final class ForeignConfigBridge {
     }
 
     /**
-     * Cheap check (no tree building) for whether this mod exposes at least one loaded, non-Moonlight {@link ModConfigSpec}.
+     * The mod either registered no config screen at all, or registered one of the stock ones anybody gets for free:
+     * NeoForge's ConfigurationScreen, or Configured's. Either way there is no hand made screen to override.
      */
+    public static boolean hasOnlyGenericScreen(String modId) {
+        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, ForeignConfigBridge::readIsGenericScreen);
+    }
+
+    private static boolean readIsGenericScreen(String modId) {
+        ModContainer container = ModList.get().getModContainerById(modId).orElse(null);
+        if (container == null) return false;
+        IConfigScreenFactory factory = container.getCustomExtension(IConfigScreenFactory.class).orElse(null);
+        if (factory == null) return true;
+        try {
+            // the factory is a lambda in the registering mod's class, so the only way to tell them apart is the
+            // screen it hands back. Building one is harmless, it's the init() call that does the work
+            Screen screen = factory.createScreen(container, null);
+            return screen instanceof ConfigurationScreen
+                    || screen.getClass().getName().startsWith(CONFIGURED_PACKAGE);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static boolean hasConfig(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
-            if (mc.getSpec() instanceof ModConfigSpec spec && spec.isLoaded() && !spec.isEmpty()) return true;
+            if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
+            if (!spec.isLoaded() || !spec.isEmpty()) return true;
         }
         return false;
     }
@@ -63,8 +95,13 @@ public final class ForeignConfigBridge {
             // skip anything Moonlight itself created: those already have a real holder and native screen
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
             if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
-            // can't safely read/write an unloaded spec (e.g. a server config with no world open)
-            if (!spec.isLoaded()) continue;
+            // an unloaded spec (a server config with no world open) has no values to walk. List it anyway, with an
+            // empty tree: the select screen greys the row out and says why, instead of hiding the config entirely
+            if (!spec.isLoaded()) {
+                out.add(new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec,
+                        new ConfigCategory(Component.empty()), nameFor(modId, mc)));
+                continue;
+            }
             try {
                 ForeignConfigHolder holder = CACHE.get(mc);
                 if (holder == null) {
@@ -80,15 +117,29 @@ public final class ForeignConfigBridge {
     }
 
     private static ForeignConfigHolder build(String modId, ModConfig mc, ModConfigSpec spec) {
-        ConfigType type = mc.getType() == ModConfig.Type.CLIENT ? ConfigType.CLIENT : ConfigType.COMMON;
-        String typeName = mc.getType().name().toLowerCase(Locale.ROOT);
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modId, typeName);
-
         ConfigCategory root = new ConfigCategory(Component.empty());
         walk(spec, spec.getValues(), List.of(), root);
+        return new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec, root, nameFor(modId, mc));
+    }
 
-        Component name = Component.literal(readableModName(modId) + " - " + LangBuilder.getReadableName(typeName));
-        return new ForeignConfigHolder(id, type, spec, root, name);
+    private static ConfigType typeFor(ModConfig mc) {
+        return switch (mc.getType()) {
+            case CLIENT -> ConfigType.CLIENT;
+            case SERVER -> ConfigType.COMMON_SYNCED; // world bound, so it gets the server paper icon
+            default -> ConfigType.COMMON;
+        };
+    }
+
+    private static ResourceLocation idFor(String modId, ModConfig mc) {
+        return ResourceLocation.fromNamespaceAndPath(modId, typeName(mc));
+    }
+
+    private static Component nameFor(String modId, ModConfig mc) {
+        return Component.literal(PlatHelper.getModName(modId) + " - " + TextHelper.getReadableName(typeName(mc)));
+    }
+
+    private static String typeName(ModConfig mc) {
+        return mc.getType().name().toLowerCase(Locale.ROOT);
     }
 
     private static void walk(ModConfigSpec spec, UnmodifiableConfig config, List<String> path, ConfigCategory parent) {
@@ -134,7 +185,7 @@ public final class ForeignConfigBridge {
             return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
         }
         if (sample instanceof Long l) {
-            // Moonlight has no long control: present it as an int when the range fits, else leave it uneditable
+            // no long control: present it as an int when the range fits, else leave it uneditable
             long[] r = longRange(vs);
             if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
                 return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
@@ -156,10 +207,10 @@ public final class ForeignConfigBridge {
     }
 
     private static IConfigValue wrap(ModConfigSpec.ConfigValue<?> cv, ConfigMetadata meta) {
-        return ValueWrapper.simple((ModConfigSpec.ConfigValue) cv, meta);
+        return ForgeConfigValue.simple((ModConfigSpec.ConfigValue) cv, meta);
     }
 
-    // adapts a long-backed value to the int control, clamping is the caller's job (range already checked to fit int)
+    // adapts a long-backed value to the int control; the range was already checked to fit
     private static IConfigValue<Integer> longAsInt(ModConfigSpec.ConfigValue<?> cvRaw, ConfigMetadata meta) {
         ModConfigSpec.ConfigValue<Long> cv = (ModConfigSpec.ConfigValue<Long>) cvRaw;
         return new IConfigValue<>() {
@@ -215,13 +266,13 @@ public final class ForeignConfigBridge {
     private static Component leafTitle(ModConfigSpec.ValueSpec vs, String key) {
         String tk = vs.getTranslationKey();
         if (tk != null && I18n.exists(tk)) return Component.translatable(tk);
-        return Component.literal(LangBuilder.getReadableName(key));
+        return Component.literal(TextHelper.getReadableName(key));
     }
 
     private static Component categoryTitle(ModConfigSpec spec, List<String> path, String key) {
         String tk = spec.getLevelTranslationKey(path);
-        if (tk != null && I18n.exists(tk)) return Component.translatable(tk);
-        return Component.literal(LangBuilder.getReadableName(key));
+        if (I18n.exists(tk)) return Component.translatable(tk);
+        return Component.literal(TextHelper.getReadableName(key));
     }
 
     private static ConfigReloadType reloadType(ModConfigSpec.RestartType rt) {
@@ -230,12 +281,6 @@ public final class ForeignConfigBridge {
             case GAME -> ConfigReloadType.GAME_RESTART;
             default -> ConfigReloadType.NONE;
         };
-    }
-
-    private static String readableModName(String modId) {
-        return ModList.get().getModContainerById(modId)
-                .map(c -> c.getModInfo().getDisplayName())
-                .orElse(LangBuilder.getReadableName(modId));
     }
 
     private static List<String> append(List<String> path, String key) {

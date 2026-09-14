@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -16,20 +17,14 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+//General utility to render gui stuff.
 public final class GuiHelper {
 
-    // ── shared chrome for Moonlight's config-style screens (header bar, scroll-panel background, scrollbar, tiles) ──
-    // the tiling list background / footer shadow the vanilla selection lists use (those fields are private on
-    // AbstractSelectionList, so we mirror them here for our custom-scrolled screens)
     private static final ResourceLocation MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png");
     private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
-    // Screen keeps the in-world menu background private, so mirror it here
     private static final ResourceLocation INWORLD_MENU_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/inworld_menu_background.png");
 
-    /**
-     * The top bar plus its bottom separator (no title). Same chrome vanilla's header/footer layouts use: the plain
-     * menu background texture with the 2px separator sprite under it. Ours is just taller.
-     */
+    /** The top bar plus its bottom separator, no title. Same chrome as vanilla's header layouts, just taller. */
     public static void renderHeaderBar(GuiGraphics graphics, int width, int headerHeight) {
         boolean inWorld = Minecraft.getInstance().level != null;
         Screen.renderMenuBackgroundTexture(graphics, inWorld ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND,
@@ -46,7 +41,7 @@ public final class GuiHelper {
         graphics.drawCenteredString(font, title, width / 2, (headerHeight - font.lineHeight) / 2, ConfigGuiColors.TITLE);
     }
 
-    /** The header bar with a gold title and a gray second line under it (version, subtitle, ...). */
+    /** The header bar with a gold title and a gray second line under it. */
     public static void renderHeaderBar(GuiGraphics graphics, Font font, Component title, @Nullable Component subtitle,
                                        int width, int headerHeight) {
         if (subtitle == null) {
@@ -55,24 +50,15 @@ public final class GuiHelper {
         }
         renderHeaderBar(graphics, width, headerHeight);
         int gap = 2;
-        // centered as one block within the bar, separator excluded
         int top = (headerHeight - 2 - (2 * font.lineHeight + gap)) / 2;
         graphics.drawCenteredString(font, title, width / 2, top, ConfigGuiColors.TITLE);
         graphics.drawCenteredString(font, subtitle, width / 2, top + font.lineHeight + gap, ConfigGuiColors.DESCRIPTION);
     }
 
-    /**
-     * A left-to-right gradient, which {@code GuiGraphics#fillGradient} can't do (it only goes top to bottom). Drawn as
-     * 1px columns, so keep the span narrow (edge fades, highlights) rather than filling whole screens with it.
-     */
     public static void fillGradientHorizontal(GuiGraphics graphics, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         fillGradientHorizontal(graphics, RenderType.gui(), minX, minY, maxX, maxY, colorFrom, colorTo);
     }
 
-    /**
-     * As above, over an explicit render type. Pass {@link RenderType#guiOverlay()} to fade over rendered items: they
-     * write depth at z≈150, so the default depth-tested {@link RenderType#gui()} would be punched out by them.
-     */
     public static void fillGradientHorizontal(GuiGraphics graphics, RenderType renderType, int minX, int minY, int maxX, int maxY, int colorFrom, int colorTo) {
         int steps = maxX - minX;
         if (steps <= 0) return;
@@ -82,7 +68,7 @@ public final class GuiHelper {
         }
     }
 
-    /** The plain menu background the header bar uses, over an arbitrary rect. Keeps its tiling aligned to the screen. */
+    /** The plain menu background the header bar uses, over an arbitrary rect, tiling still aligned to the screen. */
     public static void renderMenuBand(GuiGraphics graphics, int x, int y, int width, int height) {
         ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_BACKGROUND : Screen.MENU_BACKGROUND;
         Screen.renderMenuBackgroundTexture(graphics, bg, x, y, x, y, width, height);
@@ -96,14 +82,14 @@ public final class GuiHelper {
         RenderSystem.disableBlend();
     }
 
-    /** Vertical counterpart to {@link #renderSeparator}. The vanilla sprites are horizontal, so this is a drawn groove. */
+    /** Same as renderSeparator but vertical. Vanilla's sprites are horizontal, so this one is drawn by hand. */
     public static void renderVerticalSeparator(GuiGraphics graphics, int x, int top, int bottom) {
         graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.HEADER_SEPARATOR);
         graphics.fill(x + 1, top, x + 2, bottom, 0x18FFFFFF);
     }
 
     /** A mod icon at its real aspect ratio, scaled to fit and centered inside the given box. */
-    public static void renderModIcon(GuiGraphics graphics, ModIcons.Icon icon, int x, int y, int maxWidth, int maxHeight) {
+    public static void renderModIcon(GuiGraphics graphics, Icon icon, int x, int y, int maxWidth, int maxHeight) {
         int h = maxHeight;
         int w = Math.round(maxHeight * (icon.width() / (float) icon.height()));
         if (w > maxWidth) {
@@ -114,7 +100,6 @@ public final class GuiHelper {
                 0f, 0f, icon.width(), icon.height(), icon.width(), icon.height());
     }
 
-    /** The 32×32 tiling list background over a scroll panel (mirrors {@code AbstractSelectionList#renderListBackground}). */
     public static void renderListBackground(GuiGraphics graphics, int top, int bottom, int width, double scroll) {
         ResourceLocation bg = Minecraft.getInstance().level != null ? INWORLD_MENU_LIST_BACKGROUND : MENU_LIST_BACKGROUND;
         RenderSystem.enableBlend();
@@ -122,7 +107,6 @@ public final class GuiHelper {
         RenderSystem.disableBlend();
     }
 
-    /** The bottom inner-shadow strip (mirrors {@code AbstractSelectionList#renderListSeparators}, footer only). */
     public static void renderFooterSeparator(GuiGraphics graphics, int bottom, int width) {
         ResourceLocation footer = Minecraft.getInstance().level != null ? Screen.INWORLD_FOOTER_SEPARATOR : Screen.FOOTER_SEPARATOR;
         RenderSystem.enableBlend();
@@ -142,8 +126,8 @@ public final class GuiHelper {
     }
 
     /**
-     * The placeholder mod icon: a dark square with the mod's capital initial, or {@code gearIcon} when the name is
-     * blank. Colors are passed in so callers can dim it (e.g. for not-installed mods).
+     * The placeholder mod icon: a dark square with the mod's capital initial, or gearIcon when the name is blank.
+     * Colors are passed in so callers can dim it.
      */
     public static void renderInitialTile(GuiGraphics graphics, Font font, String name, int x, int y, int size,
                                          int tileColor, int letterColor, ResourceLocation gearIcon) {
@@ -151,7 +135,7 @@ public final class GuiHelper {
         graphics.renderOutline(x, y, size, size, 0xFF000000);
         String trimmed = name.trim();
         if (trimmed.isEmpty()) {
-            int g = size - 10;
+            int g = size >= 26 ? 16 : 8; // the gear is 16x16, so only whole steps of it stay on the pixel grid
             graphics.blitSprite(gearIcon, x + (size - g) / 2, y + (size - g) / 2, g, g);
             return;
         }
@@ -161,23 +145,22 @@ public final class GuiHelper {
         graphics.drawString(font, initial, tx, ty, letterColor, false);
     }
 
-    /**
-     * The vanilla button click sound, for clickable things that aren't {@code AbstractWidget}s (grid cards, list rows,
-     * breadcrumb segments, ...) and so can't call {@code playDownSound} themselves.
-     */
+    /** The vanilla button click sound, for clickable things that aren't widgets and can't play it themselves. */
     public static void playClickSound() {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
     }
 
-    /** A number as a text field shows it: no trailing {@code .0} when it happens to be whole. */
+    /**
+     * @deprecated moved to TextHelper
+     */
+    @Deprecated(forRemoval = true)
     public static String formatNumber(double v) {
-        return v == Math.rint(v) && !Double.isInfinite(v) ? String.valueOf((long) v) : String.valueOf(v);
+        return TextHelper.formatNumber(v);
     }
 
     /**
-     * Left aligned text that scrolls back and forth when it doesn't fit its box, mirroring vanilla's
-     * {@code AbstractWidget.renderScrollingString} (which isn't publicly accessible). Handy for any label/value
-     * box whose text can overflow (option rows, combo box values, ...).
+     * Left aligned text that scrolls back and forth when it doesn't fit its box, like vanilla's
+     * AbstractWidget.renderScrollingString, which we can't call.
      */
     public static void renderScrollingText(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
@@ -186,11 +169,7 @@ public final class GuiHelper {
         }
     }
 
-    /**
-     * Like {@link #renderScrollingText} but the text is centered within {@code [minX, maxX]} while it fits,
-     * only marqueeing once it overflows. Used where centered labels (e.g. grid cards) still need to reveal
-     * longer values.
-     */
+    /** Like renderScrollingText, but centered while the text fits and only scrolling once it doesn't. */
     public static void renderScrollingTextCentered(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {
@@ -199,7 +178,6 @@ public final class GuiHelper {
         }
     }
 
-    /** Marquees the text within the band if it overflows and returns true; returns false (drew nothing) if it fits. */
     private static boolean scrollIfOverflow(GuiGraphics graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int textY, int color) {
         int overflow = font.width(text) - (maxX - minX);
         if (overflow <= 0) return false;

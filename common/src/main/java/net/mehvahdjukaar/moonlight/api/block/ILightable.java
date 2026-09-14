@@ -112,14 +112,15 @@ public interface ILightable {
         if (Utils.mayPerformBlockAction(player, pos, stack)) {
             if (!this.isLitUp(state, level, pos)) {
                 Item item = stack.getItem();
-                if (item instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS)) {
-                    if (tryLightUp(player, state, pos, level, FireSoundType.FLINT_AND_STEEL)) {
-                        stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
-                        return ItemInteractionResult.sidedSuccess(level.isClientSide);
-                    }
-                } else if (item instanceof FireChargeItem) {
+                // fire charges also have the light fire ability so they must be checked first
+                if (item instanceof FireChargeItem) {
                     if (tryLightUp(player, state, pos, level, FireSoundType.FIRE_CHANGE)) {
                         stack.consume(1, player);
+                        return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                    }
+                } else if (isIgniter(stack)) {
+                    if (tryLightUp(player, state, pos, level, FireSoundType.FLINT_AND_STEEL)) {
+                        stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
                         return ItemInteractionResult.sidedSuccess(level.isClientSide);
                     }
                 }
@@ -132,6 +133,15 @@ public interface ILightable {
             }
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    /**
+     * Checks if this item can be used to light blocks on fire. Item abilities are checked too so tools that can
+     * only sometimes light fires (broken tinkers tools for example) are respected
+     */
+    static boolean isIgniter(ItemStack stack) {
+        return stack.getItem() instanceof FlintAndSteelItem || stack.is(FLINT_AND_STEELS) ||
+                PlatHelper.canLightFire(stack);
     }
 
     default boolean canBeExtinguishedBy(ItemStack item) {

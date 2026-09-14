@@ -36,10 +36,4 @@ public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
     protected JsonElement encodeValue(T value) {
         return new JsonPrimitive(value.name());
     }
-
-    @Override
-    public String getExtraInfo() {
-        return "Accepted values: " + String.join(", ",
-                java.util.Arrays.stream(acceptedValues).map(Enum::name).toList());
-    }
 }

@@ -42,9 +42,4 @@ public class IntConfigValue extends ConfigValue<Integer> {
     public Integer getMin() {
         return min;
     }
-
-    @Override
-    public String getExtraInfo() {
-        return "Accepted range: " + min + " to " + max;
-    }
 }

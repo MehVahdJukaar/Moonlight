@@ -27,9 +27,6 @@ public class ConfigBuilderHelper {
             Codec.INT.fieldOf("second").forGetter(m -> m.second)
     ).apply(inst, MyObj::new));
 
-    // Same object, but declared with a CodecUI schema (via the codecui jar Moonlight bundles). A SchemaCodec IS a
-    // Codec, so the wire format is identical to CODEC above — but because it carries an edit surface, defineObject
-    // builds a real in-game form for it (here: two 0..100 int sliders) instead of a raw-JSON editor.
     public static final SchemaCodec<MyObj> SCHEMA_CODEC = SchemaRecord.create(MyObj.class, i -> i.group(
             i.field("first", SchemaCodecs.intRange(0, 100), MyObj::first),
             i.field("second", SchemaCodecs.intRange(0, 100), MyObj::second)

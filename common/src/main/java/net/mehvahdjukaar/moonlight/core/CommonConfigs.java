@@ -79,7 +79,7 @@ public class CommonConfigs {
             builder.push("test_category");
             builder.comment("A dev only section used to test the config screen. It doesn't ship to players.");
 
-            builder.icon("minecraft:lever").comment("A boolean feature: drawn as a ✓/✗ toggle with its icon next to the symbol").feature("test_bool", true);
+            builder.icon("minecraft:lever").comment("A boolean feature, drawn as a check/cross toggle with its icon next to the symbol").feature("test_bool", true);
             builder.comment("A plain boolean, drawn as an ON/OFF button").define("test_plain_bool", true);
             builder.comment("A value that needs a world reload (shows a globe icon)").worldReload().define("test_world_reload", true);
             builder.comment("A value that needs a game restart (shows a power icon)").gameRestart().define("test_game_restart", true);
@@ -99,6 +99,7 @@ public class CommonConfigs {
             builder.comment("A string field").define("test_string", "hello");
             builder.comment("A regex pattern with live syntax highlighting").defineRegex("test_regex", "\\d+(foo|bar)?");
             builder.comment("An ARGB color, edited as a hex field").defineColor("test_color", 0xFFFF5555);
+            builder.comment("An RGB color with no alpha channel").defineColor("test_color_no_alpha", 0x2A77EA, false);
 
             // comment declared AFTER its define: still ends up on the row (lenient ordering)
             builder.define("test_after_comment", false);
@@ -129,9 +130,9 @@ public class CommonConfigs {
             builder.comment("A float value living in a nested sub category").define("nested_float", 0.5f, 0f, 1f);
             builder.pop();
 
-            // Feature gating demo: a category with an enable toggle (shown inline on its row). Its children grey out
-            // when it's off, and the returned supplier reads false whenever an ancestor feature is off — via supplier
-            // composition, without ever rewriting the stored child values. (Suppliers unused here, just demonstrating.)
+            // Feature gating demo: a category with an enable toggle, shown inline on its row. Its children grey out
+            // when it's off, and the returned supplier reads false whenever an ancestor feature is off, composed at
+            // read time without ever rewriting the stored child values
             builder.icon("minecraft:redstone").pushFeature("test_feature", true);
             builder.comment("Only meaningful while the feature is on").define("feature_speed", 1.0, 0, 10);
             builder.pushFeature("test_sub_feature", true);

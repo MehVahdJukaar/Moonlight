@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.util.codec;
 
 import com.mojang.datafixers.util.Either;
+import io.netty.buffer.ByteBuf;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Function5;
@@ -20,6 +21,7 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
@@ -94,6 +96,12 @@ public class CodecUtils {
                     Vec3.CODEC.fieldOf("to").forGetter(AABB::getMaxPosition)
             ).apply(i, AABB::new)
     );
+
+    public static final StreamCodec<ByteBuf, Vec3> VEC3_STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.DOUBLE, Vec3::x,
+            ByteBufCodecs.DOUBLE, Vec3::y,
+            ByteBufCodecs.DOUBLE, Vec3::z,
+            Vec3::new);
 
 
     public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {

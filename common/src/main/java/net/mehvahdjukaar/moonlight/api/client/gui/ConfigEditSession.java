@@ -4,16 +4,18 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.screens.Screen;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
- * Mutable editing state for one config screen visit, shared across the whole navigation stack (so edits and
- * expanded rows made in a subcategory survive going back and are persisted by a single Save). Holds only a
- * working copy; nothing is written to the underlying config until {@link #apply()}.
+ * Mutable editing state for one config screen visit, shared across the whole navigation stack so edits made in a
+ * subcategory survive going back and are written by a single Save. Nothing touches the real config until apply().
  */
 public final class ConfigEditSession {
 
+    // null for a scratch session, which only holds working values and never writes anything back
+    @Nullable
     private final ModConfigHolder holder;
     private final Screen returnScreen;
 
@@ -27,6 +29,19 @@ public final class ConfigEditSession {
         this.returnScreen = returnScreen;
     }
 
+    private ConfigEditSession(Screen returnScreen) {
+        this.holder = null;
+        this.returnScreen = returnScreen;
+    }
+
+    /**
+     * A session with no config behind it, for screens that edit a value in memory and hand it back themselves (the
+     * generated schema form). apply() does nothing on one of these.
+     */
+    public static ConfigEditSession scratch(Screen returnScreen) {
+        return new ConfigEditSession(returnScreen);
+    }
+
     public ModConfigHolder holder() {
         return holder;
     }
@@ -35,9 +50,6 @@ public final class ConfigEditSession {
         return returnScreen;
     }
 
-    /**
-     * The value to display: the pending edit if there is one, otherwise the saved value.
-     */
     @SuppressWarnings("unchecked")
     public <T> T current(ConfigOption<T> v) {
         return pending.containsKey(v) ? (T) pending.get(v) : v.get();
@@ -60,18 +72,15 @@ public final class ConfigEditSession {
     }
 
     public void apply() {
+        if (holder == null) return;
         pending.forEach((v, value) -> {
             if (!Objects.equals(value, v.get())) {
                 v.apply(holder, value);
-                // remember the heaviest reload a saved change needs, so the exit can prompt for it
                 if (v.reloadType().ordinal() > appliedReload.ordinal()) appliedReload = v.reloadType();
             }
         });
     }
 
-    /**
-     * Most severe reload a saved change has required this visit ({@link ConfigReloadType#NONE} if none).
-     */
     public ConfigReloadType appliedReload() {
         return appliedReload;
     }

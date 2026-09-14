@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 /**
- * A small square that previews an ARGB color over a grey checkerboard (so alpha reads clearly). With an
- * {@code onPress} action it behaves as a button (and outlines white on hover); with a {@code null} action it is a
- * passive preview. The current color can be updated live via {@link #setColor(int)}.
+ * A small square showing an ARGB color over a grey checkerboard, so you can tell how transparent it is. With an
+ * onPress action it acts as a button and outlines white on hover, with a null one it just sits there. Call
+ * setColor to change what it shows.
  */
 public class ColorSwatchWidget extends AbstractWidget {
 

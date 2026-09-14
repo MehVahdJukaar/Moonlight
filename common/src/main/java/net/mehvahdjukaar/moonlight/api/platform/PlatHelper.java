@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.misc.TileOrEntityTarget;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeLocalPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
@@ -249,6 +250,25 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    /**
+     * Every http url the mod declared in its metadata, in no particular order. Neither loader says what any of them
+     * point at, so callers work that out from the host.
+     */
+    @PlatformImpl
+    public static List<String> getModLinks(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
+     * @deprecated moved to TextHelper
+     */
+    @Deprecated(forRemoval = true)
+    @Nullable
+    public static String urlHost(String url) {
+        return TextHelper.urlHost(url);
+    }
+
+    /** The mod's display name, or a readable form of the id when the loader doesn't know that mod. */
     @PlatformImpl
     public static String getModName(String modId) {
         throw new AssertionError();
@@ -346,6 +366,11 @@ public class PlatHelper {
 
     @PlatformImpl
     public static int getBurnTime(ItemStack stack) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
+    public static boolean canLightFire(ItemStack stack) {
         throw new AssertionError();
     }
 

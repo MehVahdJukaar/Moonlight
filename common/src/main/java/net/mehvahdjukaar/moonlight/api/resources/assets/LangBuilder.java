@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -11,12 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class LangBuilder {
 
@@ -36,7 +34,7 @@ public class LangBuilder {
 
     public <T> void addSimpleEntry(Registry<T> reg, T entry) {
         entries.put(Util.makeDescriptionId(reg.key().location().getPath(), reg.getKey(entry)),
-                LangBuilder.getReadableName(reg.getKey(entry).getPath()));
+                TextHelper.getReadableName(reg.getKey(entry).getPath()));
     }
 
     public void addEntry(Item item, String translation) {
@@ -62,29 +60,20 @@ public class LangBuilder {
 
     //utils
 
-    //helper to make lang strings
+    /**
+     * @deprecated moved to TextHelper
+     */
+    @Deprecated(forRemoval = true)
     public static String getReadableName(String name) {
-        return Arrays.stream((name).replace(":", "_").split("_"))
-                .map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        return TextHelper.getReadableName(name);
     }
 
     /**
-     * Attempts grabbing a translated component with the given key and arguments. If none is found it will make the key itself readable
-     *
-     * @param key       translation key
-     * @param arguments optional arguments
-     * @return readable component
+     * @deprecated moved to TextHelper
      */
+    @Deprecated(forRemoval = true)
     public static Component getReadableComponent(String key, String... arguments) {
-        Component translated = Component.translatable(key, (Object[]) arguments);
-        if (translated.getString().equals(key)) {
-            StringBuilder aa = new StringBuilder();
-            for (String s : arguments) {
-                aa.append("_").append(s);
-            }
-            return Component.literal(LangBuilder.getReadableName(key + aa));
-        }
-        return translated;
+        return TextHelper.getReadableComponent(key, arguments);
     }
 
 

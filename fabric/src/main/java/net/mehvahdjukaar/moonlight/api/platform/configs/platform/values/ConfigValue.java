@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ConfigEntry;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.JsonConfigEntry;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue<T> {
+public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigValue<T> {
 
     protected final T defaultValue;
     protected T value;
@@ -22,7 +22,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue
     private final ConfigMetadata meta;
     private String translationKey = "";
     private String commentKey = "";
-    private String rawComment = "";
     private boolean slider = false;
     private boolean percent = false;
 
@@ -114,18 +113,6 @@ public abstract class ConfigValue<T> extends ConfigEntry implements IConfigValue
     public Component getCommentComponent() {
         if (this.commentKey.isEmpty()) return null;
         return Component.translatable(commentKey);
-    }
-
-    public String getRawComment() {
-        return rawComment;
-    }
-
-    public void setRawComment(String rawDescription) {
-        this.rawComment = rawDescription;
-    }
-
-    public String getExtraInfo() {
-        return "";
     }
 
     public boolean isSlider() {

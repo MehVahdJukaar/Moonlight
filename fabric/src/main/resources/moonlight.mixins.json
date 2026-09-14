@@ -31,6 +31,7 @@
     "MappedRegistryAccessor",
     "MinecraftServerMixin",
     "PackRepositoryAccessor",
+    "PistonStructureResolverMixin",
     "PoiTypeAccessor",
     "RegistryMixin",
     "ServerPackSourceMixin"

@@ -38,7 +38,6 @@ public class ConfigCategory extends ConfigNode {
         return entries;
     }
 
-    /** Drops every entry. For categories whose content is regenerated, like a schema form's list page. */
     public void clear() {
         this.entries.clear();
     }

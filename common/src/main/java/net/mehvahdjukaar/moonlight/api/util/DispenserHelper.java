@@ -4,6 +4,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
+import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
@@ -255,15 +256,22 @@ public class DispenserHelper {
         @Override
         protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
             Item item = stack.getItem();
-            if (item instanceof BlockItem bi) {
-                Direction direction = source.state().getValue(DispenserBlock.FACING);
-                BlockPos blockpos = source.pos().relative(direction);
-                // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
-                InteractionResult result = bi.place(new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction));
-                var res = new InteractionResultHolder<>(result, stack);
-                if (result.consumesAction()) {
-                    return res;
-                }
+            Direction direction = source.state().getValue(DispenserBlock.FACING);
+            BlockPos blockpos = source.pos().relative(direction);
+            // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
+            DirectionalPlaceContext context = new DirectionalPlaceContext(source.level(), blockpos, direction, stack, direction);
+
+            InteractionResult result = null;
+            //takes priority as it does when used by a player. Also covers items that aren't BlockItems at all
+            var placement = AdditionalItemPlacementsAPI.getBehavior(item);
+            if (placement != null) {
+                result = placement.overridePlace(context);
+            }
+            if ((result == null || !result.consumesAction()) && item instanceof BlockItem bi) {
+                result = bi.place(context);
+            }
+            if (result != null && result.consumesAction()) {
+                return new InteractionResultHolder<>(result, stack);
             }
             return InteractionResultHolder.pass(stack);
         }

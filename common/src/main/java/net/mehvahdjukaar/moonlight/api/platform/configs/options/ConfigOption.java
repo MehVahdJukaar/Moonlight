@@ -13,8 +13,10 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -25,12 +27,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * An editable leaf config value in the loader independent screen model. Most kinds are backed by a single writable
- * value of the same type {@code T} and so extend {@link SimpleConfigOption}; the compound kinds (range/vec3/json) sit on
- * top of several backing leaves and extend this class directly, implementing {@link #get()}/{@link #apply}/
- * {@link #backingMeta()} from those leaves. This is the single loader independent bridge the whole screen is built on.
- *
- * @param <T> the value type
+ * One editable value on a config screen. Most kinds extend SimpleConfigOption and sit on a single stored value of the
+ * same type. The grouped ones (range, vec3, json) sit on several stored values and extend this class directly.
  */
 public abstract class ConfigOption<T> extends ConfigNode {
 
@@ -41,48 +39,33 @@ public abstract class ConfigOption<T> extends ConfigNode {
         this.defaultValue = defaultValue;
     }
 
-    /**
-     * How a change to this value takes effect (drives the reload/restart icon on its screen row). Derived from the
-     * backing leaf value(s), which are the source of truth: a grouped row (range/vec3) reports the highest-severity
-     * reload among its members — the aggregate of the bunch wins.
-     */
+    /** When a change takes effect. A grouped row reports the heaviest of the values behind it. */
     public ConfigReloadType reloadType() {
-        return backingMeta()
+        return backingValues()
                 .map(IConfigValue::reloadType)
                 .max(Comparator.comparingInt(Enum::ordinal))
                 .orElse(ConfigReloadType.NONE);
     }
 
-    /** The backing leaf value(s), read for their change metadata: one for a leaf row, several for a grouped one. */
-    protected abstract Stream<IConfigValue<?>> backingMeta();
+    // one stored value for a simple row, several for a grouped one
+    protected abstract Stream<IConfigValue<?>> backingValues();
 
-    /** Picks the {@link IConfigValue} leaves out of the given backing handles (a handle may be synthetic). */
-    protected static Stream<IConfigValue<?>> metaOf(Supplier<?>... handles) {
+    // some handles are plain suppliers we made up, so keep only the real stored values
+    protected static Stream<IConfigValue<?>> storedValuesOf(Supplier<?>... handles) {
         return Arrays.stream(handles)
                 .filter(h -> h instanceof IConfigValue)
                 .map(h -> (IConfigValue<?>) h);
     }
 
-    /**
-     * The currently saved value.
-     */
     public abstract T get();
 
     public T defaultValue() {
         return defaultValue;
     }
 
-    /**
-     * Writes the given (already validated) value back to the underlying config and saves it.
-     */
+    /** Writes an already checked value back to the config and saves it. */
     public abstract void apply(ModConfigHolder holder, Object value);
 
-    /**
-     * The common case: an option backed by a single writable leaf of the same type {@code T}. Reading, writing and
-     * change metadata all go straight through that one {@link IConfigValue} — the very object {@code define(...)}
-     * returned (a {@code ConfigValue} on Fabric, a {@code ValueWrapper} on NeoForge). The compound kinds instead sit on
-     * top of several leaves and extend {@link ConfigOption} directly.
-     */
     public abstract static class SimpleConfigOption<T> extends ConfigOption<T> {
 
         protected final IConfigValue<T> handle;
@@ -97,9 +80,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
             return handle.get();
         }
 
-        /**
-         * The cast is safe because {@code value} always originates from a control bound to this entry.
-         */
+        // cast is safe, the value always comes from the widget bound to this row
         @Override
         @SuppressWarnings("unchecked")
         public void apply(ModConfigHolder holder, Object value) {
@@ -107,18 +88,19 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingValues() {
             return Stream.of(this.handle);
+        }
+
+        @ApiStatus.Internal
+        public IConfigValue<T> handle() {
+            return this.handle;
         }
     }
 
-    // ===== concrete value kinds =====
-
     public static class BooleanValue extends SimpleConfigOption<Boolean> {
-        // a "feature" boolean renders as the ✓/✗ toggle (with its icon drawn next to the symbol) instead of the
-        // plain ON/OFF button; set by ConfigBuilder.feature(...). A category's enabled gate is also drawn this way,
-        // but keyed off the owning category's gate() rather than this flag.
         private boolean feature;
+        private List<BooleanValue> dependencies = List.of();
 
         public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
@@ -128,9 +110,21 @@ public abstract class ConfigOption<T> extends ConfigNode {
             return feature;
         }
 
-        @org.jetbrains.annotations.ApiStatus.Internal
+        @ApiStatus.Internal
         public void setFeature(boolean feature) {
             this.feature = feature;
+        }
+
+        /** Other features that must be on for this one to do anything, in the order they were declared. */
+        public List<BooleanValue> dependencies() {
+            return dependencies;
+        }
+
+        @ApiStatus.Internal
+        public void addDependency(BooleanValue dependency) {
+            var next = new ArrayList<>(this.dependencies);
+            next.add(dependency);
+            this.dependencies = List.copyOf(next);
         }
     }
 
@@ -145,10 +139,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * An int drawn as a slider instead of a text field. The type itself is the "draw me as a slider" signal:
-     * the control registry keys on the exact class, so no separate style flag is needed.
-     */
     public static class IntSliderValue extends IntValue {
         public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
@@ -166,14 +156,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /** A double drawn as a slider instead of a text field. See {@link IntSliderValue}. */
     public static class DoubleSliderValue extends DoubleValue {
         public DoubleSliderValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    /** A {@code [0, 1]} double drawn as a slider that displays a percentage. */
+    /** A 0 to 1 double shown as a percentage slider. */
     public static class PercentValue extends DoubleValue {
         public PercentValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
@@ -250,8 +239,16 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     public static class ColorValue extends SimpleConfigOption<Integer> {
+        public final boolean hasAlpha;
+
         public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {
+            this(title, description, handle, defaultValue, true);
+        }
+
+        public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle,
+                          Integer defaultValue, boolean hasAlpha) {
             super(title, description, handle, defaultValue);
+            this.hasAlpha = hasAlpha;
         }
     }
 
@@ -283,16 +280,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(minHandle, maxHandle);
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(minHandle, maxHandle);
         }
     }
 
-    /**
-     * A {@link Vec3} value: three backing double config values ({@code x}/{@code y}/{@code z}) presented and edited
-     * as one row of number fields. {@code min}/{@code max} are the shared accepted bounds of each component.
-     * Like {@link RangeValue}, writing goes through all three handles at once.
-     */
     public static class Vec3Value extends ConfigOption<Vec3> {
         public final Supplier<Double> xHandle;
         public final Supplier<Double> yHandle;
@@ -324,15 +316,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(xHandle, yHandle, zHandle);
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(xHandle, yHandle, zHandle);
         }
     }
 
-    /**
-     * A {@link Vec3i} value: three backing int config values ({@code x}/{@code y}/{@code z}) presented and edited as
-     * one row of number fields. The integer counterpart of {@link Vec3Value}.
-     */
     public static class Vec3iValue extends ConfigOption<Vec3i> {
         public final Supplier<Integer> xHandle;
         public final Supplier<Integer> yHandle;
@@ -364,16 +352,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(xHandle, yHandle, zHandle);
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(xHandle, yHandle, zHandle);
         }
     }
 
-    /**
-     * A list of strings, edited on a dedicated add/remove page. {@code entryValidator}, when present, marks
-     * individual entries valid/invalid in the editor. When {@code options} is present each entry is picked with a
-     * dropdown (with an optional {@code icon}, as in {@link DropdownValue}) instead of typed as free text.
-     */
     public static class ListValue extends SimpleConfigOption<List<String>> {
         @Nullable
         public final Predicate<String> entryValidator;
@@ -401,18 +384,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    /**
-     * A JSON-backed value (raw json or a reflection-serialized bean), edited as pretty-printed JSON text on a
-     * dedicated page. The screen edits it as a {@code String}; {@link #apply} parses that string back into a
-     * {@link JsonElement} and writes it through the underlying {@code Supplier<JsonElement>} handle. Both loaders
-     * expose such a handle, so this stays loader independent.
-     */
     public static class JsonValue extends ConfigOption<String> {
         public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
         private final Supplier<JsonElement> json;
 
-        // handle/default stay lazy: on NeoForge the spec can't be read at define time, so never call json.get() here
+        // stays lazy. On NeoForge the spec can't be read while defining, so never call json.get() here
         public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
             super(title, description, null);
             this.json = json;
@@ -434,20 +411,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(json); // the real leaf is the json handle, not the synthetic string handle
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(json);
         }
     }
 
-    /**
-     * A codec-backed object value that <em>can</em> be edited, because it carries a {@link SchemaCodec}: its screen row
-     * opens a form generated from the schema (see {@code SchemaEditScreen}) instead of the "edit manually" placeholder.
-     * Reading/writing/change-metadata go straight through the one object leaf {@code define} returned (an
-     * {@code ObjectConfigValue} on Fabric, a codec {@code ValueWrapper}/{@code ConfigObject} on NeoForge), so the wire
-     * format is unchanged. The default is kept lazy: the object may reference things not registered when the config is built.
-     *
-     * @param <T> the object type
-     */
     public static class SchemaValue<T> extends ConfigOption<T> {
         private final IConfigValue<T> handle;
         private final Supplier<T> lazyDefault;
@@ -461,7 +429,6 @@ public abstract class ConfigOption<T> extends ConfigNode {
             this.codec = codec;
         }
 
-        /** The declared edit surface the form is generated from. */
         public Schema<T> schema() {
             return codec.schema();
         }
@@ -483,15 +450,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
+        protected Stream<IConfigValue<?>> backingValues() {
             return Stream.of(this.handle);
         }
     }
 
-    /**
-     * A value the screen can't yet edit (codec objects). Shown as a disabled placeholder row telling the user to
-     * edit the file manually.
-     */
     public static class UnsupportedValue extends ConfigOption<Object> {
         private final Supplier<Object> handle;
 
@@ -507,12 +470,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
 
         @Override
         public void apply(ModConfigHolder holder, Object value) {
-            // not editable
         }
 
         @Override
-        protected Stream<IConfigValue<?>> backingMeta() {
-            return metaOf(handle);
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(handle);
         }
     }
 }

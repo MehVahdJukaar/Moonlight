@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.values.*;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -31,16 +30,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigBuilderImpl(name, type);
     }
 
-    private final ConfigSubCategory mainCategory = new ConfigSubCategory(this.getName().getNamespace());
+    private final JsonConfigCategory mainCategory = new JsonConfigCategory(this.getName().getNamespace());
 
-    private final Deque<ConfigSubCategory> categoryStack = new ArrayDeque<>();
+    private final Deque<JsonConfigCategory> categoryStack = new ArrayDeque<>();
 
     public ConfigBuilderImpl(ResourceLocation name, ConfigType type) {
         super(name, type);
         categoryStack.push(mainCategory);
     }
 
-    //doesn't load it immediately. happens after registration to mimic forge
     @Override
     @NotNull
     protected FabricConfigHolder buildHolder() {
@@ -60,21 +58,19 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             return null;
         }
         var it = categoryStack.descendingIterator();
-        it.next(); // current category
-        return it.next().getName(); // parent category
+        it.next();
+        return it.next().getName();
     }
 
     @Override
     public ConfigBuilderImpl push(String translation) {
-        var cat = new ConfigSubCategory(translation);
+        var cat = new JsonConfigCategory(translation);
         Objects.requireNonNull(categoryStack.peek()).addEntry(cat);
         categoryStack.push(cat);
-        // register a readable name for the category so the native config screen button isn't a raw key
-        translations.put(translationKey(""), LangBuilder.getReadableName(translation));
+        noteCategoryName(translation);
         uiPush(Component.translatable(translationKey("")));
         return this;
     }
-
 
     @Override
     public ConfigBuilderImpl pop() {
@@ -85,11 +81,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return this;
     }
 
-    /**
-     * Snapshot of the builder's pending change-effect flags, passed into each leaf's constructor as it is defined.
-     * The flags stay set across a compound value's suppressed inner defines (recordOption no-ops while suppressed),
-     * so every leaf of a range/vec3 gets the same meta; they are cleared at the compound boundary in recordOption.
-     */
+    // The flags stay set while a grouped value defines its hidden parts, so every piece of a range or vec3 gets the
+    // same reload info
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -98,11 +91,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         doAddConfig(name, config, ConfigBuilderImpl::toOption);
     }
 
-    /**
-     * As {@link #doAddConfig(String, ConfigValue)} but with an explicit screen-row factory, so codec-backed values that
-     * want a richer row than the default {@link #toOption} mapping (e.g. {@link #defineObject} → an editable
-     * {@link ConfigOption.SchemaValue} instead of an {@link ConfigOption.UnsupportedValue}) can supply their own.
-     */
     private void doAddConfig(String name, ConfigValue<?> config, Function<ConfigValue<?>, ConfigOption<?>> optionFactory) {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
@@ -110,25 +98,21 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
         if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
-        // build the matching screen row; the comment (before or after) fills in its description and file comment
+        // the comment, before or after, fills in the row's description
         if (!suppressUi) {
             ConfigOption<?> option = optionFactory.apply(config);
             recordOption(option);
-            noteDefined(name, option, raw -> {
-                config.setRawComment(raw);
-                config.setCommentKey(this.tooltipKey(name));
-            });
+            noteDefined(name, option, raw -> config.setCommentKey(this.tooltipKey(name)));
         }
     }
 
-    /** Translates a stored value into the matching loader independent screen row. Description is left empty here;
-     * {@code comment(...)} fills it in later (before or after the define) via {@code noteDefined}. */
+    // Description is left empty here: comment(...) fills it in later through noteDefined
     private static ConfigOption<?> toOption(ConfigValue<?> v) {
         Component title = v.getTranslation();
         boolean slider = v.isSlider();
         // ColorConfigValue extends IntConfigValue, so it must be checked first
         if (v instanceof ColorConfigValue c) {
-            return new ConfigOption.ColorValue(title, null, c, c.getDefaultValue());
+            return new ConfigOption.ColorValue(title, null, c, c.getDefaultValue(), c.hasAlpha());
         } else if (v instanceof IntConfigValue i) {
             return slider
                     ? new ConfigOption.IntSliderValue(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax())
@@ -235,8 +219,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public Supplier<Integer> defineColor(String name, int defaultValue) {
-        var config = new ColorConfigValue(name, defaultValue, pendingMeta());
+    public Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha) {
+        var config = new ColorConfigValue(name, defaultValue, hasAlpha, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -301,7 +285,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> rawCodec) {
-        // SchemaCodec IS a Codec (identical wire format), so this gives an editable schema-driven row for free
+        // a SchemaCodec IS a Codec and writes the same thing, so wrapping it costs nothing and gets us a real form
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
         doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(

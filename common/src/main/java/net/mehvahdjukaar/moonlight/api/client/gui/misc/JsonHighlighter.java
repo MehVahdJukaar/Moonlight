@@ -5,9 +5,9 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 import java.util.Arrays;
 
 /**
- * Very small, line-by-line JSON syntax colorer (pairs with {@link SyntaxEditBox}). Pretty-printed JSON keeps each
- * string on its own line, so tokenizing per line (no cross-line state) is enough for a "basic" highlight: strings,
- * numbers, the {@code true/false/null} literals and the structural punctuation each get their own color.
+ * Tiny JSON colorer, one line at a time, for SyntaxEditBox. Pretty printed JSON keeps every string on its own line,
+ * so reading each line on its own is enough: strings, numbers, true/false/null and the brackets and commas each get
+ * their own color.
  */
 public final class JsonHighlighter implements SyntaxHighlighter {
 

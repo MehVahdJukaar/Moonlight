@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.textures.TextureImage;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.CompatHandler;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.integration.ModernFixCompat;
@@ -70,7 +71,7 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
     private static PackLocationInfo makeInfo(ResourceLocation name) {
         return new PackLocationInfo(
                 name.toString(),    // id
-                Component.translatable(LangBuilder.getReadableName(name.toString())), // title
+                Component.translatable(TextHelper.getReadableName(name.toString())), // title
                 PackSource.BUILT_IN,
                 Optional.empty() //no clue what this is
         );

@@ -3,6 +3,43 @@
   "item.minecraft.potion_lingering": "残留ポーション",
   "item.minecraft.potion_splash": "スプラッシュポーション",
   "gui.moonlight.open_mod_page": "%sのCurseForgeページを開く",
+  "gui.moonlight.config.mods_button": "Mod",
+  "gui.moonlight.config.mods_title": "設定可能なMod",
+  "gui.moonlight.config.discover_mods": "Modを見つける",
+  "gui.moonlight.config.open_folder": "configフォルダーを開く",
+  "gui.moonlight.config.discover_title": "Modを見つける",
+  "gui.moonlight.config.discover_title_by": "%sによるその他のMod",
+  "gui.moonlight.config.discover_by": "%sによるMod",
+  "gui.moonlight.config.discover_loading": "Modリストを取得中",
+  "gui.moonlight.config.discover_offline": "Modリストを取得できませんでした。接続を確認してください。",
+  "gui.moonlight.config.authors": "作成者",
+  "gui.moonlight.config.edit_manually": "ファイルを編集",
+  "gui.moonlight.config.save": "保存",
+  "gui.moonlight.config.save_count": "保存 %s",
+  "gui.moonlight.config.reset": "デフォルトに戻す",
+  "gui.moonlight.config.reset_all": "すべてリセット",
+  "gui.moonlight.config.reset_all.title": "すべての設定をリセットしてもよろしいですか？",
+  "gui.moonlight.config.reset_all.message": "このConfig内のすべての設定をデフォルト値にリセットし、即座に保存します。\nこの操作は取り消すことができません。",
+  "gui.moonlight.config.discard.title": "変更を破棄してもよろしいですか？",
+  "gui.moonlight.config.discard.message": "保存されていない変更が%s件あります。保存せずに終了しますか？",
+  "gui.moonlight.config.discard.confirm": "破棄",
+  "gui.moonlight.config.reload_needed.title": "Configを保存しました",
+  "gui.moonlight.config.reload_needed.world": "一部の変更を反映させるには、ワールドの再読み込みが必要です。",
+  "gui.moonlight.config.reload_needed.game": "一部の変更を反映させるには、ゲームの再起動が必要です。",
+  "gui.moonlight.config.search": "検索…",
+  "gui.moonlight.config.color_picker": "カラーピッカー",
+  "gui.moonlight.config.color_pick": "カラーピッカー",
+  "gui.moonlight.config.no_matches": "一致なし",
+  "gui.moonlight.config.list_entries": "編集 (%s)",
+  "gui.moonlight.config.list_add": "項目を追加する",
+  "gui.moonlight.config.list_remove": "項目を削除する",
+  "gui.moonlight.config.list_entry": "項目 %s",
+  "gui.moonlight.config.edit": "編集",
+  "gui.moonlight.config.reload.world": "ワールドの再読み込みが必要です",
+  "gui.moonlight.config.reload.game": "ゲームの再起動が必要です",
+  "gui.moonlight.config.json_hint": "JSONを入力…",
+  "gui.moonlight.config.json_invalid": "無効なJSONです",
+  "gui.moonlight.config.schema_invalid": "「%s」は無効な値です",
   "tooltip.moonlight.media.youtube": "Youtubeチャンネル",
   "tooltip.moonlight.media.twitter": "Twitterページ",
   "tooltip.moonlight.media.discord": "Mod Discord",
@@ -10,7 +47,9 @@
   "tooltip.moonlight.media.ko_fi": "コーヒーを奢る",
   "tooltip.moonlight.media.curseforge": "CurseForgeページ",
   "tooltip.moonlight.media.modrinth": "Modrinthページ",
+  "tooltip.moonlight.media.marketplace": "マーケットプレイスもぜひ見てみてください！",
   "tooltip.moonlight.media.github": "Mod Wiki",
+  "tooltip.moonlight.media.link": "Modページ",
   "tooltip.moonlight.media.partner_server": "サーバーが必要ですか？%sで手に入れましょう",
   "tooltip.moonlight.media.akliz": "サーバーが必要ですか？Aklizで手に入れましょう",
   "message.moonlight.anti_repost": "%1$sを非公式のサイトでダウンロードしたようです(´･ω･`) %2$sから公式版をダウンロードしてください",
@@ -26,6 +65,7 @@
   "block.moonlight.spawn_box": "スポーンボックスブロック",
   "commands.moonlight.blockstate_stats": "合計ブロック数：%1$s、合計ブロック状態：%2$s。追加情報が%3$sに保存されました",
   "commands.moonlight.dice": "ダイスロール D%1$d：%2$d",
+  "commands.moonlight.config.no_config": "Mod「%s」にはConfig画面がありません",
   "commands.moonlight.navigation.add": "%sの経路探索デバッグ用レンダラーを有効化しました",
   "commands.moonlight.navigation.remove": "%sの経路探索デバッグ用レンダラーを無効化しました",
   "commands.moonlight.navigation.on": "経路探索デバッグ用レンダラーを有効化しました",
@@ -42,7 +82,7 @@
   "commands.moonlight.structures.off": "構造物境界デバッグ用レンダラーを無効化しました",
   "commands.moonlight.back.invalid_dimension": "前の位置は、現在読み込まれていないディメンション内にあります",
   "commands.moonlight.back.empty": "前の位置の記録がありません",
-  "commands.moonlight.back.only_players": "backコマンドはプレイヤーのみが使用できますy",
+  "commands.moonlight.back.only_players": "backコマンドはプレイヤーのみが使用できます",
   "commands.moonlight.added_map_marker": "現在のアイテムにマップの装飾（%s）を追加しました",
   "commands.moonlight.registry.copy_elements_names": "クリックしてすべての項目名をクリップボードにコピー",
   "commands.moonlight.registry.element": "%s：%s",
@@ -85,6 +125,22 @@
   "tag.block.moonlight.non_recolorable": "再染色不可",
   "tag.block.minecraft.mineable.shear": "ハサミで採掘可能",
 
+  "moonlight.config.common.enabled": "有効化",
+  "moonlight.config.common.min": "最小",
+  "moonlight.config.common.max": "最大",
+  "moonlight.config.common.x": "X",
+  "moonlight.config.common.y": "Y",
+  "moonlight.config.common.z": "Z",
+
+
+
+
+
+
+
+
+
+
   "wood_type.minecraft.oak": "オークの",
   "wood_type.minecraft.spruce": "トウヒの",
   "wood_type.minecraft.birch": "シラカバの",
@@ -95,6 +151,7 @@
   "wood_type.minecraft.cherry": "サクラの",
   "wood_type.minecraft.bamboo": "竹の",
   "wood_type.minecraft.pale_oak": "ペールオークの",
+  "wood_type.minecraft.poplar": "ポプラの",
   "wood_type.minecraft.crimson": "真紅の",
   "wood_type.minecraft.warped": "歪んだ",
   "leaves_type.minecraft.oak": "オークの",
@@ -108,6 +165,9 @@
   "leaves_type.minecraft.flowering_azalea": "開花したツツジの",
   "leaves_type.minecraft.cherry": "サクラの",
   "leaves_type.minecraft.pale_oak": "ペールオークの",
+  "leaves_type.minecraft.red_poplar": "赤色のポプラの",
+  "leaves_type.minecraft.orange_poplar": "橙色のポプラの",
+  "leaves_type.minecraft.yellow_poplar": "黄色のポプラの",
 
   "wood_type.ad_astra.aeronos": "エアロノスの",
   "wood_type.ad_astra.strophar": "ストロファの",
@@ -318,7 +378,7 @@
   "leaves_type.biomeswevegone.yellow_birch": "黄色のシラカバの",
   "leaves_type.biomeswevegone.yellow_spruce": "黄色のトウヒの",
   "leaves_type.biomeswevegone.firecracker": "クロサンドラの",
-  
+
   "wood_type.blockus.legacy": "原初の",
   "wood_type.blockus.white_oak": "ホワイトオークの",
   "leaves_type.blockus.legacy": "原初の",
@@ -509,6 +569,12 @@
   "leaves_type.natures_spirit.yellow_larch": "黄色のカラマツの",
   "leaves_type.natures_spirit.yellow_maple": "黄色のカエデの",
 
+  "wood_type.netherdescent.wailing": "哭く",
+  "wood_type.netherdescent.embur": "エンバーの",
+  "wood_type.netherdescent.arisian": "アリシアンの",
+  "wood_type.netherdescent.sythian": "シシアンの",
+  "leaves_type.netherdescent.arisian": "アリシアンの",
+
   "leaves_type.occultism.otherworld": "異界の",
 
   "wood_type.quark.blossom": "イペの",
@@ -600,7 +666,7 @@
 
   "wood_type.thermal.rubberwood": "ゴムノキの",
   "leaves_type.thermal.rubberwood": "ゴムノキの",
-  
+
   "wood_type.twilightforest.twilight_oak": "トワイライトオークの",
   "wood_type.twilightforest.canopy": "林冠木の",
   "wood_type.twilightforest.mangrove": "マングローブの",

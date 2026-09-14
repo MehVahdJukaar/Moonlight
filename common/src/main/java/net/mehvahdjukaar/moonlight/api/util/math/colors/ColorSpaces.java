@@ -247,11 +247,6 @@ public final class ColorSpaces {
         h = (float) (h / (Math.PI * 2));
         while (h < 0) ++h;
 
-        if (c < 0 || h < 0 || c > 1 || h > 1) {
-
-            int aa = 1;
-        }
-
         return new HCLColor(h, c, l, color.alpha());
     }
 

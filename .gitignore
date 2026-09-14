@@ -18,10 +18,6 @@ classes/
 .settings
 *.launch
 /unique_lines.txt
-/.junie/memory/
-/.codex
-/.aiassistant/
-/.ai/
 /common/build/
 /fabric/build/
 /neoforge/build/
@@ -33,3 +29,4 @@ classes/
 /build/reports/problems/problems-report.html
 /wiki/
 /research/
+/primers/

@@ -55,9 +55,8 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
             return new TextureImage(i, metadata, relativePath.toString());
         } catch (Exception e) {
-            // The texture may be a virtual sprite produced by a vanilla paletted_permutations atlas source
-            // (no backing file on disk). Reconstruct it from its base + palette ingredients if so.
-            TextureImage virtual = PalettedPermutationsHelper.tryResolve(manager, relativePath);
+            //try paletted permutations
+            TextureImage virtual = PalettedPermutationsHelper.tryResolveImage(manager, relativePath);
             if (virtual != null) return virtual;
             throw new IOException("Failed to open texture at location " + relativePath + ": no such file");
         }
@@ -118,7 +117,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         // --- Hard sanity checks ---
         if (fw <= 0 || fh <= 0) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' has invalid metadata frame size {}x{} — using full image size {}x{} instead",
+                    "Texture '{}' has invalid metadata frame size {}x{}, using full image size {}x{} instead",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             fw = imgWidth;
@@ -127,7 +126,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
         if (fw > imgWidth || fh > imgHeight) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' frame size {}x{} is larger than image {}x{} — using full image size instead",
+                    "Texture '{}' frame size {}x{} is larger than image {}x{}, using full image size instead",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             fw = imgWidth;
@@ -142,7 +141,7 @@ public class TextureImage implements AutoCloseable, Sampler2D {
 
         if (gridW == 0 || gridH == 0) {
             Moonlight.LOGGER.error(
-                    "Texture '{}' frame size {}x{} cannot fit in image {}x{} — defaulting to 1x1 grid",
+                    "Texture '{}' frame size {}x{} cannot fit in image {}x{}, defaulting to 1x1 grid",
                     debugPath, fw, fh, imgWidth, imgHeight
             );
             gridW = 1;
@@ -246,8 +245,9 @@ public class TextureImage implements AutoCloseable, Sampler2D {
         for (int frameIdx = 0; frameIdx < frameCount; frameIdx++) {
             int xOff = getFrameStartX(frameIdx);
             int yOff = getFrameStartY(frameIdx);
-            for (int x = 0; x < frameWidth(); x++) {
-                for (int y = 0; y < frameHeight(); y++) {
+            //row major, same order as SpriteUtils.forEachPixel
+            for (int y = 0; y < frameHeight(); y++) {
+                for (int x = 0; x < frameWidth(); x++) {
                     pixel.frameIndex = frameIdx;
                     pixel.localX = x;
                     pixel.localY = y;

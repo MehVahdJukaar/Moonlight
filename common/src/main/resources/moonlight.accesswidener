@@ -130,6 +130,9 @@ transitive-accessible method net/minecraft/client/renderer/texture/SpriteContent
 #texture image stuff
 #paletted permutations: rebuild virtual repaletted sprites at gen time
 accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations createPaletteMapping ([I[I)Ljava/util/function/IntUnaryOperator;
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations textures Ljava/util/List;
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations paletteKey Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations permutations Ljava/util/Map;
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameWidth I
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frameHeight I
 accessible field net/minecraft/client/resources/metadata/animation/AnimationMetadataSection frames Ljava/util/List;

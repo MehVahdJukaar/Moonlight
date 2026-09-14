@@ -23,21 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * Client side resolver for the decorative icons attached to config rows via
- * {@link net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder#icon}. A config only ever stores an inert
- * icon id (a {@link ResourceLocation}); this turns that id into a rendered 16x16 item at screen render time, when
- * the item/block registries are populated. Resolution is memoized, so it's cheap to call every frame.
- * <p>
- * By default an id resolves to the matching item, else the matching block's item. Mods that need something a plain
- * lookup can't produce (a stack with data components, a made-up icon key, ...) register an override via
- * {@link ConfigScreenExtensions#registerIcon} from their client setup.
- */
 public final class ConfigScreenIcons {
 
     private static final Map<ResourceLocation, ItemStack> CACHE = new HashMap<>();
 
-    /** @deprecated use {@link ConfigScreenExtensions#registerIcon} instead. */
     @Deprecated(forRemoval = true)
     public static void registerOverride(ResourceLocation id, Supplier<ItemStack> stack) {
         ConfigScreenExtensions.registerIcon(id, stack);
@@ -82,17 +71,13 @@ public final class ConfigScreenIcons {
         return true;
     }
 
-    // ===== hover animation (ported from the old Configured screen) =====
-
     private static final int PERIOD = 36; // phase wraps here: a full Y spin, or two pulse cycles
 
     public static boolean renderAnimated(GuiGraphics graphics, @Nullable ResourceLocation id, int x, int y,
                                          float phase, boolean lit) {
         ItemStack stack = resolve(id);
         if (stack.isEmpty()) return false;
-        // GUI items have no world lightmap, so a low combinedLight only darkens when a level is loaded (the lightmap
-        // is white on the main menu). Dim through the shader colour modulator instead, which reads the same in or out
-        // of a world, so a disabled category's icon looks dark everywhere.
+
         if (!lit) RenderSystem.setShaderColor(0.35f, 0.35f, 0.35f, 1f);
         RenderUtil.renderGuiItemRelative(graphics.pose(), stack, x, y,
                 Minecraft.getInstance().getItemRenderer(),

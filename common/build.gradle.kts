@@ -3,15 +3,17 @@ plugins {
 }
 
 common {
+    //pinned so the build doesn't need to hit maven.neoforged.net to list versions
+    neoformVersion = "1.21.1-20240808.144430"
     accessWidener()
 }
 
 val sable_version_comp: String by extra
+val sable_companion_version: String by extra
 val codecui_version: String by extra
 
 dependencies {
 
-    // Declarative codec schema API — compile against the common (named-mappings) artifact; bundled (JiJ) per loader.
     compileOnly("net.mehvahdjukaar:codecui-common:${codecui_version}")
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")
@@ -25,7 +27,7 @@ dependencies {
 
     modCompileOnly("curse.maven:configured-457570:7122913") // v2.6.2
 
-    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0")
+    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
 }
 tasks.named("copyAccessTransformersPublications") {

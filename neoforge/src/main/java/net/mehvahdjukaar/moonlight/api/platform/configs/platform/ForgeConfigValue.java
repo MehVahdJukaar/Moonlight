@@ -11,27 +11,24 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
-/**
- * NeoForge leaf value: a loader independent {@link TrackedConfigValue} view over a raw {@link ModConfigSpec.ConfigValue}.
- * The stored raw type {@code C} (what the {@code ModConfigSpec} persists) is mapped to/from the exposed type {@code T}
- * via {@link #map}/{@link #unmap}, so colours, json and beans can live behind the same interface as plain values. The
- * change metadata is injected once at construction ({@link ConfigMetadata}); there are no setters.
- */
-abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
+// Wraps a raw ModConfigSpec.ConfigValue so the rest of the code can use it through TrackedConfigValue and not care
+// which loader it's on. map/unmap convert between what's stored and what's handed out, so colours, json and beans
+// look the same as plain values from the outside. The reload flags are passed in once, at construction
+abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
     private final ConfigMetadata meta;
     private T cachedValue = null;
     private C cachedRaw = null;
     private boolean initialized = false;
 
-    ValueWrapper(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
+    ForgeConfigValue(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
         this.original = original;
         this.meta = meta;
     }
 
-    // simple pass‑through wrapper
-    public static <T> ValueWrapper<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    // no conversion, the stored type is the exposed one
+    public static <T> ForgeConfigValue<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(T value) { return value; }
             @Override
@@ -39,9 +36,9 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    // wrapper that uses a Codec to convert between String and T (e.g. for colours)
-    public static <T> ValueWrapper<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    // stored as a String, converted with a Codec. Used for colours and the like
+    public static <T> ForgeConfigValue<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(String value) {
                 return codec.parse(JavaOps.INSTANCE, value).getOrThrow();
@@ -53,9 +50,9 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    // wrapper that handles JSON config values (stored as String, exposed as JsonElement)
-    public static ValueWrapper<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    // stored as a String, handed out as a JsonElement
+    public static ForgeConfigValue<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             JsonElement map(String value) {
                 try {
@@ -73,8 +70,8 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         };
     }
 
-    public static <T> ValueWrapper<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
-        return new ValueWrapper<>(original, meta) {
+    public static <T> ForgeConfigValue<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
+        return new ForgeConfigValue<>(original, meta) {
             @Override
             T map(String raw) {
                 // raw is stored with single quotes, restore double quotes and parse
@@ -127,11 +124,10 @@ abstract class ValueWrapper<T, C> implements TrackedConfigValue<T> {
         C raw = unmap(value);
         boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
         original.set(raw);
-        // NeoForge's ConfigValue.set() skips refreshing its own cache for worldRestart/gameRestart values, so
-        // original.get() would keep returning the stale old value; our pollChanged() would then revert the freshly
-        // set value on the next read (e.g. the config screen snapping back after Save). Clearing the cache makes
-        // NeoForge re-read the value we just wrote to the backing config, keeping both caches consistent (and
-        // matching Fabric, where a set is effective immediately - the reload badge stays advisory).
+        // NeoForge's ConfigValue.set() doesn't refresh its own cache for worldRestart/gameRestart values, so
+        // original.get() would keep giving the old value and pollChanged() would undo the one we just wrote on the
+        // next read, making the screen snap back after Save. Clearing the cache makes it re-read what we wrote, like
+        // on Fabric where a set takes effect right away and the reload icon is only a hint
         original.clearCache();
         cachedRaw = raw;
         cachedValue = value;

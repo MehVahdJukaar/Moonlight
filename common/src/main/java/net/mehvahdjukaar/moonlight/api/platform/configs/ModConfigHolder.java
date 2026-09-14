@@ -4,9 +4,9 @@ import net.mehvahdjukaar.candlelight.api.ClientOnly;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.pack.GlobalCachedStrategy;
 import net.minecraft.server.packs.PackType;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.network.SyncConfigsMessage;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,28 +23,45 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public abstract class ModConfigHolder {
 
-    private static final Map<ResourceLocation, ModConfigHolder> CONFIG_STORAGE = new ConcurrentHashMap<>(); //wack. multithreading mod loading
+    private static final Map<ResourceLocation, ModConfigHolder> TRACKED_HOLDERS = new ConcurrentHashMap<>(); //wack. multithreading mod loading
 
-    public static void addTrackedSpec(ModConfigHolder spec) {
-        var old = CONFIG_STORAGE.put(spec.getId(), spec);
+    public static void registerHolder(ModConfigHolder holder) {
+        var old = TRACKED_HOLDERS.put(holder.getId(), holder);
         if (old != null) {
-            throw new IllegalStateException("Duplicate config type for with id " + spec.getId());
+            throw new IllegalStateException("Duplicate config id " + holder.getId());
         }
     }
 
-    public static Collection<ModConfigHolder> getTrackedSpecs() {
-        return CONFIG_STORAGE.values();
+    public static Collection<ModConfigHolder> getTrackedHolders() {
+        return TRACKED_HOLDERS.values();
     }
 
     @Nullable
+    public static ModConfigHolder getHolder(ResourceLocation configId) {
+        return TRACKED_HOLDERS.get(configId);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void addTrackedSpec(ModConfigHolder holder) {
+        registerHolder(holder);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Collection<ModConfigHolder> getTrackedSpecs() {
+        return getTrackedHolders();
+    }
+
+    @Deprecated(forRemoval = true)
+    @Nullable
     public static ModConfigHolder getConfigSpec(ResourceLocation configId) {
-        return CONFIG_STORAGE.get(configId);
+        return getHolder(configId);
     }
 
     private final ResourceLocation configId;
@@ -54,51 +71,58 @@ public abstract class ModConfigHolder {
     private final ConfigType type;
     @Nullable
     private final Runnable changeCallback;
-    // feature (short name and full path) -> effective enabled supplier, collected by the builder (see
-    // ConfigBuilder.feature/mainFeature) and stamped in at build(). Lets mods gate content by feature name.
+    // short name and full dotted path -> effective enabled supplier, filled in by the builder at build()
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
+    private Map<String, String> missingTranslations = new LinkedHashMap<>();
 
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this(id, fileExtension, configDirectory, type, changeCallback, true);
     }
 
-    // tracked=false is for holders that only mirror another mod's config (the foreign-config bridge): they must not
-    // join the global registry, both to avoid a duplicate-id clash on re-open and to stay out of sync/enumeration logic
+    // untracked holders only mirror another mod's config (the foreign-config bridge). They stay out of the global
+    // registry, both to avoid a duplicate-id clash on re-open and to stay out of sync/enumeration logic
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback, boolean tracked) {
         this.configId = id;
         this.fileName = id.getNamespace() + "-" + id.getPath() + "." + fileExtension;
         this.filePath = configDirectory.resolve(fileName);
         this.type = type;
         this.changeCallback = changeCallback;
-        this.readableName = Component.literal(LangBuilder.getReadableName(id.toDebugFileName() + "_configs"));
+        this.readableName = Component.literal(TextHelper.getReadableName(id.toDebugFileName() + "_configs"));
 
-        if (tracked) ModConfigHolder.addTrackedSpec(this);
+        if (tracked) ModConfigHolder.registerHolder(this);
     }
 
     public Component getReadableName() {
         return readableName;
     }
 
-    /** Internal: the builder hands over its collected feature registry at build time. */
     @ApiStatus.Internal
     public void setFeatureToggles(Map<String, Supplier<Boolean>> featureToggles) {
         this.featureToggles = Map.copyOf(featureToggles);
     }
 
-    /**
-     * Whether the {@code feature(...)}/{@code mainFeature(...)} toggle with the given name is currently on. Accepts
-     * either the feature's short name or its full dotted path (e.g. {@code "speaker_block"} or
-     * {@code "redstone.speaker_block"}). Returns {@code true} for an unknown name, so content not gated by a feature
-     * is enabled by default. The value composes ancestor gates, so it reads {@code false} when a parent feature is off.
-     */
     public boolean isFeatureEnabled(String nameOrPath) {
         Supplier<Boolean> toggle = this.featureToggles.get(nameOrPath);
         return toggle == null || Boolean.TRUE.equals(toggle.get());
     }
 
-    /** The raw feature registry (short name and full path keys -> effective enabled supplier). */
     public Map<String, Supplier<Boolean>> getFeatureToggles() {
         return this.featureToggles;
+    }
+
+    @ApiStatus.Internal
+    public void setTranslationMap(Map<String, String> translations, Map<String, String> alreadyTranslated) {
+        translations.forEach((key, name) -> {
+            if (!alreadyTranslated.containsKey(key)) this.missingTranslations.put(key, name);
+        });
+    }
+
+    public boolean hasMissingTranslations() {
+        return !this.missingTranslations.isEmpty();
+    }
+
+    public Map<String, String> getMissingTranslations() {
+        return this.missingTranslations;
     }
 
     protected void onRefresh() {
@@ -129,18 +153,10 @@ public abstract class ModConfigHolder {
         return this.type.isSynced();
     }
 
-    /** The pack kind whose cache a dynamic-pack-affecting value of this config should invalidate. */
     protected PackType getPackType() {
         return this.type == ConfigType.CLIENT ? PackType.CLIENT_RESOURCES : PackType.SERVER_DATA;
     }
 
-    /**
-     * Writes a new (already validated) value to a config handle and saves it. {@code config} is the object a
-     * {@code define(...)} returned; it is exposed to mods as a read-only {@link Supplier} but is always really one of
-     * ours ({@link IConfigValue}), so this recovers that type with a single boundary cast rather than an
-     * {@code instanceof} chain. Invalidates this config's pack cache when the write actually changed a pack-affecting
-     * value. Shared by both loaders; only {@link #persist()} differs.
-     */
     public <T> void manuallySetValue(Supplier<T> config, T value) {
         if (!(config instanceof IConfigValue<T> handle)) {
             throw new IllegalArgumentException("Config value is not settable: " + config);
@@ -148,11 +164,10 @@ public abstract class ModConfigHolder {
         if (handle.setValue(value) && handle.affectsDynamicPacks()) {
             GlobalCachedStrategy.forceInvalidateState(this.getPackType());
         }
-        this.persist();
+        this.saveToDisk();
     }
 
-    /** Flushes the whole config to disk after a manual edit (spec save on NeoForge, json write on Fabric). */
-    protected abstract void persist();
+    protected abstract void saveToDisk();
 
     public String getFileName() {
         return fileName;
@@ -174,11 +189,6 @@ public abstract class ModConfigHolder {
     @ClientOnly
     public abstract Screen makeScreen(Screen parent, @Nullable ResourceLocation background);
 
-    /**
-     * Loader independent, server safe description of this config as a navigable tree. The client side
-     * {@code MoonlightConfigScreen} consumes it; this base class never references the screen so the holder stays
-     * server safe. Returns null if this holder doesn't expose one.
-     */
     @Nullable
     public ConfigCategory getConfigRoot() {
         return null;

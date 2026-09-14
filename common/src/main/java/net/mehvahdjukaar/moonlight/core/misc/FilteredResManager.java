@@ -60,16 +60,11 @@ public class FilteredResManager extends MultiPackResourceManager {
         return including(manager, type, p -> {
             String id = p.packId();
             if (id.equals("vanilla")) return true;
-            // never our own dynamically generated packs
+            //never our own dynamically generated packs
             if (isDynamicPackResource(p)) return false;
-            // fast path: known engine/mod resource packs
+            //known loader/mod resource packs
             if (isModResourcePack(p)) return true;
-            // Fallback: keep everything that isn't an externally added (user installed) pack.
-            // Needed because a mod whose pack.mcmeta declares overlays (multi version jars) is
-            // handed to us wrapped in a CompositePackResources on Fabric, which is neither a
-            // ModNioResourcePack nor has the "fabric" id, so isModResourcePack misses it.
-            // User packs from the resourcepacks folder carry PackSource.DEFAULT; vanilla/mod
-            // packs do not, and CompositePackResources delegates its location to the wrapped pack.
+            //keep everything that isn't an externally user installed pack.
             return p.location().source() != PackSource.DEFAULT;
         });
     }

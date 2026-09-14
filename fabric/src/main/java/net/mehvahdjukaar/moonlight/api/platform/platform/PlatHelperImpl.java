@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.Person;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.core.network.platform.ClientBoundSpawnCustomEntityMessage;
@@ -52,6 +53,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.FireChargeItem;
+import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
@@ -127,6 +130,11 @@ public class PlatHelperImpl {
         return v;
     }
 
+    public static boolean canLightFire(ItemStack stack) {
+        Item item = stack.getItem();
+        return item instanceof FlintAndSteelItem || item instanceof FireChargeItem;
+    }
+
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return FlammableBlockRegistry.getDefaultInstance().get(state.getBlock()).getSpreadChance();
     }
@@ -179,7 +187,7 @@ public class PlatHelperImpl {
     }
 
     public static String getModModrinthUrl(String modId) {
-        // no conventional fallback for modrinth — only return if explicitly set
+        // no conventional fallback for modrinth: only return if explicitly set
         return contact(modId, "modrinth");
     }
 
@@ -202,7 +210,9 @@ public class PlatHelperImpl {
     }
 
     public static String getModName(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).orElseThrow().getMetadata().getName();
+        return FabricLoader.getInstance().getModContainer(modId)
+                .map(c -> c.getMetadata().getName())
+                .orElseGet(() -> TextHelper.getReadableName(modId));
     }
 
     @Nullable
@@ -212,6 +222,16 @@ public class PlatHelperImpl {
         String iconPath = container.getMetadata().getIconPath(128).orElse(null);
         if (iconPath == null) return null;
         return container.findPath(iconPath).orElse(null);
+    }
+
+    public static List<String> getModLinks(String modId) {
+        var container = FabricLoader.getInstance().getModContainer(modId).orElse(null);
+        if (container == null) return List.of();
+        return container.getMetadata().getContact().asMap().values().stream()
+                .map(String::trim)
+                .filter(u -> u.startsWith("http"))
+                .distinct()
+                .toList();
     }
 
     @Nullable

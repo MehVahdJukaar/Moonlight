@@ -6,7 +6,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public class PostShadersExample {
 
-
     //applies first
     private static final PostShadersHelper.Group LENSES_GROUP = new PostShadersHelper.Group(
             Moonlight.res("contact_lenses"), 0
@@ -22,14 +21,10 @@ public class PostShadersExample {
 
     // register with loader events
     public static void onClientTick() {
-
         boolean hasBinoculars = false;
         boolean hasContactLenses = false;
 
         PostShadersHelper.toggleEffect(hasBinoculars ? null : BINOCULAR_POST, BINOCULAR_GROUP);
         PostShadersHelper.toggleEffect(hasContactLenses ? null : LENS_POST, LENSES_GROUP);
-
     }
-
-
 }

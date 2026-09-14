@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.LoaderCondition;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
@@ -56,6 +57,8 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -75,6 +78,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -82,6 +87,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PlatHelperImpl {
+
 
     public static boolean isDev() {
         return !FMLLoader.isProduction();
@@ -132,6 +138,13 @@ public class PlatHelperImpl {
 
     public static int getBurnTime(ItemStack stack) {
         return stack.getBurnTime(RecipeType.SMELTING);
+    }
+
+    private static final ItemAbility TINKERS_LIGHT_FIRE = ItemAbility.get("light_fire");
+
+    public static boolean canLightFire(ItemStack stack) {
+        return stack.canPerformAction(ItemAbilities.FIRESTARTER_LIGHT) ||
+                stack.canPerformAction(TINKERS_LIGHT_FIRE);
     }
 
     public static int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
@@ -194,6 +207,22 @@ public class PlatHelperImpl {
         return issues;
     }
 
+    private static final List<String> LINK_KEYS = List.of("displayURL", "curseforge", "modrinth", "sources", "discord");
+
+    public static List<String> getModLinks(String modId) {
+        var container = ModList.get().getModContainerById(modId).orElse(null);
+        if (container == null) return List.of();
+        IModInfo info = container.getModInfo();
+        List<String> out = new ArrayList<>();
+        info.getModURL().map(URL::toString).ifPresent(out::add);
+        for (String key : LINK_KEYS) {
+            String url = readModString(modId, key);
+            if (url != null) out.add(url);
+        }
+        info.getOwningFile().getConfig().<String>getConfigElement("issueTrackerURL").ifPresent(out::add);
+        return out.stream().map(String::trim).filter(u -> u.startsWith("http")).distinct().toList();
+    }
+
     @Nullable
     private static String readModString(String modId, String key) {
         return ModList.get().getModContainerById(modId)
@@ -202,7 +231,9 @@ public class PlatHelperImpl {
     }
 
     public static String getModName(String modId) {
-        return ModList.get().getModContainerById(modId).get().getModInfo().getDisplayName();
+        return ModList.get().getModContainerById(modId)
+                .map(c -> c.getModInfo().getDisplayName())
+                .orElseGet(() -> TextHelper.getReadableName(modId));
     }
 
     @Nullable
@@ -225,9 +256,13 @@ public class PlatHelperImpl {
     }
 
     public static List<String> getModAuthors(String modId) {
-        // one free-form string on this loader, already comma separated by convention
+        // one free-form string on this loader, comma separated by convention, so it's split back into names
         String authors = readModString(modId, "authors");
-        return authors == null || authors.isBlank() ? List.of() : List.of(authors);
+        if (authors == null || authors.isBlank()) return List.of();
+        return Arrays.stream(authors.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 
     @Nullable

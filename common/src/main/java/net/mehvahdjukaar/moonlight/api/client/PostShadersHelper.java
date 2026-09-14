@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client;
 
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
@@ -18,7 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Allows one to add and remove Post Shader effects in an ordered, grouped, and non-destructive way
+ * Lets you add and remove post shader effects in a set order, in groups, without wiping out the ones other mods
+ * already put there.
  */
 public class PostShadersHelper {
 
@@ -28,11 +30,11 @@ public class PostShadersHelper {
     }
 
     /**
-     * Use instead of loadEffect.
-     * This allows adding a post-effect in a non-destructive manner, allowing multiple mods to work together.
+     * Use this instead of loadEffect. It adds a post effect without throwing away the ones already active, so
+     * several mods can add their own at the same time.
      *
      * @param newPost post-effect. Null to remove it
-     * @param group      effect group. Used for priority and mutual exclusivity.
+     * @param group   effect group, used for priority and mutual exclusivity
      */
     public static void toggleEffect(@Nullable ResourceLocation newPost, Group group) {
         GameRenderer gr = Minecraft.getInstance().gameRenderer;
@@ -40,11 +42,11 @@ public class PostShadersHelper {
             RenderTarget target = gr.postEffect != null ? gr.postEffect.screenTarget : Minecraft.getInstance().getMainRenderTarget();
             gr.postEffect = refreshComposite(gr.postEffect, newPost, group, target);
             gr.effectActive = gr.postEffect != null;
-        } catch (IOException ioexception) {
-            //  LOGGER.warn("Failed to load shader: {}", resourceLocation, ioexception);
+        } catch (IOException e) {
+            Moonlight.LOGGER.warn("Failed to load shader: {}", newPost, e);
             gr.effectActive = false;
-        } catch (JsonSyntaxException jsonsyntaxexception) {
-            //   LOGGER.warn("Failed to parse shader: {}", resourceLocation, jsonsyntaxexception);
+        } catch (JsonSyntaxException e) {
+            Moonlight.LOGGER.warn("Failed to parse shader: {}", newPost, e);
             gr.effectActive = false;
         }
     }
@@ -59,14 +61,13 @@ public class PostShadersHelper {
         } else if (currentChain instanceof ComposedPostChain cpc) {
             newChain = cpc.with(newPost, group);
         } else {
-            // Another mod set gr.postEffect directly to a non-ComposedPostChain.
-            // If passes are empty the chain was already closed (e.g. by checkEntityPostEffect before the mixin
-            // intercepted the null assignment) — treat it the same as a null chain so we don't wrap dead GL state.
+            // another mod set gr.postEffect directly. Empty passes mean the chain was already closed, so treat it
+            // like a null one instead of wrapping dead GL state
             if (currentChain.passes.isEmpty()) {
                 if (newPost == null) return null;
                 newChain = ComposedPostChain.create(newPost, group, mainTarget);
             } else {
-                // Actively rendering external chain: absorb it as DEFAULT and apply our change on top.
+                // actively rendering external chain: absorb it as DEFAULT and apply our change on top
                 ComposedPostChain wrapped = ComposedPostChain.wrap(currentChain, Group.DEFAULT);
                 newChain = (newPost == null) ? wrapped : wrapped.with(newPost, group);
                 if (newChain == null) newChain = wrapped;
@@ -84,18 +85,16 @@ public class PostShadersHelper {
             super(textureManager, resourceProvider, screenTarget, resourceLocation);
         }
 
-
         @Override
         public void close() {
             for (PostChain sub : chainsPerGroup.values()) {
                 sub.close();
             }
             chainsPerGroup.clear();
-            passes.clear();             // references are now dead; clear so nothing else touches them
+            passes.clear(); // references are now dead
             customRenderTargets.clear();
             fullSizedTargets.clear();
         }
-
 
         //prevent it from loading normally
         public void load(@NotNull TextureManager textureManager, @NotNull ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
@@ -132,24 +131,21 @@ public class PostShadersHelper {
                     return this;
                 }
             }
-            // copy existing groups
             Map<Group, PostChain> newGroups = new HashMap<>(this.chainsPerGroup);
             if (newEffect == null) {
                 PostChain removed = newGroups.remove(group);
                 if (removed != null) removed.close();
                 if (newGroups.isEmpty()) {
-                    // if no groups left, return null to indicate no post-chain needed
-                    return null;
+                    return null; // no groups left, so no post-chain is needed
                 }
             } else {
                 PostChain newChain = new PostChain(tm, rm, this.screenTarget, newEffect);
                 newChain.resize(this.screenTarget.width, this.screenTarget.height);
-                // Close the old sub-chain for this group if one existed, so its GL programs are freed.
+                // close the old sub-chain for this group so its GL programs are freed
                 PostChain old = newGroups.put(group, newChain);
                 if (old != null) old.close();
             }
 
-            // sort groups by priority
             List<Map.Entry<Group, PostChain>> ordered =
                     newGroups.entrySet().stream()
                             .sorted((a, b) -> Float.compare(a.getKey().priority(), b.getKey().priority()))
@@ -163,37 +159,27 @@ public class PostShadersHelper {
                                       .replace(":", "_"))
                             .reduce((a, b) -> a + "_" + b).orElse("empty"));
 
-            // create new composed chain (empty base)
             ComposedPostChain result = new ComposedPostChain(
                     tm, rm,
                     this.screenTarget,
-                    newName // reuse same name
+                    newName
             );
-            // rebuild passes + targets in order
             for (var entry : ordered) {
                 PostChain pc = entry.getValue();
                 result.addSubChain(pc, entry.getKey());
             }
 
             result.resize(this.screenTarget.width, this.screenTarget.height);
-
             return result;
-
         }
 
         private void addSubChain(PostChain chain, Group group) {
             this.chainsPerGroup.put(group, chain);
-
             this.passes.addAll(chain.passes);
             this.customRenderTargets.putAll(chain.customRenderTargets);
             this.fullSizedTargets.addAll(chain.fullSizedTargets);
-
             this.time = chain.time;
             this.lastStamp = chain.lastStamp;
-
-
         }
     }
-
-
 }

@@ -8,16 +8,16 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -31,9 +31,9 @@ import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ItemLike;
@@ -44,9 +44,10 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.model.ExtendedBlockModelDeserializer;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
@@ -56,6 +57,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -103,6 +105,34 @@ public class ClientHelperImpl {
         Consumer<EntityRenderersEvent.RegisterRenderers> eventConsumer = event ->
                 eventListener.accept(event::registerEntityRenderer);
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void addEntityLayersRegistration(ClientHelper.EntityLayerEvent listener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<EntityRenderersEvent.AddLayers> eventConsumer = event -> {
+            var context = event.getContext();
+            for (var skin : event.getSkins()) {
+                if (event.getSkin(skin) instanceof LivingEntityRenderer<?, ?> le) {
+                    listener.onRendererCreated(EntityType.PLAYER, le, new LayerAdderImpl(le), context);
+                }
+            }
+            for (var type : event.getEntityTypes()) {
+                if (event.getRenderer(type) instanceof LivingEntityRenderer<?, ?> le) {
+                    listener.onRendererCreated((EntityType<? extends LivingEntity>) type, le, new LayerAdderImpl(le), context);
+                }
+            }
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    private record LayerAdderImpl(LivingEntityRenderer<?, ?> renderer) implements ClientHelper.EntityLayerEvent.LayerAdder {
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        @Override
+        public <T extends LivingEntity> void add(RenderLayer<T, ? extends EntityModel<T>> layer) {
+            ((LivingEntityRenderer) renderer).addLayer(layer);
+        }
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
@@ -239,19 +269,16 @@ public class ClientHelperImpl {
     @Nullable
     public static Path getModIcon(String modId) {
         var m = ModList.get().getModContainerById(modId);
-        if (m.isPresent()) {
-            IModInfo mod = m.get().getModInfo();
-            IModFile file = mod.getOwningFile().getFile();
-
-            var logo = mod.getLogoFile().orElse(null);
-            if (logo != null && file != null) {
-                Path logoPath = file.findResource(logo);
-                if (Files.exists(logoPath)) {
-                    return logoPath;
-                }
-            }
-        }
-        return null;
+        if (m.isEmpty()) return null;
+        IModInfo mod = m.get().getModInfo();
+        IModFile file = mod.getOwningFile().getFile();
+        String logo = mod.getLogoFile().orElse(null);
+        if (logo == null || file == null) return null;
+        // split the way NeoForge's own mod list does, so a declaration with backslashes or a leading slash still lands
+        String[] parts = Arrays.stream(logo.split("[/\\\\]")).filter(p -> !p.isBlank()).toArray(String[]::new);
+        if (parts.length == 0) return null;
+        Path logoPath = file.findResource(parts);
+        return logoPath != null && Files.exists(logoPath) ? logoPath : null;
     }
 
     @Nullable
@@ -275,6 +302,10 @@ public class ClientHelperImpl {
 
     public static boolean hasNativeForeignConfig(String modId) {
         return ForeignConfigBridge.hasConfig(modId);
+    }
+
+    public static boolean hasOnlyGenericConfigScreen(String modId) {
+        return ForeignConfigBridge.hasOnlyGenericScreen(modId);
     }
 
     public static BlockModel parseBlockModel(JsonElement json) {
@@ -330,7 +361,7 @@ public class ClientHelperImpl {
                                         false
                                 ));
                     } catch (Exception ee) {
-                        if (!DatagenModLoader.isRunningDataGen()){
+                        if (!DatagenModLoader.isRunningDataGen()) {
                             Moonlight.LOGGER.error("Failed to load optional texture pack: {}", folderName, ee);
                         }
                     }
@@ -385,6 +416,12 @@ public class ClientHelperImpl {
             eventListener.accept(event::register);
         };
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void addClientLoginCallback(Runnable callback) {
+        Moonlight.assertInitPhase();
+        // game bus, not the mod bus. LoggingIn is the client side counterpart of PlayerLoggedInEvent
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> callback.run());
     }
 
 }

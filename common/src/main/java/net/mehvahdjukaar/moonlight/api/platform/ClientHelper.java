@@ -11,15 +11,19 @@ import net.mehvahdjukaar.moonlight.api.client.ItemStackRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomBakedModel;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomModelLoader;
 import net.mehvahdjukaar.moonlight.api.item.IItemDecoratorRenderer;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
+import net.mehvahdjukaar.moonlight.core.ClientConfigs;
+import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
@@ -29,6 +33,8 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -40,6 +46,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -53,6 +60,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -102,6 +110,11 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addClientSetupAsync(Runnable clientSetup) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
+    public static void addClientLoginCallback(Runnable callback) {
         throw new AssertionError();
     }
 
@@ -192,6 +205,22 @@ public class ClientHelper {
     }
 
     @FunctionalInterface
+    public interface EntityLayerEvent {
+
+        void onRendererCreated(EntityType<? extends LivingEntity> type, LivingEntityRenderer<?, ?> renderer,
+                               LayerAdder adder, EntityRendererProvider.Context context);
+
+        interface LayerAdder {
+            <T extends LivingEntity> void add(RenderLayer<T, ? extends EntityModel<T>> layer);
+        }
+    }
+
+    @PlatformImpl
+    public static void addEntityLayersRegistration(EntityLayerEvent listener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
     public interface BlockEntityRendererEvent {
         <E extends BlockEntity> void register(BlockEntityType<? extends E> blockEntity, BlockEntityRendererProvider<E> renderer);
     }
@@ -242,7 +271,7 @@ public class ClientHelper {
     }
 
     //Use the "special_models" folder instead since that's auto loaded
-    @Deprecated
+    @ApiStatus.Internal
     @PlatformImpl
     public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();
@@ -307,6 +336,21 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
+    @Nullable
+    public static Screen getMoonlightConfigScreen(String modId, Screen parent, @Nullable ResourceLocation background) {
+        return MoonlightConfigSelectScreen.create(modId, parent, background);
+    }
+
+    /**
+     * Moonlight's mod hub: a grid with a tile for every installed mod that has a config screen. Returns null when the
+     * player turned Moonlight's own config screens off, in which case there is no hub to show.
+     */
+    @Nullable
+    public static Screen getModsListScreen(@Nullable Screen parent, @Nullable ResourceLocation background) {
+        if (!ClientConfigs.CUSTOM_CONFIG_SCREEN.get()) return null;
+        return new ModsTilesScreen(parent, background);
+    }
+
     /**
      * Opens the config screen a mod registered with the loader itself (NeoForge's screen extension, or Mod Menu
      * on Fabric) rather than through Moonlight's config system. Returns null when that mod exposes no such screen
@@ -348,6 +392,16 @@ public class ClientHelper {
     }
 
     /**
+     * Whether the screen this mod registered is a stock one it got for free (NeoForge's ConfigurationScreen, or
+     * Configured's), or none at all. Either way the mod wrote no screen of its own, so converting its config costs
+     * nothing. Always false on Fabric.
+     */
+    @PlatformImpl
+    public static boolean hasOnlyGenericConfigScreen(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
      * Pack in /resources/resourcepacks
      */
     @PlatformImpl
@@ -356,7 +410,7 @@ public class ClientHelper {
     }
 
     public static void registerOptionalTexturePack(ResourceLocation folderName, boolean defaultEnabled) {
-        registerOptionalTexturePack(folderName, Component.literal(LangBuilder.getReadableName(folderName.getPath())), defaultEnabled);
+        registerOptionalTexturePack(folderName, Component.literal(TextHelper.getReadableName(folderName.getPath())), defaultEnabled);
     }
 
 

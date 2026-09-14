@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.resources.textures;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.McMetaFile;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
@@ -124,14 +126,11 @@ public class Respriter {
                 targetPalettes, outputTexture.frameCount());
 
         outputTexture.forEachPixel(pixel -> {
-            int ind = pixel.frameIndex();
-            //TODO:optimize. only needed for some types of textures
-            // If there's a recoloring mask, sample it. Skip recoloring if mask is "off" at this pixel
             if (recoloringMask != null && FastColor.ABGR32.alpha(recoloringMask.sample(pixel.globalX, pixel.globalY)) != 0) {
-                return; // skip recoloring this pixel
+                return;
             }
-            Integer newColor = colorRemapper.remapColor(ind, pixel.getValue());
-            if (newColor != null) {
+            int newColor = colorRemapper.remapColor(pixel.frameIndex(), pixel.getValue());
+            if (newColor != Color2ColorMap.NO_MATCH_MARKER) {
                 pixel.setValue(newColor);
             }
         });
@@ -158,16 +157,15 @@ public class Respriter {
     }
 
 
-    //boxed so it's cleaner
-
     /**
      * Does not modify any of the given palettes
      */
-    private record Color2ColorMap(Int2ObjectArrayMap<Integer> map) {
-        static final Color2ColorMap EMPTY = new Color2ColorMap(new Int2ObjectArrayMap<>(0));
+    private record Color2ColorMap(Int2IntMap map) {
+        //palette colors are never fully transparent so 0 is free
+        static final int NO_MATCH_MARKER = 0;
+        static final Color2ColorMap EMPTY = new Color2ColorMap(Int2IntMaps.EMPTY_MAP);
 
-        @Nullable
-        public Integer mapColor(int color) {
+        public int mapColor(int color) {
             return map.get(color);
         }
 
@@ -178,17 +176,16 @@ public class Respriter {
             toPalette.matchSize(originalPalette.size(), originalPalette.getAverageLuminanceStep());
             if (toPalette.size() != originalPalette.size()) {
                 Moonlight.LOGGER.error("Failed to create Color2ColorMap. Too few colors in toPalette: {} vs required {}", toPalette.size(), originalPalette.size());
-                //provided swap palette had too little colors
                 return EMPTY;
             }
-            //now they should be the same size
             return new Color2ColorMap(zipToMap(originalPalette.getValues(), toPalette.getValues()));
         }
 
-        private static Int2ObjectArrayMap<Integer> zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
-            Int2ObjectArrayMap<Integer> map = new Int2ObjectArrayMap<>(keys.size());
+        private static Int2IntMap zipToMap(List<PaletteColor> keys, List<PaletteColor> values) {
+            Int2IntMap map = new Int2IntOpenHashMap(keys.size());
+            map.defaultReturnValue(NO_MATCH_MARKER);
             for (int i = 0; i < keys.size(); i++) {
-                map.put(keys.get(i).value(), (Integer) values.get(i).value());
+                map.put(keys.get(i).value(), values.get(i).value());
             }
             return map;
         }
@@ -216,16 +213,11 @@ public class Respriter {
                     mappingPerFrame.add(Color2ColorMap.create(originalPalette, toPalette));
                 }
 
-                return (frameIndex, color) -> {
-                    Color2ColorMap colorMap = mappingPerFrame.get(frameIndex);
-                    if (colorMap != null) return colorMap.mapColor(color);
-                    return null;
-                };
+                return (frameIndex, color) -> mappingPerFrame.get(frameIndex).mapColor(color);
             }
         }
 
-        @Nullable
-        Integer remapColor(int frameIndex, int color);
+        int remapColor(int frameIndex, int color);
     }
 
 }

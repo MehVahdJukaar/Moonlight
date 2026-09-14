@@ -12,7 +12,8 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
-import static net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper.formatNumber;
+import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 
 public class Vec3ControlWidget extends CompositeWidget {
 

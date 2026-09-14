@@ -109,7 +109,7 @@ public class BreadcrumbWidget extends AbstractWidget {
         for (int i = 0; i < n; i++) full.add(i);
         if (n <= 2 || trailWidth(full) <= maxWidth) return full;
 
-        // hide the fewest middle crumbs that make it fit: root + "…" + the deepest trailing crumbs
+        // hide as few middle crumbs as possible to make it fit: root, then ELLIPSIS, then the last few crumbs
         for (int tailCount = n - 2; tailCount >= 1; tailCount--) {
             List<Integer> display = new ArrayList<>();
             display.add(0);

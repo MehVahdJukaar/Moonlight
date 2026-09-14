@@ -10,9 +10,10 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.misc.ConfigLangExporter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,9 +25,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,50 +34,43 @@ import java.util.regex.Pattern;
 
 public abstract class ConfigBuilder {
 
-    protected final Map<String, String> translations = new HashMap<>();
+    protected final Map<String, String> translations = new LinkedHashMap<>();
+    // keys whose name Moonlight made up rather than the mod, mapped to that name. Moonlight translates those itself,
+    // so no mod has to
+    private final Map<String, String> moonlightNames = new LinkedHashMap<>();
     protected Runnable changeCallback;
     protected boolean pendingDynamicPacks;
 
-    // Lenient comments: comment(...) may come before or after its define(...). It binds forward to the next define
-    // (pendingComment); if none claims it, it falls back onto the last one (lastCommentTarget). Forward-first stops
-    // an un-commented define (e.g. a feature() toggle) from stealing the before-comment of the value that follows it.
+    // comment(...) may come before or after its define(...).
     @Nullable
     private String pendingComment;
-    // Forge attaches a comment to the NEXT define, so pendingComment is forwarded once (see pollCommentToForward);
-    // this stops it re-emitting for each suppressed backing value of a compound define.
+    // handed out once only, so a grouped define like defineRange doesn't repeat it for each hidden value it makes
     private boolean pendingCommentForwarded;
     @Nullable
     private CommentTarget lastCommentTarget;
     @Nullable
     private String lastCommentKey;
 
-    // loader independent UI tree consumed by the native config screen, built as values are defined
     private final ConfigCategory uiRoot = new ConfigCategory(Component.empty());
     private final Deque<ConfigCategory> uiStack = new ArrayDeque<>();
-    // effective "enabled" supplier of the current category (parallel to uiStack); a feature() ANDs its own value with
-    // the ancestor beneath it, so nested features compose at read time without touching stored child values
     private final Deque<Supplier<Boolean>> gateStack = new ArrayDeque<>();
-    // while set, define(...)/push(...) skip UI emission, so a compound value (e.g. defineRange) shows one combined row
     protected boolean suppressUi = false;
 
-    // every feature()'s effective supplier, keyed by both short name and full dotted path so mods can query it either
-    // way; handed to the built ModConfigHolder
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
-    // raw category-name stack (root first), parallel to uiStack, so a feature's full path can be built
+    private static final Map<Supplier<?>, ConfigOption.BooleanValue> BOOLEAN_ROWS =
+            Collections.synchronizedMap(new IdentityHashMap<>());
+    private final List<PendingDependency> pendingDependencies = new ArrayList<>();
     private final Deque<String> categoryPath = new ArrayDeque<>();
 
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
-    protected boolean usesDataBuddy = true; // on by default; setWriteJsons() disables it
+    protected boolean writeObjectsAsJson = false;
 
-    // set by worldReload()/gameRestart(), applied to and cleared by the next recorded option
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
-    // set by icon(...), applied to and cleared by the next category push or defined option
     @Nullable
     private ResourceLocation pendingIcon;
 
-    // how a pending/late comment is applied to its value (on-disk comment + screen row)
     @FunctionalInterface
     protected interface CommentTarget {
         void applyComment(String rawComment);
@@ -101,22 +92,37 @@ public abstract class ConfigBuilder {
         this.name = name;
         this.type = type;
         this.uiStack.push(this.uiRoot);
-        this.gateStack.push(() -> true); // root is always enabled
+        this.gateStack.push(() -> true);
         Consumer<AfterLanguageLoadEvent> consumer = e -> {
+            moonlightNames.forEach((key, rawName) -> {
+                String shared = e.getEntry(moonlightNamedKey(rawName));
+                if (shared != null) e.addEntry(key, shared);
+            });
             if (e.isDefault()) translations.forEach(e::addEntry);
         };
         MoonlightEventsHelper.addListener(consumer, AfterLanguageLoadEvent.class);
         Moonlight.addDependent(name.getNamespace());
     }
 
-    public final ModConfigHolder build() {
-        flushPendingComment(); // a trailing after-comment at the very end has no define to claim it
+    public final ModConfigHolder build(boolean collectTranslations) {
+        flushPendingComment(); // a trailing after-comment has no define to claim it
         ModConfigHolder holder = buildHolder();
         holder.setFeatureToggles(getFeatureToggles());
+        if (collectTranslations) {
+            holder.setTranslationMap(translations, moonlightNames);
+        }
+        ConfigLangExporter.exportInDev(name.getNamespace(), translations, moonlightNames);
         return holder;
     }
 
-    // platform hook: build the loader specific holder; build() wraps it with the comment flush + toggle wiring
+    public final ModConfigHolder build() {
+        return build(false);
+    }
+
+    private static String moonlightNamedKey(String name) {
+        return "moonlight.config.common." + name;
+    }
+
     protected abstract ModConfigHolder buildHolder();
 
     public ResourceLocation getName() {
@@ -127,12 +133,24 @@ public abstract class ConfigBuilder {
 
     public abstract ConfigBuilder pop();
 
-    public <T extends ConfigBuilder> T setWriteJsons() {
-        this.usesDataBuddy = false;
+    /** Stops moonlight from writing missing config lang keys into your en_us.json when running in dev. */
+    public <T extends ConfigBuilder> T disableLangExport() {
+        ConfigLangExporter.disableFor(name.getNamespace());
         return (T) this;
     }
 
-    /** Marks the next defined value as affecting dynamic resource/data packs. Sticky until the next value, like {@link #worldReload()}. */
+    /** Stores defineObject values as a json string rather than a native toml object. NeoForge only. */
+    public <T extends ConfigBuilder> T writeObjectsAsJson() {
+        this.writeObjectsAsJson = true;
+        return (T) this;
+    }
+
+    @Deprecated(forRemoval = true)
+    public <T extends ConfigBuilder> T setWriteJsons() {
+        return writeObjectsAsJson();
+    }
+
+    /** Marks the next defined value as one that affects dynamic resource/data packs. Sticky until then, like worldReload(). */
     public <T extends ConfigBuilder> T affectsDynamicPacks() {
         this.pendingDynamicPacks = true;
         return (T) this;
@@ -146,7 +164,15 @@ public abstract class ConfigBuilder {
 
     public abstract Supplier<Integer> define(String name, int defaultValue, int min, int max);
 
-    public abstract Supplier<Integer> defineColor(String name, int defaultValue);
+    public Supplier<Integer> defineColor(String name, int defaultValue) {
+        return defineColor(name, defaultValue, true);
+    }
+
+    /**
+     * An int color, edited as a hex field. With hasAlpha it's an ARGB color (#AARRGGBB), without it the alpha is
+     * dropped and it's a plain RGB color (#2A77EA).
+     */
+    public abstract Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha);
 
     public abstract Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max);
 
@@ -166,10 +192,8 @@ public abstract class ConfigBuilder {
         return new RegexPatternValue(defineRegexInternal(name, defaultValue));
     }
 
-    /** Platform hook: stores the regex as a string and records the {@link ConfigOption.RegexValue} row. */
     protected abstract Supplier<String> defineRegexInternal(String name, String defaultValue);
 
-    /** Platform hook for dropdowns/pickers: stores a validated string and records a {@link ConfigOption.DropdownValue} row. */
     protected abstract Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
                                                              Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon);
 
@@ -219,14 +243,9 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * A list picker like {@link #defineList} but whose {@code suggestions} are resolved lazily (re-read each time
-     * they're needed) instead of captured now, so options that only exist later - e.g. after registration - are still
-     * offered. Entries the user enters are kept as long as they pass {@code entryValidator}; they are NOT restricted to
-     * the suggestions, so regex patterns or not-yet-loaded ids are never dropped. Suggestions act purely as autocomplete.
-     *
-     * @param suggestions    lazily-evaluated autocomplete options
-     * @param entryValidator validates each stored entry ({@link #STRING_CHECK} accepts any string, {@link #REGEX_CHECK} any valid regex)
-     * @param icon           optional per-entry preview icon, or null
+     * Like defineList, but the suggestions are read lazily, so options that only exist later (after registration for
+     * instance) still show up. Entries aren't limited to them: anything entryValidator accepts is kept, so regex
+     * patterns or ids that aren't loaded yet don't get dropped.
      */
     public Supplier<List<String>> defineSuggestionList(String name, List<String> defaultValue,
                                                        Supplier<List<String>> suggestions,
@@ -248,7 +267,6 @@ public abstract class ConfigBuilder {
         return () -> handle.get().stream().map(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id))).toList();
     }
 
-    /** Like {@link #defineRegistryList} but preset to the block registry, previewing each block's item icon. */
     public Supplier<List<Block>> defineBlockList(String name, List<ResourceLocation> defaultValue) {
         Supplier<List<String>> handle = defineListInternal(name, idStrings(defaultValue), REGISTRY_ID_CHECK,
                 () -> registryIds(BuiltInRegistries.BLOCK),
@@ -316,83 +334,14 @@ public abstract class ConfigBuilder {
         Class<T> type = (Class<T>) defaultValue.getClass();
         this.push(name);
         try {
-            return type.isRecord() ? defineRecordBean(type, defaultValue) : definePojoBean(type, defaultValue);
+            return ConfigBeans.define(this, type, defaultValue);
         } finally {
             this.pop();
         }
     }
 
-    private <T> Supplier<T> definePojoBean(Class<T> type, T defaultValue) {
-        List<Field> fields = new ArrayList<>();
-        List<Supplier<?>> readers = new ArrayList<>();
-        try {
-            for (Field f : type.getDeclaredFields()) {
-                int mods = f.getModifiers();
-                if (Modifier.isStatic(mods) || Modifier.isTransient(mods)) continue;
-                f.setAccessible(true);
-                fields.add(f);
-                readers.add(defineBeanField(f.getName(), f.getType(), f.get(defaultValue)));
-            }
-            var ctor = type.getDeclaredConstructor();
-            ctor.setAccessible(true);
-            return () -> {
-                try {
-                    T instance = ctor.newInstance();
-                    for (int i = 0; i < fields.size(); i++) fields.get(i).set(instance, readers.get(i).get());
-                    return instance;
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException("Failed to build bean " + type.getName(), e);
-                }
-            };
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("defineBean: " + type.getName() + " needs a no-arg constructor and readable fields", e);
-        }
-    }
-
-    private <T> Supplier<T> defineRecordBean(Class<T> type, T defaultValue) {
-        RecordComponent[] comps = type.getRecordComponents();
-        List<Supplier<?>> readers = new ArrayList<>();
-        Class<?>[] paramTypes = new Class<?>[comps.length];
-        try {
-            for (int i = 0; i < comps.length; i++) {
-                paramTypes[i] = comps[i].getType();
-                readers.add(defineBeanField(comps[i].getName(), comps[i].getType(), comps[i].getAccessor().invoke(defaultValue)));
-            }
-            var ctor = type.getDeclaredConstructor(paramTypes);
-            ctor.setAccessible(true);
-            return () -> {
-                try {
-                    Object[] args = new Object[readers.size()];
-                    for (int i = 0; i < args.length; i++) args[i] = readers.get(i).get();
-                    return ctor.newInstance(args);
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException("Failed to build record " + type.getName(), e);
-                }
-            };
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("defineBean: failed to read record " + type.getName(), e);
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Supplier<?> defineBeanField(String name, Class<?> type, Object current) {
-        if (type == boolean.class || type == Boolean.class) return define(name, (Boolean) current);
-        if (type == int.class || type == Integer.class)
-            return define(name, (Integer) current, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        if (type == double.class || type == Double.class)
-            return define(name, (Double) current, -Double.MAX_VALUE, Double.MAX_VALUE);
-        if (type == float.class || type == Float.class)
-            return define(name, (Float) current, -Float.MAX_VALUE, Float.MAX_VALUE);
-        // must reject null: a null-accepting validator makes NeoForge treat a MISSING string field as valid, so it
-        // never writes the default, and then re-corrects the spec every load -> endless "config is not correct" loop
-        if (type == String.class) return define(name, (String) current);
-        if (type.isEnum()) return define(name, (Enum) current);
-        throw new IllegalArgumentException("defineBean: unsupported field type " + type.getName() + " for field '" + name + "'");
-    }
-
 
     public Supplier<ResourceLocation> define(String name, ResourceLocation defaultValue) {
-        // stored and screen-edited as a validated string; the returned supplier just parses it
         Supplier<String> handle = define(name, defaultValue.toString(), REGISTRY_ID_CHECK);
         return () -> ResourceLocation.parse(handle.get());
     }
@@ -415,7 +364,7 @@ public abstract class ConfigBuilder {
     }
 
     public ConfigBuilder comment(String comment) {
-        // a new comment means the previous one had no define of its own -> it was an "after" comment; flush it first
+        // a new comment means the previous one had no define of its own, so it was an "after" comment: flush it first
         if (this.pendingComment != null) applyComment(this.pendingComment);
         this.pendingComment = comment;
         this.pendingCommentForwarded = false;
@@ -437,7 +386,42 @@ public abstract class ConfigBuilder {
                 : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
-    // a still-pending comment at a section boundary (pop/build) was an "after" comment for the last value; attach it there
+    private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanValue row) {
+    }
+
+    /**
+     * Makes the next feature() or mainFeature() depend on other config values
+     */
+    @SafeVarargs
+    public final ConfigBuilder dependsOn(Supplier<Boolean>... others) {
+        for (Supplier<Boolean> other : others) {
+            ConfigOption.BooleanValue row = BOOLEAN_ROWS.get(other);
+            if (row == null) {
+                if (PlatHelper.isDev()) {
+                    throw new IllegalArgumentException("dependsOn() takes a boolean config value that was already " +
+                            "defined in this config or in one built before it");
+                }
+                continue;
+            }
+            this.pendingDependencies.add(new PendingDependency(other, row));
+        }
+        return this;
+    }
+
+    private List<PendingDependency> pollDependencies() {
+        if (this.pendingDependencies.isEmpty()) return List.of();
+        List<PendingDependency> deps = List.copyOf(this.pendingDependencies);
+        this.pendingDependencies.clear();
+        return deps;
+    }
+
+    private static Supplier<Boolean> effectiveToggle(Supplier<Boolean> raw, Supplier<Boolean> ancestor,
+                                                     List<PendingDependency> dependencies) {
+        if (dependencies.isEmpty()) return () -> raw.get() && ancestor.get();
+        List<Supplier<Boolean>> required = dependencies.stream().map(PendingDependency::value).toList();
+        return () -> raw.get() && ancestor.get() && required.stream().allMatch(s -> Boolean.TRUE.equals(s.get()));
+    }
+
     protected void flushPendingComment() {
         if (this.suppressUi) return;
         if (this.pendingComment != null) {
@@ -446,8 +430,6 @@ public abstract class ConfigBuilder {
         }
     }
 
-    // Forge attaches a comment to the NEXT define: hand out the pending before-comment once, to be forwarded right
-    // before that define runs (null when there is nothing new to forward)
     @Nullable
     protected String pollCommentToForward() {
         if (this.pendingComment != null && !this.pendingCommentForwarded) {
@@ -474,7 +456,6 @@ public abstract class ConfigBuilder {
         this.lastCommentKey = null;
     }
 
-    // wires the comment target so a before- or after-comment reaches this value; skipped while suppressed
     protected void noteDefined(String name, @Nullable ConfigNode uiNode, @Nullable Consumer<String> rawCommentSink) {
         if (this.suppressUi) return;
         String key = this.tooltipKey(name);
@@ -495,19 +476,17 @@ public abstract class ConfigBuilder {
     }
 
     protected void uiPush(Component title) {
-        // a comment(...) right before a push belongs to the category itself, not to its first value. We don't show
-        // category descriptions yet, so drop it instead of letting the first child claim it (on screen and on disk)
         this.pendingComment = null;
         this.pendingCommentForwarded = false;
         if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
-        if (this.pendingIcon != null) { // an icon(...) right before this push decorates the category row
+        if (this.pendingIcon != null) {
             cat.setIcon(this.pendingIcon);
             this.pendingIcon = null;
         }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
-        this.gateStack.push(this.gateStack.peek()); // inherit the parent's gate until a feature() narrows it
+        this.gateStack.push(this.gateStack.peek()); // inherited until a feature() narrows it
         this.categoryPath.addLast(currentCategory());
     }
 
@@ -523,30 +502,32 @@ public abstract class ConfigBuilder {
     }
 
     /**
-     * Declares the current category's single feature toggle and returns its effective supplier (own value AND every
-     * ancestor feature). Composition is read-time only, so toggling a parent never rewrites stored child values.
+     * Adds the current category's on/off toggle. The returned supplier is true only when this toggle and every parent
+     * one are on. Nothing is rewritten on disk: turning a parent off just makes the children read false.
      */
     public Supplier<Boolean> mainFeature(boolean defaultEnabled) {
         ConfigCategory cat = this.uiStack.peek();
         if (cat == this.uiRoot) {
-            throw new IllegalStateException("feature() must be called inside a category (use push/pushFeature first), not at the config root");
+            throw new IllegalStateException("mainFeature() must be called inside a category (use push/pushFeature first), not at the config root");
         }
         if (cat.gate() != null) {
-            throw new IllegalStateException("category '" + currentCategory() + "' already has a feature() toggle");
+            throw new IllegalStateException("category '" + currentCategory() + "' already has a mainFeature() toggle");
         }
+        List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
-        // define() just recorded the matching BooleanValue as this category's last entry; adopt it as the gate row
+        // define() just recorded the matching BooleanValue as this category's last entry: adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
-        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
+        Supplier<Boolean> ancestor = this.gateStack.peek();
+        Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
             cat.setGate(bv);
-            // icon: an explicit icon(...) on the value or category wins, else infer from the category name; mirror it
-            // so the category button and the enable-gate row share one icon
+            // explicit icon(...) wins, else infer from the category name. Mirrored so the category button and the
+            // gate row share one icon
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
             if (cat.icon() == null) cat.setIcon(bv.icon());
+            bindFeature(bv, effective, dependencies);
         }
-        Supplier<Boolean> ancestor = this.gateStack.peek();
-        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
-        this.gateStack.pop();            // replace the inherited gate with this category's own effective gate
+        this.gateStack.pop(); // replace the inherited gate with this category's own
         this.gateStack.push(effective);
         registerFeature(currentCategory(), currentCategoryPath(), effective);
         return effective;
@@ -558,20 +539,20 @@ public abstract class ConfigBuilder {
 
 
     /**
-     * A named boolean feature leaf: draws as a ✓/✗ switch (with its {@link #icon}) instead of an ON/OFF button, and
-     * returns an effective supplier (own value AND every ancestor feature), so it reads false whenever an enclosing
-     * feature category is off. Combine with {@link #icon}: {@code builder.icon("lever").feature("test_bool", true)}.
+     * A named on/off feature. Draws as a check/cross switch instead of an ON/OFF button, and the supplier reads false if this
+     * one or any parent feature is off. Pair it with icon(), like builder.icon("lever").feature("test_bool", true).
      */
     public Supplier<Boolean> feature(String name, boolean defaultEnabled) {
+        List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(name, defaultEnabled);
-        // adopt the just-recorded BooleanValue so the client draws it as a ✓/✗ toggle instead of an ON/OFF button
-        List<ConfigNode> entries = this.uiStack.peek().entries();
-        if (!entries.isEmpty() && entries.get(entries.size() - 1) instanceof ConfigOption.BooleanValue bv) {
-            bv.setFeature(true);
-            if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name)); // infer icon from the name unless icon(...) set one
-        }
         Supplier<Boolean> ancestor = this.gateStack.peek();
-        Supplier<Boolean> effective = () -> raw.get() && ancestor.get();
+        Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
+        List<ConfigNode> entries = this.uiStack.peek().entries();
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
+            bv.setFeature(true);
+            if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
+            bindFeature(bv, effective, dependencies);
+        }
         String path = this.categoryPath.isEmpty() ? name : currentCategoryPath() + "." + name;
         registerFeature(name, path, effective);
         return effective;
@@ -587,13 +568,20 @@ public abstract class ConfigBuilder {
     }
 
 
-    // resolved lazily on the client, so a name that isn't a real item/block simply shows no icon
     @Nullable
     private ResourceLocation inferFeatureIcon(String name) {
         return ResourceLocation.tryBuild(this.name.getNamespace(), name);
     }
 
-    // register under both short name and full dotted path, so a feature can be queried either way
+    private static void bindFeature(ConfigOption.BooleanValue row, Supplier<Boolean> effective,
+                                    List<PendingDependency> dependencies) {
+        for (PendingDependency dependency : dependencies) {
+            row.addDependency(dependency.row());
+        }
+        BOOLEAN_ROWS.put(effective, row);
+    }
+
+    // keyed by both short name and full dotted path, so a feature can be queried either way
     private void registerFeature(String name, String path, Supplier<Boolean> effective) {
         this.featureToggles.put(name, effective);
         this.featureToggles.put(path, effective);
@@ -609,14 +597,19 @@ public abstract class ConfigBuilder {
 
     protected void recordOption(ConfigOption<?> option) {
         if (this.suppressUi) return;
-        // clear the pending change-effect flags at this compound-safe boundary (they were already stamped onto each
-        // backing leaf as it was defined); recordOption no-ops while suppressed, so every leaf of a group is stamped
+        if (!this.pendingDependencies.isEmpty()) {
+            this.pendingDependencies.clear();
+            if (PlatHelper.isDev()) {
+                throw new IllegalStateException("dependsOn() only applies to feature() and mainFeature()");
+            }
+        }
+        if (option instanceof ConfigOption.BooleanValue bv) BOOLEAN_ROWS.put(bv.handle(), bv);
         this.pendingReload = ConfigReloadType.NONE;
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
     }
 
-    /** Root of the loader independent screen model, ready after {@link #build()}. */
+    /** Root of the screen tree. Ready once build() has run. */
     public ConfigCategory getUiRoot() {
         return this.uiRoot;
     }
@@ -634,7 +627,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.RangeValue node = new ConfigOption.RangeValue(
                 description(name), null, minHandle, maxHandle,
                 new Range(defaultMin, defaultMax), min, max);
@@ -643,7 +636,7 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
-    /** A {@link Vec3} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
+    /** A Vec3 shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);
@@ -653,7 +646,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.Vec3Value node = new ConfigOption.Vec3Value(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
@@ -661,7 +654,7 @@ public abstract class ConfigBuilder {
         return () -> new Vec3(xHandle.get(), yHandle.get(), zHandle.get());
     }
 
-    /** A {@link Vec3i} shown as one row of x/y/z fields, each bounded by {@code [min, max]}. */
+    /** A Vec3i shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3i> defineVec3i(String name, Vec3i defaultValue, int min, int max) {
         this.suppressUi = true;
         push(name);
@@ -671,7 +664,7 @@ public abstract class ConfigBuilder {
         pop();
         this.suppressUi = false;
 
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         ConfigOption.Vec3iValue node = new ConfigOption.Vec3iValue(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
@@ -700,15 +693,26 @@ public abstract class ConfigBuilder {
         return this;
     }
 
-    // platform hook: forward the flag to a store that needs it before the next define (Forge). Fabric keeps it on its
-    // own value object and reads pendingReload at record time, so it doesn't override this
+    // Forge needs the flag before the next define. Fabric keeps it on its own value object and reads pendingReload
+    // at record time, so it doesn't override this
     protected void forwardReloadFlag(ConfigReloadType type) {
     }
 
     protected void addTranslationsAndComments(String name) {
-        this.translations.put(this.translationKey(name), LangBuilder.getReadableName(name));
+        putName(this.translationKey(name), name);
         if (this.currentCategory() == null && PlatHelper.isDev())
             throw new AssertionError("Current config category was null. How?");
+    }
+
+    protected void noteCategoryName(String category) {
+        putName(this.translationKey(""), category);
+    }
+
+    private void putName(String key, String rawName) {
+        this.translations.put(key, TextHelper.getReadableName(rawName));
+        if (ConfigLangExporter.BUILTIN_NAMES.contains(rawName)){
+            this.moonlightNames.put(key, rawName);
+        }
     }
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;

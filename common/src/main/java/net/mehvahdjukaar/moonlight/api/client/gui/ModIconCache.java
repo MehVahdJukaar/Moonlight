@@ -12,31 +12,29 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Locale;
 
-/**
- * Lazily loads and caches mod icons (from each mod's jar, via {@link PlatHelper#getModIcon}) as GUI textures, so
- * screens can show a mod's logo. Returns {@code null} for mods that declare no icon (callers draw a fallback).
- * Load happens once per mod id on the render thread and the {@link DynamicTexture} lives for the game session.
- */
-public final class ModIcons {
-
-    /** A loaded icon texture plus its pixel size (icons aren't always square). */
-    public record Icon(ResourceLocation texture, int width, int height) {
-    }
+public final class ModIconCache {
 
     private static final Map<String, Optional<Icon>> CACHE = new HashMap<>();
 
+    //mods dont declare their darn logo...
+    private static final List<String> GUESSED_ICON_PATHS = List.of(
+            "icon.png", "logo.png", "%s.png", "%s-icon.png", "%s_icon.png", "%s-logo.png", "%s_logo.png",
+            "assets/%s/icon.png", "assets/%s/logo.png", "pack.png");
+
     @Nullable
     public static Icon get(String modId) {
-        return CACHE.computeIfAbsent(modId, ModIcons::load).orElse(null);
+        return CACHE.computeIfAbsent(modId, ModIconCache::load).orElse(null);
     }
 
     private static Optional<Icon> load(String modId) {
         try {
             Path path = PlatHelper.getModIcon(modId);
+            if (path == null) path = guessIcon(modId);
             if (path == null) return Optional.empty();
             NativeImage image = SpriteUtils.readImage(Files.readAllBytes(path));
             ResourceLocation id = Moonlight.res("mod_icon/" + modId.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_.-]", "_"));
@@ -46,5 +44,14 @@ public final class ModIcons {
             Moonlight.LOGGER.warn("Failed to load mod icon for {}", modId, e);
             return Optional.empty();
         }
+    }
+
+    @Nullable
+    private static Path guessIcon(String modId) {
+        for (String candidate : GUESSED_ICON_PATHS) {
+            Path path = PlatHelper.findModResource(modId, candidate.formatted(modId));
+            if (path != null) return path;
+        }
+        return null;
     }
 }

@@ -3,7 +3,7 @@ package net.mehvahdjukaar.moonlight.api.resources.pack;
 import com.google.common.base.Stopwatch;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
-import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.CommonConfigs;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.network.chat.Component;
@@ -45,7 +45,7 @@ public abstract class DynamicResourcesProvider implements SimplePackProvider {
         //TODO:make these configurable
         this.locationInfo = new PackLocationInfo(
                 name.toString(),    // id
-                Component.translatable(LangBuilder.getReadableName(name.toString())), // title
+                Component.translatable(TextHelper.getReadableName(name.toString())), // title
                 PackSource.BUILT_IN,
                 Optional.empty() //no clue what this is
         );

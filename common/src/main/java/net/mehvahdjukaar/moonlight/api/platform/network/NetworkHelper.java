@@ -4,11 +4,15 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class NetworkHelper {
@@ -23,7 +27,30 @@ public class NetworkHelper {
 
         <M extends Message> void registerClientBound(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
 
+        <M extends Message> void registerClientBoundOptional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
+
         <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType);
+    }
+
+    private static final Set<ResourceLocation> OPTIONAL_PAYLOADS = new HashSet<>();
+
+    @ApiStatus.Internal
+    public static void markOptional(CustomPacketPayload.Type<?> type) {
+        OPTIONAL_PAYLOADS.add(type.id());
+    }
+
+    public static boolean isOptional(CustomPacketPayload.Type<?> type) {
+        return OPTIONAL_PAYLOADS.contains(type.id());
+    }
+
+    @PlatformImpl
+    public static boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
+    public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
+        throw new AssertionError();
     }
 
 

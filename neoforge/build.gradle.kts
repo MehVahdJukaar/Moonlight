@@ -15,9 +15,9 @@ neoForge {
 }
 
 val codecui_version: String by extra
+val sable_companion_version: String by extra
 
 dependencies {
-    // Declarative codec schema API — runtime dep + bundled (JiJ) into the shipped jar.
     implementation("net.mehvahdjukaar:codecui-neoforge:${codecui_version}")
     jarJar("net.mehvahdjukaar:codecui-neoforge:${codecui_version}")
 
@@ -26,6 +26,7 @@ dependencies {
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")
+    modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
     modImplementation("curse.maven:the-twilight-forest-227639:7398100")
 //    modImplementation("curse.maven:open-loader-354339:6546293")
@@ -34,6 +35,8 @@ dependencies {
     //modRuntimeOnly("curse.maven:productivetrees-867074:5290721")
     // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    modImplementation("curse.maven:quark-243121:7640331")
+    modImplementation("curse.maven:zeta-968868:7640154")
 
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-forge:1.19.2-2.2.3")
     modRuntimeOnly("curse.maven:supplementaries-412082:8051628")

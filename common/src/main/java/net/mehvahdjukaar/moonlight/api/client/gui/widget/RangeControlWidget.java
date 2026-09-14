@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 
+import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
-import static net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper.formatNumber;
+import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
 
 public class RangeControlWidget extends CompositeWidget {
 

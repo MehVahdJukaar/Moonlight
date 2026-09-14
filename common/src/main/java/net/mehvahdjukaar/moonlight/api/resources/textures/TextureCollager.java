@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class TextureCollager {
     protected final int originFrameW;
@@ -35,11 +36,11 @@ public class TextureCollager {
         }
         if (originFrameW <= 0 || originFrameH <= 0) {
             throw new IllegalStateException("TextureCollager origin frame dimensions invalid: "
-                    + originFrameW + "x" + originFrameH + " — " + debugInfo);
+                    + originFrameW + "x" + originFrameH + " - " + debugInfo);
         }
         if (targetFrameW <= 0 || targetFrameH <= 0) {
             throw new IllegalStateException("TextureCollager target frame dimensions invalid: "
-                    + targetFrameW + "x" + targetFrameH + " — " + debugInfo);
+                    + targetFrameW + "x" + targetFrameH + " - " + debugInfo);
         }
 
         float scaleSourceX = source.frameWidth() / (float) originFrameW;
@@ -72,11 +73,11 @@ public class TextureCollager {
                 // --- Validate bounds with debug logging ---
                 if (scaledSourceW <= 0 || scaledSourceH <= 0) {
                     throw new IllegalStateException("Scaled source rectangle invalid: " +
-                            scaledSourceW + "x" + scaledSourceH + " — " + debugInfo + ", op=" + op);
+                            scaledSourceW + "x" + scaledSourceH + " - " + debugInfo + ", op=" + op);
                 }
                 if (scaledTargetW <= 0 || scaledTargetH <= 0) {
                     throw new IllegalStateException("Scaled target rectangle invalid: " +
-                            scaledTargetW + "x" + scaledTargetH + " — " + debugInfo + ", op=" + op);
+                            scaledTargetW + "x" + scaledTargetH + " - " + debugInfo + ", op=" + op);
                 }
 
                 if (scaledSourceX < 0 || scaledSourceY < 0
@@ -84,7 +85,7 @@ public class TextureCollager {
                         || scaledSourceY + scaledSourceH > source.frameHeight()) {
                     throw new IllegalStateException("Source operation rectangle out of bounds: " +
                             scaledSourceX + "," + scaledSourceY + "," + scaledSourceW + "," + scaledSourceH +
-                            " — " + debugInfo + ", op=" + op);
+                            " - " + debugInfo + ", op=" + op);
                 }
 
                 if (scaledTargetX < 0 || scaledTargetY < 0
@@ -92,40 +93,45 @@ public class TextureCollager {
                         || scaledTargetY + scaledTargetH > destination.frameHeight()) {
                     throw new IllegalStateException("Target operation rectangle out of bounds: " +
                             scaledTargetX + "," + scaledTargetY + "," + scaledTargetW + "," + scaledTargetH +
-                            " — " + debugInfo + ", op=" + op);
+                            " - " + debugInfo + ", op=" + op);
                 }
 
+                boolean swapsAxes = op.rotation == Rotation.CLOCKWISE_90 || op.rotation == Rotation.COUNTERCLOCKWISE_90;
+                int rotatedW = swapsAxes ? scaledSourceH : scaledSourceW;
+                int rotatedH = swapsAxes ? scaledSourceW : scaledSourceH;
+                float opScaleX = rotatedW / (float) scaledTargetW;
+                float opScaleY = rotatedH / (float) scaledTargetH;
+
+                //wrappers run outermost first, so read this bottom up to follow a target pixel back to its source.
+                //flips happen in source space, before the rotation
                 Sampler2D sampler = Sampler2D.offset(sourceFrameSampler, scaledSourceX, scaledSourceY);
                 sampler = Sampler2D.clamp(sampler, scaledSourceW, scaledSourceH);
-                if (op.bilinear) sampler = Sampler2D.bilinear(sampler);
-
-                int flipW = scaledSourceW;
-                int flipH = scaledSourceH;
-                if (op.rotation == Rotation.CLOCKWISE_90 || op.rotation == Rotation.COUNTERCLOCKWISE_90) {
-                    flipW = scaledSourceH;
-                    flipH = scaledSourceW;
+                switch (op.sampling) {
+                    case BILINEAR -> sampler = Sampler2D.bilinear(sampler);
+                    case BOX -> sampler = Sampler2D.box(sampler,
+                            swapsAxes ? opScaleY : opScaleX, swapsAxes ? opScaleX : opScaleY);
+                    case NEAREST -> {
+                    }
                 }
-
-                if (op.flipX) sampler = Sampler2D.flippedX(sampler, flipW);
-                if (op.flipY) sampler = Sampler2D.flippedY(sampler, flipH);
+                if (op.flipX) sampler = Sampler2D.flippedX(sampler, scaledSourceW);
+                if (op.flipY) sampler = Sampler2D.flippedY(sampler, scaledSourceH);
                 if (op.rotation != Rotation.NONE)
                     sampler = Sampler2D.rotate(sampler, op.rotation, scaledSourceW, scaledSourceH);
 
+                //target pixel centers land on source pixel centers
                 sampler = Sampler2D.offset(sampler, -0.5f, -0.5f);
-
-                float opScaleX = scaledSourceW / (float) scaledTargetW;
-                float opScaleY = scaledSourceH / (float) scaledTargetH;
-
                 if (opScaleX != 1.0f || opScaleY != 1.0f) sampler = Sampler2D.scale(sampler, opScaleX, opScaleY);
-                sampler = Sampler2D.offset(sampler, 0.5f, 0.5f);
 
                 int actualW = Math.min(scaledTargetW, destination.frameWidth() - scaledTargetX);
                 int actualH = Math.min(scaledTargetH, destination.frameHeight() - scaledTargetY);
 
                 if (actualW <= 0 || actualH <= 0) {
                     throw new IllegalStateException("Operation would write zero or negative pixel area: " +
-                            "actualW=" + actualW + ", actualH=" + actualH + " — " + debugInfo + ", op=" + op);
+                            "actualW=" + actualW + ", actualH=" + actualH + " - " + debugInfo + ", op=" + op);
                 }
+
+                IntUnaryOperator paletteSnapper = op.palettes == null ? null :
+                        op.palettes.get(Math.min(i, op.palettes.size() - 1)).nearestColorMapper();
 
                 for (int ty = 0; ty < actualH; ty++) {
                     for (int tx = 0; tx < actualW; tx++) {
@@ -134,9 +140,8 @@ public class TextureCollager {
 
                         int color = sampler.sample(srcX, srcY);
 
-                        if (op.palettes != null) {
-                            int maxPaletteIndex = Math.min(source.frameCount(), op.palettes.size() - 1);
-                            color = op.palettes.get(maxPaletteIndex).getColorClosestTo(new PaletteColor(color)).value();
+                        if (paletteSnapper != null) {
+                            color = paletteSnapper.applyAsInt(color);
                         }
 
                         if (op.blended) {
@@ -157,8 +162,12 @@ public class TextureCollager {
 
     private record Operation(int sourceX, int sourceY, int sourceW, int sourceH,
                              int targetX, int targetY, int targetW, int targetH,
-                             boolean flipX, boolean flipY, Rotation rotation, boolean bilinear,
+                             boolean flipX, boolean flipY, Rotation rotation, Sampling sampling,
                              boolean blended, @Nullable List<Palette> palettes) {
+    }
+
+    private enum Sampling {
+        NEAREST, BILINEAR, BOX
     }
 
     public static class Builder {
@@ -169,7 +178,7 @@ public class TextureCollager {
         private Integer targetX, targetY, targetW, targetH;
         private boolean flipX = false, flipY = false;
         private Rotation rotation = Rotation.NONE;
-        private boolean bilinear = false;
+        private Sampling sampling = Sampling.NEAREST;
         private boolean blended = false;
         @Nullable
         private List<Palette> palettes = null;
@@ -244,7 +253,16 @@ public class TextureCollager {
         }
 
         public Builder bilinearScaling() {
-            this.bilinear = true;
+            this.sampling = Sampling.BILINEAR;
+            return this;
+        }
+
+        /**
+         * Averages every source pixel the target pixel covers. Use it when shrinking by more than 2x,
+         * where bilinear only sees 4 of them.
+         */
+        public Builder boxScaling() {
+            this.sampling = Sampling.BOX;
             return this;
         }
 
@@ -272,7 +290,7 @@ public class TextureCollager {
                     fromX, fromY, fromW, fromH,
                     targetX, targetY, targetW, targetH,
                     flipX, flipY, rotation,
-                    bilinear, blended, palettes));
+                    sampling, blended, palettes));
 
             // Clear operation state for next operation
             fromX = fromY = fromW = fromH = null;
@@ -280,7 +298,7 @@ public class TextureCollager {
             targetW = targetH = null;
             flipX = flipY = false;
             rotation = Rotation.NONE;
-            bilinear = false;
+            sampling = Sampling.NEAREST;
             blended = false;
             palettes = null;
         }

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.network.platform;
 
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.api.platform.network.NetworkHelper;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
@@ -46,6 +47,18 @@ public class NetworkHelperImpl {
                 }
 
                 @Override
+                public <M extends Message> void registerClientBoundOptional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
+                    NetworkHelper.markOptional(messageType.type());
+
+                    event.registrar(messageType.type().id().getPath())
+                            .versioned(versionStr)
+                            .optional()
+                            .executesOn(HandlerThread.MAIN)
+                            .playToClient(messageType.type(), messageType.codec(),
+                                    (m, c) -> m.handle(new ContextWrapper(c)));
+                }
+
+                @Override
                 public <M extends Message> void registerBidirectional(CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, M> messageType) {
                     event.registrar(messageType.type().id().getPath())
                             .versioned(versionStr)
@@ -86,7 +99,20 @@ public class NetworkHelperImpl {
     }
 
 
+    public static boolean canSendToPlayer(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return player.connection.hasChannel(type);
+    }
+
+    public static boolean serverHasChannel(CustomPacketPayload.Type<?> type) {
+        if (!PlatHelper.getPhysicalSide().isClient()) return false;
+        return NetworkHelperImplClient.serverHasChannel(type);
+    }
+
     public static void sendToClientPlayer(ServerPlayer serverPlayer, CustomPacketPayload message) {
+        // An optional payload is one the receiver is allowed not to have, and NeoForge throws rather than drop
+        // a payload the connection never negotiated. Required payloads can't be missing, so skip the lookup.
+        if (NetworkHelper.isOptional(message.type()) && !canSendToPlayer(serverPlayer, message.type())) return;
+
         PacketDistributor.sendToPlayer(serverPlayer, message);
     }
 

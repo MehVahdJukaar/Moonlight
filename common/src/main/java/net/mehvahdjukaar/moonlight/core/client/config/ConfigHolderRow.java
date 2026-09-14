@@ -1,7 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.minecraft.ChatFormatting;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +18,6 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-
 class ConfigHolderRow extends ConfigListRow {
 
     private final Button button;
@@ -27,14 +26,18 @@ class ConfigHolderRow extends ConfigListRow {
     private final Component subtitle;
     private final ResourceLocation icon;
     private final List<AbstractWidget> children;
+    @Nullable
+    private final Component unavailableReason;
 
-    ConfigHolderRow(Component label, @Nullable Component subtitle,
-                    ResourceLocation icon, Runnable onClick) {
+    ConfigHolderRow(Component label, @Nullable Component subtitle, ResourceLocation icon,
+                    @Nullable Component unavailableReason, Runnable onClick) {
         this.label = label;
         this.subtitle = subtitle;
         this.icon = icon;
+        this.unavailableReason = unavailableReason;
         this.button = Button.builder(Component.empty(), b -> onClick.run())
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
+        this.button.active = unavailableReason == null;
         this.children = List.of(button);
     }
 
@@ -54,15 +57,19 @@ class ConfigHolderRow extends ConfigListRow {
         int editX = left + width - 8 - ROW_ICON;
         int textRight = editX - GAP;
 
+        boolean available = this.unavailableReason == null;
+        int labelColor = available ? CATEGORY : DESCRIPTION;
+        int subtitleColor = available ? TEXT : DISABLED;
+
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
-        Component boldLabel = label.copy();//.withStyle(ChatFormatting.BOLD);
         if (subtitle != null) {
-            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top + 3, font.lineHeight + 2, CATEGORY);
-            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, TEXT);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top + 3, font.lineHeight + 2, labelColor);
+            drawClipped(graphics, font, subtitle, textLeft, top + 5 + font.lineHeight, textRight, subtitleColor);
         } else {
-            GuiHelper.renderScrollingText(graphics, font, boldLabel, textLeft, textRight, top, height, CATEGORY);
+            GuiHelper.renderScrollingText(graphics, font, label, textLeft, textRight, top, height, labelColor);
         }
-        graphics.blitSprite(EDIT_ICON, editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
+        graphics.blitSprite(available ? MoonlightIcons.EDIT : MoonlightIcons.NO,
+                editX, top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
     }
 
     @Override
@@ -78,6 +85,6 @@ class ConfigHolderRow extends ConfigListRow {
     @Nullable
     @Override
     Component getTooltip(int mouseX, int mouseY) {
-        return null; // file name is shown inline as the subtitle
+        return unavailableReason;
     }
 }

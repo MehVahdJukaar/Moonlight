@@ -1,6 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
-import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,15 +10,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * A rounded chat-bubble widget: white interior, black outline, fixed height, variable width.
- * <p>
- * Can be added to a screen like any other {@link AbstractWidget}, or positioned dynamically
- * above another widget via {@link #renderPointingAt(GuiGraphics, AbstractWidget, int, int, int, float)}.
+ * A rounded chat bubble: white inside, black outline, fixed height, width follows the text. Add it to a screen like
+ * any other widget, or place it above another one with renderPointingAt().
  */
 public class ChatBubbleWidget extends AbstractWidget {
 
-    private static final ResourceLocation BODY = Moonlight.res("widget/chat_bubble_body");
-    private static final ResourceLocation TAIL = Moonlight.res("widget/chat_bubble_tail");
 
     public static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
@@ -66,16 +62,14 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.blitSprite(BODY, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_BODY, this.getX(), this.getY(), this.getWidth(), this.getHeight());
 
         int textX = this.getX() + PADDING;
         int textY = this.getY() + (this.getHeight() - this.font.lineHeight) / 2 + 1;
         graphics.drawString(this.font, this.getMessage(), textX, textY, this.textColor, false);
     }
 
-    /**
-     * Renders this bubble above {@code target}, clamped to the screen width and with an optional bob animation.
-     */
+    /** Draws the bubble above the target widget, kept inside the screen, with an optional bob animation. */
     public void renderPointingAt(GuiGraphics graphics, AbstractWidget target, int screenWidth,
                                  int mouseX, int mouseY, float partialTick) {
         int bubbleW = this.getWidth();
@@ -99,7 +93,7 @@ public class ChatBubbleWidget extends AbstractWidget {
         this.setY(bubbleY);
         this.renderWidget(graphics, mouseX, mouseY, partialTick);
 
-        graphics.blitSprite(TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
+        graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
     }
 
     @Override

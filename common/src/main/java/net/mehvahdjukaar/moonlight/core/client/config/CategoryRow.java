@@ -4,6 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.BooleanToggleWidget;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -19,12 +20,6 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-/**
- * A full-width button that opens a sub category, Configured-style: a leading gear icon, the category name (with a
- * one-line description subtitle when present) and a trailing chevron. If the category declares a {@code feature()}
- * toggle it's edited inline here (right-aligned); the label dims when the category is effectively off, and the
- * toggle is disabled when an ancestor is off.
- */
 class CategoryRow extends ConfigListRow {
 
     private final ConfigScreenAccess view;
@@ -38,6 +33,7 @@ class CategoryRow extends ConfigListRow {
     @Nullable
     private final Component tooltip;
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
+    private final GutterHints gutter = new GutterHints();
 
     CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
         this.view = view;
@@ -47,7 +43,7 @@ class CategoryRow extends ConfigListRow {
         this.button = Button.builder(Component.empty(), b -> view.openCategory(category))
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         if (gate != null) {
-            this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT, ON_ICON, OFF_ICON,
+            this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT, MoonlightIcons.YES, MoonlightIcons.NO,
                     Boolean.TRUE.equals(view.session().current(gate)), val -> {
                 view.session().put(gate, val);
                 view.onValueEdited();
@@ -64,7 +60,14 @@ class CategoryRow extends ConfigListRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         Font font = view.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        boolean enabled = view.isCategoryEnabled(category);
+        Component blockedBy = gate == null ? null : view.featureBlockedBy(gate);
+        boolean enabled = view.isCategoryEnabled(category); // already false when blockedBy is set
+
+        gutter.begin(top, height);
+        if (blockedBy != null) {
+            gutter.add(graphics, left, MoonlightIcons.WARNING,
+                    Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
+        }
 
         int buttonWidth = toggle != null ? width - CONTROL_HEIGHT - GAP : width;
         button.setMessage(Component.empty()); // we draw our own icon + label over the (empty) button background
@@ -85,14 +88,14 @@ class CategoryRow extends ConfigListRow {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, category.icon(), iconX, iconY, iconAnim.phase(), enabled);
         } else {
-            graphics.blitSprite(FOLDER_ICON, iconX, iconY, ROW_ICON, ROW_ICON);
+            graphics.blitSprite(MoonlightIcons.FOLDER, iconX, iconY, ROW_ICON, ROW_ICON);
         }
         Component title = category.title().copy().withStyle(ChatFormatting.BOLD);
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         if (toggle != null && gate != null) {
             toggle.set(Boolean.TRUE.equals(view.session().current(gate)));
-            toggle.active = view.areAncestorsEnabled(category); // can't enable a sub-feature of a disabled feature
+            toggle.active = blockedBy == null; // can't enable a sub-feature of a disabled one, or one with an unmet dependency
             toggle.setX(left + width - CONTROL_HEIGHT);
             toggle.setY(cy);
             toggle.render(graphics, mouseX, mouseY, partialTick);
@@ -113,5 +116,11 @@ class CategoryRow extends ConfigListRow {
     @Override
     Component getTooltip(int mouseX, int mouseY) {
         return tooltip;
+    }
+
+    @Nullable
+    @Override
+    Component getGutterTooltip(int mouseX, int mouseY) {
+        return gutter.tooltipAt(mouseX, mouseY);
     }
 }
