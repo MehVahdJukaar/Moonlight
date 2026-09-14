@@ -95,7 +95,7 @@ public class BreadcrumbWidget extends AbstractWidget {
     private Screen crumbAt(double mouseX, double mouseY) {
         for (int i = 0; i < crumbs.size(); i++) {
             Crumb c = crumbs.get(i);
-            if (c.current() || crumbX0[i] < 0) continue; // skip current + collapsed (off-screen) crumbs
+            if (c.current() || crumbX0[i] < 0) continue;
             if (inside(mouseX, mouseY, crumbX0[i], crumbX1[i] - crumbX0[i])) {
                 return c.target();
             }
