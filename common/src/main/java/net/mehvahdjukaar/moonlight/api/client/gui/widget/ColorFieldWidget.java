@@ -2,8 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 
-import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.GAP;
-import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.GAP;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

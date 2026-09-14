@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -56,7 +57,7 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     private int bobOffset() {
         if (!animated) return 0;
-        double phase = (System.currentTimeMillis() % BOB_PERIOD_MS) / (double) BOB_PERIOD_MS;
+        double phase = (Util.getMillis() % BOB_PERIOD_MS) / (double) BOB_PERIOD_MS;
         return -(int) Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2);
     }
 

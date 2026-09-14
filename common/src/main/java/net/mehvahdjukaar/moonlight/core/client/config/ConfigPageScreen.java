@@ -51,8 +51,9 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
     protected abstract void populate();
 
     protected void addDescriptionRows(List<ConfigListRow> rows, ConfigOption<?> option) {
-        if (option.description() == null || !session().isExpanded(option)) return;
-        List<FormattedCharSequence> lines = this.font.split(option.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
+        Component desc = option.description();
+        if (desc == null || !session().isExpanded(option)) return;
+        List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - GAP);
         for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
             rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
         }

@@ -29,20 +29,17 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class SchemaEditScreen extends ConfigPageScreen {
 
-    // shared across the whole sub-category navigation stack of one editing visit
     private record State(ConfigEditSession session, SchemaForm.Reader reader, Codec<?> codec, Consumer<Object> onDone) {}
 
     private final State state;
     private final ConfigCategory category;
     @Nullable
-    private final SchemaEditScreen parentPage; // null = root page (the one that commits)
-
+    private final SchemaEditScreen parentPage;
     @Nullable
-    private Button addButton; // list pages only; kept to re-evaluate its enabled state after an entry is added
+    private Button addButton;
     @Nullable
     private Component error;
 
-    // the current working value comes from outerSession; on Done the decoded object is staged back into it
     public static <T> Screen create(ConfigOption.SchemaValue<T> option, ConfigEditSession outerSession, Runnable onChange) {
         Screen parent = Minecraft.getInstance().screen;
         SchemaCodec<T> codec = option.codec;
@@ -52,7 +49,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
         try {
             defaultJson = encode(codec, option.defaultValue());
         } catch (Exception e) {
-            defaultJson = currentJson; // default may reference things not available; seeding from current is fine
+            defaultJson = currentJson;
         }
         SchemaForm form = SchemaForm.build(option.title(), codec.schema(), currentJson, defaultJson);
         Consumer<Object> onDone = decoded -> {
@@ -91,7 +88,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
 
     @Override
     public void onValueEdited() {
-        this.error = null; // a fresh edit may well have fixed whatever was invalid; re-checked on Done
+        this.error = null;
     }
 
     @Override
@@ -151,7 +148,9 @@ public class SchemaEditScreen extends ConfigPageScreen {
                 continue; // generated list entries never carry a description, so there is nothing to expand
             }
             rows.add(row);
-            if (e instanceof ConfigOption<?> v) addDescriptionRows(rows, v);
+            if (e instanceof ConfigOption<?> v) {
+                addDescriptionRows(rows, v);
+            }
         }
         this.list.setRows(rows);
     }
@@ -173,7 +172,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
         double scroll = this.list.getScrollAmount();
         cat.setEntries(values);
-        this.overlay.clear(); // the rows are recreated below, and with them any popup one of them had open
+        this.overlay.clear();
         populate();
         this.list.setScrollAmount(scroll);
         if (this.addButton != null) this.addButton.active = cat.canAdd();
@@ -195,7 +194,6 @@ public class SchemaEditScreen extends ConfigPageScreen {
 
     @Override
     public void onClose() {
-        // sub-page: go back up, edits stay in the shared session. Root: leave without committing
         this.minecraft.setScreen(isRoot() ? state.session.returnScreen() : parentPage);
     }
 

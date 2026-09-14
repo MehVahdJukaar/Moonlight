@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -9,9 +10,6 @@ import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.ARROW_WIDTH;
-import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.DESCRIPTION;
 
 class DescriptionRow extends ConfigListRow {
 
@@ -28,7 +26,7 @@ class DescriptionRow extends ConfigListRow {
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
         int y = top + 1;
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, left + ARROW_WIDTH + 2, y, DESCRIPTION);
+            graphics.drawString(font, line, left + ConfigScreenLayout.ARROW_WIDTH + 2, y, ConfigGuiColors.DESCRIPTION);
             y += font.lineHeight;
         }
     }

@@ -1,34 +1,34 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 //Shared sizing constants
-final class ConfigScreenLayout {
+public final class ConfigScreenLayout {
 
-    static final int HEADER = ConfigGuiLayout.HEADER;
-    static final int FOOTER = ConfigGuiLayout.FOOTER;
-    static final int ITEM_HEIGHT = 24; // compact single-line rows on the main config screen (button ~ on/off height)
-    static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
-    static final int ROW_WIDTH = 280;
-    static final int ROW_ICON = 16; // leading category/config icon
+    public static final int HEADER = 44;
+    public static final int FOOTER = 36;
+    public static final int GAP = 4;
+    public static final int LINE_HEIGHT = 9; // Font.lineHeight, for layout math that has no font at hand
+    public static final int CONTROL_HEIGHT = Button.DEFAULT_HEIGHT;
+    public static final int CONTROL_WIDTH = 96; // kept narrow so row labels get more room
+    public static final int ARROW_WIDTH = 12;
+    public static final int RESET_WIDTH = CONTROL_HEIGHT;
 
-    static final int CONTROL_WIDTH = 96; // kept narrow so row labels get more room
-    static final int CONTROL_HEIGHT = ConfigGuiLayout.CONTROL_HEIGHT;
-    static final int ARROW_WIDTH = 12;
-    static final int RESET_WIDTH = CONTROL_HEIGHT;
-    static final int GAP = ConfigGuiLayout.GAP;
-
-    static final int DESC_LINES_PER_ROW = 2;
+    public static final int ITEM_HEIGHT = 24; // compact single-line rows on the main config screen (button ~ on/off height)
+    public static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
+    public static final int ROW_WIDTH = 280;
+    public static final int ROW_ICON = 16; // leading category/config icon
+    public static final int DESC_LINES_PER_ROW = 2;
 
     // the mod tile grids (mods hub, discover mods)
-    static final int GRID_SIDE_MARGIN = 24;
-    static final int GRID_PAD = 8;
-    static final int MOD_ICON_SIZE = 32; // icon slot height; square icons render at this, wider ones expand
+    public static final int GRID_SIDE_MARGIN = 24;
+    public static final int GRID_PAD = 8;
+    public static final int MOD_ICON_SIZE = 32; // icon slot height; square icons render at this, wider ones expand
 
     @Nullable
     static ResourceLocation reloadIcon(ConfigReloadType type) {

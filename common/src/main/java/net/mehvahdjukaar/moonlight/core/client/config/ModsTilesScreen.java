@@ -37,20 +37,18 @@ public class ModsTilesScreen extends Screen {
 
     private static final List<String> EXTRA_MODS = List.of("polytone", "nautilus_studio");
 
-
     private static final int CARD_W = 88;
     private static final int CARD_PAD = 9;        // equal padding above the icon and below the last text line
     private static final int ICON_TEXT_GAP = 6;
     private static final int NAME_VER_GAP = 2;
     private static final int ICON_SIDE_PAD = 8;
-    private static final int LINE = 9;            // vanilla font line height
-    private static final int CARD_H = CARD_PAD + MOD_ICON_SIZE + ICON_TEXT_GAP + LINE + NAME_VER_GAP + LINE + CARD_PAD;
+    private static final int CARD_H = CARD_PAD + MOD_ICON_SIZE + ICON_TEXT_GAP + LINE_HEIGHT + NAME_VER_GAP + LINE_HEIGHT + CARD_PAD;
     private static final int CARD_GAP = 6;
 
     private static final int TITLE_SEARCH_GAP = 5;
     // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
-    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (LINE + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
-    private static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + LINE + TITLE_SEARCH_GAP;
+    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (LINE_HEIGHT + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
+    private static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + LINE_HEIGHT + TITLE_SEARCH_GAP;
 
     private final Screen parent;
     @Nullable
@@ -252,9 +250,9 @@ public class ModsTilesScreen extends Screen {
         }
 
         int nameY = iconY + MOD_ICON_SIZE + ICON_TEXT_GAP;
-        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE, ConfigGuiColors.TEXT);
+        GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, LINE_HEIGHT, ConfigGuiColors.TEXT);
         if (entry.version() != null) {
-            GuiHelper.renderClippedTextCentered(graphics, this.font, entry.version(), x + 4, x + CARD_W - 4, nameY + LINE + NAME_VER_GAP, ConfigGuiColors.DESCRIPTION);
+            GuiHelper.renderClippedTextCentered(graphics, this.font, entry.version(), x + 4, x + CARD_W - 4, nameY + LINE_HEIGHT + NAME_VER_GAP, ConfigGuiColors.DESCRIPTION);
         }
     }
 
