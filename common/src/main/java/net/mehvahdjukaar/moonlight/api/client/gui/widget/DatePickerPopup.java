@@ -58,8 +58,8 @@ public class DatePickerPopup extends AnchoredPopup {
 
         int textY = y + PAD + (HEADER_H - font.lineHeight) / 2 + 1;
         boolean overPrev = overArrow(mouseX, mouseY, x, y, false), overNext = overArrow(mouseX, mouseY, x, y, true);
-        graphics.centeredText(font, "<", x + PAD + CELL_W / 2, textY, overPrev ? TEXT : TEXT_SECONDARY);
-        graphics.centeredText(font, ">", x + width - PAD - CELL_W / 2, textY, overNext ? TEXT : TEXT_SECONDARY);
+        graphics.centeredText(font, "<", x + PAD + CELL_W / 2, textY, overPrev ? TEXT : DESCRIPTION);
+        graphics.centeredText(font, ">", x + width - PAD - CELL_W / 2, textY, overNext ? TEXT : DESCRIPTION);
         graphics.centeredText(font, month.getDisplayName(TextStyle.FULL, GuiHelper.currentLocale()), x + width / 2, textY, TEXT);
 
         int gridX = x + PAD, gridY = gridTop(y);
@@ -67,7 +67,7 @@ public class DatePickerPopup extends AnchoredPopup {
             int cx = gridX + ((d - 1) % COLS) * CELL_W;
             int cy = gridY + ((d - 1) / COLS) * CELL_H;
             if (d == hovered) graphics.fill(cx, cy, cx + CELL_W, cy + CELL_H, HOVER_HIGHLIGHT);
-            GuiHelper.renderTextCenteredIn(graphics, font, String.valueOf(d), cx, cy, CELL_W, CELL_H, d == day ? TEXT : TEXT_SECONDARY);
+            GuiHelper.renderTextCenteredIn(graphics, font, String.valueOf(d), cx, cy, CELL_W, CELL_H, d == day ? TEXT : DESCRIPTION);
         }
     }
 

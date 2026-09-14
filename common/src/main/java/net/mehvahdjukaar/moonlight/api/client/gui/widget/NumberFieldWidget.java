@@ -50,7 +50,7 @@ public class NumberFieldWidget extends CompositeWidget {
         this.box.setValue(format(initial));
         this.box.setResponder(s -> {
             Double parsed = parse(s);
-            this.box.setTextColor(parsed != null ? TEXT : ERROR);
+            this.box.setTextColor(parsed != null ? FIELD_TEXT : ERROR);
             if (parsed != null) onChange.accept(parsed);
         });
         this.children = List.of(box);
@@ -103,7 +103,7 @@ public class NumberFieldWidget extends CompositeWidget {
         double from = typedValueOrNearestBound();
         double next = Math.clamp(from + dir * step * (Minecraft.getInstance().hasShiftDown() ? SHIFT_MULTIPLIER : 1), min, max);
         if (next == from && parse(box.getValue()) != null) return;
-        this.box.setValue(format(next)); // the responder commits it
+        this.box.setValue(format(next));
         GuiHelper.playClickSound();
     }
 

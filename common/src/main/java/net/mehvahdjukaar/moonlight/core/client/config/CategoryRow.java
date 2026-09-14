@@ -81,7 +81,7 @@ class CategoryRow extends ConfigListRow {
         int iconX = left + 6;
         int textLeft = iconX + ROW_ICON + 6;
         int textRight = left + buttonWidth - GAP;
-        int titleColor = enabled ? LABEL : DESCRIPTION; // white (bold), greyed when the feature is off
+        int titleColor = enabled ? TEXT : DESCRIPTION; // white (bold), greyed when the feature is off
 
         int iconY = top + (height - ROW_ICON) / 2;
         // an animated item/block icon if the category declares one, otherwise the default folder sprite

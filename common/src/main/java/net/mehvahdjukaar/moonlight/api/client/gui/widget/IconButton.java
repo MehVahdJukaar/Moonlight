@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -46,7 +47,7 @@ public class IconButton extends Button {
         int iconY = this.getY() + (this.getHeight() - this.spriteHeight) / 2;
         int iconX;
         if (drawBackground) {
-            this.extractDefaultSprite(graphics); // background
+            this.extractDefaultSprite(graphics);
             this.extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
             if (hasText()) {
                 // vanilla centers the label on the button's midpoint; drop the icon just left of the text's left edge
@@ -58,7 +59,7 @@ public class IconButton extends Button {
             }
         } else {
             if (this.isHoveredOrFocused()) {
-                graphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), 0x30FFFFFF);
+                graphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), ConfigGuiColors.HOVER_HIGHLIGHT);
             }
             iconX = this.getX() + (this.getWidth() - this.spriteWidth) / 2;
         }

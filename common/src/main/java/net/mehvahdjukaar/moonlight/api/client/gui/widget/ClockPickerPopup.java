@@ -87,18 +87,18 @@ public class ClockPickerPopup extends AnchoredPopup {
             int sx = slotLeft(centerX, slot), sy = slotTop(centerY, slot);
             boolean selected = slot == selectedSlot && onFiveMinuteMark;
             if (slot == hovered) graphics.fill(sx, sy, sx + SLOT_W, sy + SLOT_H, HOVER_HIGHLIGHT);
-            GuiHelper.renderTextCenteredIn(graphics, font, slotLabel(slot), sx, sy, SLOT_W, SLOT_H, selected ? TEXT : TEXT_SECONDARY);
+            GuiHelper.renderTextCenteredIn(graphics, font, slotLabel(slot), sx, sy, SLOT_W, SLOT_H, selected ? TEXT : DESCRIPTION);
         }
 
         int modeY = modeTop(y);
         int textY = modeY + (MODE_H - font.lineHeight) / 2 + 1;
         int[] parts = modeLayout(font, centerX);
         String hh = twoDigits(hour), mm = twoDigits(minute), meridiem = hour < 12 ? "AM" : "PM";
-        graphics.text(font, hh, parts[0], textY, mode == Mode.HOUR ? TEXT : TEXT_SECONDARY, false);
-        graphics.text(font, ":", parts[1], textY, TEXT_SECONDARY, false);
-        graphics.text(font, mm, parts[2], textY, mode == Mode.MINUTE ? TEXT : TEXT_SECONDARY, false);
+        graphics.text(font, hh, parts[0], textY, mode == Mode.HOUR ? TEXT : DESCRIPTION, false);
+        graphics.text(font, ":", parts[1], textY, DESCRIPTION, false);
+        graphics.text(font, mm, parts[2], textY, mode == Mode.MINUTE ? TEXT : DESCRIPTION, false);
         boolean overMeridiem = isMouseOver(mouseX, mouseY, parts[3], modeY, font.width(meridiem), MODE_H);
-        graphics.text(font, meridiem, parts[3], textY, overMeridiem ? TEXT : TEXT_SECONDARY, false);
+        graphics.text(font, meridiem, parts[3], textY, overMeridiem ? TEXT : DESCRIPTION, false);
         int underlineX = mode == Mode.HOUR ? parts[0] : parts[2];
         graphics.fill(underlineX, modeY + MODE_H - 1, underlineX + font.width(hh), modeY + MODE_H, TEXT);
     }

@@ -24,7 +24,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
     public SyntaxEditBox(Font font, int x, int y, int width, int height, Component placeholder,
                          SyntaxHighlighter highlighter) {
-        super(font, x, y, width, height, placeholder, placeholder, ConfigGuiColors.TEXT, true, ConfigGuiColors.TEXT, true, true);
+        super(font, x, y, width, height, placeholder, placeholder, ConfigGuiColors.FIELD_TEXT, true, ConfigGuiColors.FIELD_TEXT, true, true);
         this.font = font;
         this.placeholder = placeholder;
         this.highlighter = highlighter;
@@ -60,7 +60,7 @@ public class SyntaxEditBox extends MultiLineEditBox {
         for (MultilineTextField.StringView line : this.textField.iterateLines()) {
             if (this.withinContentAreaTopBottom(y, y + lineHeight)) {
                 String lineText = value.substring(line.beginIndex(), line.endIndex());
-                graphics.text(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.TEXT);
+                graphics.text(this.font, this.highlighter.highlightLine(lineText), textX, y, ConfigGuiColors.FIELD_TEXT);
             }
             if (!placedCursor && cursor >= line.beginIndex() && cursor <= line.endIndex()) {
                 cursorX = textX + this.font.width(value.substring(line.beginIndex(), cursor));
@@ -72,9 +72,9 @@ public class SyntaxEditBox extends MultiLineEditBox {
 
         if (showCursor && placedCursor && this.withinContentAreaTopBottom(cursorY, cursorY + lineHeight)) {
             if (cursor >= value.length()) {
-                TextCursorUtils.extractAppendCursor(graphics, this.font, cursorX, cursorY, ConfigGuiColors.TEXT, true);
+                TextCursorUtils.extractAppendCursor(graphics, this.font, cursorX, cursorY, ConfigGuiColors.FIELD_TEXT, true);
             } else {
-                TextCursorUtils.extractInsertCursor(graphics, cursorX, cursorY, ConfigGuiColors.TEXT, lineHeight);
+                TextCursorUtils.extractInsertCursor(graphics, cursorX, cursorY, ConfigGuiColors.FIELD_TEXT, lineHeight);
             }
         }
     }

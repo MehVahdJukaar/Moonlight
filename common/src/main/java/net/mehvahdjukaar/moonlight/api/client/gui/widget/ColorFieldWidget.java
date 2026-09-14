@@ -1,6 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+
+import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.GAP;
 import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.Minecraft;
@@ -20,7 +22,6 @@ import java.util.function.Consumer;
 /** Hex color field plus a swatch. Colors are ARGB ints, or plain RGB when hasAlpha is false. */
 public class ColorFieldWidget extends CompositeWidget {
 
-    private static final int GAP = 4;
 
     private final EditBox hexBox;
     private final ColorSwatchWidget swatch;
@@ -49,7 +50,7 @@ public class ColorFieldWidget extends CompositeWidget {
                 int c = sanitize(ColorUtils.parseHex(str));
                 this.color = c;
                 this.swatch.setColor(opaqueIfNeeded(c));
-                this.hexBox.setTextColor(ConfigGuiColors.TEXT);
+                this.hexBox.setTextColor(ConfigGuiColors.FIELD_TEXT);
                 onChange.accept(c);
             } catch (Exception e) {
                 this.hexBox.setTextColor(ConfigGuiColors.ERROR);

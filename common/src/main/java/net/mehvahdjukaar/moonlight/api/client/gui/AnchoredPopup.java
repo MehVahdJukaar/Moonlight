@@ -78,7 +78,7 @@ public abstract class AnchoredPopup implements Popup {
     public void renderPopup(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int x = x(), y = y();
         graphics.nextStratum();
-        graphics.fill(x, y, x + width, y + height, ConfigGuiColors.POPUP_BG);
+        graphics.fill(x, y, x + width, y + height, ConfigGuiColors.PANEL_BG);
         renderContent(graphics, x, y, mouseX, mouseY);
         graphics.outline(x, y, width, height, CommonColors.WHITE);
     }

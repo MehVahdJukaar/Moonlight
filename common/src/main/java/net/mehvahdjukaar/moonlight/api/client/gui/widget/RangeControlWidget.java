@@ -55,8 +55,8 @@ public class RangeControlWidget extends CompositeWidget {
     private void onEdited() {
         Double parsedMin = parse(minBox);
         Double parsedMax = parse(maxBox);
-        this.minBox.setTextColor(parsedMin != null ? TEXT : ERROR);
-        this.maxBox.setTextColor(parsedMax != null ? TEXT : ERROR);
+        this.minBox.setTextColor(parsedMin != null ? FIELD_TEXT : ERROR);
+        this.maxBox.setTextColor(parsedMax != null ? FIELD_TEXT : ERROR);
         if (parsedMin != null && parsedMax != null) {
             this.onChange.accept(new Range(parsedMin, parsedMax));
         }
@@ -85,7 +85,7 @@ public class RangeControlWidget extends CompositeWidget {
         Font font = Minecraft.getInstance().font;
         graphics.text(font, SEPARATOR,
                 getX() + half + (INNER_GAP - font.width(SEPARATOR)) / 2 + 1,
-                getY() + (getHeight() - font.lineHeight) / 2 + 1, LABEL, false);
+                getY() + (getHeight() - font.lineHeight) / 2 + 1, TEXT, false);
     }
 
     @Override

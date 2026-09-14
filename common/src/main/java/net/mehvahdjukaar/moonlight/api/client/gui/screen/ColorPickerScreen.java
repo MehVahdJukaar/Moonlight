@@ -3,6 +3,8 @@ package net.mehvahdjukaar.moonlight.api.client.gui.screen;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorFieldWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+
+import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.*;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -18,9 +20,6 @@ import java.util.function.Consumer;
 
 public class ColorPickerScreen extends Screen {
 
-    private static final int GAP = 4;
-    private static final int CONTROL_HEIGHT = 20;
-    private static final int TOP_MARGIN = 44;
 
     private final Screen parent;
     private final Consumer<Integer> onApply;
@@ -60,13 +59,11 @@ public class ColorPickerScreen extends Screen {
         this.hueW = 14;
         this.alphaH = hasAlpha ? 12 : 0;
 
-        // one centered block: [SV square | hue bar] with the alpha bar and the hex+preview control stacked under it
         int blockW = svSize + GAP + hueW;
         int blockX = cx - blockW / 2;
         int blockH = svSize + 10 + alphaH + 12 + CONTROL_HEIGHT;
-        // center the block on the screen's vertical midpoint, clamped so it never overlaps the header or the buttons
         int buttonsY = this.height - 30;
-        int top = Mth.clamp((this.height - blockH) / 2, TOP_MARGIN + 8, buttonsY - blockH - 8);
+        int top = Mth.clamp((this.height - blockH) / 2, HEADER + 8, buttonsY - blockH - 8);
 
         this.svX = blockX;
         this.svY = top;

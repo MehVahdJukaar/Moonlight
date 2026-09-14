@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.misc;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.CommonColors;
 
@@ -9,23 +10,20 @@ import java.util.Objects;
 
 public final class ConfigGuiColors {
 
-    // text with alpha 0 is skipped
     public static int chat(ChatFormatting color) {
         return ARGB.opaque(Objects.requireNonNull(color.getColor()));
     }
 
-    // structural chrome, deliberately not themeable
-    public static final int HEADER_SEPARATOR = 0xFF101012; // our own inner bands; header/footer use the vanilla sprites
-    public static final int HOVER_HIGHLIGHT = 0x40FFFFFF; // translucent wash over a hovered popup row/cell
-    public static final int POPUP_BG = 0xFF101010; // opaque so the rows behind never bleed through
-    public static final int SCROLLBAR_THUMB = 0xFFB0B0B0;
-    public static final int CHECKER_LIGHT = 0xFFBBBBBB; // behind translucent colors so alpha reads
-    public static final int CHECKER_DARK = 0xFF6E6E6E;
+    public static final int PANEL_BG = 0xFF101012; // popups, description bands, the dark half of a hand drawn separator
+    public static final int SEPARATOR_HIGHLIGHT = 0x18FFFFFF; // the light half, same idea as the vanilla separator sprite
+    public static final int HOVER_HIGHLIGHT = 0x40FFFFFF; // translucent wash over a hovered row, cell or icon button
+    public static final int SCROLLBAR_THUMB = CommonColors.LIGHTER_GRAY;
+    public static final int CHECKER_LIGHT = CommonColors.LIGHTER_GRAY; // behind translucent colors so alpha reads
+    public static final int CHECKER_DARK = CommonColors.GRAY;
 
     // core text
-    public static final int LABEL = chat(ChatFormatting.WHITE);
     public static final int TEXT = chat(ChatFormatting.WHITE);
-    public static final int TEXT_SECONDARY = chat(ChatFormatting.GRAY);
+    public static final int FIELD_TEXT = EditBox.DEFAULT_TEXT_COLOR; // our fields look like the vanilla edit box, so they read like it too
     public static final int DESCRIPTION = chat(ChatFormatting.GRAY);
     public static final int DISABLED = chat(ChatFormatting.DARK_GRAY);
     public static final int ERROR = chat(ChatFormatting.RED);
@@ -44,7 +42,7 @@ public final class ConfigGuiColors {
     public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
 
     // the bright chat colors, picked from the mod id so a mod without a logo always gets the same one
-    private static final ChatFormatting[] INITIAL_COLORS = {
+    private static final ChatFormatting[] INITIA_MOD_COLORS = {
             ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN,
             ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE, ChatFormatting.WHITE
     };
@@ -57,7 +55,7 @@ public final class ConfigGuiColors {
     public static int initialLetter(String modId) {
         Integer brand = BRAND_COLORS.get(modId);
         if (brand != null) return brand;
-        return chat(INITIAL_COLORS[Math.floorMod(modId.hashCode(), INITIAL_COLORS.length)]);
+        return chat(INITIA_MOD_COLORS[Math.floorMod(modId.hashCode(), INITIA_MOD_COLORS.length)]);
     }
 
     // breadcrumb

@@ -82,7 +82,7 @@ public class NumberPickerFieldWidget extends AbstractWidget {
 
         Font font = Minecraft.getInstance().font;
         String text = twoDigits(first) + " " + separator + " " + twoDigits(second);
-        graphics.centeredText(font, text, x + (w - iconBox) / 2, y + (h - font.lineHeight) / 2 + 1, active ? TEXT : DISABLED);
+        graphics.centeredText(font, text, x + (w - iconBox) / 2, y + (h - font.lineHeight) / 2 + 1, active ? FIELD_TEXT : DISABLED);
     }
 
     @Override

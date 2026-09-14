@@ -67,6 +67,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.DefaultDataComponentsBoundEvent;
 import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -207,8 +208,7 @@ public class PlatHelperImpl {
     public static String getModSourcesUrl(String modId) {
         String custom = readModString(modId, "sources");
         if (custom != null) return custom;
-        // fall back: read the file-level issueTrackerURL from the raw config
-        // and strip a trailing /issues to recover the repo root
+        // fall back
         String issues = ModList.get().getModContainerById(modId)
                 .map(c -> c.getModInfo().getOwningFile().getConfig())
                 .flatMap(cfg -> cfg.<String>getConfigElement("issueTrackerURL"))
@@ -327,7 +327,6 @@ public class PlatHelperImpl {
     }
 
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
-        // colors come from the spawn egg item model. Entity types register before items so the supplier resolves here
         return new SpawnEggItem(properties.spawnEgg(entityType.get()));
     }
 
@@ -413,11 +412,23 @@ public class PlatHelperImpl {
         MoonlightForge.getCurrentBus().addListener(eventConsumer);
     }
 
+    //tags event fires before item default components are bound, so building a stack in there crashes.
+    //keep its registries and run once components are done, which is when fabric fires its tags event too
+    //TODO:bad: rethink all of this and who uses this common setup thing
+    private static @Nullable RegistryAccess registriesFromLastTagsUpdate;
+
+    static {
+        Consumer<TagsUpdatedEvent> captureRegistries = event -> registriesFromLastTagsUpdate = event.getRegistries();
+        NeoForge.EVENT_BUS.addListener(captureRegistries);
+    }
+
     public static void addReloadableCommonSetup(BiConsumer<RegistryAccess, Boolean> listener) {
         Moonlight.assertInitPhase();
-        Consumer<TagsUpdatedEvent> eventConsumer = event -> {
-            listener.accept(event.getRegistries(),
-                    event instanceof TagsUpdatedEvent.ClientPacketReceived);
+        Consumer<DefaultDataComponentsBoundEvent> eventConsumer = event -> {
+            RegistryAccess registries = registriesFromLastTagsUpdate;
+            if (registries == null) return;
+            boolean client = event.getUpdateCause() == DefaultDataComponentsBoundEvent.UpdateCause.CLIENT_PACKET_RECEIVED;
+            listener.accept(registries, client);
         };
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }

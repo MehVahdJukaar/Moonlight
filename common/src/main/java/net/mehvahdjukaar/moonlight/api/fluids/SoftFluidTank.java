@@ -27,6 +27,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -442,6 +444,18 @@ public class SoftFluidTank {
         this.setFluid(this.fluidStack);
         Tag tag = this.fluidStack.save(registries);
         compound.put("fluid", tag);
+    }
+
+    public void load(ValueInput input) {
+        //TODO: remove FluidHolder in 1.22
+        input.read("fluid", SoftFluidStack.CODEC)
+                .or(() -> input.read("FluidHolder", SoftFluidStack.CODEC))
+                .ifPresent(this::setFluid);
+    }
+
+    public void save(ValueOutput output) {
+        this.setFluid(this.fluidStack);
+        output.store("fluid", SoftFluidStack.CODEC, this.fluidStack);
     }
 
     /**

@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 public class PanningEditBox extends EditBox {
 
     private final Font font;
-    private int textColor = ConfigGuiColors.TEXT;
+    private int textColor = ConfigGuiColors.FIELD_TEXT;
 
     public PanningEditBox(Font font, int x, int y, int width, int height, Component message) {
         super(font, x, y, width, height, message);

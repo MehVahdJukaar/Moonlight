@@ -187,7 +187,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (String author : this.authors) {
             for (FormattedCharSequence row : this.font.split(Component.literal(author), textWidth)) {
                 if (y + line > bottom - 2) return;
-                graphics.text(this.font, row, PAD, y, ConfigGuiColors.LABEL);
+                graphics.text(this.font, row, PAD, y, ConfigGuiColors.TEXT);
                 y += line;
             }
         }

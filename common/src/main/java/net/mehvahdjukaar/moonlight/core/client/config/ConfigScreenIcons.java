@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigScreenExtensions;
 import net.mehvahdjukaar.moonlight.api.client.gui.FrameClock;
@@ -68,9 +69,6 @@ public final class ConfigScreenIcons {
         return true;
     }
 
-    private static final int PERIOD = 36;
-    // tint instead of combinedLight: the gui lightmap is white outside a world
-    private static final int DISABLED_TINT = 0xFF595959;
 
     public static boolean renderAnimated(GuiGraphicsExtractor graphics, @Nullable Identifier id, int x, int y,
                                          float phase, boolean lit) {
@@ -79,7 +77,7 @@ public final class ConfigScreenIcons {
         if (phase <= 0 && lit) {
             graphics.item(stack, x, y);
         } else {
-            AnimatedGuiItem.submit(graphics, stack, x, y, 16, lit ? CommonColors.WHITE : DISABLED_TINT,
+            AnimatedGuiItem.submit(graphics, stack, x, y, 16, lit ? CommonColors.WHITE : ConfigGuiColors.DISABLED,
                     (pose, blockModel) -> animate(pose, blockModel, phase));
         }
         return true;
@@ -99,9 +97,11 @@ public final class ConfigScreenIcons {
         private float phase;
 
         public void update(boolean hovered) {
+             int period = 36;
+
             phase += (hovered ? 20f : -40f) * clock.advance(); // +1/-2 per 1/20s tick, expressed as a per-second rate
             if (phase < 0) phase = 0;
-            else if (phase > PERIOD) phase -= PERIOD;
+            else if (phase > period) phase -= period;
         }
 
         public float phase() {
