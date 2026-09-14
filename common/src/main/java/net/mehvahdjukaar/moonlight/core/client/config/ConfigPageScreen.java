@@ -20,7 +20,7 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
-    protected final OverlayLayer overlay = new OverlayLayer(); // floats an open dropdown/popup above the list
+    protected final OverlayLayer overlay = new OverlayLayer();
     protected ConfigRowList list;
 
     protected ConfigPageScreen(Component title) {
@@ -53,10 +53,10 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
 
     protected abstract void populate();
 
-    // expanded state lives in the session so it survives a repopulate
     protected void addDescriptionRows(List<ConfigListRow> rows, ConfigOption<?> option) {
-        if (option.description() == null || !session().isExpanded(option)) return;
-        List<FormattedCharSequence> lines = this.font.split(option.description(), ROW_WIDTH - ARROW_WIDTH - GAP);
+        Component desc = option.description();
+        if (desc == null || !session().isExpanded(option)) return;
+        List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - GAP);
         for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
             rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
         }
@@ -101,7 +101,6 @@ abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, Po
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;
         }
-        // gutter icons sit outside the row hover band
         for (ConfigListRow row : this.list.children()) {
             Component tooltip = row.getGutterTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;

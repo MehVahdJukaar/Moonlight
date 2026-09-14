@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorFieldWidget;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 
-import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.*;
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -25,7 +25,7 @@ public class ColorPickerScreen extends Screen {
     private final Consumer<Integer> onApply;
     private final boolean hasAlpha;
 
-    private float hue, sat, val, alpha; // all 0..1
+    private float hue, sat, val, alpha;
 
     private int svX, svY, svSize;
     private int hueX, hueY, hueW, hueH;
@@ -33,8 +33,9 @@ public class ColorPickerScreen extends Screen {
 
     private ColorFieldWidget control;
     private boolean suppressControlSync;
-    private int dragging = DRAG_NONE;
-    private static final int DRAG_NONE = 0, DRAG_SV = 1, DRAG_HUE = 2, DRAG_ALPHA = 3;
+    private Drag dragging = Drag.NONE;
+
+    private enum Drag {NONE, SV, HUE, ALPHA}
 
     public ColorPickerScreen(int color, Screen parent, Consumer<Integer> onApply) {
         this(color, true, parent, onApply);
@@ -115,17 +116,17 @@ public class ColorPickerScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         double mouseX = event.x(), mouseY = event.y();
         if (GuiHelper.isMouseOver(mouseX, mouseY, svX, svY, svSize, svSize)) {
-            dragging = DRAG_SV;
+            dragging = Drag.SV;
             updateDrag(mouseX, mouseY);
             return true;
         }
         if (GuiHelper.isMouseOver(mouseX, mouseY, hueX, hueY, hueW, hueH)) {
-            dragging = DRAG_HUE;
+            dragging = Drag.HUE;
             updateDrag(mouseX, mouseY);
             return true;
         }
         if (GuiHelper.isMouseOver(mouseX, mouseY, alphaX, alphaY, alphaW, alphaH)) {
-            dragging = DRAG_ALPHA;
+            dragging = Drag.ALPHA;
             updateDrag(mouseX, mouseY);
             return true;
         }
@@ -134,7 +135,7 @@ public class ColorPickerScreen extends Screen {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
-        if (dragging != DRAG_NONE) {
+        if (dragging != Drag.NONE) {
             updateDrag(event.x(), event.y());
             return true;
         }
@@ -143,18 +144,18 @@ public class ColorPickerScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        dragging = DRAG_NONE;
+        dragging = Drag.NONE;
         return super.mouseReleased(event);
     }
 
     private void updateDrag(double mouseX, double mouseY) {
         switch (dragging) {
-            case DRAG_SV -> {
+            case SV -> {
                 this.sat = Mth.clamp((float) (mouseX - svX) / svSize, 0, 1);
                 this.val = Mth.clamp(1 - (float) (mouseY - svY) / svSize, 0, 1);
             }
-            case DRAG_HUE -> this.hue = Mth.clamp((float) (mouseY - hueY) / hueH, 0, 1);
-            case DRAG_ALPHA -> this.alpha = Mth.clamp((float) (mouseX - alphaX) / alphaW, 0, 1);
+            case HUE -> this.hue = Mth.clamp((float) (mouseY - hueY) / hueH, 0, 1);
+            case ALPHA -> this.alpha = Mth.clamp((float) (mouseX - alphaX) / alphaW, 0, 1);
         }
         syncControl();
     }

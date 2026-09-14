@@ -90,7 +90,7 @@ public class BreadcrumbWidget extends AbstractWidget {
     }
 
     private boolean inside(double mouseX, double mouseY, int x, int w) {
-        return mouseX >= x && mouseX <= x + w && mouseY >= getY() - 2 && mouseY <= getY() + 9;
+        return mouseX >= x && mouseX <= x + w && mouseY >= getY() - 2 && mouseY <= getY() + getHeight();
     }
 
     @Nullable

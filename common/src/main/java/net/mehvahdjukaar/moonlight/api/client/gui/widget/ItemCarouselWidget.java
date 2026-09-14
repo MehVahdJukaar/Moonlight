@@ -178,8 +178,7 @@ public class ItemCarouselWidget extends AbstractWidget {
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.visible && mouseX >= this.getX() && mouseY >= this.getY()
-                && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
+        return this.visible && GuiHelper.isMouseOver(mouseX, mouseY, this.getX(), this.getY(), this.width, this.height);
     }
 
     @Override

@@ -5,7 +5,6 @@ import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.SyntaxEditBox;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 
-import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiLayout.HEADER;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.JsonHighlighter;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -17,6 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.FOOTER;
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.HEADER;
 
 public class JsonEditScreen extends Screen {
 
@@ -47,7 +49,7 @@ public class JsonEditScreen extends Screen {
     protected void init() {
         layoutDescription();
         int top = HEADER + this.descriptionBlockHeight + 6;
-        int bottom = this.height - 36;
+        int bottom = this.height - FOOTER;
         this.editor = new SyntaxEditBox(this.font, SIDE_MARGIN, top, this.width - 2 * SIDE_MARGIN, bottom - top,
                 Component.translatable("gui.moonlight.config.json_hint"), JsonHighlighter.INSTANCE);
         this.editor.setValue(this.initial);

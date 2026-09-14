@@ -59,13 +59,17 @@ public class ClockPickerPopup extends AnchoredPopup {
         return String.valueOf(slot == 0 ? 12 : slot);
     }
 
-    private static int[] modeLayout(Font font, int centerX) {
+    // x of each piece of the "hh : mm AM" strip under the face
+    private record TimeStripPos(int hourX, int colonX, int minuteX, int meridiemX) {
+    }
+
+    private static TimeStripPos modeStrip(Font font, int centerX) {
         int digitsW = font.width("00");
         int colonW = font.width(":");
         int amW = font.width("AM");
         int total = digitsW + 2 + colonW + 2 + digitsW + 6 + amW;
         int start = centerX - (total - 1) / 2;
-        return new int[]{start, start + digitsW + 2, start + digitsW + 2 + colonW + 2, start + total - amW};
+        return new TimeStripPos(start, start + digitsW + 2, start + digitsW + 2 + colonW + 2, start + total - amW);
     }
 
     @Override
@@ -94,14 +98,14 @@ public class ClockPickerPopup extends AnchoredPopup {
 
         int modeY = modeTop(y);
         int textY = modeY + (MODE_H - font.lineHeight) / 2 + 1;
-        int[] parts = modeLayout(font, centerX);
+        TimeStripPos strip = modeStrip(font, centerX);
         String hh = twoDigits(hour), mm = twoDigits(minute), meridiem = hour < 12 ? "AM" : "PM";
-        graphics.text(font, hh, parts[0], textY, mode == Mode.HOUR ? TEXT : DESCRIPTION, false);
-        graphics.text(font, ":", parts[1], textY, DESCRIPTION, false);
-        graphics.text(font, mm, parts[2], textY, mode == Mode.MINUTE ? TEXT : DESCRIPTION, false);
-        boolean overMeridiem = isMouseOver(mouseX, mouseY, parts[3], modeY, font.width(meridiem), MODE_H);
-        graphics.text(font, meridiem, parts[3], textY, overMeridiem ? TEXT : DESCRIPTION, false);
-        int underlineX = mode == Mode.HOUR ? parts[0] : parts[2];
+        graphics.text(font, hh, strip.hourX(), textY, mode == Mode.HOUR ? TEXT : DESCRIPTION, false);
+        graphics.text(font, ":", strip.colonX(), textY, DESCRIPTION, false);
+        graphics.text(font, mm, strip.minuteX(), textY, mode == Mode.MINUTE ? TEXT : DESCRIPTION, false);
+        boolean overMeridiem = isMouseOver(mouseX, mouseY, strip.meridiemX(), modeY, font.width(meridiem), MODE_H);
+        graphics.text(font, meridiem, strip.meridiemX(), textY, overMeridiem ? TEXT : DESCRIPTION, false);
+        int underlineX = mode == Mode.HOUR ? strip.hourX() : strip.minuteX();
         graphics.fill(underlineX, modeY + MODE_H - 1, underlineX + font.width(hh), modeY + MODE_H, TEXT);
     }
 
@@ -126,13 +130,13 @@ public class ClockPickerPopup extends AnchoredPopup {
 
         int modeY = modeTop(y);
         if (mouseY < modeY || mouseY >= modeY + MODE_H) return;
-        int[] parts = modeLayout(font, centerX);
+        TimeStripPos strip = modeStrip(font, centerX);
         int digits = font.width("00");
-        if (mouseX >= parts[0] && mouseX < parts[0] + digits) {
+        if (mouseX >= strip.hourX() && mouseX < strip.hourX() + digits) {
             this.mode = Mode.HOUR;
-        } else if (mouseX >= parts[2] && mouseX < parts[2] + digits) {
+        } else if (mouseX >= strip.minuteX() && mouseX < strip.minuteX() + digits) {
             this.mode = Mode.MINUTE;
-        } else if (mouseX >= parts[3] && mouseX < parts[3] + font.width("AM")) {
+        } else if (mouseX >= strip.meridiemX() && mouseX < strip.meridiemX() + font.width("AM")) {
             GuiHelper.playClickSound();
             field.setValues((hour + 12) % 24, minute);
         }

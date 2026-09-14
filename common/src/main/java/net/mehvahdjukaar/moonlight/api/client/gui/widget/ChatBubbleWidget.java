@@ -9,6 +9,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonColors;
+import net.minecraft.util.Util;
 
 /**
  * A rounded chat bubble: white inside, black outline, fixed height, width follows the text. Add it to a screen like
@@ -56,7 +57,7 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     private int bobOffset() {
         if (!animated) return 0;
-        double phase = (System.currentTimeMillis() % BOB_PERIOD_MS) / (double) BOB_PERIOD_MS;
+        double phase = (Util.getMillis() % BOB_PERIOD_MS) / (double) BOB_PERIOD_MS;
         return -(int) Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2);
     }
 

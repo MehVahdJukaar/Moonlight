@@ -25,7 +25,6 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-
 public class DiscoverModsScreen extends Screen {
 
     private static final int MAX_CONTENT_W = 320;
@@ -33,9 +32,8 @@ public class DiscoverModsScreen extends Screen {
     private static final int ROW_GAP = 4;
     private static final int SECTION_H = 18;
     private static final int ROW_INNER_PAD = 8;
-    private static final int LINE = 11;
+    private static final int LINE_SPACING = 11;
     private static final int MAX_DESC_LINES = 2;
-
 
     private final Screen parent;
     private final List<ModCatalogAPI.Catalog> catalogs;
@@ -97,13 +95,17 @@ public class DiscoverModsScreen extends Screen {
 
     private int modCount() {
         int count = 0;
-        for (ModCatalogAPI.Catalog c : catalogs) count += c.mods().size();
+        for (ModCatalogAPI.Catalog c : catalogs){
+            count += c.mods().size();
+        }
         return count;
     }
 
     private boolean anyLoading() {
         for (ModCatalogAPI.Catalog c : catalogs) {
-            if (c.isLoading()) return true;
+            if (c.isLoading()){
+                return true;
+            }
         }
         return false;
     }
@@ -160,14 +162,15 @@ public class DiscoverModsScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        this.contentTop = HEADER;
-        this.contentBottom = this.height - FOOTER;
+        int mods = modCount();
+        if (mods > 0 && mods != this.builtModCount){
+            buildItems();
+        }
+        computeLayout();
 
         GuiHelper.renderListBackground(graphics, contentTop, contentBottom, this.width, this.scroll);
 
-        int mods = modCount();
         if (mods > 0) {
-            if (mods != this.builtModCount) buildItems();
             renderItems(graphics, mouseX, mouseY);
         } else if (!anyLoading()) {
             graphics.centeredText(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
@@ -182,7 +185,6 @@ public class DiscoverModsScreen extends Screen {
     }
 
     private void renderItems(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        computeLayout();
         boolean inViewport = mouseY >= contentTop && mouseY < contentBottom;
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
         int y = this.contentTop + GRID_PAD - (int) this.scroll;
@@ -223,13 +225,13 @@ public class DiscoverModsScreen extends Screen {
 
         int nameColor = installed ? ConfigGuiColors.TEXT : ConfigGuiColors.DESCRIPTION;
         GuiHelper.renderScrollingText(graphics, this.font, Component.literal(row.data().name()),
-                textX, nameRight, y + 6, LINE, nameColor);
+                textX, nameRight, y + 6, LINE_SPACING, nameColor);
 
         int descColor = installed ? ConfigGuiColors.DESCRIPTION : ConfigGuiColors.DISABLED;
-        int descY = y + 6 + LINE;
+        int descY = y + 6 + LINE_SPACING;
         for (FormattedCharSequence line : row.descLines()) {
             graphics.text(this.font, line, textX, descY, descColor);
-            descY += LINE;
+            descY += LINE_SPACING;
         }
 
         if (installed) {
