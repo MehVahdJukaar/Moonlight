@@ -159,8 +159,6 @@ public class ScreenParticle {
         pose.pushMatrix();
         pose.translate(this.x, this.y);
         if (this.rotation != 0) pose.rotate(this.rotation * Mth.DEG_TO_RAD);
-        // the quad is authored as a unit square centered on the origin, so size and rotation are pure transforms and
-        // nothing has to be rounded to whole pixels
         pose.scale(size, size);
         pose.translate(-0.5f, -0.5f);
         if (this.sprites.isEmpty()) {
