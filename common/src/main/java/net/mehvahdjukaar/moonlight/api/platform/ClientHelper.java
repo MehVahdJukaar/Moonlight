@@ -273,6 +273,27 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
+    @FunctionalInterface
+    public interface StandaloneModelEvent {
+        void register(Identifier modelId);
+    }
+
+    /**
+     * Models not tied to a block or an item. Fires on every model reload so the set can come from resources.
+     * Everything under models/special_models is registered already, only use this for files elsewhere.
+     */
+    @PlatformImpl
+    public static void addStandaloneModelRegistration(Consumer<StandaloneModelEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    /** Null until models have baked, and for ids that were never registered. */
+    @PlatformImpl
+    @Nullable
+    public static BlockStateModel getStandaloneModel(Identifier modelId) {
+        throw new AssertionError();
+    }
+
     /** Like BlockStateModel.collectParts but passes the level along so nested level aware models resolve. */
     @PlatformImpl
     public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,

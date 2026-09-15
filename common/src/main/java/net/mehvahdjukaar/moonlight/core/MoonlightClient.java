@@ -14,6 +14,7 @@ import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.mehvahdjukaar.moonlight.core.client.MoonlightHubInfo;
 import net.mehvahdjukaar.moonlight.core.client.OurModsList;
 import net.mehvahdjukaar.moonlight.core.client.SpawnBoxBlockEntityRenderer;
+import net.mehvahdjukaar.moonlight.core.client.SpecialModelsFolder;
 import net.mehvahdjukaar.moonlight.core.pack.DynamicResourcesInternals;
 import net.mehvahdjukaar.moonlight.core.pack.MergedDynamicClientResourcesProvider;
 import net.minecraft.ChatFormatting;
@@ -62,6 +63,8 @@ public class MoonlightClient {
         ClientHelper.addBlockEntityRenderersRegistration(event -> {
             event.register(MoonlightRegistry.SPAWN_BOX_BLOCK_ENTITY.get(), SpawnBoxBlockEntityRenderer::new);
         });
+
+        ClientHelper.addStandaloneModelRegistration(event -> SpecialModelsFolder.scan().forEach(event::register));
 
         RegHelper.registerDynamicResourceProvider(new MLDynamicClientResources());
     }

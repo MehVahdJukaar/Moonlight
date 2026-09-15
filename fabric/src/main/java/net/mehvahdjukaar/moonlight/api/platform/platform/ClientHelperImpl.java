@@ -17,6 +17,10 @@ import net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat;
 import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
+import net.fabricmc.fabric.api.client.model.loading.v1.FabricModelManager;
+import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
+import java.util.concurrent.ConcurrentHashMap;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -184,6 +188,27 @@ public class ClientHelperImpl {
             eventListener.accept((id, codec) ->
                     CustomUnbakedBlockStateModel.register(id, CustomUnbakedModelWrapper.wrap(codec)));
         });
+    }
+
+    private static final Map<Identifier, ExtraModelKey<BlockStateModel>> STANDALONE_KEYS = new ConcurrentHashMap<>();
+
+    public static void addStandaloneModelRegistration(Consumer<ClientHelper.StandaloneModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        ModelLoadingPlugin.register(pluginContext -> {
+            eventListener.accept(id -> pluginContext.addModel(standaloneKey(id),
+                    SimpleUnbakedExtraModel.blockStateModel(id)));
+        });
+    }
+
+    public static @Nullable BlockStateModel getStandaloneModel(Identifier modelId) {
+        ExtraModelKey<BlockStateModel> key = STANDALONE_KEYS.get(modelId);
+        if (key == null) return null;
+        return Minecraft.getInstance().getModelManager().getModel(key);
+    }
+
+    private static ExtraModelKey<BlockStateModel> standaloneKey(Identifier id) {
+        return STANDALONE_KEYS.computeIfAbsent(id, i -> ExtraModelKey.create(i::toString));
     }
 
     // fabric has no level aware collectParts, this is only the fallback for plain quad access

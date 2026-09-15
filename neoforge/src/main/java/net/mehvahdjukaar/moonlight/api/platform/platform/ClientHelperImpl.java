@@ -1,6 +1,12 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
+import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -193,6 +199,27 @@ public class ClientHelperImpl {
             eventListener.accept((id, codec) -> event.registerModel(id, CustomUnbakedModelWrapper.wrap(codec)));
         };
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    private static final Map<Identifier, StandaloneModelKey<BlockStateModel>> STANDALONE_KEYS = new ConcurrentHashMap<>();
+
+    public static void addStandaloneModelRegistration(Consumer<ClientHelper.StandaloneModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<ModelEvent.RegisterStandalone> eventConsumer = event -> {
+            eventListener.accept(id -> event.register(standaloneKey(id),
+                    SimpleUnbakedStandaloneModel.blockStateModel(id)));
+        };
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static @Nullable BlockStateModel getStandaloneModel(Identifier modelId) {
+        StandaloneModelKey<BlockStateModel> key = STANDALONE_KEYS.get(modelId);
+        return key == null ? null : Minecraft.getInstance().getModelManager().getStandaloneModel(key);
+    }
+
+    private static StandaloneModelKey<BlockStateModel> standaloneKey(Identifier id) {
+        return STANDALONE_KEYS.computeIfAbsent(id, i -> new StandaloneModelKey<>(i::toString));
     }
 
     public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,
