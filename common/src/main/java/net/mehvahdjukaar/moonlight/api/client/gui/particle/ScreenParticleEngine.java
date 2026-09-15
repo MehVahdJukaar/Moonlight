@@ -12,8 +12,8 @@ public class ScreenParticleEngine implements Renderable {
     private static final int DEFAULT_CAP = 256;
 
     private final List<ScreenParticle> particles = new ArrayList<>();
-    private final int cap;
     private final FrameClock clock = new FrameClock();
+    private final int cap;
 
     public ScreenParticleEngine() {
         this(DEFAULT_CAP);
