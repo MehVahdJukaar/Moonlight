@@ -32,7 +32,6 @@ import java.util.function.IntFunction;
 public class MediaButton {
 
     public enum MediaIcon implements StringRepresentable {
-        // socials
         YOUTUBE(),
         TWITTER(),
         DISCORD(),
@@ -42,11 +41,9 @@ public class MediaButton {
         MODRINTH(),
         MARKETPLACE(),
         GITHUB(),
-        // server-host partners
         AKLIZ(),
         BISECT(),
         GENERIC_SERVER(),
-        // generic link
         LINK();
 
         public static final Codec<MediaIcon> CODEC = StringRepresentable.fromValues(MediaIcon::values);
@@ -92,8 +89,6 @@ public class MediaButton {
     private static final String OWN_PACKAGE = "net/mehvahdjukaar";
     private static final Map<String, Boolean> OWN_MODS = new HashMap<>();
 
-    // whether a mod is one of ours, by looking for our package in its jar. The social buttons point at our own pages,
-    // so on somebody else's mod they'd advertise the wrong author
     public static boolean isOwnMod(String modId) {
         return OWN_MODS.computeIfAbsent(modId, id -> PlatHelper.findModResource(id, OWN_PACKAGE) != null);
     }
@@ -336,7 +331,6 @@ public class MediaButton {
         // our socials only belong on our own mods; the per-mod pages are fine on anyone's
         boolean ours = isOwnMod(modId);
 
-        // the loader hands us a pile of untagged urls, so each one is sorted by its host. Explicit arguments win
         Map<MediaIcon, String> byIcon = new LinkedHashMap<>();
         List<String> unknownHosts = new ArrayList<>();
         for (String url : PlatHelper.getModLinks(modId)) {
@@ -354,7 +348,6 @@ public class MediaButton {
         adder.accept(Button.builder(CommonComponents.GUI_BACK, b -> onBack.run())
                 .bounds(centerX - 45, y, 90, 20).build());
 
-        // support goes left and socials right. Ours point at the hub, anyone else's at whatever they gave us
         List<IntFunction<Button>> support = new ArrayList<>();
         List<IntFunction<Button>> socials = new ArrayList<>();
         Map<MediaIcon, String> supportLinks = new LinkedHashMap<>();
@@ -386,8 +379,6 @@ public class MediaButton {
             pages.add(new ModLink(MediaIcon.LINK, url));
         }
 
-        // what the mod registered by hand, on top of what its metadata gave us. On our own mods the hub already
-        // covers the support links, so only the pages are taken from there
         for (ConfigScreenExtensions.FooterLink link : ConfigScreenExtensions.linksFor(modId)) {
             if (SUPPORT_ORDER.contains(link.icon())) {
                 if (!ours) supportLinks.put(link.icon(), link.url());
@@ -399,7 +390,6 @@ public class MediaButton {
             if (enabled(e.getKey())) support.add(x -> forIcon(parent, x, y, e.getKey(), e.getValue()));
         }
 
-        // each page joins whichever side has fewer buttons, so the bar comes out even no matter how many there are
         List<IntFunction<Button>> left = new ArrayList<>();
         List<IntFunction<Button>> right = new ArrayList<>();
         int leftCount = support.size();
@@ -413,7 +403,6 @@ public class MediaButton {
                 rightCount++;
             }
         }
-        // mod pages hug the back button, the fixed ones trail off outwards
         left.addAll(support);
         right.addAll(socials);
 
