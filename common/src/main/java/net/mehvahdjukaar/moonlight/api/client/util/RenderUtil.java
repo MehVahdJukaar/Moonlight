@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SingleQuadParticle;
@@ -17,7 +18,9 @@ import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -48,6 +51,15 @@ public class RenderUtil {
             renderState.lightEngine = level.getLightEngine();
         }
         collector.submitMovingBlock(poseStack, renderState);
+    }
+
+    public static BlockStateModel getBlockModel(BlockState state) {
+        return Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
+    }
+
+    /** Sprite on the block atlas, for textures that arent declared in any model json. */
+    public static TextureAtlasSprite getBlockSprite(Identifier texture) {
+        return Minecraft.getInstance().getAtlasManager().get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, texture));
     }
 
     /** Draws a block model with an explicit light value, no level lighting or tints. */

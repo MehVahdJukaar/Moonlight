@@ -51,9 +51,7 @@ final class SchemaForm {
         this.reader = reader;
     }
 
-    // current is the value's JSON, defaults the encoded default's (used to seed absent optional fields)
     static SchemaForm build(Component title, Schema<?> schema, JsonElement current, @Nullable JsonElement defaults) {
-        // a record or a list becomes the root page itself; anything else gets a single "value" row on an empty page
         if (schema instanceof Schema.Record<?> rec) {
             ConfigCategory root = new ConfigCategory(title);
             return new SchemaForm(root, populateRecord(root, rec, current, defaults));

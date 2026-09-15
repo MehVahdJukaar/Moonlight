@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.client.model;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
@@ -86,6 +87,12 @@ public abstract class QuadEmitter {
         ClientHelper.collectModelParts(model, level, pos, state, random, parts);
         for (BlockStateModelPart part : parts) this.emitAll(part);
         return this;
+    }
+
+    /** Emits another block's model, as it would look placed at pos. */
+    public final QuadEmitter emitBlock(BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos,
+                                       RandomSource random) {
+        return this.emitAll(RenderUtil.getBlockModel(state), level, pos, state, random);
     }
 
     public final QuadEmitter emitAll(QuadBatch batch) {
