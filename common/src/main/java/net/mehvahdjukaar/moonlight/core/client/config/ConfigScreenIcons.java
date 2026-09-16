@@ -102,7 +102,7 @@ public final class ConfigScreenIcons {
         public void update(boolean hovered) {
              int period = 36;
 
-            phase += (hovered ? 20f : -40f) * clock.advance(); // +1/-2 per 1/20s tick, expressed as a per-second rate
+            phase += (hovered ? 20f : -40f) * clock.advance();
             if (phase < 0) phase = 0;
             else if (phase > period) phase -= period;
         }
