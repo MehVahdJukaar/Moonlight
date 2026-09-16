@@ -73,25 +73,25 @@ final class SchemaForm {
                 boolean v = asBool(seed, false);
                 var opt = new ConfigOption.BooleanValue(title, null, new MemoryConfigValue<>(v), v);
                 parent.add(opt);
-                yield s -> new JsonPrimitive(s.current(opt));
+                yield s -> new JsonPrimitive(s.valueOrPendingValue(opt));
             }
             case Schema.IntRange r -> {
                 int v = Math.clamp(asInt(seed, neutralInt(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.IntValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive(s.current(opt));
+                yield s -> new JsonPrimitive(s.valueOrPendingValue(opt));
             }
             case Schema.FloatRange r -> {
                 float v = Math.clamp(asFloat(seed, neutralFloat(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.FloatValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive(s.current(opt));
+                yield s -> new JsonPrimitive(s.valueOrPendingValue(opt));
             }
             case Schema.DoubleRange r -> {
                 double v = Math.clamp(asDouble(seed, neutralDouble(r.min(), r.max())), r.min(), r.max());
                 var opt = new ConfigOption.DoubleValue(title, null, new MemoryConfigValue<>(v), v, r.min(), r.max());
                 parent.add(opt);
-                yield s -> new JsonPrimitive(s.current(opt));
+                yield s -> new JsonPrimitive(s.valueOrPendingValue(opt));
             }
             case Schema.LongRange r -> {
                 // no dedicated long control: a numeric text field whose reader parses back to a JSON long
@@ -100,14 +100,14 @@ final class SchemaForm {
                 Predicate<Object> valid = o -> o instanceof String str && isLongInRange(str, r.min(), r.max());
                 var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(sv), sv, valid);
                 parent.add(opt);
-                yield s -> new JsonPrimitive(parseLongOr(s.current(opt), v));
+                yield s -> new JsonPrimitive(parseLongOr(s.valueOrPendingValue(opt), v));
             }
             case Schema.Color c -> {
                 int rgb = asColor(seed, CommonColors.WHITE);
                 var opt = new ConfigOption.ColorValue(title, null, new MemoryConfigValue<>(rgb), rgb, c.hasAlpha());
                 parent.add(opt);
                 yield s -> {
-                    int col = s.current(opt);
+                    int col = s.valueOrPendingValue(opt);
                     return c.hexString() ? new JsonPrimitive(ColorUtils.toHexString(col, c.hasAlpha())) : new JsonPrimitive(col);
                 };
             }
@@ -118,16 +118,14 @@ final class SchemaForm {
                         && (str.pattern() == null || str.pattern().matcher(x).matches());
                 var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(v), v, valid);
                 parent.add(opt);
-                yield s -> new JsonPrimitive(s.current(opt));
+                yield s -> new JsonPrimitive(s.valueOrPendingValue(opt));
             }
             case Schema.ResourceId id -> idField(parent, title, registryIds(id.registry()), asString(seed, ""),
                     o -> o instanceof String x && Identifier.tryParse(x) != null, UnaryOperator.identity(),
                     iconsFor(id.registry()));
             case Schema.TagId tag -> {
-                // "#namespace:path" when hashed, a bare id otherwise; accept either so a pasted id still works
                 List<String> tags = SchemaCodecs.availableTagIds(tag.registry()).stream()
                         .map(t -> normalizeTagId(t.toString(), tag.hashed())).toList();
-                // no icons: a tag id names a set, never a single item
                 yield idField(parent, title, tags, asString(seed, ""),
                         o -> o instanceof String x && isTagId(x), s -> normalizeTagId(s, tag.hashed()), null);
             }
@@ -247,7 +245,7 @@ final class SchemaForm {
         if (known.isEmpty()) {
             var opt = new ConfigOption.StringValue(title, null, new MemoryConfigValue<>(current), current, valid);
             parent.add(opt);
-            return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
+            return s -> new JsonPrimitive(normalize.apply(s.valueOrPendingValue(opt)));
         }
         // keep the current value selectable, picking the first id for an absent field would commit a wrong id
         List<String> options = known.contains(current) ? known
@@ -255,7 +253,7 @@ final class SchemaForm {
         var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(current), current,
                 () -> options, icon);
         parent.add(opt);
-        return s -> new JsonPrimitive(normalize.apply(s.current(opt)));
+        return s -> new JsonPrimitive(normalize.apply(s.valueOrPendingValue(opt)));
     }
 
     // only item and block ids are their own icon
@@ -294,7 +292,7 @@ final class SchemaForm {
         if (!labels.contains(initial)) initial = labels.isEmpty() ? "" : labels.getFirst();
         var opt = new ConfigOption.DropdownValue(title, null, new MemoryConfigValue<>(initial), initial, () -> labels, null);
         parent.add(opt);
-        return s -> new JsonPrimitive(s.current(opt));
+        return s -> new JsonPrimitive(s.valueOrPendingValue(opt));
     }
 
     @SuppressWarnings("unchecked")
@@ -311,7 +309,7 @@ final class SchemaForm {
         parent.add(opt);
         // JsonValue is edited as a pretty-printed string, so parse it back and fall back to the seed if invalid
         return s -> {
-            Object cur = s.current(opt);
+            Object cur = s.valueOrPendingValue(opt);
             if (!(cur instanceof String str)) return node;
             try {
                 return JsonParser.parseString(str);

@@ -52,7 +52,7 @@ public final class ConfigControllers {
     static {
         // the check/cross sprite toggle is reserved for feature() switches, plain booleans get an ON/OFF text button
         register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
-            CycleButton<Boolean> w = CycleButton.onOffBuilder(s.current(o))
+            CycleButton<Boolean> w = CycleButton.onOffBuilder(s.valueOrPendingValue(o))
                     .displayOnlyValue()
                     .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {
                         s.put(o, val);
@@ -67,14 +67,14 @@ public final class ConfigControllers {
         register(enumClass, ConfigControllers::enumControl);
 
         register(ConfigOption.StringValue.class, (o, s, onChange) ->
-                textField(s.current(o), String::valueOf, str -> {
+                textField(s.valueOrPendingValue(o), String::valueOf, str -> {
                     if (!o.isValid(str)) throw new IllegalArgumentException();
                     s.put(o, str);
                     onChange.run();
                 }));
 
         register(ConfigOption.RegexValue.class, (o, s, onChange) -> {
-            ConfigControl<Object> control = textField(s.current(o), String::valueOf, str -> {
+            ConfigControl<Object> control = textField(s.valueOrPendingValue(o), String::valueOf, str -> {
                 if (!o.isValid(str)) throw new IllegalArgumentException();
                 s.put(o, str);
                 onChange.run();
@@ -85,7 +85,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.ColorValue.class, (o, s, onChange) -> {
-            ColorFieldWidget w = new ColorFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.current(o), o.hasAlpha,
+            ColorFieldWidget w = new ColorFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.valueOrPendingValue(o), o.hasAlpha,
                     c -> {
                         s.put(o, c);
                         onChange.run();
@@ -100,34 +100,34 @@ public final class ConfigControllers {
 
         // plain numbers get a stepper field, slider subtypes get a slider
         register(ConfigOption.IntValue.class, (o, s, onChange) ->
-                numberField(s.current(o), o.min, o.max, true, v -> {
+                numberField(s.valueOrPendingValue(o), o.min, o.max, true, v -> {
                     s.put(o, (int) Math.round(v));
                     onChange.run();
                 }));
         register(ConfigOption.IntSliderValue.class, (o, s, onChange) ->
-                slider(o.min, o.max, s.current(o), true, v -> s.put(o, (int) Math.round(v)), onChange));
+                slider(o.min, o.max, s.valueOrPendingValue(o), true, v -> s.put(o, (int) Math.round(v)), onChange));
 
         register(ConfigOption.DoubleValue.class, (o, s, onChange) ->
-                numberField(s.current(o), o.min, o.max, false, v -> {
+                numberField(s.valueOrPendingValue(o), o.min, o.max, false, v -> {
                     s.put(o, v);
                     onChange.run();
                 }));
         register(ConfigOption.DoubleSliderValue.class, (o, s, onChange) ->
-                slider(o.min, o.max, s.current(o), false, v -> s.put(o, v), onChange));
+                slider(o.min, o.max, s.valueOrPendingValue(o), false, v -> s.put(o, v), onChange));
 
         register(ConfigOption.PercentValue.class, (o, s, onChange) ->
-                slider(0, 1, s.current(o), false, true, v -> s.put(o, v), onChange));
+                slider(0, 1, s.valueOrPendingValue(o), false, true, v -> s.put(o, v), onChange));
 
         register(ConfigOption.FloatValue.class, (o, s, onChange) ->
-                numberField(s.current(o), o.min, o.max, false, v -> {
+                numberField(s.valueOrPendingValue(o), o.min, o.max, false, v -> {
                     s.put(o, (float) v);
                     onChange.run();
                 }));
         register(ConfigOption.FloatSliderValue.class, (o, s, onChange) ->
-                slider(o.min, o.max, s.current(o), false, v -> s.put(o, v.floatValue()), onChange));
+                slider(o.min, o.max, s.valueOrPendingValue(o), false, v -> s.put(o, v.floatValue()), onChange));
 
         register(ConfigOption.RangeValue.class, (o, s, onChange) -> {
-            Range current = s.current(o);
+            Range current = s.valueOrPendingValue(o);
             RangeControlWidget w = new RangeControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, current, o.min, o.max, r -> {
                 s.put(o, r);
                 onChange.run();
@@ -136,7 +136,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
-            Vec3 c = s.current(o);
+            Vec3 c = s.valueOrPendingValue(o);
             Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x, c.y, c.z, o.min, o.max, false,
                     (x, y, z) -> {
                         s.put(o, new Vec3(x, y, z));
@@ -146,7 +146,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.Vec3iValue.class, (o, s, onChange) -> {
-            Vec3i c = s.current(o);
+            Vec3i c = s.valueOrPendingValue(o);
             Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.getX(), c.getY(), c.getZ(), o.min, o.max, true,
                     (x, y, z) -> {
                         s.put(o, new Vec3i((int) Math.round(x), (int) Math.round(y), (int) Math.round(z)));
@@ -156,7 +156,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.DateValue.class, (o, s, onChange) -> {
-            MonthDay c = s.current(o);
+            MonthDay c = s.valueOrPendingValue(o);
             NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, "/", c.getMonthValue(), c.getDayOfMonth(),
                     MoonlightIcons.CALENDAR, DatePickerPopup::new, (m, d) -> {
                         s.put(o, MonthDay.of(m, d));
@@ -166,7 +166,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.TimeValue.class, (o, s, onChange) -> {
-            LocalTime c = s.current(o);
+            LocalTime c = s.valueOrPendingValue(o);
             NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, ":", c.getHour(), c.getMinute(),
                     MoonlightIcons.CLOCK, ClockPickerPopup::new, (h, m) -> {
                         s.put(o, LocalTime.of(h, m));
@@ -176,7 +176,7 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.DropdownValue.class, (o, s, onChange) -> {
-            DropdownWidget w = new DropdownWidget(CONTROL_WIDTH, CONTROL_HEIGHT, o.options.get(), o.icon, s.current(o), val -> {
+            DropdownWidget w = new DropdownWidget(CONTROL_WIDTH, CONTROL_HEIGHT, o.options.get(), o.icon, s.valueOrPendingValue(o), val -> {
                 s.put(o, val);
                 onChange.run();
             });
@@ -184,8 +184,8 @@ public final class ConfigControllers {
         });
 
         register(ConfigOption.ListValue.class, (o, s, onChange) -> {
-            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.current(o)), MoonlightIcons.EDIT, b ->
-                    Minecraft.getInstance().setScreen(new ListEditScreen(o, s.current(o), Minecraft.getInstance().screen, edited -> {
+            IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.valueOrPendingValue(o)), MoonlightIcons.EDIT, b ->
+                    Minecraft.getInstance().setScreen(new ListEditScreen(o, s.valueOrPendingValue(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     })));
@@ -195,7 +195,7 @@ public final class ConfigControllers {
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
                     Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, b ->
-                    Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.current(o), Minecraft.getInstance().screen, edited -> {
+                    Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.valueOrPendingValue(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     })));
@@ -235,7 +235,7 @@ public final class ConfigControllers {
             }
         };
         BooleanToggleWidget w = new BooleanToggleWidget(CONTROL_WIDTH, CONTROL_HEIGHT, MoonlightIcons.YES, MoonlightIcons.NO,
-                Boolean.TRUE.equals(s.current(o)), val -> {
+                Boolean.TRUE.equals(s.valueOrPendingValue(o)), val -> {
             s.put(o, val);
             onChange.run();
         }, iconRenderer);
@@ -243,7 +243,7 @@ public final class ConfigControllers {
     }
 
     private static <E extends Enum<E>> ConfigControl<E> enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {
-        CycleButton<E> w = CycleButton.builder(x -> Component.literal(x.name()), s.current(o))
+        CycleButton<E> w = CycleButton.builder(x -> Component.literal(x.name()), s.valueOrPendingValue(o))
                 .withValues(o.options)
                 .displayOnlyValue()
                 .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {

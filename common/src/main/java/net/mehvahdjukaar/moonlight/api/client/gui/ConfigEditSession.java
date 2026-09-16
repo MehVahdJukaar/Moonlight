@@ -29,17 +29,12 @@ public final class ConfigEditSession {
         this.returnScreen = returnScreen;
     }
 
-    private ConfigEditSession(Screen returnScreen) {
-        this.holder = null;
-        this.returnScreen = returnScreen;
-    }
-
-    /** A session with no config behind it. apply does nothing. */
+    //session with no config
     public static ConfigEditSession scratch(Screen returnScreen) {
-        return new ConfigEditSession(returnScreen);
+        return new ConfigEditSession(null, returnScreen);
     }
 
-    public ModConfigHolder holder() {
+    public ModConfigHolder configHolder() {
         return holder;
     }
 
@@ -48,12 +43,8 @@ public final class ConfigEditSession {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T current(ConfigOption<T> v) {
+    public <T> T valueOrPendingValue(ConfigOption<T> v) {
         return pending.containsKey(v) ? (T) pending.get(v) : v.get();
-    }
-
-    public Object currentRaw(ConfigOption<?> v) {
-        return pending.containsKey(v) ? pending.get(v) : v.get();
     }
 
     public void put(ConfigOption<?> v, Object value) {

@@ -293,6 +293,7 @@ public class Utils {
         return switch (object) {
             case Block b -> getID(b);
             case Item b -> getID(b);
+            case TypedInstance<?> t -> getID(t);
             case Fluid b -> getID(b);
             case EntityType<?> b -> getID(b);
             case BlockEntityType<?> b -> getID(b);
@@ -309,7 +310,6 @@ public class Utils {
             //RegSupplier is both a supplier and a holder, so this one has to stay above
             case Supplier<?> s -> getID(s.get());
             case Holder<?> h -> getId(h);
-            case TypedInstance<?> t -> getID(t);
             default -> throw new UnsupportedOperationException("Unsupported class type " +
                     object.getClass() + ". Expected a registry entry for a call to Utils.getID()");
         };

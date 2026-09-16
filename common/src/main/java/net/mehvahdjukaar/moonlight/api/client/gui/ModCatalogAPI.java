@@ -28,6 +28,13 @@ public final class ModCatalogAPI {
                 Codec.STRING.optionalFieldOf("modrinth").forGetter(e -> Optional.ofNullable(e.modrinthUrl))
         ).apply(i, (id, name, desc, icon, cf, mr) ->
                 new Entry(id, name, desc, icon.orElse(null), cf.orElse(null), mr.orElse(null))));
+
+        @Nullable
+        public String firstPageUrl() {
+            if (curseforgeUrl != null) return curseforgeUrl;
+            if (modrinthUrl != null) return modrinthUrl;
+            return null;
+        }
     }
 
     public interface Catalog {

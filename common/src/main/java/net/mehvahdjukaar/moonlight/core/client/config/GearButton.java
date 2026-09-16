@@ -14,7 +14,6 @@ import org.joml.Matrix3x2fStack;
 
 public class GearButton extends Button {
 
-    private static final int SPRITE_SIZE = 16;
     private static final float SECONDS_PER_TURN = 32f;
     private static final float HOVER_SCALE = 1.25f;
     private static final float SCALE_APPROACH = 10f;
@@ -41,9 +40,10 @@ public class GearButton extends Button {
         pose.translate(this.getX() + this.getWidth() / 2f, this.getY() + this.getHeight() / 2f);
         pose.rotate(angle * Mth.DEG_TO_RAD);
         pose.scale(scale, scale);
-        pose.translate(-SPRITE_SIZE / 2f, -SPRITE_SIZE / 2f);
+        int spriteSize = 16;
+        pose.translate(-spriteSize / 2f, -spriteSize / 2f);
         int tint = this.active ? CommonColors.WHITE : CommonColors.GRAY;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CONFIG, 0, 0, SPRITE_SIZE, SPRITE_SIZE, tint);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CONFIG, 0, 0, spriteSize, spriteSize, tint);
         pose.popMatrix();
     }
 }

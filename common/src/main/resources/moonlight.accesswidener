@@ -162,7 +162,7 @@ transitive-accessible method net/minecraft/world/entity/ai/sensing/SensorType <i
 accessible field com/mojang/blaze3d/platform/NativeImage pixels J
 #png encoding
 accessible method com/mojang/blaze3d/platform/NativeImage writeToChannel (Ljava/nio/channels/WritableByteChannel;)Z
-accessible method com/mojang/blaze3d/platform/NativeImage getPixelABGR (II)I
+transitive-accessible method com/mojang/blaze3d/platform/NativeImage getPixelABGR (II)I
 
 #post chain
 accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;

@@ -46,7 +46,6 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     private static final int CRUMB_Y = 25;
 
     private Button saveButton;
-    private SearchBoxWidget searchBox;
     private String searchQuery = "";
 
     public MoonlightConfigScreen(ModConfigHolder holder, ConfigCategory root, Screen returnScreen,
@@ -62,7 +61,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     private MoonlightConfigScreen(ConfigCategory category, @Nullable MoonlightConfigScreen parentPage,
                                   ConfigEditSession session, @Nullable Identifier background) {
         // the header keeps the config's own name on every sub-screen; the breadcrumb is what tracks the category
-        super(session.holder().getReadableName());
+        super(session.configHolder().getReadableName());
         this.category = category;
         this.parentPage = parentPage;
         this.session = session;
@@ -93,19 +92,19 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         this.overlay.clear();
         this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
 
-        this.searchBox = new SearchBoxWidget(this.font, this.width - SIDE_MARGIN - SearchBoxWidget.WIDTH, CRUMB_Y - 3,
+        SearchBoxWidget searchBox = new SearchBoxWidget(this.font, this.width - SIDE_MARGIN - SearchBoxWidget.WIDTH, CRUMB_Y - 3,
                 this.searchQuery, query -> {
             this.searchQuery = query;
             populate();
         });
-        this.addRenderableWidget(this.searchBox);
+        this.addRenderableWidget(searchBox);
 
         List<BreadcrumbWidget.Crumb> crumbs = new ArrayList<>();
         for (MoonlightConfigScreen s = this; s != null; s = s.parentPage) {
             Component label = s.isRoot() ? Component.literal("⌂") : s.category.title();
             crumbs.addFirst(new BreadcrumbWidget.Crumb(label, s, s == this));
         }
-        int trailRight = this.searchBox.getX() - SearchBoxWidget.ICON_SPACE - 4; // leave room for the magnifier glyph + a gap
+        int trailRight = searchBox.getX() - SearchBoxWidget.ICON_SPACE - 4; // leave room for the magnifier glyph + a gap
         BreadcrumbWidget breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
                 this.font, crumbs, target -> {
             if (target != this) this.minecraft.setScreen(target);

@@ -9,7 +9,7 @@ import net.mehvahdjukaar.moonlight.api.util.codec.CodecUtils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.FormattedText;
@@ -19,7 +19,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -135,27 +134,23 @@ public class TextUtil {
     /**
      * Render text line in world
      */
-    public static void renderLine(FormattedCharSequence formattedCharSequences, Font font, float yOffset, PoseStack poseStack,
-                                  MultiBufferSource buffer, RenderProperties properties) {
+    public static void submitLine(FormattedCharSequence formattedCharSequences, Font font, float yOffset, PoseStack poseStack,
+                                  SubmitNodeCollector collector, RenderProperties properties) {
         if (formattedCharSequences == null) return;
         float x = -font.width(formattedCharSequences) / 2f;
-        Matrix4f matrix4f = poseStack.last().pose();
-        if (properties.outline) {
-            font.drawInBatch8xOutline(formattedCharSequences, x, yOffset, properties.textColor, properties.darkenedColor,
-                    matrix4f, buffer, properties.light);
-        } else {
-            font.drawInBatch(formattedCharSequences, x, yOffset, properties.darkenedColor, false,
-                    matrix4f, buffer, Font.DisplayMode.NORMAL, 0, properties.light);
-        }
+        int color = properties.outline ? properties.textColor : properties.darkenedColor;
+        int outlineColor = properties.outline ? properties.darkenedColor : 0;
+        collector.submitText(poseStack, x, yOffset, formattedCharSequences, false, Font.DisplayMode.POLYGON_OFFSET,
+                properties.light, color, 0, outlineColor);
     }
 
     /**
      * Renders multiple lines in world
      */
-    public static void renderAllLines(FormattedCharSequence[] charSequences, int ySeparation, Font font, PoseStack poseStack,
-                                      MultiBufferSource buffer, RenderProperties properties) {
+    public static void submitAllLines(FormattedCharSequence[] charSequences, int ySeparation, Font font, PoseStack poseStack,
+                                      SubmitNodeCollector collector, RenderProperties properties) {
         for (int i = 0; i < charSequences.length; i++) {
-            renderLine(charSequences[i], font, ySeparation * i, poseStack, buffer, properties);
+            submitLine(charSequences[i], font, ySeparation * i, poseStack, collector, properties);
         }
     }
 

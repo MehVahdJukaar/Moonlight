@@ -130,7 +130,7 @@ public final class GuiHelper {
         graphics.outline(x, y, size, size, CommonColors.BLACK);
         String trimmed = name.trim();
         if (trimmed.isEmpty()) {
-            int g = size >= 26 ? 16 : 8; // the gear is 16x16, so only whole steps of it stay on the pixel grid
+            int g = size >= 26 ? 16 : 8;
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, gearIcon, x + (size - g) / 2, y + (size - g) / 2, g, g);
             return;
         }

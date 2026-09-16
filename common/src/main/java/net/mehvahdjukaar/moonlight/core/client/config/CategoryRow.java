@@ -23,7 +23,7 @@ import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
 class CategoryRow extends ConfigListRow {
 
-    private final ConfigScreenAccess view;
+    private final ConfigScreenAccess screenView;
     private final ConfigCategory category;
     private final Button button;
     @Nullable
@@ -37,7 +37,7 @@ class CategoryRow extends ConfigListRow {
     private final GutterHints gutter = new GutterHints();
 
     CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
-        this.view = view;
+        this.screenView = view;
         this.category = category;
         this.tooltip = category.description();
         this.gate = category.gate();
@@ -45,7 +45,7 @@ class CategoryRow extends ConfigListRow {
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
         if (gate != null) {
             this.toggle = new BooleanToggleWidget(CONTROL_HEIGHT, CONTROL_HEIGHT, MoonlightIcons.YES, MoonlightIcons.NO,
-                    Boolean.TRUE.equals(view.session().current(gate)), val -> {
+                    Boolean.TRUE.equals(view.session().valueOrPendingValue(gate)), val -> {
                 view.session().put(gate, val);
                 view.onValueEdited();
             });
@@ -59,10 +59,10 @@ class CategoryRow extends ConfigListRow {
     @Override
     public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovering, float partialTick) {
         int top = this.getContentY(), left = this.getX(), width = this.getWidth(), height = this.getContentHeight();
-        Font font = view.font();
+        Font font = screenView.font();
         int cy = top + (height - CONTROL_HEIGHT) / 2;
-        Component blockedBy = gate == null ? null : view.featureBlockedBy(gate);
-        boolean enabled = view.isCategoryEnabled(category); // already false when blockedBy is set
+        Component blockedBy = gate == null ? null : screenView.featureBlockedBy(gate);
+        boolean enabled = screenView.isCategoryEnabled(category); // already false when blockedBy is set
 
         gutter.begin(top, height);
         if (blockedBy != null) {
@@ -81,10 +81,10 @@ class CategoryRow extends ConfigListRow {
         int iconX = left + 6;
         int textLeft = iconX + ROW_ICON + 6;
         int textRight = left + buttonWidth - GAP;
-        int titleColor = enabled ? TEXT : DESCRIPTION; // white (bold), greyed when the feature is off
+        int titleColor = enabled ? TEXT : DESCRIPTION;
 
         int iconY = top + (height - ROW_ICON) / 2;
-        // an animated item/block icon if the category declares one, otherwise the default folder sprite
+
         if (ConfigScreenIcons.has(category.icon())) {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, category.icon(), iconX, iconY, iconAnim.phase(), enabled);
@@ -95,8 +95,8 @@ class CategoryRow extends ConfigListRow {
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 
         if (toggle != null && gate != null) {
-            toggle.set(Boolean.TRUE.equals(view.session().current(gate)));
-            toggle.active = blockedBy == null; // can't enable a sub-feature of a disabled one, or one with an unmet dependency
+            toggle.set(Boolean.TRUE.equals(screenView.session().valueOrPendingValue(gate)));
+            toggle.active = blockedBy == null;
             toggle.setX(left + width - CONTROL_HEIGHT);
             toggle.setY(cy);
             toggle.extractRenderState(graphics, mouseX, mouseY, partialTick);

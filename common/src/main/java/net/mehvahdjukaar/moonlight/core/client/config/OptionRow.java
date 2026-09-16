@@ -85,7 +85,7 @@ class OptionRow extends ConfigListRow {
     }
 
     private void refreshReset() {
-        this.resetButton.active = editable && !Objects.equals(session.currentRaw(value), value.defaultValue());
+        this.resetButton.active = editable && !Objects.equals(session.valueOrPendingValue(value), value.defaultValue());
     }
 
     private void rollback() {
@@ -112,7 +112,7 @@ class OptionRow extends ConfigListRow {
         int resetX = left + width - resetButton.getWidth();
         resetButton.setX(resetX);
         resetButton.setY(cy);
-        resetButton.active = editable && contextEnabled && !Objects.equals(session.currentRaw(value), value.defaultValue());
+        resetButton.active = editable && contextEnabled && !Objects.equals(session.valueOrPendingValue(value), value.defaultValue());
         resetButton.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         AbstractWidget w = control.widget();
@@ -149,7 +149,7 @@ class OptionRow extends ConfigListRow {
             gutter.add(graphics, left, reloadIcon, reloadTooltip(value.reloadType()));
         }
 
-        boolean modified = !Objects.equals(session.currentRaw(value), value.get());
+        boolean modified = !Objects.equals(session.valueOrPendingValue(value), value.get());
         int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : TEXT;
         GuiHelper.renderScrollingText(graphics, font, title, textLeft, textRight, top, height, titleColor);
 

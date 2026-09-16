@@ -7,6 +7,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
@@ -49,11 +50,10 @@ public class RenderableDynamicTexture extends AbstractTexture implements Tickabl
         RenderSystem.assertOnRenderThread();
         this.textureLocation = resourceLocation;
         this.drawingFunction = (Consumer<? super RenderableDynamicTexture>) textureDrawingFunction;
-        //depth is needed for 3d block models to sort against themselves
         this.target = new TextureTarget(resourceLocation.toString(), width, height, true);
-        //share the target's color attachment as this texture
         this.texture = target.getColorTexture();
         this.textureView = target.getColorTextureView();
+        this.sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
     }
 
     public RenderableDynamicTexture(Identifier resourceLocation, int size,
@@ -153,8 +153,6 @@ public class RenderableDynamicTexture extends AbstractTexture implements Tickabl
         RenderSystem.getDevice().createCommandEncoder().writeToTexture(target.getColorTexture(), pixels);
     }
 
-    //the completion callback of copyTextureToBuffer is only polled once a frame, and mapping right after the
-    //copy races the draws feeding it, so block on our own fence instead. awaitCompletion doesn't flush by itself
     private static void awaitGpu(CommandEncoder encoder) {
         try (GpuFence fence = encoder.createFence()) {
             GL11.glFlush();
@@ -181,10 +179,8 @@ public class RenderableDynamicTexture extends AbstractTexture implements Tickabl
     }
 
     public void unregister() {
-        //this also calls close
         TextureManager tm = Minecraft.getInstance().getTextureManager();
         AbstractTexture t = tm.getTexture(textureLocation);
-        //if it's us we release it. Otherwise it means we have already been closed
         if (t == this) {
             tm.release(textureLocation);
         }
@@ -193,7 +189,7 @@ public class RenderableDynamicTexture extends AbstractTexture implements Tickabl
     @Override
     public void close() {
         this.closed = true;
-        //the render target owns the texture, null ours so AbstractTexture#close doesn't double free it
+        //the render target owns the texture
         this.texture = null;
         this.textureView = null;
         this.target.destroyBuffers();
