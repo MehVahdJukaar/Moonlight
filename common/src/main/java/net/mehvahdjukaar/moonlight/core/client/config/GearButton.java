@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 
 public class GearButton extends Button {
 
-    private static final int SPRITE_SIZE = 16;
     private static final float SECONDS_PER_TURN = 32f;
     private static final float HOVER_SCALE = 1.25f;
     private static final float SCALE_APPROACH = 10f;
@@ -39,9 +38,10 @@ public class GearButton extends Button {
         pose.translate(this.getX() + this.getWidth() / 2f, this.getY() + this.getHeight() / 2f, 0);
         pose.mulPose(Axis.ZP.rotationDegrees(angle));
         pose.scale(scale, scale, 1);
-        pose.translate(-SPRITE_SIZE / 2f, -SPRITE_SIZE / 2f, 0);
+        int spriteSize = 16;
+        pose.translate(-spriteSize / 2f, -spriteSize / 2f, 0);
         if (!this.active) graphics.setColor(0.5f, 0.5f, 0.5f, 1f);
-        graphics.blitSprite(MoonlightIcons.CONFIG, 0, 0, SPRITE_SIZE, SPRITE_SIZE);
+        graphics.blitSprite(MoonlightIcons.CONFIG, 0, 0, spriteSize, spriteSize);
         if (!this.active) graphics.setColor(1f, 1f, 1f, 1f);
         pose.popPose();
     }

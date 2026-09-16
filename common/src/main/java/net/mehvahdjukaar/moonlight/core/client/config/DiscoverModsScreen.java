@@ -27,7 +27,6 @@ public class DiscoverModsScreen extends Screen {
 
     private static final int MAX_CONTENT_W = 320;
     private static final int ROW_H = 48;
-    private static final int ROW_GAP = 4;
     private static final int SECTION_H = 18;
     private static final int ROW_INNER_PAD = 8;
     private static final int LINE_SPACING = 11;
@@ -141,13 +140,13 @@ public class DiscoverModsScreen extends Screen {
 
     private int totalHeight() {
         int h = 0;
-        for (Item item : this.items) h += item.height() + ROW_GAP;
-        return Math.max(0, h - ROW_GAP);
+        for (Item item : this.items) h += item.height() + GAP;
+        return Math.max(0, h - GAP);
     }
 
     private int itemY(int index) {
         int y = this.contentTop + GRID_PAD - (int) this.scroll;
-        for (int i = 0; i < index; i++) y += this.items.get(i).height() + ROW_GAP;
+        for (int i = 0; i < index; i++) y += this.items.get(i).height() + GAP;
         return y;
     }
 
@@ -196,7 +195,7 @@ public class DiscoverModsScreen extends Screen {
                     renderRow(graphics, row, y, hover);
                 }
             }
-            y += h + ROW_GAP;
+            y += h + GAP;
         }
         graphics.disableScissor();
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
@@ -296,7 +295,7 @@ public class DiscoverModsScreen extends Screen {
     }
 
     private boolean openModPage(ModCatalogAPI.Entry entry) {
-        String url = entry.curseforgeUrl() != null ? entry.curseforgeUrl() : entry.modrinthUrl();
+        String url = entry.firstPageUrl();
         if (url == null) return false;
         GuiHelper.playClickSound();
         this.handleComponentClicked(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));

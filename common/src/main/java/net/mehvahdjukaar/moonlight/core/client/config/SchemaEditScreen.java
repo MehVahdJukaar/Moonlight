@@ -43,7 +43,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     public static <T> Screen create(ConfigOption.SchemaValue<T> option, ConfigEditSession outerSession, Runnable onChange) {
         Screen parent = Minecraft.getInstance().screen;
         SchemaCodec<T> codec = option.codec;
-        T current = outerSession.current(option);
+        T current = outerSession.valueOrPendingValue(option);
         JsonElement currentJson = encode(codec, current);
         JsonElement defaultJson;
         try {

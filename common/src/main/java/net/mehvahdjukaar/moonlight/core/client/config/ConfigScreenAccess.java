@@ -34,7 +34,7 @@ interface ConfigScreenAccess {
         ConfigCategory from = owner != null && owner.gate() == feature ? owner.parent() : owner;
         for (ConfigCategory c = from; c != null; c = c.parent()) {
             ConfigOption.BooleanValue gate = c.gate();
-            if (gate != null && !Boolean.TRUE.equals(session().current(gate))) return c.title();
+            if (gate != null && !Boolean.TRUE.equals(session().valueOrPendingValue(gate))) return c.title();
         }
         return null;
     }
@@ -48,7 +48,7 @@ interface ConfigScreenAccess {
     }
 
     private boolean isFeatureOn(ConfigOption.BooleanValue feature) {
-        if (!Boolean.TRUE.equals(session().current(feature))) return false;
+        if (!Boolean.TRUE.equals(session().valueOrPendingValue(feature))) return false;
         ConfigCategory parent = feature.parent();
         return parent == null || isCategoryEnabled(parent);
     }
