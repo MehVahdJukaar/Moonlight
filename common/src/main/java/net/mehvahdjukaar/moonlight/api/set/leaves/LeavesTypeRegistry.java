@@ -84,7 +84,7 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
             name = path.substring("leaves_" .length());
         }
         String namespace = baseId.getNamespace();
-        if (name != null && !namespace.equals("securitycraft") && !path.contains("hanging")) {
+        if (name != null && !IGNORED_MODS.contains(namespace) && !path.contains("hanging_")) {
             if (baseBlock instanceof LeavesBlock) {
                 ResourceLocation id = baseId.withPath(name);
                 if (!valuesReg.containsKey(id)) return Optional.of(new LeavesType(id, baseBlock));
@@ -94,10 +94,10 @@ public class LeavesTypeRegistry extends BlockTypeRegistry<LeavesType> {
     }
 
     //- BLACKLISTED_MODS
-    private static boolean isBlacklisted(String namespace, String path) {
-        return namespace.equals("securitycraft") || namespace.equals("dynamic_trees") ||
-                namespace.matches("dynamictrees|dt\\w+") || path.contains("hanging");
-    }
+    public static final Set<String> IGNORED_MODS = Set.of(
+           "securitycraft", "burnt",
+            "dynamic_trees",  "dynamictrees", "dt"
+    );
 
 
     @Override

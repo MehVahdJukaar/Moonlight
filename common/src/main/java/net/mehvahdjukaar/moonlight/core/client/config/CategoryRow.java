@@ -20,7 +20,7 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-class CategoryRow extends ConfigListRow {
+public class CategoryRow extends ConfigListRow {
 
     private final ConfigScreenAccess screenView;
     private final ConfigCategory category;
@@ -35,7 +35,7 @@ class CategoryRow extends ConfigListRow {
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
     private final GutterHints gutter = new GutterHints();
 
-    CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
+    public CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
         this.screenView = view;
         this.category = category;
         this.tooltip = category.description();
@@ -114,13 +114,13 @@ class CategoryRow extends ConfigListRow {
 
     @Nullable
     @Override
-    Component getTooltip(int mouseX, int mouseY) {
+    public Component getTooltip(int mouseX, int mouseY) {
         return tooltip;
     }
 
     @Nullable
     @Override
-    Component getGutterTooltip(int mouseX, int mouseY) {
+    public Component getGutterTooltip(int mouseX, int mouseY) {
         return gutter.tooltipAt(mouseX, mouseY);
     }
 }

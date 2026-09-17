@@ -2,12 +2,11 @@ package net.mehvahdjukaar.moonlight.core.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -59,8 +58,7 @@ public class ConfigLangExporter {
         JsonObject json = new JsonObject();
         if (Files.exists(langFile)) {
             try (BufferedReader reader = Files.newBufferedReader(langFile, StandardCharsets.UTF_8)) {
-                JsonElement parsed = JsonParser.parseReader(reader);
-                if (parsed.isJsonObject()) json = parsed.getAsJsonObject();
+                json = GsonHelper.parse(reader);
             }
         }
         int added = 0;

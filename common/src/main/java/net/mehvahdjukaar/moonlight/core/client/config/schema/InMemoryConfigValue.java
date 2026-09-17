@@ -1,18 +1,15 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.core.client.config.schema;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 
 import java.util.Objects;
 
-// Transient in-memory value backing each leaf of a schema-generated form, so the reused row/control machinery can
-// drive it like a real config value. Nothing is persisted through here: the editor reads working values straight out
-// of its ConfigEditSession and re-encodes them through the codec on Done.
-class MemoryConfigValue<T> implements IConfigValue<T> {
+class InMemoryConfigValue<T> implements IConfigValue<T> {
 
     private T value;
 
-    MemoryConfigValue(T value) {
+    InMemoryConfigValue(T value) {
         this.value = value;
     }
 

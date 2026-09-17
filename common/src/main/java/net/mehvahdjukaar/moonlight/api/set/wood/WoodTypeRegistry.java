@@ -86,10 +86,10 @@ public class WoodTypeRegistry extends BlockTypeRegistry<WoodType> {
     }
 
     //- BLACKLISTED_MODS
-    public static final Set<String> IGNORED_MODS = new HashSet<>(Set.of(
-            "chipped", "compressedblocks", "securitycraft",
+    public static final Set<String> IGNORED_MODS = Set.of(
+            "chipped", "compressedblocks", "securitycraft", "burnt",
             "absentbydesign", "immersive_weathering", "dynamictrees", "dt"
-    ));
+    );
 
     //returns if this block is the base plank block
     @Override

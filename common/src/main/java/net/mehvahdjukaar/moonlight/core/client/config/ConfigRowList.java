@@ -10,16 +10,16 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.ROW_WIDTH;
 
-class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
+public class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
 
     private boolean drawFooterSeparator = true;
     private int rowWidth = ROW_WIDTH;
 
-    ConfigRowList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
+    public ConfigRowList(Minecraft minecraft, int width, int height, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
     }
 
-    void setRows(List<ConfigListRow> rows) {
+    public void setRows(List<ConfigListRow> rows) {
         this.clearEntries();
         for (ConfigListRow row : rows) this.addEntry(row);
         this.clampScrollAmount();

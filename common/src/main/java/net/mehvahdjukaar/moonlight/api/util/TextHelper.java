@@ -48,4 +48,8 @@ public class TextHelper {
             return null;
         }
     }
+
+    public static String stripHash(String tagId) {
+        return tagId.startsWith("#") ? tagId.substring(1) : tagId;
+    }
 }
