@@ -1,1 +1,2 @@
-- fixed a concurrency issue
+- blacklisted burnt mod from automatic wood detection
+- more support for codec config screen
