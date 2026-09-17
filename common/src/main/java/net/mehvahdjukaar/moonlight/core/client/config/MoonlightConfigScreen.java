@@ -107,7 +107,9 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         int trailRight = searchBox.getX() - SearchBoxWidget.ICON_SPACE - 4; // leave room for the magnifier glyph + a gap
         BreadcrumbWidget breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
                 this.font, crumbs, target -> {
-            if (target != this) this.minecraft.setScreen(target);
+            if (target != this){
+                this.minecraft.setScreen(target);
+            }
         });
         this.addRenderableWidget(breadcrumb);
 
