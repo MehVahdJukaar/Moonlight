@@ -110,7 +110,6 @@ public interface InvPlacer {
                         if (slot.add(stack, inventory, player)) {
                             return true;
                         }
-                        return true;
                     }
                 }
             }
