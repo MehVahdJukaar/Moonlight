@@ -403,8 +403,8 @@ public class HardcodedBlockTypes {
                 .leaves("dyna_leaves_red")
                 .equivalentWood("pokecube_legends:aged");
 
-        // REGIONS UNEXPLORED - REASON: Associated WoodType
-        leafReg.addLeavesToWoodMapping("regions_unexplored:bamboo", "minecraft:jungle");
+        // REGIONS UNEXPLORED - REASON: Associated WoodType - The WoodType wasn't detected on WoodType's side
+        leafReg.addLeavesToWoodMapping("regions_unexplored", "bamboo", "bamboo");
 
         // THE TWILIGHT FOREST - REASON: Associated WoodType, Naming-Convention
         leafReg.addLeavesToWoodMapping("twilightforest", "beanstalk", "twilight_oak");
@@ -454,9 +454,6 @@ public class HardcodedBlockTypes {
         // ALEX'S CAVES - REASON: Associated WoodType
         leafReg.addLeavesToWoodMapping("alexscaves:ancient", "minecraft:jungle");
 
-        // Ars Elemental - REASON: Associated WoodType
-        leafReg.addSimpleFinder("ars_elemental", "yellow_archwood")
-                .childBlock(LOG, ResourceLocation.parse("ars_nouveau:archwood_log"));
     }
 
 
