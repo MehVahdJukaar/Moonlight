@@ -41,47 +41,7 @@ public interface SlotProvider {
         boolean add(ItemStack stack, Inventory inv, Player player);
 
         static Slot invSlot(Inventory inv, int slot) {
-            return new Slot() {
-                @Override
-                public ItemStack getStack() {
-                    return inv.getItem(slot);
-                }
-
-                @Override
-                public boolean add(ItemStack toAdd, Inventory inv, Player player) {
-                    ItemStack current = getStack();
-                    if (current.isEmpty()){
-                        inv.setItem(slot, toAdd);
-                        return true;
-                    }
-                    //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
-                    if (!inv.hasRemainingSpaceForItem(current, toAdd)) return false;
-
-                    //same as vanilla .add but no damageable and creative bs logic
-                    if (toAdd.isEmpty()) {
-                        return false;
-                    } else {
-                        try {
-                            int originalCount;
-                            do {
-                                originalCount = toAdd.getCount();
-                                toAdd.setCount(inv.addResource(slot, toAdd));
-                            } while (!toAdd.isEmpty() && toAdd.getCount() < originalCount);
-
-                            return toAdd.getCount() < originalCount;
-                        } catch (Throwable var6) {
-                            CrashReport crashReport = CrashReport.forThrowable(var6, "Adding item to inventory");
-                            CrashReportCategory crashReportCategory = crashReport.addCategory("Item being added");
-                            crashReportCategory.setDetail("Item ID", Item.getId(toAdd.getItem()));
-                            crashReportCategory.setDetail("Item data", toAdd.getDamageValue());
-                            crashReportCategory.setDetail("Item name", () -> toAdd.getHoverName().getString());
-                            throw new ReportedException(crashReport);
-                        }
-                    }
-                }
-            };
-
-
+            return new InvSlot(inv, slot);
         }
 
         static Slot offHandSlot(Inventory inv, int offHandSlot) {
@@ -150,5 +110,44 @@ public interface SlotProvider {
         }
     }
 
-}
+    record InvSlot(Inventory inv, int slot) implements Slot {
+        @Override
+        public ItemStack getStack() {
+            return inv.getItem(slot);
+        }
 
+        @Override
+        public boolean add(ItemStack toAdd, Inventory inv, Player player) {
+            ItemStack current = getStack();
+            if (current.isEmpty()){
+                inv.setItem(slot, toAdd);
+                return true;
+            }
+            //vanilla doesn't do this for some reason... calling add alone will just incrememnt the count of an existing item
+            if (!inv.hasRemainingSpaceForItem(current, toAdd)) return false;
+
+            //same as vanilla .add but no damageable and creative bs logic
+            if (toAdd.isEmpty()) {
+                return false;
+            } else {
+                try {
+                    int originalCount;
+                    do {
+                        originalCount = toAdd.getCount();
+                        toAdd.setCount(inv.addResource(slot, toAdd));
+                    } while (!toAdd.isEmpty() && toAdd.getCount() < originalCount);
+
+                    return toAdd.getCount() < originalCount;
+                } catch (Throwable var6) {
+                    CrashReport crashReport = CrashReport.forThrowable(var6, "Adding item to inventory");
+                    CrashReportCategory crashReportCategory = crashReport.addCategory("Item being added");
+                    crashReportCategory.setDetail("Item ID", Item.getId(toAdd.getItem()));
+                    crashReportCategory.setDetail("Item data", toAdd.getDamageValue());
+                    crashReportCategory.setDetail("Item name", () -> toAdd.getHoverName().getString());
+                    throw new ReportedException(crashReport);
+                }
+            }
+        }
+    }
+
+}
