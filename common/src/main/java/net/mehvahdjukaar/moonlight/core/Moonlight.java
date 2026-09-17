@@ -72,6 +72,7 @@ public class Moonlight {
     //called on mod creation
     public static void commonInit() {
         CommonConfigs.init();
+        if (PlatHelper.isDev()) TestConfigs.init();
 
         BlockSetInternal.registerBlockSetDefinition(WoodTypeRegistry.INSTANCE);
         BlockSetInternal.registerBlockSetDefinition(LeavesTypeRegistry.INSTANCE);

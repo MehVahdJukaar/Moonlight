@@ -241,7 +241,7 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
     @Nullable
     private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
         try {
-            return Utils.hackyGetRegistryAccess().lookup(key).orElse(null);
+            return Utils.hackyGetRegistryAccess().<Object>lookup(key).orElse(null);
         } catch (Exception openedFromMainMenu) {
             return null;
         }
