@@ -85,7 +85,7 @@ class ConfigHolderRow extends ConfigListRow {
 
     @Nullable
     @Override
-    Component getTooltip(int mouseX, int mouseY) {
+    public Component getTooltip(int mouseX, int mouseY) {
         return unavailableReason;
     }
 }

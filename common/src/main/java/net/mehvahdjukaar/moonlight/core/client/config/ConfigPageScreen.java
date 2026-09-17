@@ -18,7 +18,7 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, PopupHost {
+public abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
     protected final OverlayLayer overlay = new OverlayLayer();
     protected ConfigRowList list;

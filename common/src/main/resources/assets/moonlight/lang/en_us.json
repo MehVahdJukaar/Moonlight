@@ -34,6 +34,8 @@
   "gui.moonlight.config.list_add": "Add entry",
   "gui.moonlight.config.list_remove": "Remove entry",
   "gui.moonlight.config.list_entry": "Entry %s",
+  "gui.moonlight.config.map_duplicate_key": "Duplicate key, only the last one is kept",
+  "gui.moonlight.config.schema_type": "Type",
   "gui.moonlight.config.edit": "Edit",
   "gui.moonlight.config.unavailable.not_in_world": "This config belongs to a world. Load a world to edit it.",
   "gui.moonlight.config.unavailable.server_controlled": "This config is set by the server you are connected to.",
@@ -250,5 +252,9 @@
   "moonlight.configuration.test_time": "Test Time",
   "moonlight.configuration.test_time.hour": "Hour",
   "moonlight.configuration.test_time.minute": "Minute",
-  "moonlight.configuration.test_category.test_time": "Test Time"
+  "moonlight.configuration.test_category.test_time": "Test Time",
+  "moonlight.configuration.test_category.test_schema_advanced": "Test Schema Advanced",
+  "moonlight.configuration.test_category.test_schema_advanced.description": "schema form: long, hex color, pattern, optionals, bounded list, pair, dispatch, either, dispatched map, recursive, raw",
+  "moonlight.configuration.test_category.test_schema_map": "Test Schema Map",
+  "moonlight.configuration.test_category.test_schema_map.description": "schema map"
 }

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-final class GutterHints {
+public final class GutterHints {
 
     private static final int SIZE = 8;
     private static final int SPACING = SIZE + 3;
@@ -20,20 +20,20 @@ final class GutterHints {
     private record Hint(int x, Component tooltip) {
     }
 
-    void begin(int top, int height) {
+    public void begin(int top, int height) {
         this.hints.clear();
         this.rowY0 = top;
         this.rowY1 = top + height;
     }
 
-    void add(GuiGraphicsExtractor graphics, int left, Identifier icon, Component tooltip) {
+    public void add(GuiGraphicsExtractor graphics, int left, Identifier icon, Component tooltip) {
         int x = left - (this.hints.size() + 1) * SPACING;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, this.rowY0 + (this.rowY1 - this.rowY0 - SIZE) / 2, SIZE, SIZE);
         this.hints.add(new Hint(x, tooltip));
     }
 
     @Nullable
-    Component tooltipAt(double mouseX, double mouseY) {
+    public Component tooltipAt(double mouseX, double mouseY) {
         if (mouseY < this.rowY0 || mouseY > this.rowY1) return null;
         for (Hint hint : this.hints) {
             if (mouseX >= hint.x() && mouseX <= hint.x() + SIZE) return hint.tooltip();

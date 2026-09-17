@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.*;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.core.client.config.schema.SchemaEditScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;

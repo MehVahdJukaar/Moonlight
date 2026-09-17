@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.core.client.config.schema;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,6 +12,11 @@ import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
+import net.mehvahdjukaar.moonlight.core.client.config.CategoryRow;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigListRow;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigPageScreen;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigRowList;
+import net.mehvahdjukaar.moonlight.core.client.config.OptionRow;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -29,9 +34,11 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 
 public class SchemaEditScreen extends ConfigPageScreen {
 
-    private record State(ConfigEditSession session, SchemaForm.Reader reader, Codec<?> codec, Consumer<Object> onDone) {}
+    private static final int ADD_ENTRY_STRIP = 24;
 
-    private final State state;
+    private record FormEdit(ConfigEditSession session, SchemaForm.FormPart editedValue, Codec<?> codec, Consumer<Object> onDone) {}
+
+    private final FormEdit edit;
     private final ConfigCategory category;
     @Nullable
     private final SchemaEditScreen parentPage;
@@ -56,15 +63,15 @@ public class SchemaEditScreen extends ConfigPageScreen {
             outerSession.put(option, decoded);
             onChange.run();
         };
-        State state = new State(ConfigEditSession.scratch(parent), form.reader, codec, onDone);
-        return new SchemaEditScreen(form.root, null, state, option.title());
+        FormEdit edit = new FormEdit(ConfigEditSession.scratch(parent), form.editedValue(), codec, onDone);
+        return new SchemaEditScreen(form.rootPage(), null, edit, option.title());
     }
 
-    private SchemaEditScreen(ConfigCategory category, @Nullable SchemaEditScreen parentPage, State state, Component title) {
+    private SchemaEditScreen(ConfigCategory category, @Nullable SchemaEditScreen parentPage, FormEdit edit, Component title) {
         super(title);
         this.category = category;
         this.parentPage = parentPage;
-        this.state = state;
+        this.edit = edit;
     }
 
     private static <T> JsonElement encode(Codec<T> codec, @Nullable T value) {
@@ -78,37 +85,40 @@ public class SchemaEditScreen extends ConfigPageScreen {
 
     @Override
     public ConfigEditSession session() {
-        return this.state.session;
+        return this.edit.session;
     }
 
     @Override
     public void openCategory(ConfigCategory cat) {
-        this.minecraft.setScreen(new SchemaEditScreen(cat, this, state, cat.title()));
+        this.minecraft.setScreen(new SchemaEditScreen(cat, this, edit, cat.title()));
     }
 
     @Override
     public void onValueEdited() {
         this.error = null;
+        if (category instanceof SchemaCategory page && page.rebuildRowsIfSchemaChanged(edit.session)) {
+            refreshRows();
+        }
     }
 
     @Override
     protected void init() {
         this.overlay.clear();
-        SchemaForm.ListCategory listCategory = listCategory();
+        SchemaCategory.Entries<?> entries = entriesCategory();
 
-        int footer = listCategory != null ? FOOTER + 24 : FOOTER;
+        int footer = entries != null ? FOOTER + ADD_ENTRY_STRIP : FOOTER;
         this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
         populate();
         this.addRenderableWidget(this.list);
 
         int y = this.height - 28;
         int cx = this.width / 2;
-        if (listCategory != null) {
+        if (entries != null) {
             Component label = Component.literal("+ ").withStyle(ChatFormatting.AQUA)
                     .append(Component.translatable("gui.moonlight.config.list_add").withStyle(ChatFormatting.RESET));
-            this.addButton = Button.builder(label, b -> addEntry(listCategory))
-                    .bounds(cx - 100, y - 24, 200, 20).build();
-            this.addButton.active = listCategory.canAdd();
+            this.addButton = Button.builder(label, b -> addEntry(entries))
+                    .bounds(cx - 100, y - ADD_ENTRY_STRIP, 200, 20).build();
+            this.addButton.active = entries.canAdd();
             this.addRenderableWidget(this.addButton);
         }
         if (isRoot()) {
@@ -123,69 +133,59 @@ public class SchemaEditScreen extends ConfigPageScreen {
     }
 
     @Nullable
-    private SchemaForm.ListCategory listCategory() {
-        return category instanceof SchemaForm.ListCategory lc ? lc : null;
+    private SchemaCategory.Entries<?> entriesCategory() {
+        return category instanceof SchemaCategory.Entries<?> entries ? entries : null;
     }
 
     @Override
     protected void populate() {
-        SchemaForm.ListCategory listCategory = listCategory();
+        SchemaCategory.Entries<?> entries = entriesCategory();
         List<ConfigListRow> rows = new ArrayList<>();
-        List<ConfigNode> entries = category.entries();
-        for (int i = 0; i < entries.size(); i++) {
-            ConfigNode e = entries.get(i);
-            ConfigListRow row;
-            if (e instanceof ConfigCategory cat) {
-                row = new CategoryRow(this, cat);
-            } else if (e instanceof ConfigOption<?> v) {
-                row = new OptionRow(this, v);
-            } else {
-                continue;
-            }
-            if (listCategory != null) {
-                int index = i;
-                rows.add(new ListEntryRow(row, listCategory.canRemove(), () -> removeEntry(listCategory, index)));
-                continue; // generated list entries never carry a description, so there is nothing to expand
-            }
-            rows.add(row);
-            if (e instanceof ConfigOption<?> v) {
-                addDescriptionRows(rows, v);
-            }
+        List<ConfigNode> nodes = category.entries();
+        for (int i = 0; i < nodes.size(); i++) {
+            ConfigListRow row = nodes.get(i) instanceof ConfigCategory cat
+                    ? new CategoryRow(this, cat)
+                    : new OptionRow(this, (ConfigOption<?>) nodes.get(i));
+            rows.add(entries == null ? row : removableEntryRow(entries, row, i));
         }
         this.list.setRows(rows);
     }
 
-    private void addEntry(SchemaForm.ListCategory cat) {
-        List<JsonElement> values = cat.snapshot(state.session);
-        values.add(cat.newEntry());
-        rebuild(cat, values);
-        this.list.setScrollAmount(this.list.maxScrollAmount()); // reveal the entry that was just appended
+    private ConfigListRow removableEntryRow(SchemaCategory.Entries<?> entries, ConfigListRow row, int index) {
+        if (entries instanceof SchemaCategory.MapEntries map) {
+            row = new KeyValueRow(this, map.keyOption(index), row, () -> map.isDuplicateKey(edit.session, index));
+        }
+        return new ListEntryRow(row, entries.canRemove(), () -> removeEntry(entries, index));
     }
 
-    private void removeEntry(SchemaForm.ListCategory cat, int index) {
-        List<JsonElement> values = cat.snapshot(state.session);
-        if (index >= values.size()) return;
-        values.remove(index);
-        rebuild(cat, values);
+    private void addEntry(SchemaCategory.Entries<?> entries) {
+        entries.addEntry(edit.session);
+        refreshRows();
+        this.list.setScrollAmount(this.list.maxScrollAmount());
     }
 
-    private void rebuild(SchemaForm.ListCategory cat, List<JsonElement> values) {
+    private void removeEntry(SchemaCategory.Entries<?> entries, int index) {
+        entries.removeEntry(edit.session, index);
+        refreshRows();
+    }
+
+    private void refreshRows() {
         double scroll = this.list.scrollAmount();
-        cat.setEntries(values);
         this.overlay.clear();
         populate();
         this.list.setScrollAmount(scroll);
-        if (this.addButton != null) this.addButton.active = cat.canAdd();
-        onValueEdited();
+        SchemaCategory.Entries<?> entries = entriesCategory();
+        if (this.addButton != null && entries != null) this.addButton.active = entries.canAdd();
+        this.error = null;
     }
 
     private void commit() {
-        JsonElement json = state.reader.read(state.session);
-        DataResult<?> result = state.codec.parse(JsonOps.INSTANCE, json);
+        JsonElement json = edit.editedValue.toJson(edit.session);
+        DataResult<?> result = edit.codec.parse(JsonOps.INSTANCE, json);
         var value = result.result();
         if (value.isPresent()) {
-            state.onDone.accept(value.get());
-            this.minecraft.setScreen(state.session.returnScreen());
+            edit.onDone.accept(value.get());
+            this.minecraft.setScreen(edit.session.returnScreen());
         } else {
             this.error = Component.translatable("gui.moonlight.config.schema_invalid",
                     result.error().map(DataResult.Error::message).orElse(""));
@@ -194,7 +194,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(isRoot() ? state.session.returnScreen() : parentPage);
+        this.minecraft.setScreen(isRoot() ? edit.session.returnScreen() : parentPage);
     }
 
     @Override
@@ -208,8 +208,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         if (renderOverlayOrTooltip(graphics, mouseX, mouseY)) return;
         if (this.error != null) {
-            // sits just above the button strip, which is one row taller on a list page (the "add entry" button)
-            int y = this.height - (listCategory() != null ? 66 : 42);
+            int y = this.height - 42 - (entriesCategory() != null ? ADD_ENTRY_STRIP : 0);
             graphics.centeredText(this.font, this.error, this.width / 2, y, ConfigGuiColors.ERROR);
         }
     }

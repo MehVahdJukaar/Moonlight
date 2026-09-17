@@ -1,16 +1,15 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.core.client.config.schema;
 
 import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 
 import java.util.Objects;
 
-// in-memory value backing a leaf of a schema generated form. Nothing is persisted through it
-class MemoryConfigValue<T> implements IConfigValue<T> {
+class InMemoryConfigValue<T> implements IConfigValue<T> {
 
     private T value;
 
-    MemoryConfigValue(T value) {
+    InMemoryConfigValue(T value) {
         this.value = value;
     }
 

@@ -7,7 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-interface ConfigScreenAccess {
+public interface ConfigScreenAccess {
 
     Font font();
 

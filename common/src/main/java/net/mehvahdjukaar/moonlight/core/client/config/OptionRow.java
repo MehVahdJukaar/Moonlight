@@ -28,15 +28,15 @@ import java.util.Objects;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-class OptionRow extends ConfigListRow {
+public class OptionRow extends ConfigListRow {
 
     private final ConfigScreenAccess view;
     private final ConfigEditSession session;
     private final ConfigOption<?> value;
     @Nullable
     private final ConfigCategory owner;
-    private final boolean isGate; // this value IS its category's feature() toggle (the "enabled" switch)
-    private final boolean asToggle; // drawn as the check/cross feature toggle (a category gate, or a named feature leaf)
+    private final boolean isGate;
+    private final boolean isDrawnAsToggle;
     @Nullable
     private final ConfigOption.BooleanValue feature; // same value as above, only set on toggle rows
     private final Component title;
@@ -51,7 +51,7 @@ class OptionRow extends ConfigListRow {
 
     private int toggleX0, toggleX1, rowY0, rowY1;
 
-    OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
+    public OptionRow(ConfigScreenAccess view, ConfigOption<?> value) {
         this(view, value, null);
     }
 
@@ -65,9 +65,9 @@ class OptionRow extends ConfigListRow {
                 : Component.empty().append(categoryPath).append(value.title());
         this.description = value.description();
         this.editable = !(value instanceof ConfigOption.UnsupportedValue);
-        this.asToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
-        this.feature = asToggle ? (ConfigOption.BooleanValue) value : null;
-        this.control = asToggle
+        this.isDrawnAsToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
+        this.feature = isDrawnAsToggle ? (ConfigOption.BooleanValue) value : null;
+        this.control = isDrawnAsToggle
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
                 : ConfigControllers.create(value, session, this::onEdited);
 
@@ -131,7 +131,7 @@ class OptionRow extends ConfigListRow {
                     arrowSize, arrowSize, contextEnabled ? CommonColors.WHITE : CommonColors.GRAY);
             textLeft = left + ARROW_WIDTH;
         }
-        if (!asToggle && ConfigScreenIcons.has(value.icon())) {
+        if (!isDrawnAsToggle && ConfigScreenIcons.has(value.icon())) {
             iconAnim.update(hovering);
             ConfigScreenIcons.renderAnimated(graphics, value.icon(), textLeft, top + (height - ROW_ICON) / 2,
                     iconAnim.phase(), contextEnabled);
@@ -182,13 +182,13 @@ class OptionRow extends ConfigListRow {
 
     @Nullable
     @Override
-    Component getTooltip(int mouseX, int mouseY) {
+    public Component getTooltip(int mouseX, int mouseY) {
         return null;
     }
 
     @Nullable
     @Override
-    Component getGutterTooltip(int mouseX, int mouseY) {
+    public Component getGutterTooltip(int mouseX, int mouseY) {
         return gutter.tooltipAt(mouseX, mouseY);
     }
 

@@ -188,7 +188,7 @@ class ListEditScreen extends Screen implements PopupHost {
 
         @Nullable
         @Override
-        Component getTooltip(int mouseX, int mouseY) {
+        public Component getTooltip(int mouseX, int mouseY) {
             return null;
         }
     }

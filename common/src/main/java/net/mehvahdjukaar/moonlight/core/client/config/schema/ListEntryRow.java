@@ -1,7 +1,8 @@
-package net.mehvahdjukaar.moonlight.core.client.config;
+package net.mehvahdjukaar.moonlight.core.client.config.schema;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigListRow;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -66,13 +67,13 @@ class ListEntryRow extends ConfigListRow {
 
     @Nullable
     @Override
-    Component getTooltip(int mouseX, int mouseY) {
+    public Component getTooltip(int mouseX, int mouseY) {
         return inner.getTooltip(mouseX, mouseY);
     }
 
     @Nullable
     @Override
-    Component getGutterTooltip(int mouseX, int mouseY) {
+    public Component getGutterTooltip(int mouseX, int mouseY) {
         return inner.getGutterTooltip(mouseX, mouseY);
     }
 }
