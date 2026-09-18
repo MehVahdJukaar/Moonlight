@@ -22,7 +22,6 @@
     "accessor.AgeableListModelAccessor"
   ],
   "mixins": [
-    "BlockBehaviorMixin",
     "BlockItemMixin",
     "BlockStateBaseMixin",
     "ChunkGeneratorMixin",
