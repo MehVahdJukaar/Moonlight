@@ -45,7 +45,7 @@ public class QuadEmitterImpl extends QuadEmitter {
     @Override
     public QuadEmitter emitAll(BlockStateModel model, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos,
                                @Nullable BlockState state, RandomSource random) {
-        if (level == null || pos == null || state == null) {
+        if (level == null || pos == null || state == null || this.transform != null) {
             return super.emitAll(model, level, pos, state, random);
         }
         ((FabricBlockStateModel) model).emitQuads(this.target, level, pos, state, random, dir -> false);

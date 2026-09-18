@@ -121,7 +121,7 @@ public final class ColorUtils {
         int r = Math.min(255, (int) (ARGB.red(color) * amount));
         int g = Math.min(255, (int) (ARGB.green(color) * amount));
         int b = Math.min(255, (int) (ARGB.blue(color) * amount));
-        return ARGB.color(0, r, g, b);
+        return ARGB.color(ARGB.alpha(color), r, g, b);
     }
 
     public static int lerp(int c0, int c1, float t) {
