@@ -8,8 +8,6 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -19,7 +17,7 @@ import java.util.Map;
 
 public class SoftFluidInternalImpl {
 
-    public static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap, Map<Item, Holder<SoftFluid>> itemMap) {
+    public static void registerExistingVanillaFluids(RegistryAccess ra, Map<Fluid, Holder<SoftFluid>> fluidMap) {
         //only runs on the first object
         MappedRegistry<SoftFluid> reg = (MappedRegistry<SoftFluid>) SoftFluidRegistry.get(ra);
         reg.unfreeze(false);
@@ -37,10 +35,7 @@ public class SoftFluidInternalImpl {
                 //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
                 Registry.register(reg, Utils.getID(f), sf);
 
-                var holder = reg.wrapAsHolder(sf);
-                fluidMap.put(f, holder);
-                Item bucket = f.getBucket();
-                if (bucket != Items.AIR) itemMap.put(bucket, holder);
+                fluidMap.put(f, reg.wrapAsHolder(sf));
             } catch (Exception ignored) {
             }
         }
