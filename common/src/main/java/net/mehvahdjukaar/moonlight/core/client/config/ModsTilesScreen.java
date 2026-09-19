@@ -44,6 +44,8 @@ public class ModsTilesScreen extends Screen {
     private static final int ICON_SIDE_PAD = 8;
     private static final int CARD_H = CARD_PAD + MOD_ICON_SIZE + ICON_TEXT_GAP + FONT_LINE_HEIGHT + NAME_VER_GAP + FONT_LINE_HEIGHT + CARD_PAD;
     private static final int CARD_GAP = 6;
+    private static final int STAR_SIZE = 12;
+    private static final int STAR_INSET = 3;
 
     private static final int TITLE_SEARCH_GAP = 5;
     // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
@@ -70,6 +72,16 @@ public class ModsTilesScreen extends Screen {
     }
 
     private record Entry(String modId, Component name, @Nullable Component version, boolean ours) {
+    }
+
+    private static boolean isFavourite(String modId) {
+        return ClientConfigs.FAVOURITE_MODS.get().contains(modId);
+    }
+
+    private static void toggleFavourite(String modId) {
+        List<String> favourites = new ArrayList<>(ClientConfigs.FAVOURITE_MODS.get());
+        if (!favourites.remove(modId)) favourites.add(modId);
+        ClientConfigs.CONFIG.manuallySetValue(ClientConfigs.FAVOURITE_MODS, favourites);
     }
 
     private static boolean isOurs(String modId) {
@@ -134,14 +146,16 @@ public class ModsTilesScreen extends Screen {
             this.allEntries.add(new Entry(modId, Component.literal(name),
                     version == null ? null : Component.literal("v" + version), isOurs(modId)));
         }
-        this.allEntries.sort(Comparator.comparing((Entry e) -> e.ours() ? 0 : 1)
-                .thenComparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER));
+        sortEntries();
 
         this.entries.clear();
         this.entries.addAll(this.allEntries);
         computeLayout();
         this.searchBox = this.maxScroll > 0 ? makeSearchBox() : null;
-        if (this.searchBox != null) this.addRenderableWidget(this.searchBox);
+        if (this.searchBox != null) {
+            this.addRenderableWidget(this.searchBox);
+            this.addRenderableWidget(makeSortButton());
+        }
         applyFilter();
 
         this.addRenderableWidget(new IconButton(this.width / 2 - 154, this.height - 28, 140, 20,
@@ -165,6 +179,26 @@ public class ModsTilesScreen extends Screen {
             this.scroll = 0;
             applyFilter();
         });
+    }
+
+    private IconButton makeSortButton() {
+        boolean descending = ClientConfigs.MOD_LIST_DESCENDING.get();
+        int size = SearchBoxWidget.HEIGHT;
+        IconButton sort = new IconButton((this.width + SearchBoxWidget.WIDTH) / 2 + 1, SEARCH_Y, size, size,
+                CommonComponents.EMPTY, descending ? MoonlightIcons.SORT_DESCENDING : MoonlightIcons.SORT_ASCENDING, b -> {
+            ClientConfigs.CONFIG.manuallySetValue(ClientConfigs.MOD_LIST_DESCENDING, !descending);
+            this.rebuildWidgets();
+        }).borderless();
+        sort.setTooltip(Tooltip.create(Component.translatable(descending
+                ? "gui.moonlight.config.sort_descending" : "gui.moonlight.config.sort_ascending")));
+        return sort;
+    }
+
+    private void sortEntries() {
+        Comparator<Entry> byName = Comparator.comparing(e -> e.name().getString(), String.CASE_INSENSITIVE_ORDER);
+        if (ClientConfigs.MOD_LIST_DESCENDING.get()) byName = byName.reversed();
+        this.allEntries.sort(Comparator.comparing((Entry e) -> isFavourite(e.modId()) ? 0 : 1)
+                .thenComparing(byName));
     }
 
     private void applyFilter() {
@@ -226,7 +260,8 @@ public class ModsTilesScreen extends Screen {
             int x = cardX(i), y = cardY(i);
             if (y + CARD_H < contentTop || y > contentBottom) continue;
             boolean hover = inViewport && GuiHelper.isMouseOver(mouseX, mouseY, x, y, CARD_W, CARD_H);
-            renderCard(graphics, entries.get(i), x, y, hover);
+            boolean starHover = hover && isOverStar(mouseX, mouseY, x, y);
+            renderCard(graphics, entries.get(i), x, y, hover, starHover);
         }
         graphics.disableScissor();
 
@@ -234,7 +269,11 @@ public class ModsTilesScreen extends Screen {
         GuiHelper.renderScrollbar(graphics, contentTop, contentBottom, this.width, this.scroll, this.maxScroll);
     }
 
-    private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover) {
+    private static boolean isOverStar(double mouseX, double mouseY, int cardX, int cardY) {
+        return GuiHelper.isMouseOver(mouseX, mouseY, cardX + CARD_W - STAR_SIZE - STAR_INSET, cardY + STAR_INSET, STAR_SIZE, STAR_SIZE);
+    }
+
+    private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover, boolean starHover) {
         graphics.fill(x, y, x + CARD_W, y + CARD_H, hover ? ConfigGuiColors.TILE_BG_HOVER : ConfigGuiColors.TILE_BG);
         int outline = ConfigGuiColors.TILE_OUTLINE;
         if (hover) outline = entry.ours() ? ConfigGuiColors.TILE_OUTLINE_HOVER : ConfigGuiColors.TILE_OUTLINE_HOVER_FOREIGN;
@@ -253,6 +292,16 @@ public class ModsTilesScreen extends Screen {
         GuiHelper.renderScrollingTextCentered(graphics, this.font, entry.name(), x + 4, x + CARD_W - 4, nameY, FONT_LINE_HEIGHT, ConfigGuiColors.TEXT);
         if (entry.version() != null) {
             GuiHelper.renderClippedTextCentered(graphics, this.font, entry.version(), x + 4, x + CARD_W - 4, nameY + FONT_LINE_HEIGHT + NAME_VER_GAP, ConfigGuiColors.DESCRIPTION);
+        }
+
+        boolean favourite = isFavourite(entry.modId());
+        if (favourite || hover) {
+            ResourceLocation star = favourite || starHover ? MoonlightIcons.STAR : MoonlightIcons.STAR_EMPTY;
+            graphics.blitSprite(star, x + CARD_W - STAR_SIZE - STAR_INSET, y + STAR_INSET, STAR_SIZE, STAR_SIZE);
+        }
+        if (starHover) {
+            this.setTooltipForNextRenderPass(Component.translatable(favourite
+                    ? "gui.moonlight.config.unfavourite" : "gui.moonlight.config.favourite"));
         }
     }
 
@@ -278,6 +327,13 @@ public class ModsTilesScreen extends Screen {
                 int x = cardX(i), y = cardY(i);
                 if (GuiHelper.isMouseOver(mouseX, mouseY, x, y, CARD_W, CARD_H)) {
                     String modId = entries.get(i).modId();
+                    if (isOverStar(mouseX, mouseY, x, y)) {
+                        GuiHelper.playClickSound();
+                        toggleFavourite(modId);
+                        sortEntries();
+                        applyFilter();
+                        return true;
+                    }
                     Screen s = configScreenFor(modId, this, background);
                     if (s != null) {
                         GuiHelper.playClickSound();

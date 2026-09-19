@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.minecraft.world.item.TooltipFlag;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class ClientConfigs {
@@ -20,6 +21,8 @@ public class ClientConfigs {
     public static final Supplier<Boolean> SHOW_ALL_MOD_CONFIGS;
     public static final Supplier<ForeignConfigMode> CONVERT_FOREIGN_CONFIGS;
     public static final Supplier<Boolean> CONFIG_ITEM_CAROUSEL;
+    public static final Supplier<List<String>> FAVOURITE_MODS;
+    public static final Supplier<Boolean> MOD_LIST_DESCENDING;
 
     @Deprecated(forRemoval = true)
     public static final Supplier<Boolean> BLOCKTYPES_DEBUG = () -> false;
@@ -59,6 +62,10 @@ public class ClientConfigs {
                 .define("convert_foreign_configs", ForeignConfigMode.GENERIC_ONLY);
         CONFIG_ITEM_CAROUSEL = builder.comment("Show a slowly panning strip of a mod's items on its config screen")
                 .define("config_item_carousel", true);
+        FAVOURITE_MODS = builder.comment("Mods pinned to the top of the mods screen. Click the star on a mod tile to add or remove one")
+                .define("favourite_mods", List.of());
+        MOD_LIST_DESCENDING = builder.comment("Sort the mods screen from Z to A")
+                .define("mod_list_descending", false);
         builder.pop();
         CONFIG = builder.build();
         CONFIG.forceLoad();

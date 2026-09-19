@@ -18,6 +18,10 @@ public final class MoonlightIcons {
     public static final ResourceLocation DISCOVER_MODS = Moonlight.res("discover_mods");
     public static final ResourceLocation CALENDAR = Moonlight.res("calendar");
     public static final ResourceLocation CLOCK = Moonlight.res("clock");
+    public static final ResourceLocation STAR = Moonlight.res("star");
+    public static final ResourceLocation STAR_EMPTY = Moonlight.res("star_empty");
+    public static final ResourceLocation SORT_ASCENDING = Moonlight.res("sort_ascending");
+    public static final ResourceLocation SORT_DESCENDING = Moonlight.res("sort_descending");
 
     public static final ResourceLocation CONFIG = Moonlight.res("config");
     public static final ResourceLocation CONFIG_CLIENT = Moonlight.res("config_client");
