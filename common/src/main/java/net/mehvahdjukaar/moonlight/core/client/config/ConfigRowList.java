@@ -81,7 +81,7 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
 
         @Nullable
         @Override
-        Component getTooltip(int mouseX, int mouseY) {
+        public Component getTooltip(int mouseX, int mouseY) {
             return null;
         }
     }

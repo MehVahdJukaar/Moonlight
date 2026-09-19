@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+//nonsensical adapter for codeui schemas
 record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
 
     @FunctionalInterface
