@@ -461,9 +461,9 @@ public abstract class ConfigBuilder {
     }
 
     protected void uiPush(Component title) {
+        if (this.suppressUi) return;
         this.pendingComment = null;
         this.pendingCommentForwarded = false;
-        if (this.suppressUi) return;
         ConfigCategory cat = new ConfigCategory(title);
         if (this.pendingIcon != null) {
             cat.setIcon(this.pendingIcon);
@@ -471,7 +471,7 @@ public abstract class ConfigBuilder {
         }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
-        this.gateStack.push(this.gateStack.peek()); // inherited until a feature() narrows it
+        this.gateStack.push(this.gateStack.peek());
         this.categoryPath.addLast(currentCategory());
     }
 
@@ -500,7 +500,6 @@ public abstract class ConfigBuilder {
         }
         List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
-        // define() just recorded the BooleanValue, adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
@@ -511,7 +510,7 @@ public abstract class ConfigBuilder {
             if (cat.icon() == null) cat.setIcon(bv.icon());
             bindFeature(bv, effective, dependencies);
         }
-        this.gateStack.pop(); // replace the inherited gate with this category's own
+        this.gateStack.pop();
         this.gateStack.push(effective);
         registerFeature(currentCategory(), currentCategoryPath(), effective);
         return effective;
