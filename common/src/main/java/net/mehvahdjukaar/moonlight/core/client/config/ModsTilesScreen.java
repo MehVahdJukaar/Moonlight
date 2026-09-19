@@ -47,11 +47,6 @@ public class ModsTilesScreen extends Screen {
     private static final int STAR_SIZE = 12;
     private static final int STAR_INSET = 3;
 
-    private static final int TITLE_SEARCH_GAP = 5;
-    // title and search box stack as one block centered in the header bar, the way the title + subtitle header does
-    private static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (FONT_LINE_HEIGHT + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
-    private static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + FONT_LINE_HEIGHT + TITLE_SEARCH_GAP;
-
     private final Screen parent;
     @Nullable
     private final ResourceLocation background;

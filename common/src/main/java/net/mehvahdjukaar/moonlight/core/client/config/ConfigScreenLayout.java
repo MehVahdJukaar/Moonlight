@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.SearchBoxWidget;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.components.Button;
@@ -31,6 +32,10 @@ public final class ConfigScreenLayout {
     public static final int GRID_SIDE_MARGIN = 24;
     public static final int GRID_PAD = 8;
     public static final int MOD_ICON_SIZE = 32; // icon slot height; square icons render at this, wider ones expand
+
+    public static final int TITLE_SEARCH_GAP = 5;
+    public static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (FONT_LINE_HEIGHT + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
+    public static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + FONT_LINE_HEIGHT + TITLE_SEARCH_GAP;
 
     @Nullable
     static ResourceLocation reloadIcon(ConfigReloadType type) {

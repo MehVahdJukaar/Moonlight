@@ -16,6 +16,7 @@
   "gui.moonlight.config.discover_by": "Mods by %s",
   "gui.moonlight.config.discover_loading": "Fetching mod list",
   "gui.moonlight.config.discover_offline": "Couldn't reach the mod list. Check your connection.",
+  "gui.moonlight.config.discover_no_results": "No mods match your search",
   "gui.moonlight.config.authors": "Authors",
   "gui.moonlight.config.edit_manually": "Edit file",
   "gui.moonlight.config.save": "Save",
