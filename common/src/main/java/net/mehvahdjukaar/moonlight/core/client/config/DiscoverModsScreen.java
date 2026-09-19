@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.client.config;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.mehvahdjukaar.moonlight.api.client.gui.*;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.SearchBoxWidget;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.client.RemoteImagesCache;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
@@ -39,6 +41,7 @@ public class DiscoverModsScreen extends Screen {
     private final List<Item> items = new ArrayList<>();
 
     private LoadingDotsWidget loadingWidget;
+    private String searchQuery = "";
     private int builtModCount = -1;
 
     private double scroll;
@@ -88,6 +91,12 @@ public class DiscoverModsScreen extends Screen {
 
         this.loadingWidget = new LoadingDotsWidget(this.font, Component.translatable("gui.moonlight.config.discover_loading"));
 
+        this.addRenderableWidget(new SearchBoxWidget(this.font, (this.width - SearchBoxWidget.WIDTH) / 2, SEARCH_Y, this.searchQuery, query -> {
+            this.searchQuery = query;
+            this.scroll = 0;
+            this.builtModCount = -1;
+        }));
+
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, b -> onClose())
                 .bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
     }
@@ -114,12 +123,17 @@ public class DiscoverModsScreen extends Screen {
         this.contentW = Math.min(this.width - 2 * GRID_SIDE_MARGIN, MAX_CONTENT_W);
         int textWidth = this.contentW - (ROW_INNER_PAD + MOD_ICON_SIZE + ROW_INNER_PAD) - ROW_INNER_PAD;
         boolean sections = this.catalogs.size() > 1;
+        String query = this.searchQuery.trim().toLowerCase(Locale.ROOT);
         for (ModCatalogAPI.Catalog catalog : this.catalogs) {
-            if (catalog.mods().isEmpty()) continue;
-            if (sections) {
-                this.items.add(new Section(Component.translatable("gui.moonlight.config.discover_by", catalog.author())));
-            }
+            boolean sectionAdded = false;
             for (ModCatalogAPI.Entry e : catalog.mods()) {
+                boolean matchesSearch = query.isEmpty() || e.modId().contains(query)
+                        || e.name().toLowerCase(Locale.ROOT).contains(query);
+                if (!matchesSearch) continue;
+                if (sections && !sectionAdded) {
+                    this.items.add(new Section(Component.translatable("gui.moonlight.config.discover_by", catalog.author())));
+                    sectionAdded = true;
+                }
                 boolean installed = PlatHelper.isModLoaded(e.modId());
                 List<FormattedCharSequence> desc = e.description().isBlank()
                         ? List.of()
@@ -155,7 +169,8 @@ public class DiscoverModsScreen extends Screen {
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
-        GuiHelper.renderHeaderBar(graphics, this.font, this.title, this.width, HEADER);
+        GuiHelper.renderHeaderBar(graphics, this.width, HEADER);
+        graphics.centeredText(this.font, this.title, this.width / 2, TITLE_Y_WITH_SEARCH, ConfigGuiColors.TITLE);
     }
 
     @Override
@@ -169,11 +184,12 @@ public class DiscoverModsScreen extends Screen {
 
         GuiHelper.renderListBackground(graphics, contentTop, contentBottom, this.width, this.scroll);
 
-        if (mods > 0) {
+        if (mods > 0 && !this.items.isEmpty()) {
             renderItems(graphics, mouseX, mouseY);
+        } else if (mods > 0) {
+            renderCenteredMessage(graphics, Component.translatable("gui.moonlight.config.discover_no_results"));
         } else if (!anyLoading()) {
-            graphics.centeredText(this.font, Component.translatable("gui.moonlight.config.discover_offline"),
-                    this.width / 2, (contentTop + contentBottom) / 2 - this.font.lineHeight / 2, ConfigGuiColors.DESCRIPTION);
+            renderCenteredMessage(graphics, Component.translatable("gui.moonlight.config.discover_offline"));
         } else {
             this.loadingWidget.setPosition(0, contentTop);
             this.loadingWidget.setSize(this.width, contentBottom - contentTop);
@@ -181,6 +197,11 @@ public class DiscoverModsScreen extends Screen {
         }
 
         GuiHelper.renderFooterSeparator(graphics, 0, contentBottom, this.width);
+    }
+
+    private void renderCenteredMessage(GuiGraphicsExtractor graphics, Component message) {
+        graphics.centeredText(this.font, message, this.width / 2,
+                (contentTop + contentBottom) / 2 - this.font.lineHeight / 2, ConfigGuiColors.DESCRIPTION);
     }
 
     private void renderItems(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
