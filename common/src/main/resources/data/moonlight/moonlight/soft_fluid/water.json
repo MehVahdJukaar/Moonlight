@@ -56,11 +56,20 @@
       ],
       "empty": "tea_kettle:empty_kettle",
       "capacity": 4
+    },
+    {
+      "filled": [
+        "thirstwastaken2:terracotta_water_bowl"
+      ],
+      "empty": "thirstwastaken2:terracotta_bowl",
+      "capacity": 1
     }
   ],
   "equivalent_fluids": "#c:water",
   "preserved_components_from_item": [
-    "thirst:purity"
+    "thirst:purity",
+    "thirstwastaken2:water_purity",
+    "thirstwastaken2:water_salty"
   ],
   "flowing_texture": "minecraft:block/water_flow",
   "still_texture": "minecraft:block/water_still",
