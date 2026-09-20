@@ -23,6 +23,7 @@
     "BlockItemMixin",
     "BlockStateBaseMixin",
     "ChunkGeneratorMixin",
+    "ChunkMapMixin",
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuMixin",
     "GrindstoneMenuSlotMixin",

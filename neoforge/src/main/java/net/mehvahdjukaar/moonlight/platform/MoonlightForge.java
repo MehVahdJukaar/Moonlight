@@ -120,7 +120,7 @@ public class MoonlightForge {
 
     @SubscribeEvent
     public static void onServerShuttingDown(ServerStoppingEvent event) {
-        FakeLevelManager.invalidateAll();
+        FakeLevelManager.invalidateAll(false);
         SidedInstance.clearAll();
     }
 

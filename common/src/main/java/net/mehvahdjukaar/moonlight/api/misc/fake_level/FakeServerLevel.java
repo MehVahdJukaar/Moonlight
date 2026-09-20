@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ProgressListener;
-import net.minecraft.util.Util;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -43,7 +42,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -60,7 +58,7 @@ public class FakeServerLevel extends ServerLevel {
 
     public FakeServerLevel(String name, ServerLevel original) {
         super(original.getServer(),
-                Util.backgroundExecutor(),
+                Runnable::run, //run inline to avoid issues.dont use back exec as its fixed
                 original.getServer().storageSource,
                 new ReadOlyServerLevelData(name, original.serverLevelData),
                 ResourceKey.create(Registries.DIMENSION, Identifier.parse(name)),
@@ -81,7 +79,7 @@ public class FakeServerLevel extends ServerLevel {
                                                          int viewDistance, int simulationDistance, boolean sync,
                                                          ChunkStatusUpdateListener chunkStatusListener, Supplier<SavedDataStorage> dataStorage) {
         return new DummyServerChunkCache(level, levelStorageAccess, fixerUpper, structureManager,
-                Util.backgroundExecutor(), generator, viewDistance, simulationDistance, sync,
+                dispatcher, generator, viewDistance, simulationDistance, sync,
                 chunkStatusListener, dataStorage);
     }
 
@@ -300,8 +298,13 @@ public class FakeServerLevel extends ServerLevel {
     //not ideal really
     private static class DummyServerChunkCache extends ServerChunkCache {
 
+        private final EmptyLevelChunk emptyChunk;
+
         public DummyServerChunkCache(ServerLevel level, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer fixerUpper, StructureTemplateManager structureManager, Executor dispatcher, ChunkGenerator generator, int viewDistance, int simulationDistance, boolean sync, ChunkStatusUpdateListener chunkStatusListener, Supplier<SavedDataStorage> overworldDataStorage) {
             super(level, levelStorageAccess, fixerUpper, structureManager, dispatcher, generator, viewDistance, simulationDistance, sync, chunkStatusListener, overworldDataStorage);
+            this.emptyChunk = new EmptyLevelChunk(level, new ChunkPos(0, 0),
+                    level.registryAccess().lookupOrThrow(Registries.BIOME)
+                            .getOrThrow(Biomes.FOREST));
         }
 
 
@@ -334,14 +337,8 @@ public class FakeServerLevel extends ServerLevel {
             return getEmptyChunk(chunkX, chunkZ);
         }
 
-        private EmptyLevelChunk emptyChunkInstance;
-
-        private @NotNull EmptyLevelChunk getEmptyChunk(int x, int z) {
-            if (emptyChunkInstance == null) {
-                emptyChunkInstance = new EmptyLevelChunk(getLevel(), new ChunkPos(0, 0),
-                        getLevel().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.FOREST));
-            }
-            return emptyChunkInstance;
+        private EmptyLevelChunk getEmptyChunk(int x, int z) {
+            return emptyChunk;
         }
 
         @Override

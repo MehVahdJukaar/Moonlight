@@ -10,21 +10,34 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 public class FakeLevelManager {
 
+    //shared by client and integrated server threads
     protected static final Map<String, Level> INSTANCES = new Object2ObjectArrayMap<>();
 
     @ApiStatus.Internal
     @VisibleForTesting
     public static void invalidateAll() {
-        new ArrayList<>(INSTANCES.values()).forEach(FakeLevelManager::invalidate);
+        invalidateAll(true);
+        invalidateAll(false);
+    }
+
+    //client logout must not close the integrated server's levels from the render thread
+    @ApiStatus.Internal
+    public static synchronized void invalidateAll(boolean clientSide) {
+        List<Level> toRemove = new ArrayList<>();
+        for (var l : INSTANCES.values()) {
+            if (l instanceof FakeServerLevel != clientSide) toRemove.add(l);
+        }
+        toRemove.forEach(FakeLevelManager::invalidate);
     }
 
     // Manually invalidate one
-    public static boolean invalidate(Level level) {
+    public static synchronized boolean invalidate(Level level) {
         boolean removed = INSTANCES.entrySet().removeIf(e -> e.getValue() == level);
 
         if (level != null) PlatHelper.invokeLevelUnload(level);
@@ -46,7 +59,7 @@ public class FakeLevelManager {
         return getClient("dummy_world", original, (id, registries) -> new FakeLevel(true, id, registries));
     }
 
-    public static <T extends FakeLevel> T getClient(String id, Level original, BiFunction<String, RegistryAccess, FakeLevel> constructor) {
+    public static synchronized <T extends FakeLevel> T getClient(String id, Level original, BiFunction<String, RegistryAccess, FakeLevel> constructor) {
         id = "client_" + id;
         String finalId = id;
         return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(finalId, original.registryAccess()));
@@ -57,7 +70,7 @@ public class FakeLevelManager {
         return getServer("dummy_world", original, FakeServerLevel::new);
     }
 
-    public static <T extends FakeServerLevel> T getServer(String id, ServerLevel original, BiFunction<String, ServerLevel, FakeServerLevel> constructor) {
+    public static synchronized <T extends FakeServerLevel> T getServer(String id, ServerLevel original, BiFunction<String, ServerLevel, FakeServerLevel> constructor) {
         id = "server_" + id;
         String finalId = id;
         return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(finalId, original));
