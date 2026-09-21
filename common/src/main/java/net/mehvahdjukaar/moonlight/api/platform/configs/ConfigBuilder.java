@@ -692,18 +692,12 @@ public abstract class ConfigBuilder {
 
     public ConfigBuilder worldReload() {
         this.pendingReload = ConfigReloadType.WORLD_RELOAD;
-        forwardReloadFlag(ConfigReloadType.WORLD_RELOAD);
         return this;
     }
 
     public ConfigBuilder gameRestart() {
         this.pendingReload = ConfigReloadType.GAME_RESTART;
-        forwardReloadFlag(ConfigReloadType.GAME_RESTART);
         return this;
-    }
-
-    // Forge needs the flag before the next define. Fabric reads pendingReload at record time instead
-    protected void forwardReloadFlag(ConfigReloadType type) {
     }
 
     protected void addTranslationsAndComments(String name) {

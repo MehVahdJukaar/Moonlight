@@ -345,12 +345,12 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return w;
     }
 
-    @Override
-    protected void forwardReloadFlag(ConfigReloadType type) {
-        // Forge applies these to the NEXT defined value, so forward them here (right before that define runs)
-        if (type == ConfigReloadType.GAME_RESTART) {
+    // Forge applies these to the NEXT defined value and throws if a push comes first, so only hand them over right
+    // before the define runs
+    private void forwardPendingReload() {
+        if (pendingReload == ConfigReloadType.GAME_RESTART) {
             builder.gameRestart();
-        } else if (type == ConfigReloadType.WORLD_RELOAD && !CompatHandler.CONFIGURED) {
+        } else if (pendingReload == ConfigReloadType.WORLD_RELOAD && !CompatHandler.CONFIGURED) {
             builder.worldRestart();
         }
     }
@@ -359,6 +359,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     protected void addTranslationsAndComments(String name) {
         builder.translation(translationKey(name));
         forwardPendingComment();
+        forwardPendingReload();
         super.addTranslationsAndComments(name);
     }
 
