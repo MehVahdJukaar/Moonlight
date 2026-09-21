@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core.mixins;
 
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.DataFixer;
@@ -12,7 +11,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
 import net.minecraft.world.level.entity.EntityPersistentStorage;
@@ -57,10 +55,5 @@ public abstract class ServerLevelMixin extends Level {
             return FakeServerLevel.createDummyEntityManager(entityClass, callbacks, permanentStorage);
         }
         return original.call(entityClass, callbacks, permanentStorage);
-    }
-
-    @WrapWithCondition(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ChunkGeneratorStructureState;ensureStructuresGenerated()V"))
-    private boolean ml$skipStructureRingsForFakeLevels(ChunkGeneratorStructureState state) {
-        return !((Object) this instanceof FakeServerLevel);
     }
 }

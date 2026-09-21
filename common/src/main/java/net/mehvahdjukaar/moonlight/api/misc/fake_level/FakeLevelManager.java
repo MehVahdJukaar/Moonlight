@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.api.misc.fake_level;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.RegistryAccess;
@@ -10,14 +9,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
 public class FakeLevelManager {
 
-    //shared by client and integrated server threads
-    protected static final Map<String, Level> INSTANCES = new Object2ObjectArrayMap<>();
+    private static final Map<String, FakeLevel> CLIENT_INSTANCES = new ConcurrentHashMap<>();
+    private static final Map<String, FakeServerLevel> SERVER_INSTANCES = new ConcurrentHashMap<>();
 
     @ApiStatus.Internal
     @VisibleForTesting
@@ -28,23 +27,27 @@ public class FakeLevelManager {
 
     //client logout must not close the integrated server's levels from the render thread
     @ApiStatus.Internal
-    public static synchronized void invalidateAll(boolean clientSide) {
-        List<Level> toRemove = new ArrayList<>();
-        for (var l : INSTANCES.values()) {
-            if (l instanceof FakeServerLevel != clientSide) toRemove.add(l);
+    public static void invalidateAll(boolean clientSide) {
+        Map<String, ? extends Level> map = SERVER_INSTANCES;
+        if (clientSide) map = CLIENT_INSTANCES;
+        for (Level l : new ArrayList<>(map.values())) {
+            invalidate(l);
         }
-        toRemove.forEach(FakeLevelManager::invalidate);
     }
 
     // Manually invalidate one
-    public static synchronized boolean invalidate(Level level) {
-        boolean removed = INSTANCES.entrySet().removeIf(e -> e.getValue() == level);
+    public static boolean invalidate(Level level) {
+        if (level == null) return false;
+        boolean removed = CLIENT_INSTANCES.values().remove(level) || SERVER_INSTANCES.values().remove(level);
 
-        if (level != null) PlatHelper.invokeLevelUnload(level);
+        PlatHelper.invokeLevelUnload(level);
+        if (level instanceof FakeServerLevel sl) close(sl);
+        return removed;
+    }
+
+    private static void close(FakeServerLevel level) {
         try {
-            if (level instanceof FakeServerLevel) {
-                level.close();
-            }
+            level.close();
         } catch (Exception e) {
             if (PlatHelper.isDev()) {
                 throw new RuntimeException(e);
@@ -52,17 +55,20 @@ public class FakeLevelManager {
                 Moonlight.LOGGER.error("An error occurred while closing fake level", e);
             }
         }
-        return removed;
     }
 
     public static FakeLevel getDefaultClient(Level original) {
         return getClient("dummy_world", original, (id, registries) -> new FakeLevel(true, id, registries));
     }
 
-    public static synchronized <T extends FakeLevel> T getClient(String id, Level original, BiFunction<String, RegistryAccess, FakeLevel> constructor) {
+    public static <T extends FakeLevel> T getClient(String id, Level original, BiFunction<String, RegistryAccess, FakeLevel> constructor) {
         id = "client_" + id;
-        String finalId = id;
-        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(finalId, original.registryAccess()));
+        FakeLevel existing = CLIENT_INSTANCES.get(id);
+        if (existing != null) return (T) existing;
+        FakeLevel created = constructor.apply(id, original.registryAccess());
+        FakeLevel raced = CLIENT_INSTANCES.putIfAbsent(id, created);
+        if (raced != null) return (T) raced;
+        return (T) created;
     }
 
 
@@ -70,10 +76,17 @@ public class FakeLevelManager {
         return getServer("dummy_world", original, FakeServerLevel::new);
     }
 
-    public static synchronized <T extends FakeServerLevel> T getServer(String id, ServerLevel original, BiFunction<String, ServerLevel, FakeServerLevel> constructor) {
+    public static <T extends FakeServerLevel> T getServer(String id, ServerLevel original, BiFunction<String, ServerLevel, FakeServerLevel> constructor) {
         id = "server_" + id;
-        String finalId = id;
-        return (T) INSTANCES.computeIfAbsent(id, k -> constructor.apply(finalId, original));
+        FakeServerLevel existing = SERVER_INSTANCES.get(id);
+        if (existing != null) return (T) existing;
+        FakeServerLevel created = constructor.apply(id, original);
+        FakeServerLevel raced = SERVER_INSTANCES.putIfAbsent(id, created);
+        if (raced != null) {
+            close(created);
+            return (T) raced;
+        }
+        return (T) created;
     }
 
     public static Level get(String id, Level original,
