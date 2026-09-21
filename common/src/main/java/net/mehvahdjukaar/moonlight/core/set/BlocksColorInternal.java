@@ -85,6 +85,10 @@ public class BlocksColorInternal extends SimplePreparableReloadListener<List<Jso
 
     @Override
     protected void apply(List<JsonElement> object, ResourceManager resourceManager, ProfilerFiller profiler) {
+        if (this.defaultState == null) {
+            throw new IllegalStateException("Server data reload ran before mod common setup. Some mod is reloading datapacks way too early. " +
+                    "This is not a Moonlight bug, check the stacktrace to see which mod caused it");
+        }
         List<ColorSetModification> colorSets = new ArrayList<>();
         //cant be bothered to make a conditional ops for this. we are using builtin registries anyways
         // JsonOps ops = ForgeHelper.conditionalOps(JsonOps.INSTANCE, registryAccess);
