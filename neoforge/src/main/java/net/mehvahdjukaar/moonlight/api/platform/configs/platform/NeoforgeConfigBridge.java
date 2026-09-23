@@ -27,11 +27,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 //Adapter for neoforge configs
@@ -45,7 +47,7 @@ public final class NeoforgeConfigBridge {
 
     @Nullable
     public static Screen createScreen(String modId, Screen parent, @Nullable Identifier background) {
-        List<ModConfigHolder> holders = holdersFor(modId);
+        List<ModConfigHolder> holders = getHoldersFor(modId);
         if (holders.isEmpty()) return null;
         return MoonlightConfigSelectScreen.create(modId, holders, parent, background);
     }
@@ -55,24 +57,23 @@ public final class NeoforgeConfigBridge {
      * NeoForge's ConfigurationScreen, or Configured's. Either way there is no hand made screen to override.
      */
     public static boolean hasOnlyGenericScreen(String modId) {
-        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, NeoforgeConfigBridge::readIsGenericScreen);
+        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, NeoforgeConfigBridge::doesConfigLookLikeGenericOne);
     }
 
-    private static boolean readIsGenericScreen(String modId) {
+    private static boolean doesConfigLookLikeGenericOne(String modId) {
         ModContainer container = ModList.get().getModContainerById(modId).orElse(null);
         if (container == null) return false;
         IConfigScreenFactory factory = container.getCustomExtension(IConfigScreenFactory.class).orElse(null);
         if (factory == null) return true;
         try {
             Screen screen = factory.createScreen(container, null);
-            return screen instanceof ConfigurationScreen
-                    || screen.getClass().getName().startsWith(CONFIGURED_PACKAGE);
+            return screen instanceof ConfigurationScreen || screen.getClass().getName().startsWith(CONFIGURED_PACKAGE);
         } catch (Exception e) {
             return false;
         }
     }
 
-    public static boolean hasForeignConfig(String modId) {
+    public static boolean hasCustomConfigScreen(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
             if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
@@ -81,7 +82,7 @@ public final class NeoforgeConfigBridge {
         return false;
     }
 
-    private static List<ModConfigHolder> holdersFor(String modId) {
+    private static List<ModConfigHolder> getHoldersFor(String modId) {
         List<ModConfig> configs = CONFIGS_BY_MOD.getOrDefault(modId, List.of());
         List<ModConfigHolder> out = new ArrayList<>();
         for (ModConfig mc : configs) {
@@ -108,61 +109,69 @@ public final class NeoforgeConfigBridge {
 
     private static ForeignConfigHolder build(String modId, ModConfig mc, ModConfigSpec spec) {
         ConfigCategory root = new ConfigCategory(Component.empty());
-        walk(spec, spec.getValues(), List.of(), root);
+        walkSpec(mc, spec, spec.getValues(), List.of(), root);
         return new ForeignConfigHolder(idFor(modId, mc), typeFor(mc), spec, root, nameFor(modId, mc));
     }
 
     private static ConfigType typeFor(ModConfig mc) {
         return switch (mc.getType()) {
             case CLIENT -> ConfigType.CLIENT;
-            case SERVER -> ConfigType.COMMON_SYNCED;
+            case SERVER -> ConfigType.COMMON_SYNCED; // world bound, so it gets the server icon
             default -> ConfigType.COMMON;
         };
     }
 
     private static Identifier idFor(String modId, ModConfig mc) {
-        return Identifier.fromNamespaceAndPath(modId, typeName(mc));
+        return Identifier.fromNamespaceAndPath(modId, modConfigTypeName(mc));
     }
 
+    //same logic as ConfigurationScreen.translatableConfig
     private static Component nameFor(String modId, ModConfig mc) {
-        return Component.literal(PlatHelper.getModName(modId) + " - " + TextHelper.getReadableName(typeName(mc)));
+        String fileKey = mc.getFileName().replaceAll("[^a-zA-Z0-9]+", ".").replaceFirst("^\\.", "").replaceFirst("\\.$", "").toLowerCase(Locale.ROOT);
+        String sectionTitleKey = modId + ".configuration.section." + fileKey + ".title";
+        String key = I18n.exists(sectionTitleKey) ? sectionTitleKey : "neoforge.configuration.uitext.title." + modConfigTypeName(mc);
+        return Component.translatable(key, PlatHelper.getModName(modId));
     }
 
-    private static String typeName(ModConfig mc) {
+    private static String modConfigTypeName(ModConfig mc) {
         return mc.getType().name().toLowerCase(Locale.ROOT);
     }
 
-    private static void walk(ModConfigSpec spec, UnmodifiableConfig config, List<String> path, ConfigCategory parent) {
+    private static void walkSpec(ModConfig mc, ModConfigSpec spec, UnmodifiableConfig config, List<String> path, ConfigCategory parent) {
         for (UnmodifiableConfig.Entry entry : config.entrySet()) {
             String key = entry.getKey();
             List<String> childPath = append(path, key);
             Object raw = entry.getRawValue();
             if (raw instanceof UnmodifiableConfig sub) {
-                ConfigCategory cat = new ConfigCategory(categoryTitle(spec, childPath, key));
-                String commentOfLevel = spec.getLevelComment(childPath);
-                if (!commentOfLevel.isBlank()) {
-                    cat.setDescription(Component.literal(commentOfLevel));
+                String translationKey = translationKey(mc, spec.getLevelTranslationKey(childPath), key);
+                ConfigCategory cat = new ConfigCategory(title(translationKey, key));
+                Component desc = description(translationKey, spec.getLevelComment(childPath));
+                if (desc != null) cat.setDescription(desc);
+                walkSpec(mc, spec, sub, childPath, cat);
+                if (!cat.isEmpty()){
+                    parent.add(cat);
                 }
-                walk(spec, sub, childPath, cat);
-                // drop categories that produced no rows
-                if (!cat.isEmpty()) parent.add(cat);
             } else if (raw instanceof ModConfigSpec.ConfigValue<?> cv) {
-                ConfigOption<?> option = leaf(spec, cv);
+                ConfigOption<?> option = leaf(mc, spec, cv);
                 if (option != null) parent.add(option);
             }
         }
     }
 
     @Nullable
-    private static ConfigOption<?> leaf(ModConfigSpec spec, ModConfigSpec.ConfigValue<?> cv) {
+    private static ConfigOption<?> leaf(ModConfig mc, ModConfigSpec spec, ModConfigSpec.ConfigValue<?> cv) {
         List<String> path = cv.getPath();
         Object specEntry = spec.getSpec().get(path);
-        if (!(specEntry instanceof ModConfigSpec.ValueSpec vs)) return null;
+        if (!(specEntry instanceof ModConfigSpec.ValueSpec vs)) {
+            return null;
+        }
 
-        String key = path.isEmpty() ? "" : path.get(path.size() - 1);
-        Component title = leafTitle(vs, key);
-        Component desc = vs.getComment() != null ? Component.literal(vs.getComment()) : null;
-        ConfigMetadata meta = new ConfigMetadata(reloadType(vs.restartType()), false);
+        String key = path.isEmpty() ? "" : path.getLast();
+        String translationKey = translationKey(mc, vs.getTranslationKey(), key);
+        Component title = title(translationKey, key);
+        Component desc = description(translationKey, vs.getComment());
+        ConfigReloadType reload = mc.getType() == ModConfig.Type.STARTUP ? ConfigReloadType.GAME_RESTART : reloadType(vs.restartType());
+        ConfigMetadata meta = new ConfigMetadata(reload, false);
 
         vs.getDefault();
         Object sample = vs.getDefault();
@@ -171,7 +180,7 @@ public final class NeoforgeConfigBridge {
             return new ConfigOption.BooleanValue(title, desc, wrap(cv, meta), b);
         }
         if (sample instanceof Enum<?> e) {
-            Enum<?>[] options = e.getDeclaringClass().getEnumConstants();
+            Enum<?>[] options = Arrays.stream(e.getDeclaringClass().getEnumConstants()).filter(vs::test).toArray(Enum[]::new);
             return new ConfigOption.EnumValue(title, desc, wrap(cv, meta), e, options);
         }
         if (sample instanceof Integer i) {
@@ -184,7 +193,7 @@ public final class NeoforgeConfigBridge {
             if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
                 return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
             }
-            return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) (Supplier<?>) cv);
+            return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
         }
         if (sample instanceof Double d) {
             double[] r = doubleRange(vs);
@@ -195,9 +204,10 @@ public final class NeoforgeConfigBridge {
         }
         if (sample instanceof List<?> list && list.stream().allMatch(o -> o instanceof String)) {
             List<String> def = list.stream().map(o -> (String) o).toList();
-            return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, null);
+            Predicate<String> entryValidator = vs instanceof ModConfigSpec.ListValueSpec lvs ? lvs::testElement : null;
+            return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, entryValidator);
         }
-        return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) (Supplier<?>) cv);
+        return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
     }
 
     private static IConfigValue wrap(ModConfigSpec.ConfigValue<?> cv, ConfigMetadata meta) {
@@ -256,18 +266,22 @@ public final class NeoforgeConfigBridge {
         return new double[]{-Double.MAX_VALUE, Double.MAX_VALUE};
     }
 
-    private static Component leafTitle(ModConfigSpec.ValueSpec vs, String key) {
-        String tk = vs.getTranslationKey();
-        if (tk != null && I18n.exists(tk)) return Component.translatable(tk);
-        return Component.literal(TextHelper.getReadableName(key));
+    // neo's fallback when the builder never called translation()
+    private static String translationKey(ModConfig mc, @Nullable String specKey, String key) {
+        return specKey != null ? specKey : mc.getModId() + ".configuration." + key;
     }
 
-    private static Component categoryTitle(ModConfigSpec spec, List<String> path, String key) {
-        String trKey = spec.getLevelTranslationKey(path);
-        if (I18n.exists(trKey)) {
-            return Component.translatable(trKey);
-        }
-        return Component.literal(TextHelper.getReadableName(key));
+    private static Component title(String translationKey, String key) {
+        return Component.translatableWithFallback(translationKey, TextHelper.getReadableName(key));
+    }
+
+    //same as neo config screen
+    @Nullable
+    private static Component description(String translationKey, @Nullable String comment) {
+        String tooltipKey = translationKey + ".tooltip";
+        boolean hasComment = comment != null && !comment.isBlank();
+        if (!hasComment && !I18n.exists(tooltipKey)) return null;
+        return Component.translatableWithFallback(tooltipKey, comment);
     }
 
     private static ConfigReloadType reloadType(ModConfigSpec.RestartType rt) {
@@ -285,6 +299,7 @@ public final class NeoforgeConfigBridge {
         return out;
     }
 
+    //hacks cuz cant mixin into fml.
     @SuppressWarnings("unchecked")
     private static Map<String, List<ModConfig>> configsByModField() {
         try {

@@ -277,7 +277,7 @@ public class ClientHelperImpl {
     }
 
     public static boolean hasNativeForeignConfig(String modId) {
-        return NeoforgeConfigBridge.hasForeignConfig(modId);
+        return NeoforgeConfigBridge.hasCustomConfigScreen(modId);
     }
 
     public static boolean hasOnlyGenericConfigScreen(String modId) {
