@@ -305,7 +305,7 @@ public class ModsTilesScreen extends Screen {
     private void renderFallbackIcon(GuiGraphicsExtractor graphics, Entry entry, int iconX, int iconY) {
         GuiHelper.renderInitialTile(graphics, this.font, entry.name().getString(),
                 iconX, iconY, MOD_ICON_SIZE, ConfigGuiColors.TILE_ICON_BG,
-                ConfigGuiColors.initialLetter(entry.modId()), MoonlightIcons.CONFIG);
+                ConfigGuiColors.initialLetterColor(entry.modId()), MoonlightIcons.CONFIG);
     }
 
     @Override

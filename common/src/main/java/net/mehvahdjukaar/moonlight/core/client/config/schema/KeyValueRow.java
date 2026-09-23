@@ -4,7 +4,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.ConfigControl;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigControllers;
-import net.mehvahdjukaar.moonlight.core.client.config.ConfigListRow;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigRow;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenAccess;
 import net.mehvahdjukaar.moonlight.core.client.config.GutterHints;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,18 +20,18 @@ import java.util.function.BooleanSupplier;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-class KeyValueRow extends ConfigListRow {
+class KeyValueRow extends ConfigRow {
 
     private static final int VALUE_WIDTH = CONTROL_WIDTH + RESET_WIDTH + 3 * GAP;
 
     private final ConfigControl<?> key;
-    private final ConfigListRow valueRow;
+    private final ConfigRow valueRow;
     private final BooleanSupplier isDuplicateKey;
     private final GutterHints gutter = new GutterHints();
     private final List<GuiEventListener> children = new ArrayList<>();
     private final List<NarratableEntry> narratableEntries = new ArrayList<>();
 
-    KeyValueRow(ConfigScreenAccess view, ConfigOption<?> keyOption, ConfigListRow valueRow, BooleanSupplier isDuplicateKey) {
+    KeyValueRow(ConfigScreenAccess view, ConfigOption<?> keyOption, ConfigRow valueRow, BooleanSupplier isDuplicateKey) {
         this.key = ConfigControllers.create(keyOption, view.session(), view::onValueEdited);
         this.valueRow = valueRow;
         this.isDuplicateKey = isDuplicateKey;

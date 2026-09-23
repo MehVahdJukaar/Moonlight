@@ -19,7 +19,7 @@ public final class ConfigEditSession {
     private final ModConfigHolder holder;
     private final Screen returnScreen;
 
-    private final Map<ConfigOption<?>, Object> pending = new IdentityHashMap<>();
+    private final Map<ConfigOption<?>, Object> pendingValuesByOption = new IdentityHashMap<>();
     private final Set<ConfigOption<?>> expanded = Collections.newSetFromMap(new IdentityHashMap<>());
     // the most severe reload requirement among values actually saved this visit (sticky across multiple saves)
     private ConfigReloadType appliedReload = ConfigReloadType.NONE;
@@ -44,16 +44,16 @@ public final class ConfigEditSession {
 
     @SuppressWarnings("unchecked")
     public <T> T valueOrPendingValue(ConfigOption<T> v) {
-        return pending.containsKey(v) ? (T) pending.get(v) : v.get();
+        return pendingValuesByOption.containsKey(v) ? (T) pendingValuesByOption.get(v) : v.get();
     }
 
     public void put(ConfigOption<?> v, Object value) {
-        pending.put(v, value);
+        pendingValuesByOption.put(v, value);
     }
 
     public int unsavedCount() {
         int count = 0;
-        for (Map.Entry<ConfigOption<?>, Object> e : pending.entrySet()) {
+        for (Map.Entry<ConfigOption<?>, Object> e : pendingValuesByOption.entrySet()) {
             if (!Objects.equals(e.getValue(), e.getKey().get())) count++;
         }
         return count;
@@ -61,7 +61,7 @@ public final class ConfigEditSession {
 
     public void apply() {
         if (holder == null) return;
-        pending.forEach((v, value) -> {
+        pendingValuesByOption.forEach((v, value) -> {
             if (!Objects.equals(value, v.get())) {
                 v.apply(holder, value);
                 if (v.reloadType().ordinal() > appliedReload.ordinal()) appliedReload = v.reloadType();
@@ -74,7 +74,7 @@ public final class ConfigEditSession {
     }
 
     public void clearPending() {
-        pending.clear();
+        pendingValuesByOption.clear();
     }
 
     public boolean isExpanded(ConfigOption<?> v) {

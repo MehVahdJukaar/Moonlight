@@ -42,7 +42,7 @@ public final class ConfigGuiColors {
     public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
 
     // the bright chat colors, picked from the mod id so a mod without a logo always gets the same one
-    private static final ChatFormatting[] INITIA_MOD_COLORS = {
+    private static final ChatFormatting[] INITIA_LETTER_COLORS = {
             ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN,
             ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE, ChatFormatting.WHITE
     };
@@ -52,10 +52,10 @@ public final class ConfigGuiColors {
             "quark", 0xFF48DDBC,
             "zeta", 0xFF48DDBC);
 
-    public static int initialLetter(String modId) {
+    public static int initialLetterColor(String modId) {
         Integer brand = BRAND_COLORS.get(modId);
         if (brand != null) return brand;
-        return chat(INITIA_MOD_COLORS[Math.floorMod(modId.hashCode(), INITIA_MOD_COLORS.length)]);
+        return chat(INITIA_LETTER_COLORS[Math.floorMod(modId.hashCode(), INITIA_LETTER_COLORS.length)]);
     }
 
     // breadcrumb

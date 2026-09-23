@@ -101,10 +101,11 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
 
         List<BreadcrumbWidget.Crumb> crumbs = new ArrayList<>();
         for (MoonlightConfigScreen s = this; s != null; s = s.parentPage) {
+            //house
             Component label = s.isRoot() ? Component.literal("⌂") : s.category.title();
             crumbs.addFirst(new BreadcrumbWidget.Crumb(label, s, s == this));
         }
-        int trailRight = searchBox.getX() - SearchBoxWidget.ICON_SPACE - 4; // leave room for the magnifier glyph + a gap
+        int trailRight = searchBox.getX() - SearchBoxWidget.ICON_SPACE - GAP;
         BreadcrumbWidget breadcrumb = new BreadcrumbWidget(SIDE_MARGIN, CRUMB_Y, trailRight - SIDE_MARGIN, this.font.lineHeight,
                 this.font, crumbs, target -> {
             if (target != this){
@@ -162,7 +163,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
 
     @Override
     protected void populate() {
-        List<ConfigListRow> rows = new ArrayList<>();
+        List<ConfigRow> rows = new ArrayList<>();
         String query = searchQuery == null ? "" : searchQuery.trim().toLowerCase(Locale.ROOT);
         if (query.isEmpty()) {
             for (ConfigNode e : category.entries()) {
@@ -183,7 +184,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         this.list.setRows(rows);
     }
 
-    private void addOption(List<ConfigListRow> rows, ConfigOption<?> v) {
+    private void addOption(List<ConfigRow> rows, ConfigOption<?> v) {
         rows.add(new OptionRow(this, v));
         addDescriptionRows(rows, v);
     }

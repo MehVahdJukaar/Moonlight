@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-class DescriptionRow extends ConfigListRow {
+class DescriptionRow extends ConfigRow {
 
     private final Font font;
     private final List<FormattedCharSequence> lines;

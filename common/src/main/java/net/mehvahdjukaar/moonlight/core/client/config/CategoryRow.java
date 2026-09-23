@@ -21,7 +21,7 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-public class CategoryRow extends ConfigListRow {
+public class CategoryRow extends ConfigRow {
 
     private final ConfigScreenAccess screenView;
     private final ConfigCategory category;

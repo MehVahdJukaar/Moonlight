@@ -28,7 +28,7 @@ import java.util.Objects;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-public class OptionRow extends ConfigListRow {
+public class OptionRow extends ConfigRow {
 
     private final ConfigScreenAccess view;
     private final ConfigEditSession session;
@@ -71,7 +71,7 @@ public class OptionRow extends ConfigListRow {
                 ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
                 : ConfigControllers.create(value, session, this::onEdited);
 
-        this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.RESET, b -> rollback())
+        this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.RESET, b -> resetToDefault())
                 .offIcon(MoonlightIcons.RESET_OFF);
         this.resetButton.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.reset")));
 
@@ -88,7 +88,7 @@ public class OptionRow extends ConfigListRow {
         this.resetButton.active = editable && !Objects.equals(session.valueOrPendingValue(value), value.defaultValue());
     }
 
-    private void rollback() {
+    private void resetToDefault() {
         if (!editable) return;
         Object def = value.defaultValue();
         session.put(value, def);

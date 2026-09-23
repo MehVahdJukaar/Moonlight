@@ -14,7 +14,7 @@ import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
-import net.mehvahdjukaar.moonlight.api.platform.configs.platform.ForeignConfigBridge;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.NeoforgeConfigBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.Font;
@@ -273,15 +273,15 @@ public class ClientHelperImpl {
 
     @Nullable
     public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
-        return ForeignConfigBridge.createScreen(modId, parent, background);
+        return NeoforgeConfigBridge.createScreen(modId, parent, background);
     }
 
     public static boolean hasNativeForeignConfig(String modId) {
-        return ForeignConfigBridge.hasConfig(modId);
+        return NeoforgeConfigBridge.hasForeignConfig(modId);
     }
 
     public static boolean hasOnlyGenericConfigScreen(String modId) {
-        return ForeignConfigBridge.hasOnlyGenericScreen(modId);
+        return NeoforgeConfigBridge.hasOnlyGenericScreen(modId);
     }
 
     public static void addClientSetup(Runnable clientSetup) {

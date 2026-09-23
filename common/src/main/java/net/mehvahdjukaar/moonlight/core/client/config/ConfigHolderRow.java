@@ -19,7 +19,7 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-class ConfigHolderRow extends ConfigListRow {
+class ConfigHolderRow extends ConfigRow {
 
     private final Button button;
     private final Component label;

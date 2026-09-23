@@ -112,7 +112,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         this.list.setDrawFooterSeparator(false); // this screen draws one across both panes instead
         // with only a handful of configs the rows read better centered in the pane than pinned under the header
         this.list.setTopPadding((this.contentBottom() - HEADER - this.holders.size() * SELECT_ITEM_HEIGHT) / 2 - 4);
-        List<ConfigListRow> rows = new ArrayList<>();
+        List<ConfigRow> rows = new ArrayList<>();
         for (ModConfigHolder h : holders) {
             Component label = Component.literal(TextHelper.getReadableName(h.getId().getPath()));
             Component subtitle = Component.literal(h.getFileName());
@@ -170,7 +170,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             } else {
                 GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
                         PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
-                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.initialLetter(this.modId), MoonlightIcons.CONFIG);
+                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.initialLetterColor(this.modId), MoonlightIcons.CONFIG);
             }
         }
         int y = this.leftPaneBottom + 8;
@@ -205,7 +205,7 @@ public class MoonlightConfigSelectScreen extends Screen {
         for (ConfigScreenExtensions.Overlay overlay : ConfigScreenExtensions.overlaysFor(modId)) {
             overlay.render(graphics, panel, mouseX, mouseY, partialTick);
         }
-        ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
+        ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) {

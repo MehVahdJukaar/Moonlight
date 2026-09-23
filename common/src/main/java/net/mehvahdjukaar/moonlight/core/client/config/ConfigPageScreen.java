@@ -53,7 +53,7 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
 
     protected abstract void populate();
 
-    protected void addDescriptionRows(List<ConfigListRow> rows, ConfigOption<?> option) {
+    protected void addDescriptionRows(List<ConfigRow> rows, ConfigOption<?> option) {
         Component desc = option.description();
         if (desc == null || !session().isExpanded(option)) return;
         List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - GAP);
@@ -96,12 +96,12 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
 
     @Nullable
     private Component tooltipAt(int mouseX, int mouseY) {
-        ConfigListRow hovered = this.list.getHovered(mouseX, mouseY);
+        ConfigRow hovered = this.list.getHovered(mouseX, mouseY);
         if (hovered != null) {
             Component tooltip = hovered.getTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;
         }
-        for (ConfigListRow row : this.list.children()) {
+        for (ConfigRow row : this.list.children()) {
             Component tooltip = row.getGutterTooltip(mouseX, mouseY);
             if (tooltip != null) return tooltip;
         }

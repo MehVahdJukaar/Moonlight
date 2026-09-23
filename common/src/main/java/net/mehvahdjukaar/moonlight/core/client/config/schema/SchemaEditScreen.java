@@ -13,7 +13,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.core.client.config.CategoryRow;
-import net.mehvahdjukaar.moonlight.core.client.config.ConfigListRow;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigRow;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigPageScreen;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigRowList;
 import net.mehvahdjukaar.moonlight.core.client.config.OptionRow;
@@ -140,10 +140,10 @@ public class SchemaEditScreen extends ConfigPageScreen {
     @Override
     protected void populate() {
         SchemaCategory.Entries<?> entries = entriesCategory();
-        List<ConfigListRow> rows = new ArrayList<>();
+        List<ConfigRow> rows = new ArrayList<>();
         List<ConfigNode> nodes = category.entries();
         for (int i = 0; i < nodes.size(); i++) {
-            ConfigListRow row = nodes.get(i) instanceof ConfigCategory cat
+            ConfigRow row = nodes.get(i) instanceof ConfigCategory cat
                     ? new CategoryRow(this, cat)
                     : new OptionRow(this, (ConfigOption<?>) nodes.get(i));
             rows.add(entries == null ? row : removableEntryRow(entries, row, i));
@@ -151,7 +151,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
         this.list.setRows(rows);
     }
 
-    private ConfigListRow removableEntryRow(SchemaCategory.Entries<?> entries, ConfigListRow row, int index) {
+    private ConfigRow removableEntryRow(SchemaCategory.Entries<?> entries, ConfigRow row, int index) {
         if (entries instanceof SchemaCategory.MapEntries map) {
             row = new KeyValueRow(this, map.keyOption(index), row, () -> map.isDuplicateKey(edit.session, index));
         }

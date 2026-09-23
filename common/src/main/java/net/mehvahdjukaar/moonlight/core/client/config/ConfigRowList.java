@@ -13,7 +13,7 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.ROW_WIDTH;
 
-public class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
+public class ConfigRowList extends ContainerObjectSelectionList<ConfigRow> {
 
     private boolean drawFooterSeparator = true;
     private int rowWidth = ROW_WIDTH;
@@ -23,15 +23,15 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
         super(minecraft, width, height, y, itemHeight);
     }
 
-    public void setRows(List<ConfigListRow> rows) {
+    public void setRows(List<ConfigRow> rows) {
         this.clearEntries();
         if (this.topPadding > 0) this.addEntry(new SpacerRow(), this.topPadding);
-        for (ConfigListRow row : rows) this.addEntry(row);
+        for (ConfigRow row : rows) this.addEntry(row);
         this.refreshScrollAmount();
     }
 
     @Nullable
-    ConfigListRow getHovered(double mouseX, double mouseY) {
+    ConfigRow getHovered(double mouseX, double mouseY) {
         return this.getEntryAtPosition(mouseX, mouseY);
     }
 
@@ -64,7 +64,7 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigListRow> {
         GuiHelper.renderFooterSeparator(graphics, this.getX(), this.getBottom(), this.getWidth());
     }
 
-    private static class SpacerRow extends ConfigListRow {
+    private static class SpacerRow extends ConfigRow {
         @Override
         public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
         }

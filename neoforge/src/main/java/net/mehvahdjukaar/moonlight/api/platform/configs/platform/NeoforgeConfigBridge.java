@@ -34,8 +34,9 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
+//Adapter for neoforge configs
 @SuppressWarnings({"unchecked", "rawtypes"})
-public final class ForeignConfigBridge {
+public final class NeoforgeConfigBridge {
 
     private static final Map<ModConfig, ForeignConfigHolder> CACHE = new WeakHashMap<>();
     private static final Map<String, List<ModConfig>> CONFIGS_BY_MOD = configsByModField();
@@ -54,7 +55,7 @@ public final class ForeignConfigBridge {
      * NeoForge's ConfigurationScreen, or Configured's. Either way there is no hand made screen to override.
      */
     public static boolean hasOnlyGenericScreen(String modId) {
-        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, ForeignConfigBridge::readIsGenericScreen);
+        return GENERIC_SCREEN_CACHE.computeIfAbsent(modId, NeoforgeConfigBridge::readIsGenericScreen);
     }
 
     private static boolean readIsGenericScreen(String modId) {
@@ -71,7 +72,7 @@ public final class ForeignConfigBridge {
         }
     }
 
-    public static boolean hasConfig(String modId) {
+    public static boolean hasForeignConfig(String modId) {
         for (ModConfig mc : CONFIGS_BY_MOD.getOrDefault(modId, List.of())) {
             if (ForgeConfigHolder.getFromForgeConfig(mc) != null) continue;
             if (!(mc.getSpec() instanceof ModConfigSpec spec)) continue;
@@ -138,8 +139,10 @@ public final class ForeignConfigBridge {
             Object raw = entry.getRawValue();
             if (raw instanceof UnmodifiableConfig sub) {
                 ConfigCategory cat = new ConfigCategory(categoryTitle(spec, childPath, key));
-                String comment = spec.getLevelComment(childPath);
-                cat.setDescription(Component.literal(comment));
+                String commentOfLevel = spec.getLevelComment(childPath);
+                if (!commentOfLevel.isBlank()) {
+                    cat.setDescription(Component.literal(commentOfLevel));
+                }
                 walk(spec, sub, childPath, cat);
                 // drop categories that produced no rows
                 if (!cat.isEmpty()) parent.add(cat);
@@ -260,8 +263,10 @@ public final class ForeignConfigBridge {
     }
 
     private static Component categoryTitle(ModConfigSpec spec, List<String> path, String key) {
-        String tk = spec.getLevelTranslationKey(path);
-        if (I18n.exists(tk)) return Component.translatable(tk);
+        String trKey = spec.getLevelTranslationKey(path);
+        if (I18n.exists(trKey)) {
+            return Component.translatable(trKey);
+        }
         return Component.literal(TextHelper.getReadableName(key));
     }
 

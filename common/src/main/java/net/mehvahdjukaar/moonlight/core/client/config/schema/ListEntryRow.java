@@ -2,7 +2,7 @@ package net.mehvahdjukaar.moonlight.core.client.config.schema;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
-import net.mehvahdjukaar.moonlight.core.client.config.ConfigListRow;
+import net.mehvahdjukaar.moonlight.core.client.config.ConfigRow;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -16,14 +16,14 @@ import java.util.List;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
-class ListEntryRow extends ConfigListRow {
+class ListEntryRow extends ConfigRow {
 
-    private final ConfigListRow inner;
+    private final ConfigRow inner;
     private final IconButton remove;
     private final List<GuiEventListener> children;
     private final List<NarratableEntry> narratables;
 
-    ListEntryRow(ConfigListRow inner, boolean canRemove, Runnable onRemove) {
+    ListEntryRow(ConfigRow inner, boolean canRemove, Runnable onRemove) {
         this.inner = inner;
         this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.DELETE, b -> onRemove.run());
         this.remove.active = canRemove;
