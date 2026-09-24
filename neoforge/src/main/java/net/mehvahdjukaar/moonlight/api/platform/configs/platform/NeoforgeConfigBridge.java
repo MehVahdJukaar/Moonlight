@@ -146,7 +146,9 @@ public final class NeoforgeConfigBridge {
                 String translationKey = translationKey(mc, spec.getLevelTranslationKey(childPath), key);
                 ConfigCategory cat = new ConfigCategory(title(translationKey, key));
                 Component desc = description(translationKey, spec.getLevelComment(childPath));
-                if (desc != null) cat.setDescription(desc);
+                if (desc != null) {
+                    cat.setDescription(desc);
+                }
                 walkSpec(mc, spec, sub, childPath, cat);
                 if (!cat.isEmpty()){
                     parent.add(cat);
@@ -176,36 +178,40 @@ public final class NeoforgeConfigBridge {
         vs.getDefault();
         Object sample = vs.getDefault();
 
-        if (sample instanceof Boolean b) {
-            return new ConfigOption.BooleanValue(title, desc, wrap(cv, meta), b);
-        }
-        if (sample instanceof Enum<?> e) {
-            Enum<?>[] options = Arrays.stream(e.getDeclaringClass().getEnumConstants()).filter(vs::test).toArray(Enum[]::new);
-            return new ConfigOption.EnumValue(title, desc, wrap(cv, meta), e, options);
-        }
-        if (sample instanceof Integer i) {
-            int[] r = intRange(vs);
-            return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
-        }
-        if (sample instanceof Long l) {
-            // no long control, use the int one when the range fits
-            long[] r = longRange(vs);
-            if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
-                return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
+        switch (sample) {
+            case Boolean b -> {
+                return new ConfigOption.BooleanValue(title, desc, wrap(cv, meta), b);
             }
-            return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
-        }
-        if (sample instanceof Double d) {
-            double[] r = doubleRange(vs);
-            return new ConfigOption.DoubleValue(title, desc, wrap(cv, meta), d, r[0], r[1]);
-        }
-        if (sample instanceof String s) {
-            return new ConfigOption.StringValue(title, desc, wrap(cv, meta), s, vs::test);
-        }
-        if (sample instanceof List<?> list && list.stream().allMatch(o -> o instanceof String)) {
-            List<String> def = list.stream().map(o -> (String) o).toList();
-            Predicate<String> entryValidator = vs instanceof ModConfigSpec.ListValueSpec lvs ? lvs::testElement : null;
-            return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, entryValidator);
+            case Enum<?> e -> {
+                Enum<?>[] options = Arrays.stream(e.getDeclaringClass().getEnumConstants()).filter(vs::test).toArray(Enum[]::new);
+                return new ConfigOption.EnumValue(title, desc, wrap(cv, meta), e, options);
+            }
+            case Integer i -> {
+                int[] r = intRange(vs);
+                return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
+            }
+            case Long l -> {
+                // no long control: present it as an int when the range fits, else leave it uneditable
+                long[] r = longRange(vs);
+                if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
+                    return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
+                }
+                return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
+            }
+            case Double d -> {
+                double[] r = doubleRange(vs);
+                return new ConfigOption.DoubleValue(title, desc, wrap(cv, meta), d, r[0], r[1]);
+            }
+            case String s -> {
+                return new ConfigOption.StringValue(title, desc, wrap(cv, meta), s, vs::test);
+            }
+            case List<?> list when list.stream().allMatch(o -> o instanceof String) -> {
+                List<String> def = list.stream().map(o -> (String) o).toList();
+                Predicate<String> entryValidator = vs instanceof ModConfigSpec.ListValueSpec lvs ? lvs::testElement : null;
+                return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, entryValidator);
+            }
+            default -> {
+            }
         }
         return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
     }
