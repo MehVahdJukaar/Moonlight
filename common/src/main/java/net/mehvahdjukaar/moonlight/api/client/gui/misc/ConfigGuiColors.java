@@ -14,7 +14,7 @@ public final class ConfigGuiColors {
         return ARGB.opaque(Objects.requireNonNull(color.getColor()));
     }
 
-    public static final int PANEL_BG = 0xFF101012; // popups, description bands, the dark half of a hand drawn separator
+    public static final int PANEL_BG = 0xFF101010; // popups, description bands, the dark half of a hand drawn separator
     public static final int SEPARATOR_HIGHLIGHT = 0x18FFFFFF; // the light half, same idea as the vanilla separator sprite
     public static final int HOVER_HIGHLIGHT = 0x40FFFFFF; // translucent wash over a hovered row, cell or icon button
     public static final int SCROLLBAR_THUMB = CommonColors.LIGHTER_GRAY;
@@ -32,16 +32,13 @@ public final class ConfigGuiColors {
     public static final int CATEGORY = chat(ChatFormatting.GREEN);
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE);
 
-    // cards of the mod grids (mods hub, discover mods)
-    public static final int TILE_BG = 0xFF1B1B20;
-    public static final int TILE_BG_HOVER = 0xFF2C2C34;
+    public static final int TILE_BG = 0xFF1B1B1B;
+    public static final int TILE_BG_HOVER = 0xFF2C2C2C;
+    public static final int TILE_LETTER_ICON_BG = 0xFF303030;
     public static final int TILE_OUTLINE = CommonColors.BLACK;
-    public static final int TILE_OUTLINE_HOVER = CATEGORY;
-    // mods that aren't ours: their config is either the loader's own screen or one we converted on the fly
+    public static final int TILE_OUTLINE_HOVER = chat(ChatFormatting.GREEN);
     public static final int TILE_OUTLINE_HOVER_FOREIGN = chat(ChatFormatting.AQUA);
-    public static final int TILE_ICON_BG = 0xFF303038; // backdrop of the letter tile standing in for a missing icon
 
-    // the bright chat colors, picked from the mod id so a mod without a logo always gets the same one
     private static final ChatFormatting[] INITIA_LETTER_COLORS = {
             ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN,
             ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE, ChatFormatting.WHITE

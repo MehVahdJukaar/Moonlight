@@ -170,7 +170,7 @@ public class MoonlightConfigSelectScreen extends Screen {
             } else {
                 GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
                         PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
-                        ConfigGuiColors.TILE_ICON_BG, ConfigGuiColors.initialLetterColor(this.modId), MoonlightIcons.CONFIG);
+                        ConfigGuiColors.TILE_LETTER_ICON_BG, ConfigGuiColors.initialLetterColor(this.modId), MoonlightIcons.CONFIG);
             }
         }
         int y = this.leftPaneBottom + 8;

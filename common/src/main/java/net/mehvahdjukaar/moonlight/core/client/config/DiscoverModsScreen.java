@@ -276,7 +276,7 @@ public class DiscoverModsScreen extends Screen {
 
     private void renderFallbackIcon(GuiGraphicsExtractor graphics, Row row, int iconX, int iconY, boolean installed) {
         GuiHelper.renderInitialTile(graphics, this.font, row.mod().name(), iconX, iconY, MOD_ICON_SIZE,
-                installed ? ConfigGuiColors.TILE_ICON_BG : ConfigGuiColors.TILE_BG_HOVER,
+                installed ? ConfigGuiColors.TILE_LETTER_ICON_BG : ConfigGuiColors.TILE_BG_HOVER,
                 installed ? ConfigGuiColors.initialLetterColor(row.mod().name()) : ConfigGuiColors.DISABLED, MoonlightIcons.CONFIG);
     }
 
