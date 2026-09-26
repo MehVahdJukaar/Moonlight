@@ -63,15 +63,8 @@ public class ResourceConditionsBridge {
 
         @Override
         public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryLookup) {
-            if (registryLookup == null) {
-                //not ideal... idk why registryLookup would be null... dub fabric as usual
-                //no static tag view to fall back on, so we just fail the check
-                Moonlight.LOGGER.error("Registry Lookup was null, failing tag_empty resource condition check");
-                return false;
-            }
-            var opt = registryLookup.lookup(Registries.ITEM)
-                    .flatMap(info -> info.getter().get(tag));
-            return opt.isEmpty() || opt.get().stream().findAny().isEmpty();
+            //tags arent bound yet during reload. this just checks that no pack defines it
+            return !ResourceConditions.tagsPopulated(tag).test(registryLookup);
         }
     }
 
