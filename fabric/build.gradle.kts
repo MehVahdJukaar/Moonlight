@@ -17,7 +17,7 @@ dependencies {
     include("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
-    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-6.7.3") { isTransitive = false }
+    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
     //fabric jar is still intermediary so it wont remap on 26.1. common one is mojmap already

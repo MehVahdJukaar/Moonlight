@@ -18,7 +18,7 @@ dependencies {
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     // modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.5.1");
-    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-6.7.3") { isTransitive = false }
+    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0@jar")
     modCompileOnly("curse.maven:quark-243121:7640331")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
