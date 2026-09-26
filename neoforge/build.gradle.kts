@@ -23,7 +23,7 @@ dependencies {
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("maven.modrinth:featurify:s1OsRGOI")
-    modCompileOnly("curse.maven:map-atlases-forge-519759:7659933")
+    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-6.7.3") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")
@@ -46,7 +46,6 @@ dependencies {
     modRuntimeOnly("curse.maven:haunted-harvest-541753:8332283")
     modRuntimeOnly("curse.maven:vista-1368607:8348336")
 
-    modCompileOnly("curse.maven:map-atlases-forge-519759:4990003")
     //modImplementation ("curse.maven:supplementaries-412082:4995508")
     modCompileOnly("curse.maven:configured-457570:7276577")
     modCompileOnly("curse.maven:yacl-667299:5424504")

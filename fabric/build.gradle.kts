@@ -17,7 +17,7 @@ dependencies {
     include("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
-    modCompileOnly ("curse.maven:map-atlases-forge-519759:7659933")
+    modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.7.3") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
     modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-fabric-1.21.1:${sable_companion_version}")
@@ -26,7 +26,6 @@ dependencies {
     modCompileOnly("curse.maven:yacl-667299:5424169")
     modImplementation("curse.maven:modmenu-308702:7808443")
     //modCompileOnly("curse.maven:super-better-grass-911433:4744836")
-    modCompileOnly("curse.maven:map-atlases-436298:6345966")
     //modImplementation ("curse.maven:supplementaries-412082:4987505")
     // modRuntimeOnly("net.mehvahdjukaar:supplementaries-fabric:1.20-2.7.17")
     modCompileOnly ("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}")

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "net.mehvahdjukaar.moonlight.core.mixins.MixinPlugin",
   "client": [
+    "CartographyTableScreenMixin",
     "ClientPacketListenerMixin",
     "DebugRendererMixin",
     "DynamicTextureMixin",
@@ -24,6 +25,9 @@
   "mixins": [
     "BlockItemMixin",
     "BlockStateBaseMixin",
+    "CartographyTableAdditionalSlotMixin",
+    "CartographyTableMapSlotMixin",
+    "CartographyTableMenuMixin",
     "ChunkGeneratorMixin",
     "ChunkMapMixin",
     "DebugPacketsMixin",
