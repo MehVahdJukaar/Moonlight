@@ -1,3 +1,1 @@
-- more configs improvements
-- added some sanity checks to prevent hard to track down issues
-- misc fixes
+- added api to add stuff to cargography table slots with icons too.

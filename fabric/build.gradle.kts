@@ -17,7 +17,7 @@ dependencies {
     include("net.mehvahdjukaar:codecui-fabric:${codecui_version}")
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
-    modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.7.3") { isTransitive = false }
+    modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-7.0.0") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
     modCompileOnly("dev.ryanhcode.sable-companion:sable-companion-fabric-1.21.1:${sable_companion_version}")
