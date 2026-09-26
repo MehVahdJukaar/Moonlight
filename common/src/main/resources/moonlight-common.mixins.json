@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "net.mehvahdjukaar.moonlight.core.mixins.MixinPlugin",
   "client": [
+    "CartographyTableScreenMixin",
     "ClientPacketListenerMixin",
     "GameRendererMixin",
     "ItemInHandRendererMixin",
@@ -22,6 +23,9 @@
     "BeeGoalMixin",
     "BlockItemMixin",
     "BlockStateBaseMixin",
+    "CartographyTableAdditionalSlotMixin",
+    "CartographyTableMapSlotMixin",
+    "CartographyTableMenuMixin",
     "ChunkGeneratorMixin",
     "ChunkMapMixin",
     "FixBlockPlaceContextMixin",
