@@ -71,6 +71,8 @@ public class Moonlight {
 
     //called on mod creation
     public static void commonInit() {
+        Identifier.tryParse("#invalid:ResourceLocation");
+
         CommonConfigs.init();
         if (PlatHelper.isDev()) TestConfigs.init();
 
