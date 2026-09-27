@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry;
+import net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
@@ -301,10 +302,6 @@ public class RegHelperImpl {
         );
     }
 
-    public static void startRegisteringFor(Object bus) {
-
-    }
-
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(Identifier name, Supplier<EntityDataSerializer<T>> serializer) {
         var value = serializer.get();
         FabricEntityDataRegistry.register(name, value);
@@ -318,6 +315,11 @@ public class RegHelperImpl {
             b = b.attribute(RegistryAttribute.SYNCED);
         }
         return b.buildAndRegister();
+    }
+
+    public static void addClientSyncedRecipes(Consumer<RegHelper.ClientSyncedRecipesEvent> eventListener) {
+        PlatHelper.addCommonSetup(() -> eventListener.accept((serializer, type) ->
+                RecipeSynchronization.synchronizeRecipeSerializer(serializer)));
     }
 
     public static void addExtraPOIStatesRegistration(Consumer<RegHelper.ExtraPOIStatesEvent> eventListener) {

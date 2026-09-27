@@ -23,7 +23,7 @@ dependencies {
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("maven.modrinth:featurify:s1OsRGOI")
-    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0") { isTransitive = false }
+    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:26.1.2-8.0.0") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")

@@ -482,6 +482,14 @@ public class RegHelperImpl {
         NeoForge.EVENT_BUS.addListener(eventConsumer);
     }
 
+    public static void addClientSyncedRecipes(Consumer<RegHelper.ClientSyncedRecipesEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<OnDatapackSyncEvent> eventConsumer = event ->
+                eventListener.accept((serializer, type) -> event.sendRecipes(type));
+        NeoForge.EVENT_BUS.addListener(eventConsumer);
+    }
+
     public static <T> Supplier<EntityDataSerializer<T>> registerEntityDataSerializer(Identifier name, Supplier<EntityDataSerializer<T>> serializer) {
         return RegHelper.register(name, serializer, NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
     }

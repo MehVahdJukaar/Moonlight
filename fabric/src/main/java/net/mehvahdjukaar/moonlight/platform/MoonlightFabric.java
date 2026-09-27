@@ -90,6 +90,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         isInit = false;
 
+        Moonlight.commonSetup();
         PRE_SETUP_WORK.forEach(Runnable::run);
         COMMON_SETUP_WORK.forEach(Runnable::run);
         AFTER_SETUP_WORK.forEach(Runnable::run);

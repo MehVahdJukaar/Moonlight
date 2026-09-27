@@ -110,7 +110,8 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     @Override
     protected final List<JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
         List<JsonElement> output = new ArrayList<>();
-        var m = resourceManager.listResourceStacks(path, r->true);
+        String folder = path.substring(0, path.lastIndexOf('/'));
+        var m = resourceManager.listResourceStacks(folder, r -> r.getPath().equals(path));
         var list = new ArrayList<Resource>();
         for (var res : m.values()) {
             list.addAll(res);

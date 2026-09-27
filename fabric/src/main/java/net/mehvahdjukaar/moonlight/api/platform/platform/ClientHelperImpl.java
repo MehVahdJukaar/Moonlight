@@ -2,69 +2,70 @@ package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import com.google.common.base.Suppliers;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel;
+import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.*;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel;
-import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
-import net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat;
 import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderingRegistry;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
-import net.fabricmc.fabric.api.client.model.loading.v1.FabricModelManager;
-import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
-import java.util.concurrent.ConcurrentHashMap;
+import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
+import net.mehvahdjukaar.moonlight.api.integration.mod_menu.ModMenuCompat;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.platform.RenderPipelinesAccessor;
-import net.minecraft.client.Minecraft;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
-import net.minecraft.client.renderer.special.SpecialModelRenderers;
 
 public class ClientHelperImpl {
 
@@ -227,7 +228,6 @@ public class ClientHelperImpl {
     }
 
 
-
     public static Path getModIcon(String modId) {
         var container = FabricLoader.getInstance().getModContainer(modId).orElseThrow();
         return container.getMetadata().getIconPath(512).flatMap(container::findPath).orElse(null);
@@ -247,7 +247,6 @@ public class ClientHelperImpl {
 
     @Nullable
     public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
-        // no universal config format on Fabric to convert; callers fall back to the mod's own (Mod Menu) screen
         return null;
     }
 
@@ -257,6 +256,18 @@ public class ClientHelperImpl {
 
     public static boolean hasOnlyGenericConfigScreen(String modId) {
         return false;
+    }
+
+    public static @Nullable RecipeHolder<?> getSyncedRecipe(ResourceKey<Recipe<?>> key) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return null;
+        return level.recipeAccess().getSynchronizedRecipes().get(key);
+    }
+
+    public static <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> getSyncedRecipes(RecipeType<T> type) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return List.of();
+        return level.recipeAccess().getSynchronizedRecipes().getAllOfType(type);
     }
 
     public static void addClientSetup(Runnable clientSetup) {

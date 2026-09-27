@@ -1,76 +1,65 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
-import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
-import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.platform.NeoforgeConfigBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.platform.MoonlightForgeClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.RandomSource;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.loading.DatagenModLoader;
-import net.neoforged.neoforgespi.language.IModInfo;
-import net.neoforged.neoforgespi.locating.IModFile;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.mehvahdjukaar.moonlight.platform.MoonlightForge.getCurrentBus;
-import java.util.function.Function;
-import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 public class ClientHelperImpl {
 
@@ -120,7 +109,8 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
-    private record LayerAdderImpl(LivingEntityRenderer<?, ?, ?> renderer) implements ClientHelper.EntityLayerEvent.LayerAdder {
+    private record LayerAdderImpl(
+            LivingEntityRenderer<?, ?, ?> renderer) implements ClientHelper.EntityLayerEvent.LayerAdder {
         @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public <S extends LivingEntityRenderState> void add(RenderLayer<S, ? extends EntityModel<S>> layer) {
@@ -251,7 +241,6 @@ public class ClientHelperImpl {
     }
 
 
-
     @Nullable
     public static Path getModIcon(String modId) {
         return PlatHelperImpl.getModIcon(modId);
@@ -282,6 +271,14 @@ public class ClientHelperImpl {
 
     public static boolean hasOnlyGenericConfigScreen(String modId) {
         return NeoforgeConfigBridge.hasOnlyGenericScreen(modId);
+    }
+
+    public static @Nullable RecipeHolder<?> getSyncedRecipe(ResourceKey<Recipe<?>> key) {
+        return MoonlightForgeClient.getSyncedRecipes().byKey(key);
+    }
+
+    public static <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> getSyncedRecipes(RecipeType<T> type) {
+        return MoonlightForgeClient.getSyncedRecipes().byType(type);
     }
 
     public static void addClientSetup(Runnable clientSetup) {

@@ -91,7 +91,11 @@ public class Moonlight {
         SoftFluidInternal.init();
         RegHelper.addDynamicDispenserBehaviorRegistration(Moonlight::registerBuiltinFluidBehavior);
 
-        PlatHelper.addCommonSetup(Moonlight::commonSetup);
+        //a bit sus tbh
+        //fabric runs this itself before any mods setup work, entrypoints there don't follow dependency order
+        if (PlatHelper.getPlatform().isForge()){
+            PlatHelper.addCommonSetup(Moonlight::commonSetup);
+        }
         PlatHelper.addReloadableCommonSetup(Moonlight::afterDataReloadOrDataSync);
 
         PlatHelper.addServerReloadListener((e)->BlocksColorInternal.INSTANCE, Moonlight.res("blocks_color"));
@@ -130,7 +134,8 @@ public class Moonlight {
         }
     }
 
-    private static void commonSetup() {
+    @ApiStatus.Internal
+    public static void commonSetup() {
 
         BlocksColorInternal.INSTANCE.setup();
         if (PlatHelper.getPhysicalSide().isClient()) {

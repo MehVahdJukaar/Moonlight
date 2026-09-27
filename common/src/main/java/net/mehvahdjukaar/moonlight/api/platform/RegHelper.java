@@ -394,6 +394,19 @@ public class RegHelper {
         }, Registries.RECIPE_TYPE);
     }
 
+    public interface ClientSyncedRecipesEvent {
+
+        void add(RecipeSerializer<?> serializer, RecipeType<?> type);
+    }
+
+    /**
+     * Syncs recipes to the client for recipe viewers. Fabric goes by serializer, NeoForge by type (sends every recipe of that type)
+     */
+    @PlatformImpl
+    public static void addClientSyncedRecipes(Consumer<ClientSyncedRecipesEvent> eventListener) {
+        throw new AssertionError();
+    }
+
 
     public static <T extends BlockEntityType<E>, E extends BlockEntity> RegSupplier<T> registerBlockEntityType(Identifier name,
                                                                                                                Supplier<T> blockEntity) {
@@ -477,6 +490,7 @@ public class RegHelper {
                 ResourceKey.create(EquipmentAssets.ROOT_ID, name));
     }
 
+    // vanilla calculations here
     private static EnumMap<ArmorType, Integer> calculateStandardDefence(int totalDefense) {
         EnumMap<ArmorType, Integer> defenseMap = new EnumMap<>(ArmorType.class);
 

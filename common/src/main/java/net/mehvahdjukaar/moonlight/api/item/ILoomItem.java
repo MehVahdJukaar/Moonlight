@@ -22,17 +22,13 @@ public interface ILoomItem {
     DyeColor getLoomBaseColor(ItemStack stack);
 
     /**
-     * Icon for the loom empty slot, cycling with the banner one. Block atlas sprite, so a texture
-     * under textures/item like the smithing table ones. Null to stay out of the cycle
+     * Icon for the loom empty slot, cycling with the banner one. GUI sprite, so a texture
+     * under textures/gui/sprites like the smithing table ones. Null to stay out of the cycle
      */
     default Identifier getLoomSlotIcon() {
         return DEFAULT_LOOM_ICON;
     }
 
-    /**
-     * Null to keep the vanilla hanging banner. Supplier so the client class stays out of the descriptor,
-     * and called every frame, so hand back a constant.
-     */
     @Nullable
     default Supplier<LoomItemRenderer> getLoomRenderer() {
         return null;

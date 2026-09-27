@@ -1,22 +1,21 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
-
-import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
 import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
+import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
-import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
-import net.minecraft.client.color.block.BlockTintSource;
-import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigScreen;
+import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -27,9 +26,8 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
-import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -39,16 +37,16 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
-import net.minecraft.client.resources.model.*;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -58,8 +56,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -73,8 +73,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -97,7 +97,9 @@ public class ClientHelper {
         return (Level) (Object) level;
     }
 
-    /** Null until the local player joins a world. */
+    /**
+     * Null until the local player joins a world.
+     */
     @Nullable
     public static GameType getLocalGameMode() {
         var gameMode = Minecraft.getInstance().gameMode;
@@ -182,7 +184,9 @@ public class ClientHelper {
         void register(Identifier id, MapCodec<? extends SpecialModelRenderer.Unbaked<?>> codec);
     }
 
-    /** Items opt in from their items/<id>.json definition with a minecraft:special model of the registered type. */
+    /**
+     * Items opt in from their items/<id>.json definition with a minecraft:special model of the registered type.
+     */
     @PlatformImpl
     public static void addSpecialModelRegistration(Consumer<SpecialModelEvent> eventListener) {
         throw new AssertionError();
@@ -230,7 +234,9 @@ public class ClientHelper {
     }
 
     public interface BlockColorEvent {
-        /** A quad's tint index picks the source at that position. */
+        /**
+         * A quad's tint index picks the source at that position.
+         */
         void register(List<BlockTintSource> tintSources, Block... blocks);
 
         int getColor(BlockState block, BlockAndTintGetter level, BlockPos pos, int tint);
@@ -267,7 +273,9 @@ public class ClientHelper {
         void register(Identifier id, MapCodec<? extends CustomUnbakedModel> codec);
     }
 
-    /** Custom model types usable in blockstates files, see CustomUnbakedModel. */
+    /**
+     * Custom model types usable in blockstates files, see CustomUnbakedModel.
+     */
     @PlatformImpl
     public static void addBlockModelRegistration(Consumer<BlockModelEvent> eventListener) {
         throw new AssertionError();
@@ -287,14 +295,18 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /** Null until models have baked, and for ids that were never registered. */
+    /**
+     * Null until models have baked, and for ids that were never registered.
+     */
     @PlatformImpl
     @Nullable
     public static BlockStateModel getStandaloneModel(Identifier modelId) {
         throw new AssertionError();
     }
 
-    /** Like BlockStateModel.collectParts but passes the level along so nested level aware models resolve. */
+    /**
+     * Like BlockStateModel.collectParts but passes the level along so nested level aware models resolve.
+     */
     @PlatformImpl
     public static void collectModelParts(BlockStateModel model, @Nullable BlockAndTintGetter level,
                                          @Nullable BlockPos pos, @Nullable BlockState state,
@@ -323,7 +335,9 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /** 0xAABBGGRR. Frames are stacked vertically. */
+    /**
+     * 0xAABBGGRR. Frames are stacked vertically.
+     */
     public static int getPixelABGR(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         SpriteContents contents = sprite.contents();
         return contents.originalImage.getPixelABGR(x, y + frameIndex * contents.height());
@@ -334,11 +348,6 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /**
-     * Builds the Moonlight native screen for a single config file. When the player turned Moonlight's config screens
-     * off this hands over to whatever screen the loader registered for that mod (NeoForge's extension point, or Mod
-     * Menu on Fabric). Null when neither is available or the config isn't loaded yet.
-     */
     @Nullable
     public static Screen makeConfigScreen(ModConfigHolder holder, Screen parent, @Nullable Identifier background) {
         if (!holder.isLoaded()) return null;
@@ -381,35 +390,32 @@ public class ClientHelper {
         throw new AssertionError();
     }
 
-    /**
-     * Builds a Moonlight-native config screen for a mod that does <em>not</em> use Moonlight's config system, by
-     * reading the config the mod registered with the loader directly. Only NeoForge can do this (its configs share one
-     * ModConfigSpec format); Fabric always returns null. Also returns null when the mod has no readable config,
-     * so callers should fall back to getModConfigScreen.
-     */
     @PlatformImpl
     @Nullable
     public static Screen getNativeForeignConfigScreen(String modId, Screen parent, @Nullable Identifier background) {
         throw new AssertionError();
     }
 
-    /**
-     * Whether getNativeForeignConfigScreen would produce a screen for this mod (a readable config it didn't
-     * register through Moonlight). Cheaper than building the screen; used to decide whether to show the mod a tile.
-     * Always false on Fabric.
-     */
     @PlatformImpl
     public static boolean hasNativeForeignConfig(String modId) {
         throw new AssertionError();
     }
 
-    /**
-     * Whether the screen this mod registered is a stock one it got for free (NeoForge's ConfigurationScreen, or
-     * Configured's), or none at all. Either way the mod wrote no screen of its own, so converting its config costs
-     * nothing. Always false on Fabric.
-     */
     @PlatformImpl
     public static boolean hasOnlyGenericConfigScreen(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
+     * Recipes the server sent with RegHelper.addClientSyncedRecipes. Null if that one wasnt sent
+     */
+    @PlatformImpl
+    public static @Nullable RecipeHolder<?> getSyncedRecipe(ResourceKey<Recipe<?>> key) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
+    public static <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> getSyncedRecipes(RecipeType<T> type) {
         throw new AssertionError();
     }
 
