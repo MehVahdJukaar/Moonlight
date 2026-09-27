@@ -265,5 +265,10 @@
   "moonlight.configuration.test_category.test_schema_advanced": "Test Schema Advanced",
   "moonlight.configuration.test_category.test_schema_advanced.description": "schema form: long, hex color, pattern, optionals, bounded list, pair, dispatch, either, dispatched map, recursive, raw",
   "moonlight.configuration.test_category.test_schema_map": "Test Schema Map",
-  "moonlight.configuration.test_category.test_schema_map.description": "schema map"
+  "moonlight.configuration.test_category.test_schema_map.description": "schema map",
+  "moonlight.configuration.test_category.test_range.description": "range",
+  "moonlight.configuration.test_category.test_vec3.description": "vec3",
+  "moonlight.configuration.test_category.test_vec3i.description": "vec3i",
+  "moonlight.configuration.test_category.test_date.description": "date",
+  "moonlight.configuration.test_category.test_time.description": "time"
 }

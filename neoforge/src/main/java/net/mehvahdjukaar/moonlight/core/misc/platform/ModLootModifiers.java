@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.platform.MoonlightForge;
 import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
@@ -46,21 +47,21 @@ public class ModLootModifiers {
 
         public static final MapCodec<AddItemModifier> CODEC =
                 RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(
-                        ItemStack.CODEC.fieldOf("item").forGetter(m -> m.addedItemStack)
+                        ItemStackTemplate.CODEC.fieldOf("item").forGetter(m -> m.addedItem)
                 ).apply(inst, AddItemModifier::new));
 
-        private final ItemStack addedItemStack;
+        private final ItemStackTemplate addedItem;
 
 
-        public AddItemModifier(LootItemCondition[] conditionsIn, int priority, ItemStack addedItemStack) {
+        public AddItemModifier(LootItemCondition[] conditionsIn, int priority, ItemStackTemplate addedItem) {
             super(conditionsIn, priority);
-            this.addedItemStack = addedItemStack;
+            this.addedItem = addedItem;
         }
 
         @NotNull
         @Override
         protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-            ItemStack addedStack = addedItemStack.copy();
+            ItemStack addedStack = addedItem.create();
 
             if (addedStack.getCount() < addedStack.getMaxStackSize()) {
                 generatedLoot.add(addedStack);
@@ -90,7 +91,7 @@ public class ModLootModifiers {
                 .and(
                         inst.group(
                                 LootPoolEntries.CODEC.optionalFieldOf("loot_pool").forGetter(m -> Optional.ofNullable(m.lootPool)),
-                                ItemStack.CODEC.optionalFieldOf("item").forGetter(m -> Optional.ofNullable(m.itemStack)),
+                                ItemStackTemplate.CODEC.optionalFieldOf("item").forGetter(m -> Optional.ofNullable(m.itemStack)),
                                 Codec.INT.optionalFieldOf("max_matches", Integer.MAX_VALUE).forGetter(m -> m.maxMatches),
                                 ItemPredicate.CODEC.optionalFieldOf("target").forGetter(m -> m.itemPredicate)
                         )
@@ -106,11 +107,11 @@ public class ModLootModifiers {
         });
 
         private @Nullable LootPoolEntryContainer lootPool;
-        private @Nullable ItemStack itemStack;
+        private @Nullable ItemStackTemplate itemStack;
         private final int maxMatches;
         private final Optional<ItemPredicate> itemPredicate;
 
-        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, int priority, Optional<LootPoolEntryContainer> lootPool, Optional<ItemStack> addedItemStack, int maxMatches, Optional<ItemPredicate> itemPredicate) {
+        protected ReplaceItemModifier(LootItemCondition[] conditionsIn, int priority, Optional<LootPoolEntryContainer> lootPool, Optional<ItemStackTemplate> addedItemStack, int maxMatches, Optional<ItemPredicate> itemPredicate) {
             super(conditionsIn, priority);
             this.itemStack = addedItemStack.orElse(null);
             this.lootPool = lootPool.orElse(null);
@@ -130,7 +131,7 @@ public class ModLootModifiers {
                         matches++;
                         if (itemStack != null) {
 
-                            generatedLoot.set(i, itemStack.copy());
+                            generatedLoot.set(i, itemStack.create());
                         } else if (lootPool != null) {
                             generatedLoot.remove(i);
                             lootPool.expand(context, lootPoolEntry ->
