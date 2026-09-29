@@ -43,6 +43,10 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
+        // The Undergarden - REASON: Naming-Convention
+        woodReg.addSimpleFinder("undergarden", "ancient_root")
+                .log("ancient_root");
+
         // Shroomcraft - REASON: Naming-Convention
         woodReg.addSimpleFinder("shroomcraft", "shroomwood")
                 .planksSuffix("_planks")
