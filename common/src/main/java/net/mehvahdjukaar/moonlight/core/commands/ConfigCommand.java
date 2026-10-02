@@ -22,8 +22,6 @@ public class ConfigCommand {
         return Commands.literal("config")
                 .executes(ctx -> open(ctx, ""))
                 .then(Commands.argument(MOD_ARG, StringArgumentType.word())
-                        // every installed mod: whether one actually has a screen is a client side question, so the
-                        // client answers it when the packet lands rather than the server guessing here
                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(suggestedMods(), builder))
                         .executes(ctx -> open(ctx, StringArgumentType.getString(ctx, MOD_ARG))));
     }

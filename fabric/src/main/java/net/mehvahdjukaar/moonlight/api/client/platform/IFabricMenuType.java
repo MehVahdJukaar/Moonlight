@@ -15,8 +15,6 @@ public interface IFabricMenuType<T> {
                 ClientBoundOpenExtendedMenuMessage.consumePendingData()), FeatureFlags.DEFAULT_FLAGS);
     }
 
-    // For menus that don't sync any extra data: a plain vanilla MenuType is enough, so menus open
-    // straight through player.openMenu(provider) without the extra data payload.
     static <T extends AbstractContainerMenu> MenuType<T> createSimple(MenuType.MenuSupplier<T> factory) {
         return new MenuType<>(factory, FeatureFlags.DEFAULT_FLAGS);
     }

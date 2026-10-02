@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//copy on write, fast reads
+//copy on write, fast reads. nonsensical thread safe stuff below
 public interface IProgressTracker {
     Task subtask(int totalSteps);
 
@@ -18,7 +18,6 @@ public interface IProgressTracker {
     }
 
     final class Tree implements Task {
-        // Immutable snapshot list, published via volatile for safe lock-free reads
         private volatile List<Tree> subtasks = List.of();
 
         private final int totalSteps;
@@ -31,11 +30,9 @@ public interface IProgressTracker {
         @Override
         public Task subtask(int totalSteps) {
             Tree child = new Tree(totalSteps);
-            // Copy-on-write: rare writes, fast reads. Small critical section.
             synchronized (this) {
                 List<Tree> next = new ArrayList<>(subtasks);
                 next.add(child);
-                // Publish an immutable snapshot so readers can iterate safely without locks.
                 subtasks = Collections.unmodifiableList(next);
             }
             return child;
@@ -43,8 +40,6 @@ public interface IProgressTracker {
 
         @Override
         public void step() {
-            // Lock-free, capped at totalSteps
-            // Idk about this, AI wrote it, lol
             int prev, next;
             do {
                 prev = completedSteps.get();
@@ -56,7 +51,6 @@ public interface IProgressTracker {
         public float getProgress() {
             if (totalSteps == 0) return 1.0f;
 
-            // Lock-free snapshot reads
             List<Tree> snapshot = this.subtasks;
             int localCompleted = this.completedSteps.get();
 
@@ -72,7 +66,7 @@ public interface IProgressTracker {
         }
 
         public int countLeaves() {
-            List<Tree> snapshot = this.subtasks; // lock-free
+            List<Tree> snapshot = this.subtasks;
             if (snapshot.isEmpty()) {
                 return 1;
             } else {

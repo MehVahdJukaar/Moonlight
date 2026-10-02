@@ -16,7 +16,7 @@ import java.util.Map;
 public class FakeGenericPlayer extends Player {
 
     // Map of all active fake player usernames to their entities.
-    // weak values too: the player holds its level (the key), so weak keys alone would never let an entry go
+    //weak values too: the player holds its level, so weak keys alone would never let an entry go
     private static final Map<Level, Map<GameProfile, FakeGenericPlayer>> FAKE_PLAYERS =
             new MapMaker().weakKeys().makeMap();
 

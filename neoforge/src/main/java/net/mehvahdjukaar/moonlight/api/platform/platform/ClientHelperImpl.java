@@ -147,6 +147,14 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
+    public static void addItemTintSourceRegistration(Consumer<ClientHelper.ItemTintSourceEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterColorHandlersEvent.ItemTintSources> eventConsumer = event ->
+                eventListener.accept(event::register);
+        getCurrentBus().addListener(eventConsumer);
+    }
+
     @SuppressWarnings("ConstantConditions")
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier location) {
         Moonlight.assertInitPhase();

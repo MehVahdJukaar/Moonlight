@@ -33,7 +33,6 @@ public class DebugBlockTypes {
                 builder.append("------------------------------- LIST --------------------------------")
                         .append(System.lineSeparator());
 
-                // Step 1: list all block types
                 for (var entry : reg.getValues()) {
                     builder.append(entry.getId().toString())
                             .append(System.lineSeparator());
@@ -45,7 +44,6 @@ public class DebugBlockTypes {
                             .append("------------------------------- LIST OF CHILDREN --------------------------------")
                             .append(System.lineSeparator());
 
-                    // Step 1.5: collect all possible child keys
                     Set<String> allChildKeys = new TreeSet<>(); // TreeSet = alphabetical order
                     for (var entry : reg.getValues()) {
                         allChildKeys.addAll(entry.getChildren().stream()
@@ -53,7 +51,6 @@ public class DebugBlockTypes {
                                 .toList());
                     }
 
-                    // Step 2: list children for each block type in deterministic order
                     for (var entry : reg.getValues()) {
                         builder.append("[").append(entry.getId().toString()).append("]").append(System.lineSeparator());
 

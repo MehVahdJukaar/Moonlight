@@ -574,7 +574,6 @@ public final class MthUtils {
             return sb.toString();
         } catch (
                 NoSuchAlgorithmException e) {
-            // Fallback: deterministic string hash
             return Integer.toHexString(tokens.toString().hashCode());
         }
     }

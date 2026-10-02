@@ -89,9 +89,6 @@ public final class CircularGridUtils {
         forEachInRing(cx, cy, R, 1, consumer);
     }
 
-    /**
-     * Iterator implementation for Point objects
-     */
     private static class RingIterator implements Iterator<Vec2i> {
         private final int cx, cy, gridScale;
         private final long Rl, outerBound, innerBound;

@@ -15,6 +15,7 @@ import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScree
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -245,6 +246,16 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addBlockColorsRegistration(Consumer<BlockColorEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface ItemTintSourceEvent {
+        void register(Identifier id, MapCodec<? extends ItemTintSource> codec);
+    }
+
+    @PlatformImpl
+    public static void addItemTintSourceRegistration(Consumer<ItemTintSourceEvent> eventListener) {
         throw new AssertionError();
     }
 

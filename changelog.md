@@ -1,1 +1,2 @@
-ported many changes from 1.21.1
+- more fixes for 26.1
+- item tint source registration helper

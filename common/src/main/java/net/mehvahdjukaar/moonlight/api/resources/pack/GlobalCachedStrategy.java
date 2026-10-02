@@ -93,7 +93,7 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
         List<String> tokens = new ArrayList<>();
         boolean fabric = PlatHelper.getPlatform().isFabric();
 
-        // 1) Packs: keep the given order (order-sensitive)
+        //packs keep their order
         int i = 0;
         for (PackResources p : packs) {
             String id = p.packId();
@@ -110,7 +110,7 @@ public abstract class GlobalCachedStrategy implements PackGenerationStrategy {
             }
             tokens.add("pack[" + (i++) + "]=" + id + "@" + description);
         }
-        // 2) Mods: order-independent (sort deterministically)
+        //mods dont, so sort them
         List<String> modTokens = new ArrayList<>();
         for (String mod : PlatHelper.getInstalledMods()) {
             if (fabric && mod.startsWith("fabric")) continue;

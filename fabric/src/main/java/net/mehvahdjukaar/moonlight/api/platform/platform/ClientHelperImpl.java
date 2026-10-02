@@ -24,6 +24,7 @@ import net.mehvahdjukaar.moonlight.core.mixins.platform.RenderPipelinesAccessor;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -120,6 +121,12 @@ public class ClientHelperImpl {
                 }
             });
         });
+    }
+
+    public static void addItemTintSourceRegistration(Consumer<ClientHelper.ItemTintSourceEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(ItemTintSources.ID_MAPPER::put));
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier name) {
