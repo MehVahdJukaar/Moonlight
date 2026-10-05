@@ -18,7 +18,8 @@ dependencies {
 
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     // modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:1.21-6.5.1");
-    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0@jar")
+//    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0@jar") //NOTE: it's not being imported, using curse.maven as an alternative
+    modCompileOnly("curse.maven:map-atlases-forge-519759:8981424")
     modCompileOnly("curse.maven:quark-243121:7640331")
     //modCompileOnly("curse.maven:yacl-667299:4523734")
     modCompileOnly("curse.maven:yacl-667299:6662859")

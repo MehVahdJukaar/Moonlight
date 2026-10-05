@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.utils.extendsFrom
-
 plugins {
     id("com.possible-triangle.neoforge")
 }
@@ -23,7 +21,8 @@ dependencies {
 
     modCompileOnly("curse.maven:irisshaders-455508:5789255")
     modCompileOnly("maven.modrinth:featurify:s1OsRGOI")
-    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0") { isTransitive = false }
+//    modCompileOnly("pebjebs.mapatlases:map_atlases-neoforge:1.21-7.0.0") { isTransitive = false } //NOTE: it's not being imported, using curse.maven as an alternative
+    modCompileOnly("curse.maven:map-atlases-forge-519759:8981424") // v7.0.1
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:8146177")
     modCompileOnly("curse.maven:zeta-968868:7980010")
