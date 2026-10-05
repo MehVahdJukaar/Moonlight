@@ -1,1 +1,1 @@
-- added api to add stuff to cargography table slots with icons too.
+- Added **Undetected WoodType**: THe Undergarden's ancient_root - [#967](https://github.com/MehVahdJukaar/WoodGood/issues/967)
