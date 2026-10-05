@@ -1,4 +1,1 @@
-- **luminous_nether**: Removed childkey, STICK - it's not needed anymore
-- **WoodType**: Added isBambooLike (Backported from 1.21)
-- **Palette**: Updated first half of methods' code (Backported from 1.21)
-- **McMetaFile**: Added 2 methods (Backported from 1.21)
+- **WoodType Detection**: Updated the luminous_nether:mushroom with new children's ID - [EveryCompat#1335](https://github.com/MehVahdJukaar/WoodGood/issues/1335)
