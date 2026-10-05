@@ -95,8 +95,8 @@ subprojects {
         setCurseEnvironment("both")
 
         setArtifact(tasks.remapJar)
-        addAdditionalFile(tasks.remapSourcesJar)
         addAdditionalFile {
+            artifact tasks.remapSourcesJar
             fileType "sources-jar"
         }
 
