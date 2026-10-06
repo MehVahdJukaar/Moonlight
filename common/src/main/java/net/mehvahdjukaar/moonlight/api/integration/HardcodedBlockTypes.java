@@ -264,11 +264,9 @@ public class HardcodedBlockTypes {
         // Luminous Nether - REASON: Associated WoodType, Naming-Convention, Spelling Convention
         woodReg.addSimpleFinder("luminous_nether", "mushroom")
                 .planks("mushroom_planks")
-                .log("goldenstem")
-                .childBlock(STRIPPED_LOG, "shredded_stem")
-                .childBlock(WOOD, "goldmushroom")
-                .childBlock(SAPLING, "golden_mushroom")
-                .childItem(STICK, "whistlecane");
+                .log("mushroom_stipe")
+                .childBlockAffix(STRIPPED_LOG, "shredded_", "")
+                .childBlock(SAPLING, "golden_mushroom");
 
         // Desolation - REASON: Spelling Convention
         woodReg.addSimpleFinder("desolation", "charred")
