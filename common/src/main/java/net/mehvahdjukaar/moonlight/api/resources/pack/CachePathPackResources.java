@@ -58,6 +58,7 @@ public class CachePathPackResources extends AbstractCachedEditableResources {
         try {
             writer.clear();
             FilesHelper.fastRemove(path);
+            this.cachedResources = null;
         } catch (Exception e) {
             Moonlight.LOGGER.warn("Failed to clear cache pack resources at {}", path, e);
             return false;

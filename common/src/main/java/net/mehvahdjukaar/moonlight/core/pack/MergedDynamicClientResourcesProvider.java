@@ -133,7 +133,7 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
             var icon = p.getRootResource("pack.png");
             if (icon != null) {
                 try (var s = icon.get()) {
-                    icons.add(NativeImage.read(s));
+                    icons.add(NativeImage.read(NativeImage.Format.RGBA, s));
                 } catch (Exception e) {
                     Moonlight.LOGGER.error("Failed to read pack icon from {}", p.packId(), e);
                 }
@@ -143,8 +143,8 @@ public class MergedDynamicClientResourcesProvider implements PackResources, Simp
         }
         try (NativeImage image = ImageMerger.mergeSquare(icons, ImageMerger.Mode.MIN_AREA_NO_UPSCALE, 0xFF000000)) {
             return SpriteUtils.toPngBytes(image);
-        } catch (Exception ignored) {
-            Moonlight.LOGGER.error("Failed to merge pack icons");
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("Failed to merge pack icons", e);
         } finally {
             for (var i : icons) i.close();
         }
