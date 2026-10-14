@@ -1,1 +1,1 @@
-- **WoodType Detection**: Updated the luminous_nether:mushroom with new children's ID - [EveryCompat#1335](https://github.com/MehVahdJukaar/WoodGood/issues/1335)
+fixed an issue with texture ops

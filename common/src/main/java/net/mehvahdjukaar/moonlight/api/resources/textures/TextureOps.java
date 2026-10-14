@@ -80,13 +80,7 @@ public final class TextureOps {
                 pixel.setValue(backgroundColor);
             } else {
                 // Keep color, but set alpha fully opaque (255)
-                int newColor = FastColor.ABGR32.color(
-                        255,
-                        FastColor.ABGR32.red(oldValue),
-                        FastColor.ABGR32.green(oldValue),
-                        FastColor.ABGR32.blue(oldValue)
-                );
-                pixel.setValue(newColor);
+                pixel.setValue(FastColor.ABGR32.opaque(oldValue));
             }
         });
     }
@@ -151,9 +145,9 @@ public final class TextureOps {
             int oldValue = pixel.getValue();
             int newColor = FastColor.ABGR32.color(
                     FastColor.ABGR32.alpha(oldValue),
-                    FastColor.ABGR32.red(oldValue) * r / 255,
+                    FastColor.ABGR32.blue(oldValue) * b / 255,
                     FastColor.ABGR32.green(oldValue) * g / 255,
-                    FastColor.ABGR32.blue(oldValue) * b / 255
+                    FastColor.ABGR32.red(oldValue) * r / 255
             );
             pixel.setValue(newColor);
         });
