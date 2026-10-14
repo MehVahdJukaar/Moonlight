@@ -1,1 +1,1 @@
-- Added **Undetected WoodType**: THe Undergarden's ancient_root - [#967](https://github.com/MehVahdJukaar/WoodGood/issues/967)
+- fixed 2 minor issues
