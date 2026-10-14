@@ -20,7 +20,6 @@ dependencies {
     modCompileOnly("pebjebs.mapatlases:map_atlases-fabric:26.1.2-8.0.0") { isTransitive = false }
     modCompileOnly("curse.maven:modernfix-790626:4599353")
     modCompileOnly("curse.maven:quark-243121:7640331")
-    //fabric jar is still intermediary so it wont remap on 26.1. common one is mojmap already
     compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${sable_companion_version}")
 
     modImplementation("com.terraformersmc:modmenu:${modmenu_version}")

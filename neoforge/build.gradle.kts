@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.utils.extendsFrom
-
 plugins {
     id("com.possible-triangle.neoforge")
 }
@@ -36,7 +34,6 @@ dependencies {
     //modRuntimeOnly("curse.maven:productivetrees-867074:5290721")
     // modRuntimeOnly("com.tterrag.registrate:Registrate:MC1.19-1.1.5")
     //// modImplementation("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
-    // 1.21.1 jars, the Biolith they jarjar blocks the 26.1.2 run
 //    modImplementation("curse.maven:quark-243121:7640331")
 //    modImplementation("curse.maven:zeta-968868:7640154")
 
