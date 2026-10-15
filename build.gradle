@@ -1,7 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.11-SNAPSHOT" apply false
-    id "com.hypherionmc.modutils.modpublisher" version "2.2.3" apply false
+    id "com.hypherionmc.modutils.modpublisher" version "2.2.4" apply false
     id "com.possible-triangle.publishing" version "1.2.67" apply false
 }
 
@@ -95,10 +95,10 @@ subprojects {
         setCurseEnvironment("both")
 
         setArtifact(tasks.remapJar)
-//        addAdditionalFile {
-//            artifact tasks.remapSourcesJar
-//            fileType "sources-jar"
-//        }
+        addAdditionalFile {
+            artifact tasks.remapSourcesJar
+            fileType "sources-jar"
+        }
 
         if (modLoader == "fabric") {
             setLoaders(modLoader)
