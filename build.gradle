@@ -95,10 +95,10 @@ subprojects {
         setCurseEnvironment("both")
 
         setArtifact(tasks.remapJar)
-        addAdditionalFile {
-            artifact tasks.remapSourcesJar
-            fileType "sources-jar"
-        }
+//        addAdditionalFile {
+//            artifact tasks.remapSourcesJar
+//            fileType "sources-jar"
+//        }
 
         if (modLoader == "fabric") {
             setLoaders(modLoader)
