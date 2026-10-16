@@ -240,7 +240,7 @@ public abstract class BlockType {
                     registry.mapObjectToType(obj, this);
                 }
             } catch (Exception e) {
-                Moonlight.LOGGER.warn("Failed to add child for BlockType: {} - Key: {} - Object: {}. Ignoring", this, genericName, obj);
+                Moonlight.LOGGER.warn("Failed to add child for {}: {} - Key: {} - Object: {}. Because it's already added. Ignoring!", this.getClass().getSimpleName(), this, genericName, obj);
             }
         }
     }
