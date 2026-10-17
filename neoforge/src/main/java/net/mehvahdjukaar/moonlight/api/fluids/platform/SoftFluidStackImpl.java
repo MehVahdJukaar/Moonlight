@@ -2,6 +2,7 @@ package net.mehvahdjukaar.moonlight.api.fluids.platform;
 
 import com.mojang.serialization.JavaOps;
 import net.mehvahdjukaar.moonlight.api.MoonlightRegistry;
+import net.mehvahdjukaar.moonlight.api.fluids.MLBuiltinSoftFluids;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluid;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidStack;
 import net.mehvahdjukaar.moonlight.api.misc.OptRegSupplier;
@@ -41,8 +42,11 @@ public class SoftFluidStackImpl extends SoftFluidStack {
         FluidStack stack = new FluidStack(softFluid.fluid().getVanillaFluid(), bottlesToMB(softFluid.getCount()));
         if (!stack.isEmpty()) {
             softFluid.copyComponentsTo(stack);
-            PotionBottleType bottle = softFluid.get(MoonlightRegistry.BOTTLE_TYPE.get());
-            if (bottle != null) writeCreateBottleType(stack, bottle);
+            if (MLBuiltinSoftFluids.POTION.is(softFluid.getHolder())) {
+                //create always sets its bottle type, so ours has to go or the stacks wont match
+                boolean wroteCreateBottle = writeCreateBottleType(stack, PotionBottleType.getOrDefault(softFluid));
+                if (wroteCreateBottle) stack.remove(MoonlightRegistry.BOTTLE_TYPE.get());
+            }
         }
         return stack;
     }
@@ -94,11 +98,13 @@ public class SoftFluidStackImpl extends SoftFluidStack {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> void writeCreateBottleType(FluidStack stack, PotionBottleType bottle) {
+    private static <T> boolean writeCreateBottleType(FluidStack stack, PotionBottleType bottle) {
         var type = (DataComponentType<T>) CREATE_BOTTLE_TYPE.get();
-        if (type == null || type.codec() == null) return;
-        type.codec().parse(JavaOps.INSTANCE, bottle.getSerializedName()).result()
-                .ifPresent(v -> stack.set(type, v));
+        if (type == null || type.codec() == null) return false;
+        var createBottle = type.codec().parse(JavaOps.INSTANCE, bottle.getSerializedName()).result();
+        if (createBottle.isEmpty()) return false;
+        stack.set(type, createBottle.get());
+        return true;
     }
 
 
