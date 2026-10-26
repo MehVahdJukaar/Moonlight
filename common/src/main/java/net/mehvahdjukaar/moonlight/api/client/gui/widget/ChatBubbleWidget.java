@@ -11,20 +11,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonColors;
 import net.minecraft.util.Util;
 
-/**
- * A rounded chat bubble: white inside, black outline, fixed height, width follows the text. Add it to a screen like
- * any other widget, or place it above another one with renderPointingAt().
- */
 public class ChatBubbleWidget extends AbstractWidget {
 
     private static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
     private static final int TAIL_HEIGHT = 5;
-    private static final int TAIL_TIP = 3;
+    private static final int TIP_GAP = 1;
+
     private static final int PADDING = 6;
     private static final int CAP_INSET = 3;
     private static final int SCREEN_MARGIN = 3;
-    private static final int TIP_GAP = 1;
     private static final long BOB_PERIOD_MS = 2200L;
 
     private final Font font;
@@ -63,14 +59,13 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CHAT_BUBBLE_BODY, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CHAT_BUBBLE_BODY, getX(), getY(), getWidth(), getHeight());
 
-        int textX = this.getX() + PADDING;
-        int textY = this.getY() + (this.getHeight() - this.font.lineHeight) / 2 + 1;
-        graphics.text(this.font, this.getMessage(), textX, textY, this.textColor, false);
+        int textX = getX() + PADDING;
+        int textY = getY() + (getHeight() - font.lineHeight) / 2 + 1;
+        graphics.text(font, getMessage(), textX, textY, textColor, false);
     }
 
-    /** Draws the bubble above the target widget, kept inside the screen, with an optional bob animation. */
     public void renderPointingAt(GuiGraphicsExtractor graphics, AbstractWidget target, int screenWidth,
                                  int mouseX, int mouseY, float partialTick) {
         renderPointingAt(graphics, target, screenWidth, false, mouseX, mouseY, partialTick);
@@ -79,8 +74,7 @@ public class ChatBubbleWidget extends AbstractWidget {
     public void renderPointingAt(GuiGraphicsExtractor graphics, AbstractWidget target, int screenWidth, boolean below,
                                  int mouseX, int mouseY, float partialTick) {
         int bubbleW = this.getWidth();
-        int targetCenterX = target.getX() + target.getWidth() / 2;
-
+        int centerX = target.getX() + target.getWidth() / 2;
         int bob = bobOffset();
         int tailY;
         int bubbleY;
@@ -88,19 +82,17 @@ public class ChatBubbleWidget extends AbstractWidget {
             tailY = target.getBottom() + TIP_GAP - 2 - bob;
             bubbleY = tailY + TAIL_HEIGHT - 1;
         } else {
-            tailY = target.getY() - TIP_GAP - TAIL_HEIGHT + 2 + bob;
+            tailY = target.getY() - TAIL_HEIGHT + 1 + bob;
             bubbleY = tailY - HEIGHT + 1;
         }
 
-        int bubbleX = targetCenterX - bubbleW / 2;
+        // clamp throws when min > max
         int maxX = screenWidth - bubbleW - SCREEN_MARGIN;
-        bubbleX = maxX < SCREEN_MARGIN ? SCREEN_MARGIN
-                : Math.clamp(bubbleX, SCREEN_MARGIN, maxX);
+        int bubbleX = maxX < SCREEN_MARGIN ? SCREEN_MARGIN : Math.clamp(centerX - bubbleW / 2, SCREEN_MARGIN, maxX);
 
-        int tailX = targetCenterX - TAIL_TIP;
         int tailMin = bubbleX + CAP_INSET;
         int tailMax = bubbleX + bubbleW - TAIL_WIDTH - CAP_INSET;
-        tailX = tailMax < tailMin ? tailMin : Math.clamp(tailX, tailMin, tailMax);
+        int tailX = tailMax < tailMin ? tailMin : Math.clamp(centerX - 3, tailMin, tailMax);
 
         this.setX(bubbleX);
         this.setY(bubbleY);
