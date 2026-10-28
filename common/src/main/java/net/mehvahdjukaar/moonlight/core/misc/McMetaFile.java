@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// null animation means no "animation" section at all (ctm mods use mcmeta for their own data). Not the same as a
-// present but defaulted one, or a ctm-only file would be written out as animated with no frames
+// null animation means no "animation" section at all (ctm mods use mcmeta for their own data)
 public record McMetaFile(@Nullable AnimationMetadataSection animation, JsonObject moddedStuff) {
 
     public static final int UNKNOWN_SIZE = -1;

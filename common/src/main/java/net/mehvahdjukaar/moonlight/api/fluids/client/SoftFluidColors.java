@@ -60,8 +60,6 @@ public class SoftFluidColors implements ResourceManagerReloadListener {
         refreshParticleColors(SoftFluidRegistry.get(registryAccess));
     }
 
-    // fluid models bake on a resource reload while soft fluids are built on a datapack one, so the
-    // use_texture_from appearance can't be resolved in the SoftFluid constructor
     public static void refreshParticleColors(Registry<SoftFluid> reg) {
         for (var fluid : reg) {
             fluid.setResolvedAppearance(resolveAppearance(fluid.getTextureOverride()));

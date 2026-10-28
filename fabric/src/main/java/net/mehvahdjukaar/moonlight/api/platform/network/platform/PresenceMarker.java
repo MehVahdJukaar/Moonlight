@@ -7,8 +7,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
-// never sent. Fabric's handshake only advertises channels a side can receive, so this serverbound marker is
-// what lets a client see the server has the matching clientbound payload
 record PresenceMarker(CustomPacketPayload.Type<PresenceMarker> type) implements CustomPacketPayload {
 
     static Identifier idOf(CustomPacketPayload.Type<?> clientBound) {

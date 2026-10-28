@@ -145,12 +145,11 @@ public final class GuiHelper {
         return Locale.forLanguageTag(code.replace('_', '-'));
     }
 
-    // centers the visible glyphs in the box. Font#width counts the trailing spacing column and lineHeight the
-    // descender row, so centering on those lands a pixel off
     public static void renderTextCenteredIn(GuiGraphicsExtractor graphics, Font font, String text, int x, int y, int w, int h, int color) {
         int glyphW = font.width(text) - 1;
         graphics.text(font, text, x + (w - glyphW) / 2, y + (h - 7) / 2, color, false);
     }
+
     //for diagonals
     public static void renderChecker(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
         int cell = 4;
@@ -197,14 +196,14 @@ public final class GuiHelper {
     public static void renderScrollingText(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {
-            graphics.text(font, text, minX, textY, color); // fits: left aligned
+            graphics.text(font, text, minX, textY, color);
         }
     }
 
     public static void renderScrollingTextCentered(GuiGraphicsExtractor graphics, Font font, Component text, int minX, int maxX, int rowTop, int rowHeight, int color) {
         int textY = rowTop + (rowHeight - font.lineHeight) / 2 + 1;
         if (!scrollIfOverflow(graphics, font, text, minX, maxX, rowTop, rowHeight, textY, color)) {
-            int cx = minX + (maxX - minX - font.width(text)) / 2; // fits: centered
+            int cx = minX + (maxX - minX - font.width(text)) / 2;
             graphics.text(font, text, cx, textY, color);
         }
     }
