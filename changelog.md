@@ -1,2 +1,1 @@
-- more fixes for 26.1
-- item tint source registration helper
+minor fixes
