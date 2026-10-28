@@ -34,6 +34,18 @@ public interface IVillagerBrainEvent extends SimpleEvent {
      */
     void addOrReplaceActivity(Activity activity, ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super Villager>>> activityPackage);
 
+    //like before 26..
+    /**
+     * Adds an activity to the schedule.
+     * Will override any actifivty  that is in that specified time window
+     * Note that subsequent call to this from other mods in later event execution might override your activity if the time window is the same
+     *
+     * @param activity  activity to register
+     * @param startTime day time at which activity will start
+     * @param endTime   day time at which activity will end. can also be less than start time
+     */
+    void scheduleActivity(Activity activity, int startTime, int endTime);
+
     /**
      * Registers a memory slot on the brain.
      * Sensors and tasks added through this event already register what they require,

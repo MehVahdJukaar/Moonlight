@@ -23,6 +23,7 @@
     "BeeGoalMixin",
     "BlockItemMixin",
     "BlockStateBaseMixin",
+    "BrainMixin",
     "CartographyTableAdditionalSlotMixin",
     "CartographyTableMapSlotMixin",
     "CartographyTableMenuMixin",

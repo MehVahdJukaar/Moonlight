@@ -48,6 +48,11 @@ public class VillagerBrainEvent implements IVillagerBrainEvent {
     }
 
     @Override
+    public void scheduleActivity(Activity activity, int startTime, int endTime) {
+        this.internal.scheduleActivity(activity, startTime, endTime);
+    }
+
+    @Override
     public void registerMemory(MemoryModuleType<?> memoryModuleType) {
         this.internal.registerMemory(memoryModuleType);
     }

@@ -53,6 +53,10 @@ public class VillagerBrainEventInternal {
         this.brain.addActivity(activity, activityPackage, Set.of(), Set.of());
     }
 
+    public void scheduleActivity(Activity activity, int startTime, int endTime) {
+        ((IExtendedBrain) brain).moonlight$scheduleActivity(villager, activity, startTime, endTime);
+    }
+
     //this might be bad
 
     /**
