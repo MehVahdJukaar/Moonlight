@@ -43,6 +43,11 @@ public class HardcodedBlockTypes {
         WoodTypeRegistry woodReg = WoodTypeRegistry.INSTANCE;
         LeavesTypeRegistry leafReg = LeavesTypeRegistry.INSTANCE;
 
+        // Nourishend - REASON: Naming-Convention
+        // NOTE: it's been archived via Modrinth and is only available for 1.20.1
+        woodReg.addSimpleFinder("nourishend", "strange").bambooLike(true)
+                .log("strange_stalk_bundle");
+
         // Shroomcraft - REASON: Naming-Convention
         woodReg.addSimpleFinder("shroomcraft", "shroomwood")
                 .planksSuffix("_planks")
