@@ -1,1 +1,1 @@
-fixed an issue with texture ops
+**Undetected WoodType**: Added **Nourishend**'s strange - [EveryCompat#1323](https://github.com/MehVahdJukaar/WoodGood/issues/1323)
