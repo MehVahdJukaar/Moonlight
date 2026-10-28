@@ -94,7 +94,7 @@ subprojects {
         setVersionType(release_type)
         setCurseEnvironment("both")
 
-        setArtifact(tasks.remapJar)
+        setArtifact(tasks.jar)
         addAdditionalFile {
             artifact tasks.remapSourcesJar
             fileType "sources-jar"
