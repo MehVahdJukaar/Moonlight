@@ -187,7 +187,6 @@ public final class FileDownloadUtils {
                 throw new HttpStatusException(responseCode, urlStr);
             }
 
-            //on a 206 the length is just what's left, and startOffset is 0 in every other case
             long contentLength = conn.getContentLengthLong();
             long totalExpected = contentLength < 0 ? -1 : contentLength + startOffset;
 

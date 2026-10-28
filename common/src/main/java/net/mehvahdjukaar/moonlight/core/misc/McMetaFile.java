@@ -17,13 +17,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A parsed .png.mcmeta. A null animation means the file had no "animation" section at all,
- * which is the common case for connected texture mods that only use it to carry their own data.
- * That is NOT the same as a present but defaulted section, so it must not be collapsed into
- * {@link AnimationMetadataSection#EMPTY}: doing so makes a ctm-only file look animated and
- * ends up writing out an animation with no frames.
- */
+// null animation means no "animation" section at all (ctm mods use mcmeta for their own data). Not the same as a
+// present but defaulted one, or a ctm-only file would be written out as animated with no frames
 public record McMetaFile(@Nullable AnimationMetadataSection animation, JsonObject moddedStuff) {
 
     public static McMetaFile of(@NotNull AnimationMetadataSection vanillaMcmeta) {

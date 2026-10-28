@@ -67,10 +67,22 @@ public class ChatBubbleWidget extends AbstractWidget {
 
     public void renderPointingAt(GuiGraphics graphics, AbstractWidget target, int screenWidth,
                                  int mouseX, int mouseY, float partialTick) {
+        renderPointingAt(graphics, target, screenWidth, false, mouseX, mouseY, partialTick);
+    }
+
+    public void renderPointingAt(GuiGraphicsExtractor graphics, AbstractWidget target, int screenWidth, boolean below,
+                                 int mouseX, int mouseY, float partialTick) {
         int bubbleW = this.getWidth();
         int centerX = target.getX() + target.getWidth() / 2;
-        int tailY = target.getY() - TAIL_HEIGHT + 1 + bobOffset();
-        int bubbleY = tailY - HEIGHT + 1;
+        int tailY;
+        int bubbleY;
+        if (below) {
+            tailY = target.getBottom() + TIP_GAP - 2 - bob;
+            bubbleY = tailY + TAIL_HEIGHT - 1;
+        } else {
+            tailY = target.getY() - TAIL_HEIGHT + 1 + bobOffset();
+            bubbleY = tailY - HEIGHT + 1;
+        }
 
         // clamp throws when min > max
         int maxX = screenWidth - bubbleW - SCREEN_MARGIN;
@@ -84,7 +96,15 @@ public class ChatBubbleWidget extends AbstractWidget {
         this.setY(bubbleY);
         this.renderWidget(graphics, mouseX, mouseY, partialTick);
 
-        graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
+        if (below) {
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(tailX, tailY + TAIL_HEIGHT);
+            graphics.pose().scale(1, -1);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CHAT_BUBBLE_TAIL, 0, 0, TAIL_WIDTH, TAIL_HEIGHT);
+            graphics.pose().popMatrix();
+        } else {
+            graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
+        }
     }
 
     @Override

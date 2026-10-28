@@ -15,6 +15,7 @@ public class PointingChatBubbleOverlay implements Renderable {
     private final IntSupplier screenWidth;
     private final Supplier<Component> messageSupplier;
     private final ChatBubbleWidget bubble;
+    private final boolean below;
 
     public PointingChatBubbleOverlay(AbstractWidget target, IntSupplier screenWidth,
                                      Supplier<Component> messageSupplier) {
@@ -23,10 +24,16 @@ public class PointingChatBubbleOverlay implements Renderable {
 
     public PointingChatBubbleOverlay(AbstractWidget target, IntSupplier screenWidth,
                                      Supplier<Component> messageSupplier, boolean animated) {
+        this(target, screenWidth, messageSupplier, animated, false);
+    }
+
+    public PointingChatBubbleOverlay(AbstractWidget target, IntSupplier screenWidth,
+                                     Supplier<Component> messageSupplier, boolean animated, boolean below) {
         this.target = target;
         this.screenWidth = screenWidth;
         this.messageSupplier = messageSupplier;
         this.bubble = new ChatBubbleWidget(0, 0, Component.empty()).setAnimated(animated);
+        this.below = below;
     }
 
     @Override
@@ -39,6 +46,6 @@ public class PointingChatBubbleOverlay implements Renderable {
         if (!message.equals(this.bubble.getMessage())) {
             this.bubble.setText(message);
         }
-        this.bubble.renderPointingAt(graphics, this.target, this.screenWidth.getAsInt(), mouseX, mouseY, partialTick);
+        this.bubble.renderPointingAt(graphics, this.target, this.screenWidth.getAsInt(), this.below, mouseX, mouseY, partialTick);
     }
 }
