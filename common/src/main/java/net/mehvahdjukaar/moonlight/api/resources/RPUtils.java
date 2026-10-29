@@ -95,13 +95,11 @@ public class RPUtils {
                 //grabs the first resource location of a model
                 Set<String> models = findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"));
 
+                List<String> allTextures = new ArrayList<>();
                 for (var modelPath : models) {
-                    List<String> textures = findAllTexturesInModelRecursive(manager, modelPath);
-
-                    for (var t : textures) {
-                        TextureCache.add(block, t);
-                    }
+                    allTextures.addAll(findAllTexturesInModelRecursive(manager, modelPath));
                 }
+                TextureCache.addAll(block, allTextures);
                 cached = TextureCache.getCachedTexture(block, texturePredicate);
                 if (cached.isSuccess()) {
                     return ResourceLocation.parse(cached.getObject());
@@ -113,8 +111,8 @@ public class RPUtils {
 
             //if texture is not there try to guess location. Hack for better end
             var hack = guessBlockTextureLocation(blockId, block);
+            TextureCache.addAll(block, hack);
             for (var t : hack) {
-                TextureCache.add(block, t);
                 if (texturePredicate.test(t)) return ResourceLocation.parse(t);
             }
         }
@@ -191,9 +189,7 @@ public class RPUtils {
                 //if texture is not there try to guess location. Hack for better end
                 textures = guessItemTextureLocation(itemId, item);
             }
-            for (var t : textures) {
-                TextureCache.add(item, t);
-            }
+            TextureCache.addAll(item, textures);
             cached = TextureCache.getCachedTexture(item, texturePredicate);
             if (cached.isSuccess()) {
                 return ResourceLocation.parse(cached.getObject());

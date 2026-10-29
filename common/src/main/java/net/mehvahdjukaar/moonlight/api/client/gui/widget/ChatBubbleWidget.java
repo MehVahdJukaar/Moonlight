@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.client.gui.widget;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,7 @@ public class ChatBubbleWidget extends AbstractWidget {
     private static final int HEIGHT = 12;
     private static final int TAIL_WIDTH = 7;
     private static final int TAIL_HEIGHT = 5;
+    private static final int TIP_GAP = 1;
 
     private static final int PADDING = 6;
     private static final int CAP_INSET = 3;
@@ -70,17 +72,18 @@ public class ChatBubbleWidget extends AbstractWidget {
         renderPointingAt(graphics, target, screenWidth, false, mouseX, mouseY, partialTick);
     }
 
-    public void renderPointingAt(GuiGraphicsExtractor graphics, AbstractWidget target, int screenWidth, boolean below,
+    public void renderPointingAt(GuiGraphics graphics, AbstractWidget target, int screenWidth, boolean below,
                                  int mouseX, int mouseY, float partialTick) {
         int bubbleW = this.getWidth();
         int centerX = target.getX() + target.getWidth() / 2;
+        int bob = bobOffset();
         int tailY;
         int bubbleY;
         if (below) {
             tailY = target.getBottom() + TIP_GAP - 2 - bob;
             bubbleY = tailY + TAIL_HEIGHT - 1;
         } else {
-            tailY = target.getY() - TAIL_HEIGHT + 1 + bobOffset();
+            tailY = target.getY() - TAIL_HEIGHT + 1 + bob;
             bubbleY = tailY - HEIGHT + 1;
         }
 
@@ -97,11 +100,13 @@ public class ChatBubbleWidget extends AbstractWidget {
         this.renderWidget(graphics, mouseX, mouseY, partialTick);
 
         if (below) {
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(tailX, tailY + TAIL_HEIGHT);
-            graphics.pose().scale(1, -1);
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, MoonlightIcons.CHAT_BUBBLE_TAIL, 0, 0, TAIL_WIDTH, TAIL_HEIGHT);
-            graphics.pose().popMatrix();
+            graphics.pose().pushPose();
+            graphics.pose().translate(tailX, tailY + TAIL_HEIGHT, 0);
+            graphics.pose().scale(1, -1, 1);
+            RenderSystem.disableCull();
+            graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, 0, 0, TAIL_WIDTH, TAIL_HEIGHT);
+            RenderSystem.enableCull();
+            graphics.pose().popPose();
         } else {
             graphics.blitSprite(MoonlightIcons.CHAT_BUBBLE_TAIL, tailX, tailY, TAIL_WIDTH, TAIL_HEIGHT);
         }
