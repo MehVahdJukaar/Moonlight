@@ -27,7 +27,7 @@ public class TextureCache {
      * @param id          id that will be used to identify this texture. needs to match the criteria that are used to normally identify textures inside a model
      * @param texturePath actual texture location. It is not its absolute path so no :textures/
      */
-    public static void registerSpecialTextureForBlock(ResourceLocation blockId, String id, ResourceLocation texturePath) {
+    public static void registerSpecialTextureForBlock(Identifier blockId, String id, Identifier texturePath) {
         SPECIAL_BLOCK_TEXTURES.computeIfAbsent(blockId, b -> ConcurrentHashMap.newKeySet()).add(new Pair<>(id, texturePath.toString()));
     }
 
@@ -40,7 +40,7 @@ public class TextureCache {
         }
     }
     //lazy reg map
-    private static final Map<ResourceLocation, Set<Pair<String, String>>> SPECIAL_BLOCK_TEXTURES = new ConcurrentHashMap<>();
+    private static final Map<Identifier, Set<Pair<String, String>>> SPECIAL_BLOCK_TEXTURES = new ConcurrentHashMap<>();
 
     //live ones
     private static final Map<ItemLike, Set<Pair<String, String>>> SPECIAL_TEXTURES = new ConcurrentHashMap<>();
