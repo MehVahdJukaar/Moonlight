@@ -327,6 +327,11 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @PlatformImpl
+    public static boolean isLoadedByConnector(String modId) {
+        throw new AssertionError();
+    }
+
     @Contract
     @PlatformImpl
     public static boolean isMobGriefingOn(Level level, Entity entity) {

@@ -20,6 +20,7 @@ public final class MoonlightIcons {
     public static final Identifier CLOCK = Moonlight.res("clock");
     public static final Identifier STAR = Moonlight.res("star");
     public static final Identifier STAR_EMPTY = Moonlight.res("star_empty");
+    public static final Identifier CONNECTOR = Moonlight.res("connector");
     public static final Identifier SORT_ASCENDING = Moonlight.res("sort_ascending");
     public static final Identifier SORT_DESCENDING = Moonlight.res("sort_descending");
 
