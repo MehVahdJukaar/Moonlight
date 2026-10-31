@@ -46,6 +46,7 @@ public class ModsTilesScreen extends Screen {
     private static final int CARD_GAP = 6;
     private static final int STAR_SIZE = 12;
     private static final int STAR_INSET = 3;
+    private static final int CONNECTOR_SIZE = 8;
 
     private final Screen parent;
     @Nullable
@@ -66,7 +67,7 @@ public class ModsTilesScreen extends Screen {
         this.background = background;
     }
 
-    private record Entry(String modId, Component name, @Nullable Component version, boolean ours) {
+    private record Entry(String modId, Component name, @Nullable Component version, boolean ours, boolean viaConnector) {
     }
 
     private static boolean isFavourite(String modId) {
@@ -139,7 +140,7 @@ public class ModsTilesScreen extends Screen {
             String name = PlatHelper.getModName(modId);
             String version = PlatHelper.getModVersion(modId);
             this.allEntries.add(new Entry(modId, Component.literal(name),
-                    version == null ? null : Component.literal("v" + version), isOurs(modId)));
+                    version == null ? null : Component.literal("v" + version), isOurs(modId), PlatHelper.isLoadedByConnector(modId)));
         }
         sortEntries();
 
@@ -265,7 +266,7 @@ public class ModsTilesScreen extends Screen {
     }
 
     private static boolean isOverStar(double mouseX, double mouseY, int cardX, int cardY) {
-        return GuiHelper.isMouseOver(mouseX, mouseY, cardX + CARD_W - STAR_SIZE - STAR_INSET, cardY + STAR_INSET, STAR_SIZE, STAR_SIZE);
+        return GuiHelper.isMouseOver(mouseX, mouseY, cardX + STAR_INSET, cardY + STAR_INSET, STAR_SIZE, STAR_SIZE);
     }
 
     private void renderCard(GuiGraphics graphics, Entry entry, int x, int y, boolean hover, boolean starHover) {
@@ -292,7 +293,11 @@ public class ModsTilesScreen extends Screen {
         boolean favourite = isFavourite(entry.modId());
         if (favourite || hover) {
             ResourceLocation star = favourite || starHover ? MoonlightIcons.STAR : MoonlightIcons.STAR_EMPTY;
-            graphics.blitSprite(star, x + CARD_W - STAR_SIZE - STAR_INSET, y + STAR_INSET, STAR_SIZE, STAR_SIZE);
+            graphics.blitSprite(star, x + STAR_INSET, y + STAR_INSET, STAR_SIZE, STAR_SIZE);
+        }
+        if (entry.viaConnector()) {
+            int connectorOffset = (STAR_SIZE - CONNECTOR_SIZE) / 2;
+            graphics.blitSprite(MoonlightIcons.CONNECTOR, x + CARD_W - STAR_SIZE - STAR_INSET + connectorOffset, y + STAR_INSET + connectorOffset, CONNECTOR_SIZE, CONNECTOR_SIZE);
         }
         if (starHover) {
             this.setTooltipForNextRenderPass(Component.translatable(favourite

@@ -380,6 +380,11 @@ public class PlatHelperImpl {
         return ModList.get().getModContainerById(modId).map(v -> v.getModInfo().getVersion().toString()).orElse(null);
     }
 
+    public static boolean isLoadedByConnector(String modId) {
+        var file = ModList.get().getModFileById(modId);
+        return file != null && Files.exists(file.getFile().findResource("fabric.mod.json"));
+    }
+
     public static Packet<ClientGamePacketListener> getEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
         return new ClientboundAddEntityPacket(entity, serverEntity);
     }

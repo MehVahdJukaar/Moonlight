@@ -342,6 +342,11 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    @PlatformImpl
+    public static boolean isLoadedByConnector(String modId) {
+        throw new AssertionError();
+    }
+
     @Deprecated(forRemoval = true)
     public static void registerResourcePack(PackType packType, Supplier<Pack> packSupplier) {
         RegHelper.registerResourcePack(packType, packSupplier);
