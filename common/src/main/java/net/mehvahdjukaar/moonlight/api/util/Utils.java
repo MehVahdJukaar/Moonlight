@@ -236,6 +236,9 @@ public class Utils {
     }
 
     public static Identifier getID(@NotNull Block object) {
+        //workaround since some mods dont store their ids properly... skipping new 26.1.2 api
+        var holder = object.builtInRegistryHolder();
+        if (holder.isBound()) return holder.key().identifier();
         return object.properties().id.identifier();
     }
 
