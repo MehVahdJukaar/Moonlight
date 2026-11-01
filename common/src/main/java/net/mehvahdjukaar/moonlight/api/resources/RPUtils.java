@@ -13,8 +13,15 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -30,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -277,8 +285,36 @@ public class RPUtils {
 
     //ingredients are holder sets now so they need a registry either way, plain JsonOps just fails
     private static RegistryOps<JsonElement> recipeOps() {
-        return Utils.hackyGetRegistryAccess().createSerializationContext(JsonOps.INSTANCE);
+        return RegistryOps.create(JsonOps.INSTANCE, STATIC_REGISTRIES_WITH_UNBOUND_TAGS);
     }
+
+
+    private static final Map<TagKey<?>, HolderSet.Named<?>> UNBOUND_TAGS = new ConcurrentHashMap<>();
+
+    //hack for dynamic packs that run before datapack rwgistries and tags are loaded.
+    private static final RegistryOps.RegistryInfoLookup STATIC_REGISTRIES_WITH_UNBOUND_TAGS = new RegistryOps.RegistryInfoLookup() {
+        @Override
+        public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> registryKey) {
+            Registry<T> registry = (Registry<T>) BuiltInRegistries.REGISTRY.getValue(registryKey.identifier());
+
+            if (registry == null) return Optional.empty();
+
+            HolderGetter<T> getter = new HolderGetter<>() {
+                @Override
+                public Optional<Holder.Reference<T>> get(ResourceKey<T> id) {
+                    return registry.get(id);
+                }
+
+                //same instance per tag so equal ingredients stay equal
+                @Override
+                public Optional<HolderSet.Named<T>> get(TagKey<T> id) {
+                    return Optional.of((HolderSet.Named<T>) UNBOUND_TAGS.computeIfAbsent(id,
+                            k -> HolderSet.emptyNamed(registry, id)));
+                }
+            };
+            return Optional.of(new RegistryOps.RegistryInfo<>(registry, getter, registry.registryLifecycle()));
+        }
+    };
 
     public static Path getResourcePath(Path path, Identifier k, PackType packType) {
         return path.resolve(packType.getDirectory())

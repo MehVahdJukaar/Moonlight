@@ -123,7 +123,7 @@ public class RecipeTemplate {
                 Optional<Ingredient> slot = ingredients.get(row * width + col);
 
                 // Check if ingredient is empty, then use space.
-                if (slot.isEmpty() || slot.get().isEmpty()) {
+                if (slot.isEmpty()) {
                     rowPattern.append(' ');
                 } else {
                     Ingredient ingredient = slot.get();
@@ -173,11 +173,7 @@ public class RecipeTemplate {
         List<Ingredient> newList = new ArrayList<>();
         Map<Ingredient, Ingredient> convertedMap = new HashMap<>();
         for (Ingredient ingredient : or) {
-            if (ingredient.isEmpty()) {
-                newList.add(ingredient);
-            } else {
-                newList.add(convertedMap.computeIfAbsent(ingredient, i -> BlockTypeSwapIngredient.create(i, from, to)));
-            }
+            newList.add(convertedMap.computeIfAbsent(ingredient, i -> BlockTypeSwapIngredient.create(i, from, to)));
         }
         return newList;
     }
@@ -187,7 +183,7 @@ public class RecipeTemplate {
         Map<Ingredient, Ingredient> convertedMap = new HashMap<>();
         List<Optional<Ingredient>> newList = new ArrayList<>();
         for (Optional<Ingredient> slot : or) {
-            if (slot.isEmpty() || slot.get().isEmpty()) {
+            if (slot.isEmpty()) {
                 newList.add(slot);
             } else {
                 newList.add(Optional.of(convertedMap.computeIfAbsent(slot.get(),
