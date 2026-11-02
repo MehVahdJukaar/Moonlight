@@ -65,6 +65,7 @@ import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -385,8 +386,8 @@ public class PlatHelperImpl {
     }
 
     public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
-        return ICondition.conditionsMatched(JsonOps.INSTANCE, json) &&
-                ResourceConditionsBridge.matchesForgeConditions(json, ICondition.IContext.EMPTY, "fabric:load_conditions");
+        if (json.has(ConditionalOps.DEFAULT_CONDITIONS_KEY)) return ICondition.conditionsMatched(JsonOps.INSTANCE, json);
+        return ResourceConditionsBridge.matchesForgeConditions(json, ICondition.IContext.EMPTY, "fabric:load_conditions");
     }
 
     public static List<String> getInstalledMods() {
