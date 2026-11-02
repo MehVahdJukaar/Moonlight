@@ -1,8 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
@@ -326,6 +328,11 @@ public class PlatHelperImpl {
 
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
         return ICondition.conditionsMatched(ops, jo);
+    }
+
+    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
+        return ICondition.conditionsMatched(JsonOps.INSTANCE, json) &&
+                ResourceConditionsBridge.matchesForgeConditions(json, ICondition.IContext.EMPTY, "fabric:load_conditions");
     }
 
     public static List<String> getInstalledMods() {

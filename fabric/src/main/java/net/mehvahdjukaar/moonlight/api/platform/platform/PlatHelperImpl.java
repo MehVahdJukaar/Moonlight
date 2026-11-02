@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
@@ -17,6 +18,7 @@ import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.Person;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -325,6 +327,10 @@ public class PlatHelperImpl {
         //TODO: re add
         //if (jo instanceof JsonObject j) ResourceConditionsImpl.conditionsMet(j);
         return true;
+    }
+
+    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
+        return ResourceConditionsImpl.applyResourceConditions(json, "tags", id, null);
     }
 
     public static List<String> getInstalledMods() {

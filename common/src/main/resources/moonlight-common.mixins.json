@@ -54,6 +54,7 @@
     "ServerLevelMixin",
     "ServerPlayerMixin",
     "ShearItemMixin",
+    "TagLoaderMixin",
     "TeleportCommandMixin",
     "TemplateStructurePieceMixin",
     "ThrownPotionMixin",
