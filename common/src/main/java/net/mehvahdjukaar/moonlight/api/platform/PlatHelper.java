@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
@@ -105,6 +106,14 @@ public class PlatHelper {
 
     @PlatformImpl
     public static boolean evaluateRecipeCondition(DynamicOps<JsonElement> ops, JsonElement jo) {
+        throw new AssertionError();
+    }
+
+    /**
+     * checks fabric:load_conditions (and neoforge:conditions on neoforge) on raw json resource
+     */
+    @PlatformImpl
+    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
         throw new AssertionError();
     }
 
