@@ -1,13 +1,16 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
-import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.DropdownWidget;
-import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
+import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
+import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
+import net.mehvahdjukaar.moonlight.api.client.gui.screen.ColorPickerScreen;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.ColorFieldWidget;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.DropdownWidget;
+import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
-import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -35,8 +38,9 @@ class ListEditScreen extends Screen implements PopupHost {
     private final Consumer<List<String>> onApply;
     private final ConfigOption.ListValue option;
     private final List<String> editedEntries;
+    // non-null -> entries are picked with a dropdown
     @Nullable
-    private final List<String> options; // non-null -> entries are picked with a dropdown
+    private final List<String> options;
     private final OverlayLayer overlay = new OverlayLayer();
 
     private ConfigRowList list;
@@ -66,7 +70,11 @@ class ListEditScreen extends Screen implements PopupHost {
         Component addLabel = Component.literal("+ ").withStyle(ChatFormatting.AQUA)
                 .append(Component.translatable("gui.moonlight.config.list_add").withStyle(ChatFormatting.RESET));
         this.addRenderableWidget(Button.builder(addLabel, b -> {
-            editedEntries.add(options != null && !options.isEmpty() ? options.getFirst() : "");
+            if (option instanceof ConfigOption.ColorListValue colors) {
+                editedEntries.add(ColorUtils.toHexString(-1, colors.hasAlpha));
+            } else {
+                editedEntries.add(options != null && !options.isEmpty() ? options.getFirst() : "");
+            }
             rebuildRows();
             this.list.setScrollAmount(this.list.maxScrollAmount());
         }).bounds(cx - 100, this.height - 52, 200, 20).build());
@@ -86,6 +94,10 @@ class ListEditScreen extends Screen implements PopupHost {
             rows.add(new EntryRow(i));
         }
         this.list.setRows(rows);
+    }
+
+    private static int parseOrWhite(String hex) {
+        return ColorUtils.isValidString(hex) ? ColorUtils.parseHex(hex) : -1;
     }
 
     @Override
@@ -132,17 +144,17 @@ class ListEditScreen extends Screen implements PopupHost {
 
     private class EntryRow extends ConfigRow {
         private final AbstractWidget editor;
-        @Nullable
-        private final EditBox box; // set only for free-text entries, for validity coloring
         private final Button remove;
         private final List<AbstractWidget> children;
-        private final int index;
 
-        EntryRow(int index) {
-            this.index = index;
+        private EntryRow(int index) {
             int editorWidth = ROW_WIDTH - RESET_WIDTH - GAP;
-            if (options != null) {
-                this.box = null;
+            if (option instanceof ConfigOption.ColorListValue colors) {
+                boolean alpha = colors.hasAlpha;
+                Consumer<Integer> setEntry = c -> editedEntries.set(index, ColorUtils.toHexString(c, alpha));
+                this.editor = new ColorFieldWidget(editorWidth, CONTROL_HEIGHT, parseOrWhite(editedEntries.get(index)), alpha, setEntry,
+                        current -> minecraft.setScreen(new ColorPickerScreen(current, alpha, ListEditScreen.this, setEntry)));
+            } else if (options != null) {
                 this.editor = new DropdownWidget(editorWidth, CONTROL_HEIGHT, options, option.icon,
                         editedEntries.get(index), v -> editedEntries.set(index, v));
             } else {
@@ -154,7 +166,6 @@ class ListEditScreen extends Screen implements PopupHost {
                     b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.FIELD_TEXT : ConfigGuiColors.ERROR);
                 });
                 b.setTextColor(option.isValidEntry(b.getValue()) ? ConfigGuiColors.FIELD_TEXT : ConfigGuiColors.ERROR);
-                this.box = b;
                 this.editor = b;
             }
             this.remove = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.DELETE, btn -> {

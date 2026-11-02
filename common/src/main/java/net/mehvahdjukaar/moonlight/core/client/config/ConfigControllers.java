@@ -184,14 +184,16 @@ public final class ConfigControllers {
             return new ConfigControl<>(w, w::setValue);
         });
 
-        register(ConfigOption.ListValue.class, (o, s, onChange) -> {
+        ConfigControl.Provider<ConfigOption.ListValue> listProvider = (o, s, onChange) -> {
             IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.valueOrPendingValue(o)), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(new ListEditScreen(o, s.valueOrPendingValue(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
                         onChange.run();
                     })));
             return new ConfigControl<List<String>>(button, list -> button.setMessage(listLabel(list)));
-        });
+        };
+        register(ConfigOption.ListValue.class, listProvider);
+        register(ConfigOption.ColorListValue.class, listProvider::create);
 
         register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,

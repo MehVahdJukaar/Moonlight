@@ -208,12 +208,22 @@ public final class NeoforgeConfigBridge {
             case List<?> list when list.stream().allMatch(o -> o instanceof String) -> {
                 List<String> def = list.stream().map(o -> (String) o).toList();
                 Predicate<String> entryValidator = vs instanceof ModConfigSpec.ListValueSpec lvs ? lvs::testElement : null;
+                if (!def.isEmpty() && def.stream().allMatch(NeoforgeConfigBridge::isHexColor)) {
+                    boolean hasAlpha = def.stream().anyMatch(c -> c.length() == 9);
+                    return new ConfigOption.ColorListValue(title, desc, wrap(cv, meta), def, entryValidator, hasAlpha);
+                }
                 return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, entryValidator);
             }
             default -> {
             }
         }
         return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
+    }
+
+    //only trust the # form, a bare 6 digit string could be anything
+    private static boolean isHexColor(String s) {
+        return (s.length() == 7 || s.length() == 9) && s.charAt(0) == '#'
+                && s.chars().skip(1).allMatch(c -> Character.digit(c, 16) >= 0);
     }
 
     private static IConfigValue wrap(ModConfigSpec.ConfigValue<?> cv, ConfigMetadata meta) {
