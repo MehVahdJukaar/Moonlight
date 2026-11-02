@@ -40,6 +40,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
@@ -285,8 +286,18 @@ public class ClientHelperImpl {
     public static Screen getModConfigScreen(String modId, Screen parent) {
         return ModList.get().getModContainerById(modId)
                 .flatMap(container -> container.getCustomExtension(IConfigScreenFactory.class)
-                        .map(factory -> factory.createScreen(container, parent)))
+                        .map(factory -> createScreenSafe(factory, container, parent)))
                 .orElse(null);
+    }
+
+    @Nullable
+    private static Screen createScreenSafe(IConfigScreenFactory factory, ModContainer container, Screen parent) {
+        try {
+            return factory.createScreen(container, parent);
+        } catch (LinkageError e) {
+            Moonlight.LOGGER.error("Failed to create config screen for mod {}", container.getModId(), e);
+            return null;
+        }
     }
 
     public static boolean hasModConfigScreen(String modId) {

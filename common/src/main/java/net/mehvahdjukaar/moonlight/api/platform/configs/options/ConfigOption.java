@@ -454,6 +454,17 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
+    /** A list of hex color strings, edited with a color field per entry. */
+    public static class ColorListValue extends ListValue {
+        public final boolean hasAlpha;
+
+        public ColorListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
+                              List<String> defaultValue, @Nullable Predicate<String> entryValidator, boolean hasAlpha) {
+            super(title, description, handle, defaultValue, entryValidator);
+            this.hasAlpha = hasAlpha;
+        }
+    }
+
     public static class JsonValue extends ConfigOption<String> {
         public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
