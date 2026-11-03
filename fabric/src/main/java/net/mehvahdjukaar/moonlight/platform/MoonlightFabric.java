@@ -20,6 +20,7 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.network.ClientBoundSendLoginMessage;
+import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -86,6 +87,7 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         registerFlammableBlocks();
 
         RegHelperImpl.lateRegisterEntries();
+        BlocksColorInternal.INSTANCE.setup();
         FabricConfigHolder.loadAllConfigs();
 
         isInit = false;

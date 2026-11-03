@@ -137,7 +137,6 @@ public class Moonlight {
     @ApiStatus.Internal
     public static void commonSetup() {
 
-        BlocksColorInternal.INSTANCE.setup();
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightClient.setupClient();
         }

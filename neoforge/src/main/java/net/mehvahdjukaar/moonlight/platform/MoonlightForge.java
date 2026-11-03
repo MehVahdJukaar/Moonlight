@@ -10,6 +10,7 @@ import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.mehvahdjukaar.moonlight.core.set.BlocksColorInternal;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
 import net.mehvahdjukaar.moonlight.core.misc.platform.ModLootModifiers;
@@ -29,6 +30,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -56,6 +58,8 @@ public class MoonlightForge {
         Moonlight.commonInit();
         NeoForge.EVENT_BUS.register(MoonlightForge.class);
         bus.addListener(MoonlightForge::registerCapabilities);
+        //fires once every mod finished registering, way before any setup work runs
+        bus.addListener(BlockEntityTypeAddBlocksEvent.class, e -> BlocksColorInternal.INSTANCE.setup());
         ModLootModifiers.register();
         ModIngredientTypes.register();
         ResourceConditionsBridge.init();
