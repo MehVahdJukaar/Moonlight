@@ -113,7 +113,7 @@ public class PlatHelper {
      * checks fabric:load_conditions (and neoforge:conditions on neoforge) on raw json resource
      */
     @PlatformImpl
-    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
+    public static boolean matchesResourceConditions(JsonObject json, Identifier id) {
         throw new AssertionError();
     }
 

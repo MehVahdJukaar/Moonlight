@@ -334,7 +334,7 @@ public class PlatHelperImpl {
         return true;
     }
 
-    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
+    public static boolean matchesResourceConditions(JsonObject json, Identifier id) {
         return ResourceConditionsImpl.applyResourceConditions(json, "tags", id, null);
     }
 

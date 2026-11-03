@@ -385,7 +385,7 @@ public class PlatHelperImpl {
         return ICondition.conditionsMatched(ops, jo);
     }
 
-    public static boolean matchesResourceConditions(JsonObject json, ResourceLocation id) {
+    public static boolean matchesResourceConditions(JsonObject json, Identifier id) {
         if (json.has(ConditionalOps.DEFAULT_CONDITIONS_KEY)) return ICondition.conditionsMatched(JsonOps.INSTANCE, json);
         return ResourceConditionsBridge.matchesForgeConditions(json, ICondition.IContext.EMPTY, "fabric:load_conditions");
     }
