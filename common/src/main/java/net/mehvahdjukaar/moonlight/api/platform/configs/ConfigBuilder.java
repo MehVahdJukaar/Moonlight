@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
+import net.mehvahdjukaar.moonlight.api.util.math.Vec2i;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.misc.ConfigLangExporter;
 import net.minecraft.core.Registry;
@@ -23,6 +24,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -268,7 +270,7 @@ public abstract class ConfigBuilder {
         private String cachedSource;
         private Pattern cached;
 
-        RegexPatternValue(Supplier<String> source) {
+        private RegexPatternValue(Supplier<String> source) {
             this.source = source;
         }
 
@@ -615,6 +617,41 @@ public abstract class ConfigBuilder {
         return () -> new Range(minHandle.get(), maxHandle.get());
     }
 
+    /** A Vec2 shown as one row of x/y fields, each clamped between min and max. */
+    public Supplier<Vec2> defineVec2(String name, Vec2 defaultValue, float min, float max) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Float> xHandle = define("x", defaultValue.x, min, max);
+        Supplier<Float> yHandle = define("y", defaultValue.y, min, max);
+        pop();
+        this.suppressUi = false;
+
+        putName(this.translationKey(name), name);
+        ConfigOption.Vec2Value node = new ConfigOption.Vec2Value(
+                description(name), null, xHandle, yHandle, defaultValue, min, max);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> new Vec2(xHandle.get(), yHandle.get());
+    }
+
+    /** Integer version of defineVec2. */
+    public Supplier<Vec2i> defineVec2i(String name, Vec2i defaultValue, int min, int max) {
+        this.suppressUi = true;
+        push(name);
+        Supplier<Integer> xHandle = define("x", defaultValue.x(), min, max);
+        Supplier<Integer> yHandle = define("y", defaultValue.y(), min, max);
+        pop();
+        this.suppressUi = false;
+
+        putName(this.translationKey(name), name);
+        ConfigOption.Vec2iValue node = new ConfigOption.Vec2iValue(
+                description(name), null, xHandle, yHandle, defaultValue, min, max);
+        recordOption(node);
+        noteDefined(name, node, null);
+        return () -> new Vec2i(xHandle.get(), yHandle.get());
+    }
+
+    /** A Vec3 shown as one row of x/y/z fields, each clamped between min and max. */
     public Supplier<Vec3> defineVec3(String name, Vec3 defaultValue, double min, double max) {
         this.suppressUi = true;
         push(name);

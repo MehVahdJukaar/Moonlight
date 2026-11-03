@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.client.gui.widget.*;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
+import net.mehvahdjukaar.moonlight.api.util.math.Vec2i;
 import net.mehvahdjukaar.moonlight.core.client.config.schema.SchemaEditScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.time.LocalTime;
@@ -32,8 +34,7 @@ import java.util.function.Function;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-// Client side registry turning a server safe ConfigOption into an editing ConfigControl. The screen just calls
-// create() and never branches on value type, so a new control means registering a provider here instead
+//Client side registry turning a server safe ConfigOption into an editing ConfigControl.
 public final class ConfigControllers {
 //TODO:  expose api
     private static final Map<Class<?>, ConfigControl.Provider<?>> PROVIDERS = new HashMap<>();
@@ -51,7 +52,6 @@ public final class ConfigControllers {
 
 
     static {
-        // the check/cross sprite toggle is reserved for feature() switches, plain booleans get an ON/OFF text button
         register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
             CycleButton<Boolean> w = CycleButton.onOffBuilder(s.valueOrPendingValue(o))
                     .displayOnlyValue()
@@ -99,7 +99,6 @@ public final class ConfigControllers {
             return new ConfigControl<>(w, w::setColor);
         });
 
-        // plain numbers get a stepper field, slider subtypes get a slider
         register(ConfigOption.IntValue.class, (o, s, onChange) ->
                 numberField(s.valueOrPendingValue(o), o.min, o.max, true, v -> {
                     s.put(o, (int) Math.round(v));
@@ -134,6 +133,26 @@ public final class ConfigControllers {
                 onChange.run();
             });
             return new ConfigControl<>(w, w::setRange);
+        });
+
+        register(ConfigOption.Vec2Value.class, (o, s, onChange) -> {
+            Vec2 c = s.valueOrPendingValue(o);
+            Vec2ControlWidget w = new Vec2ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x, c.y, o.min, o.max, false,
+                    (x, y) -> {
+                        s.put(o, new Vec2((float) x, (float) y));
+                        onChange.run();
+                    });
+            return new ConfigControl<Vec2>(w, vv -> w.setValues(vv.x, vv.y));
+        });
+
+        register(ConfigOption.Vec2iValue.class, (o, s, onChange) -> {
+            Vec2i c = s.valueOrPendingValue(o);
+            Vec2ControlWidget w = new Vec2ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x(), c.y(), o.min, o.max, true,
+                    (x, y) -> {
+                        s.put(o, new Vec2i((int) Math.round(x), (int) Math.round(y)));
+                        onChange.run();
+                    });
+            return new ConfigControl<Vec2i>(w, vv -> w.setValues(vv.x(), vv.y()));
         });
 
         register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
