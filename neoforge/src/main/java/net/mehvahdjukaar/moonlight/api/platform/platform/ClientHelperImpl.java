@@ -264,7 +264,13 @@ public class ClientHelperImpl {
     }
 
     public static BakedModel getModel(ModelManager modelManager, ModelResourceLocation modelLocation) {
-        return modelManager.getModel(modelLocation);
+        BakedModel model = modelManager.getModel(modelLocation);
+        //sort of not correct but matches fabric
+        //fabric ignores the variant. mods written there ask for #inventory on models registered as standalone
+        if (model == modelManager.getMissingModel() && !ModelResourceLocation.STANDALONE_VARIANT.equals(modelLocation.variant())) {
+            return modelManager.getModel(ModelResourceLocation.standalone(modelLocation.id()));
+        }
+        return model;
     }
 
     @Nullable

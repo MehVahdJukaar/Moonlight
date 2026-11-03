@@ -9,9 +9,11 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.IConfigValue;
 import net.mehvahdjukaar.moonlight.api.util.math.Range;
 import net.mehvahdjukaar.codecui.Schema;
 import net.mehvahdjukaar.codecui.SchemaCodec;
+import net.mehvahdjukaar.moonlight.api.util.math.Vec2i;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -285,6 +287,72 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Override
         protected Stream<IConfigValue<?>> backingValues() {
             return storedValuesOf(minHandle, maxHandle);
+        }
+    }
+
+    public static class Vec2Value extends ConfigOption<Vec2> {
+        public final Supplier<Float> xHandle;
+        public final Supplier<Float> yHandle;
+        public final float min;
+        public final float max;
+
+        public Vec2Value(Component title, @Nullable Component description, Supplier<Float> xHandle,
+                         Supplier<Float> yHandle, Vec2 defaultValue, float min, float max) {
+            super(title, description, defaultValue);
+            this.xHandle = xHandle;
+            this.yHandle = yHandle;
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public Vec2 get() {
+            return new Vec2(xHandle.get(), yHandle.get());
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            Vec2 v = (Vec2) value;
+            holder.manuallySetValue(xHandle, v.x);
+            holder.manuallySetValue(yHandle, v.y);
+        }
+
+        @Override
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(xHandle, yHandle);
+        }
+    }
+
+    public static class Vec2iValue extends ConfigOption<Vec2i> {
+        public final Supplier<Integer> xHandle;
+        public final Supplier<Integer> yHandle;
+        public final int min;
+        public final int max;
+
+        public Vec2iValue(Component title, @Nullable Component description, Supplier<Integer> xHandle,
+                          Supplier<Integer> yHandle, Vec2i defaultValue, int min, int max) {
+            super(title, description, defaultValue);
+            this.xHandle = xHandle;
+            this.yHandle = yHandle;
+            this.min = min;
+            this.max = max;
+        }
+
+        @Override
+        public Vec2i get() {
+            return new Vec2i(xHandle.get(), yHandle.get());
+        }
+
+        @Override
+        public void apply(ModConfigHolder holder, Object value) {
+            Vec2i v = (Vec2i) value;
+            holder.manuallySetValue(xHandle, v.x());
+            holder.manuallySetValue(yHandle, v.y());
+        }
+
+        @Override
+        protected Stream<IConfigValue<?>> backingValues() {
+            return storedValuesOf(xHandle, yHandle);
         }
     }
 
