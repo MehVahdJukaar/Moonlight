@@ -60,7 +60,7 @@ public abstract class ConfigBuilder {
     protected boolean suppressUi = false;
 
     private final Map<String, Supplier<Boolean>> featureToggles = new LinkedHashMap<>();
-    private static final Map<Supplier<?>, ConfigOption.BooleanValue> BOOLEAN_ROWS =
+    private static final Map<Supplier<?>, ConfigOption.BooleanOption> BOOLEAN_ROWS =
             Collections.synchronizedMap(new IdentityHashMap<>());
     private final List<PendingDependency> pendingDependencies = new ArrayList<>();
     private final Deque<String> categoryPath = new ArrayDeque<>();
@@ -184,7 +184,7 @@ public abstract class ConfigBuilder {
     }
 
     public Supplier<Pattern> defineRegex(String name, String defaultValue) {
-        return new RegexPatternValue(defineRegexInternal(name, defaultValue));
+        return new CachedPattern(defineRegexInternal(name, defaultValue));
     }
 
     protected abstract Supplier<String> defineRegexInternal(String name, String defaultValue);
@@ -265,12 +265,12 @@ public abstract class ConfigBuilder {
         return () -> handle.get().stream().map(id -> BuiltInRegistries.BLOCK.getValue(Identifier.parse(id))).toList();
     }
 
-    private static class RegexPatternValue implements Supplier<Pattern> {
+    private static class CachedPattern implements Supplier<Pattern> {
         private final Supplier<String> source;
         private String cachedSource;
         private Pattern cached;
 
-        private RegexPatternValue(Supplier<String> source) {
+        private CachedPattern(Supplier<String> source) {
             this.source = source;
         }
 
@@ -294,17 +294,26 @@ public abstract class ConfigBuilder {
         return define(name, defaultValue, s -> true);
     }
 
-    public abstract String currentCategory();
+    @Nullable
+    public String currentCategory() {
+        return this.categoryPath.peekLast();
+    }
 
-    public abstract String parentCategory();
+    @Nullable
+    public String parentCategory() {
+        if (this.categoryPath.size() < 2) return null;
+        var it = this.categoryPath.descendingIterator();
+        it.next();
+        return it.next();
+    }
 
     public abstract <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate);
 
     public abstract <V extends Enum<V>> Supplier<V> define(String name, V defaultValue);
 
-    public abstract <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec);
+    public abstract <T> Supplier<T> defineObject(String name, Supplier<T> defaultSupplier, Codec<T> codec);
 
-    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
+    public <T> Supplier<List<T>> defineObjectList(String name, Supplier<List<T>> defaultSupplier, Codec<T> codec) {
         return defineObject(name, defaultSupplier, codec.listOf());
     }
 
@@ -347,12 +356,14 @@ public abstract class ConfigBuilder {
     }
 
     public String tooltipKey(String name) {
-        return this.name.getNamespace() + ".configuration." + currentCategory() + "." + name + ".description";
+        return translationKey(name) + ".description";
     }
 
     public String translationKey(String name) {
-        return this.name.getNamespace() + ".configuration." + currentCategory() +
-                (name.isEmpty() ? "" : "." + name);
+        String key = this.name.getNamespace() + ".configuration";
+        String category = currentCategory();
+        if (category != null) key += "." + category;
+        return name.isEmpty() ? key : key + "." + name;
     }
 
     public ConfigBuilder comment(String comment) {
@@ -378,7 +389,7 @@ public abstract class ConfigBuilder {
                 : Identifier.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
-    private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanValue row) {
+    private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanOption row) {
     }
 
     /**
@@ -387,7 +398,7 @@ public abstract class ConfigBuilder {
     @SafeVarargs
     public final ConfigBuilder dependsOn(Supplier<Boolean>... others) {
         for (Supplier<Boolean> other : others) {
-            ConfigOption.BooleanValue row = BOOLEAN_ROWS.get(other);
+            ConfigOption.BooleanOption row = BOOLEAN_ROWS.get(other);
             if (row == null) {
                 if (PlatHelper.isDev()) {
                     throw new IllegalArgumentException("dependsOn() takes a boolean config value that was already " +
@@ -462,26 +473,27 @@ public abstract class ConfigBuilder {
         }
     }
 
-    protected void uiPush(Component title) {
-        if (this.suppressUi) return;
+    protected void enterCategory(String category) {
+        this.categoryPath.addLast(category);
+        putName(this.translationKey(""), category);
         this.pendingComment = null;
         this.pendingCommentForwarded = false;
-        ConfigCategory cat = new ConfigCategory(title);
+        if (this.suppressUi) return;
+        ConfigCategory cat = new ConfigCategory(Component.translatable(translationKey("")));
         if (this.pendingIcon != null) {
             cat.setIcon(this.pendingIcon);
             this.pendingIcon = null;
         }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);
-        this.gateStack.push(this.gateStack.peek());
-        this.categoryPath.addLast(currentCategory());
+        this.gateStack.push(this.gateStack.peek()); // inherited until a feature() narrows it
     }
 
-    protected void uiPop() {
+    protected void exitCategory() {
+        this.categoryPath.pollLast();
         if (this.suppressUi) return;
         this.uiStack.pop();
         this.gateStack.pop();
-        this.categoryPath.pollLast();
     }
 
     protected String currentCategoryPath() {
@@ -502,10 +514,11 @@ public abstract class ConfigBuilder {
         }
         List<PendingDependency> dependencies = pollDependencies();
         Supplier<Boolean> raw = define(FEATURE_TOGGLE_NAME, defaultEnabled);
+        // define() just recorded the matching BooleanOption as this category's last entry: adopt it as the gate row
         List<ConfigNode> entries = cat.entries();
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
-        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanOption bv) {
             cat.setGate(bv);
             // explicit icon wins, else infer from the category name. category button and gate row share it
             if (bv.icon() == null) bv.setIcon(cat.icon() != null ? cat.icon() : inferFeatureIcon(currentCategory()));
@@ -530,7 +543,7 @@ public abstract class ConfigBuilder {
         Supplier<Boolean> ancestor = this.gateStack.peek();
         Supplier<Boolean> effective = effectiveToggle(raw, ancestor, dependencies);
         List<ConfigNode> entries = this.uiStack.peek().entries();
-        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanValue bv) {
+        if (!entries.isEmpty() && entries.getLast() instanceof ConfigOption.BooleanOption bv) {
             bv.setFeature(true);
             if (bv.icon() == null) bv.setIcon(inferFeatureIcon(name));
             bindFeature(bv, effective, dependencies);
@@ -555,7 +568,7 @@ public abstract class ConfigBuilder {
         return Identifier.tryBuild(this.name.getNamespace(), name);
     }
 
-    private static void bindFeature(ConfigOption.BooleanValue row, Supplier<Boolean> effective,
+    private static void bindFeature(ConfigOption.BooleanOption row, Supplier<Boolean> effective,
                                     List<PendingDependency> dependencies) {
         for (PendingDependency dependency : dependencies) {
             row.addDependency(dependency.row());
@@ -585,7 +598,7 @@ public abstract class ConfigBuilder {
                 throw new IllegalStateException("dependsOn() only applies to feature() and mainFeature()");
             }
         }
-        if (option instanceof ConfigOption.BooleanValue bv) BOOLEAN_ROWS.put(bv.handle(), bv);
+        if (option instanceof ConfigOption.BooleanOption bv) BOOLEAN_ROWS.put(bv.handle(), bv);
         this.pendingReload = ConfigReloadType.NONE;
         this.pendingDynamicPacks = false;
         this.uiStack.peek().add(option);
@@ -609,7 +622,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.RangeValue(
+        var node = new ConfigOption.RangeOption(
                 description(name), null, minHandle, maxHandle,
                 new Range(defaultMin, defaultMax), min, max);
         recordOption(node);
@@ -627,7 +640,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.Vec2Value(
+        var node = new ConfigOption.Vec2Option(
                 description(name), null, xHandle, yHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -644,7 +657,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.Vec2iValue(
+        var node = new ConfigOption.Vec2iOption(
                 description(name), null, xHandle, yHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -662,7 +675,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.Vec3Value(
+        var node = new ConfigOption.Vec3Option(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -679,7 +692,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.Vec3iValue(
+        var node = new ConfigOption.Vec3iOption(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -695,11 +708,11 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.DateValue(
+        var node = new ConfigOption.DateOption(
                 description(name), null, monthHandle, dayHandle, defaultValue);
         recordOption(node);
         noteDefined(name, node, null);
-        return () -> ConfigOption.DateValue.of(monthHandle.get(), dayHandle.get());
+        return () -> ConfigOption.DateOption.of(monthHandle.get(), dayHandle.get());
     }
 
     public Supplier<LocalTime> defineTime(String name, LocalTime defaultValue) {
@@ -711,11 +724,11 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        var node = new ConfigOption.TimeValue(
+        var node = new ConfigOption.TimeOption(
                 description(name), null, hourHandle, minuteHandle, defaultValue);
         recordOption(node);
         noteDefined(name, node, null);
-        return () -> ConfigOption.TimeValue.of(hourHandle.get(), minuteHandle.get());
+        return () -> ConfigOption.TimeOption.of(hourHandle.get(), minuteHandle.get());
     }
 
     public ConfigBuilder onChange(Runnable callback) {
@@ -739,12 +752,6 @@ public abstract class ConfigBuilder {
 
     protected void addTranslationsAndComments(String name) {
         putName(this.translationKey(name), name);
-        if (this.currentCategory() == null && PlatHelper.isDev())
-            throw new AssertionError("Current config category was null. How?");
-    }
-
-    protected void noteCategoryName(String category) {
-        putName(this.translationKey(""), category);
     }
 
     private void putName(String key, String rawName) {
@@ -756,7 +763,7 @@ public abstract class ConfigBuilder {
 
     public static final Predicate<Object> STRING_CHECK = o -> o instanceof String;
 
-    public static final Predicate<Object> REGEX_CHECK = o -> o instanceof String s && ConfigOption.RegexValue.isValidRegex(s);
+    public static final Predicate<Object> REGEX_CHECK = o -> o instanceof String s && ConfigOption.RegexOption.isValidRegex(s);
 
     public static final Predicate<Object> LIST_STRING_CHECK = o ->
             o instanceof List<?> l && l.stream().allMatch(e -> e instanceof String);

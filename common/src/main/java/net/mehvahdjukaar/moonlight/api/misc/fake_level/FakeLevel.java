@@ -41,6 +41,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -281,7 +282,7 @@ public class FakeLevel extends Level {
 
         }
         @Override
-        public @Nullable ChunkAccess getChunk(int x, int z, net.minecraft.world.level.chunk.status.ChunkStatus chunkStatus, boolean requireChunk) {
+        public @Nullable ChunkAccess getChunk(int x, int z, ChunkStatus chunkStatus, boolean requireChunk) {
             return new EmptyLevelChunk(FakeLevel.this, new ChunkPos(x, z), registryAccess().lookupOrThrow(Registries.BIOME)
                     .getOrThrow(Biomes.FOREST));
         }

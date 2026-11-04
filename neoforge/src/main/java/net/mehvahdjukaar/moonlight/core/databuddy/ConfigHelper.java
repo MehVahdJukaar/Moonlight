@@ -124,12 +124,12 @@ public class ConfigHelper {
      *                        If the codec fails to deserialize the config field at a later time, an error message will be logged and this default instance will be used instead.
      * @return A reload-sensitive wrapper around your config object value. Use ConfigObject.get to get the most up-to-date object.
      */
-    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier) {
+    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, Supplier<T> defaultSupplier) {
         return defineObject(builder, name, codec, defaultSupplier, ConfigMetadata.NONE);
     }
 
-    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMetadata meta) {
-        com.google.common.base.Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
+    public static <T> ConfigObject<T> defineObject(ModConfigSpec.Builder builder, String name, Codec<T> codec, Supplier<T> defaultSupplier, ConfigMetadata meta) {
+        Supplier<Object> lazyDefaultValue = Suppliers.memoize(() -> {
             T defaultValue = defaultSupplier.get();
             var encodeResult = codec.encodeStart(TomlConfigOps.INSTANCE, defaultValue);
             return encodeResult.getOrThrow(s -> new IllegalArgumentException(String.format("Unable to encode default value %s: %s", defaultValue, s)));
@@ -152,10 +152,10 @@ public class ConfigHelper {
         private boolean initialized;
         private final ConfigMetadata meta;
 
-        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, com.google.common.base.Supplier<T> defaultSupplier, ConfigMetadata meta) {
+        private ConfigObject(ModConfigSpec.ConfigValue<Object> value, Codec<T> codec, Supplier<T> defaultSupplier, ConfigMetadata meta) {
             this.value = value;
             this.codec = codec;
-            this.defaultObject = Suppliers.memoize(defaultSupplier);
+            this.defaultObject = Suppliers.memoize(defaultSupplier::get);
             this.meta = meta;
         }
 

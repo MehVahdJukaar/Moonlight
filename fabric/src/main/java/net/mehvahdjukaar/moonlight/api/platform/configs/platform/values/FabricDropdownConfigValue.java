@@ -13,14 +13,14 @@ import java.util.function.Supplier;
 /**
  * String value picked from a list or a registry, shown as a dropdown.
  */
-public class DropdownConfigValue extends StringConfigValue {
+public class FabricDropdownConfigValue extends FabricStringConfigValue {
 
     private final Supplier<List<String>> options;
     @Nullable
     private final Function<String, ItemStack> icon;
 
-    public DropdownConfigValue(String name, String defaultValue, Predicate<Object> validator,
-                               Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
+    public FabricDropdownConfigValue(String name, String defaultValue, Predicate<Object> validator,
+                                     Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
         super(name, defaultValue, validator, meta);
         this.options = options;
         this.icon = icon;

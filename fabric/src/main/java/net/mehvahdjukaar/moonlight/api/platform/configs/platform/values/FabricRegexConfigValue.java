@@ -5,11 +5,11 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 /**
  * A string config value constrained to be a valid regular expression. Stored exactly like a
- * StringConfigValue; the distinct type just tells the screen to use the regex highlighting field.
+ * FabricStringConfigValue; the distinct type just tells the screen to use the regex highlighting field.
  */
-public class RegexConfigValue extends StringConfigValue {
+public class FabricRegexConfigValue extends FabricStringConfigValue {
 
-    public RegexConfigValue(String name, String defaultValue, ConfigMetadata meta) {
+    public FabricRegexConfigValue(String name, String defaultValue, ConfigMetadata meta) {
         super(name, defaultValue, ConfigBuilder.REGEX_CHECK, meta);
     }
 }

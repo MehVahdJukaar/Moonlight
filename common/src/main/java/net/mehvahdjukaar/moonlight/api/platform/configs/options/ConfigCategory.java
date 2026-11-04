@@ -10,7 +10,7 @@ public class ConfigCategory extends ConfigNode {
 
     private final List<ConfigNode> entries = new ArrayList<>();
     @Nullable
-    private ConfigOption.BooleanValue gate;
+    private ConfigOption.BooleanOption gate;
 
     public ConfigCategory(Component title, @Nullable Component description) {
         super(title, description);
@@ -26,11 +26,11 @@ public class ConfigCategory extends ConfigNode {
     }
 
     @Nullable
-    public ConfigOption.BooleanValue gate() {
+    public ConfigOption.BooleanOption gate() {
         return gate;
     }
 
-    public void setGate(ConfigOption.BooleanValue gate) {
+    public void setGate(ConfigOption.BooleanOption gate) {
         this.gate = gate;
     }
 

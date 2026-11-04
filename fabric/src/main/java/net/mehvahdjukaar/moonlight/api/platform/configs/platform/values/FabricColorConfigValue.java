@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform.configs.platform.values;
 
+import com.mojang.datafixers.util.Pair;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 
 import com.google.gson.JsonElement;
@@ -8,15 +9,15 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 
-public class ColorConfigValue extends IntConfigValue {
+public class FabricColorConfigValue extends FabricIntConfigValue {
 
     private final boolean hasAlpha;
 
-    public ColorConfigValue(String name, int defaultValue, ConfigMetadata meta) {
+    public FabricColorConfigValue(String name, int defaultValue, ConfigMetadata meta) {
         this(name, defaultValue, true, meta);
     }
 
-    public ColorConfigValue(String name, int defaultValue, boolean hasAlpha, ConfigMetadata meta) {
+    public FabricColorConfigValue(String name, int defaultValue, boolean hasAlpha, ConfigMetadata meta) {
         super(name, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE, meta);
         this.hasAlpha = hasAlpha;
     }
@@ -29,7 +30,7 @@ public class ColorConfigValue extends IntConfigValue {
     protected Integer parseValue(JsonElement element) {
         String s = element.getAsString();
         var result = codec().decode(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
-        return result.map(com.mojang.datafixers.util.Pair::getFirst).orElse(defaultValue);
+        return result.map(Pair::getFirst).orElse(defaultValue);
     }
 
     @Override

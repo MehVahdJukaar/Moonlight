@@ -5,9 +5,9 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
-public class BoolConfigValue extends ConfigValue<Boolean> {
+public class FabricBoolConfigValue extends FabricConfigValue<Boolean> {
 
-    public BoolConfigValue(String name, Boolean defaultValue, ConfigMetadata meta) {
+    public FabricBoolConfigValue(String name, Boolean defaultValue, ConfigMetadata meta) {
         super(name, defaultValue, meta);
     }
 

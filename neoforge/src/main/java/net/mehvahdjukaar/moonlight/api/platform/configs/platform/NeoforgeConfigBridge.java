@@ -180,44 +180,44 @@ public final class NeoforgeConfigBridge {
 
         switch (sample) {
             case Boolean b -> {
-                return new ConfigOption.BooleanValue(title, desc, wrap(cv, meta), b);
+                return new ConfigOption.BooleanOption(title, desc, wrap(cv, meta), b);
             }
             case Enum<?> e -> {
                 Enum<?>[] options = Arrays.stream(e.getDeclaringClass().getEnumConstants()).filter(vs::test).toArray(Enum[]::new);
-                return new ConfigOption.EnumValue(title, desc, wrap(cv, meta), e, options);
+                return new ConfigOption.EnumOption(title, desc, wrap(cv, meta), e, options);
             }
             case Integer i -> {
                 int[] r = intRange(vs);
-                return new ConfigOption.IntValue(title, desc, wrap(cv, meta), i, r[0], r[1]);
+                return new ConfigOption.IntOption(title, desc, wrap(cv, meta), i, r[0], r[1]);
             }
             case Long l -> {
                 // no long control: present it as an int when the range fits, else leave it uneditable
                 long[] r = longRange(vs);
                 if (r[0] >= Integer.MIN_VALUE && r[1] <= Integer.MAX_VALUE) {
-                    return new ConfigOption.IntValue(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
+                    return new ConfigOption.IntOption(title, desc, longAsInt(cv, meta), l.intValue(), (int) r[0], (int) r[1]);
                 }
-                return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
+                return new ConfigOption.UnsupportedOption(title, desc, (Supplier<Object>) cv);
             }
             case Double d -> {
                 double[] r = doubleRange(vs);
-                return new ConfigOption.DoubleValue(title, desc, wrap(cv, meta), d, r[0], r[1]);
+                return new ConfigOption.DoubleOption(title, desc, wrap(cv, meta), d, r[0], r[1]);
             }
             case String s -> {
-                return new ConfigOption.StringValue(title, desc, wrap(cv, meta), s, vs::test);
+                return new ConfigOption.StringOption(title, desc, wrap(cv, meta), s, vs::test);
             }
             case List<?> list when list.stream().allMatch(o -> o instanceof String) -> {
                 List<String> def = list.stream().map(o -> (String) o).toList();
                 Predicate<String> entryValidator = vs instanceof ModConfigSpec.ListValueSpec lvs ? lvs::testElement : null;
                 if (!def.isEmpty() && def.stream().allMatch(NeoforgeConfigBridge::isHexColor)) {
                     boolean hasAlpha = def.stream().anyMatch(c -> c.length() == 9);
-                    return new ConfigOption.ColorListValue(title, desc, wrap(cv, meta), def, entryValidator, hasAlpha);
+                    return new ConfigOption.ColorListOption(title, desc, wrap(cv, meta), def, entryValidator, hasAlpha);
                 }
-                return new ConfigOption.ListValue(title, desc, wrap(cv, meta), def, entryValidator);
+                return new ConfigOption.ListOption(title, desc, wrap(cv, meta), def, entryValidator);
             }
             default -> {
             }
         }
-        return new ConfigOption.UnsupportedValue(title, desc, (Supplier<Object>) cv);
+        return new ConfigOption.UnsupportedOption(title, desc, (Supplier<Object>) cv);
     }
 
     //only trust the # form, a bare 6 digit string could be anything

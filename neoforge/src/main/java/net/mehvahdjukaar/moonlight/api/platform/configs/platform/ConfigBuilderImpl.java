@@ -21,9 +21,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -39,7 +37,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     private final ModConfigSpec.Builder builder;
-    private final Deque<String> categoryStack = new ArrayDeque<>();
 
     public ConfigBuilderImpl(Identifier name, ConfigType type) {
         super(name, type);
@@ -63,12 +60,10 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    private ConfigOption.UnsupportedValue unsupported(String name, Supplier<?> handle) {
-        return new ConfigOption.UnsupportedValue(uiTitle(name), uiDescription(name), (Supplier<Object>) handle);
+    private ConfigOption.UnsupportedOption unsupported(String name, Supplier<?> handle) {
+        return new ConfigOption.UnsupportedOption(uiTitle(name), uiDescription(name), (Supplier<Object>) handle);
     }
 
-    // The flags stay set while a grouped value defines its hidden parts, so every piece of a range or vec3 gets the
-    // same reload info
     private ConfigMetadata pendingMeta() {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
@@ -81,22 +76,6 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public String currentCategory() {
-        return categoryStack.peekFirst();
-    }
-
-    @Nullable
-    @Override
-    public String parentCategory() {
-        if (categoryStack.size() < 2) {
-            return null;
-        }
-        var it = categoryStack.descendingIterator();
-        it.next();
-        return it.next();
-    }
-
-    @Override
     protected ForgeConfigHolder buildHolder() {
         return new ForgeConfigHolder(this.getName(), this.builder.build(), this.type,
                 this.buildChangeCallback(), trackedValues, getUiRoot());
@@ -105,18 +84,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public ConfigBuilderImpl push(String category) {
         builder.push(category);
-        categoryStack.push(category);
-        noteCategoryName(category);
-        uiPush(Component.translatable(translationKey("")));
+        enterCategory(category);
         return this;
     }
 
     @Override
     public ConfigBuilderImpl pop() {
-        flushPendingComment(); // a trailing after-comment in this category has no following define to claim it
+        flushPendingComment();
         builder.pop();
-        categoryStack.pop();
-        uiPop();
+        exitCategory();
         return this;
     }
 
@@ -125,7 +101,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue);
         var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.BooleanValue(uiTitle(name), uiDescription(name), w, defaultValue));
+        addUiRow(name, new ConfigOption.BooleanOption(uiTitle(name), uiDescription(name), w, defaultValue));
         return w;
     }
 
@@ -142,11 +118,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private Supplier<Integer> defineInt(String name, int defaultValue, int min, int max, boolean slider) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        var w = track(ForgeConfigValue.simple(value, pendingMeta()));
+        var forgeVal = track(ForgeConfigValue.simple(value, pendingMeta()));
         addUiRow(name, slider
-                ? new ConfigOption.IntSliderValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
-                : new ConfigOption.IntValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
-        return w;
+                ? new ConfigOption.IntSliderOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue, min, max)
+                : new ConfigOption.IntOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue, min, max));
+        return forgeVal;
     }
 
     @Override
@@ -164,8 +140,8 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var value = builder.defineInRange(name, defaultValue, min, max);
         var w = track(ForgeConfigValue.simple(value, pendingMeta()));
         addUiRow(name, slider
-                ? new ConfigOption.DoubleSliderValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
-                : new ConfigOption.DoubleValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
+                ? new ConfigOption.DoubleSliderOption(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
+                : new ConfigOption.DoubleOption(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
         return w;
     }
 
@@ -173,9 +149,9 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     public Supplier<Double> definePercentage(String name, double defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, 0.0, 1.0);
-        var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.PercentValue(uiTitle(name), uiDescription(name), w, defaultValue));
-        return w;
+        var forgeVal = track(ForgeConfigValue.simple(value, pendingMeta()));
+        addUiRow(name, new ConfigOption.PercentOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue));
+        return forgeVal;
     }
 
     @ApiStatus.Experimental
@@ -192,20 +168,20 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     private Supplier<Float> defineFloat(String name, float defaultValue, float min, float max, boolean slider) {
         addTranslationsAndComments(name);
         var value = builder.defineInRange(name, defaultValue, min, max);
-        var w = track(new ForgeConfigValue<Float, Double>(value, pendingMeta()) {
+        var forgeVal = track(new ForgeConfigValue<Float, Double>(value, pendingMeta()) {
             @Override
-            Float map(Double value) {
+            protected Float map(Double value) {
                 return value.floatValue();
             }
             @Override
-            Double unmap(Float value) {
+            protected Double unmap(Float value) {
                 return (double) value;
             }
         });
         addUiRow(name, slider
-                ? new ConfigOption.FloatSliderValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max)
-                : new ConfigOption.FloatValue(uiTitle(name), uiDescription(name), w, defaultValue, min, max));
-        return w;
+                ? new ConfigOption.FloatSliderOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue, min, max)
+                : new ConfigOption.FloatOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue, min, max));
+        return forgeVal;
     }
 
     @Override
@@ -215,27 +191,29 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         String def = (String) codec.encodeStart(JavaOps.INSTANCE, defaultValue).getOrThrow();
         var value = builder.define(name, def,
                 o -> o instanceof String s && ColorUtils.isValidString(s));
-        var w = track(ForgeConfigValue.fromString(value, codec, pendingMeta()));
-        addUiRow(name, new ConfigOption.ColorValue(uiTitle(name), uiDescription(name), w, defaultValue, hasAlpha));
-        return w;
+        var forgeVal = track(ForgeConfigValue.fromString(value, codec, pendingMeta()));
+        addUiRow(name, new ConfigOption.ColorOption(uiTitle(name), uiDescription(name), forgeVal, defaultValue, hasAlpha));
+        return forgeVal;
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
-        var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.StringValue(uiTitle(name), uiDescription(name), w, defaultValue, validator));
-        return w;
+        var forgeVal = track(ForgeConfigValue.simple(value, pendingMeta()));
+        addUiRow(name, new ConfigOption.StringOption(uiTitle(name),
+                uiDescription(name), forgeVal, defaultValue, validator));
+        return forgeVal;
     }
 
     @Override
     protected Supplier<String> defineRegexInternal(String name, String defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, ConfigBuilder.REGEX_CHECK);
-        var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.RegexValue(uiTitle(name), uiDescription(name), w, defaultValue));
-        return w;
+        var forgeVal = track(ForgeConfigValue.simple(value, pendingMeta()));
+        addUiRow(name, new ConfigOption.RegexOption(uiTitle(name),
+                uiDescription(name), forgeVal, defaultValue));
+        return forgeVal;
     }
 
     @Override
@@ -244,7 +222,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         addTranslationsAndComments(name);
         var value = builder.define(name, defaultValue, validator);
         var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.DropdownValue(uiTitle(name), uiDescription(name), w, defaultValue, options, icon));
+        addUiRow(name, new ConfigOption.DropdownOption(uiTitle(name), uiDescription(name), w, defaultValue, options, icon));
         return w;
     }
 
@@ -263,7 +241,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         @SuppressWarnings("unchecked")
         ModConfigSpec.ConfigValue<List<String>> listValue = (ModConfigSpec.ConfigValue<List<String>>) (ModConfigSpec.ConfigValue<?>) value;
         var w = track(ForgeConfigValue.simple(listValue, pendingMeta()));
-        addUiRow(name, new ConfigOption.ListValue(uiTitle(name), uiDescription(name), w, List.copyOf(defaultValue),
+        addUiRow(name, new ConfigOption.ListOption(uiTitle(name), uiDescription(name), w, List.copyOf(defaultValue),
                 s -> predicate.test(s)));
         return w;
     }
@@ -275,23 +253,23 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         var value = builder.defineList(name, defaultValue, entryValidator);
         @SuppressWarnings("unchecked")
         ModConfigSpec.ConfigValue<List<String>> listValue = (ModConfigSpec.ConfigValue<List<String>>) (ModConfigSpec.ConfigValue<?>) value;
-        var w = track(ForgeConfigValue.simple(listValue, pendingMeta()));
-        addUiRow(name, new ConfigOption.ListValue(uiTitle(name), uiDescription(name), w, List.copyOf(defaultValue),
+        var forgeVal = track(ForgeConfigValue.simple(listValue, pendingMeta()));
+        addUiRow(name, new ConfigOption.ListOption(uiTitle(name), uiDescription(name), forgeVal, List.copyOf(defaultValue),
                 entryValidator::test, options, icon));
-        return w;
+        return forgeVal;
     }
 
     @Override
-    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> rawCodec) {
+    public <T> Supplier<T> defineObject(String name, Supplier<T> defaultSupplier, Codec<T> rawCodec) {
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
         addTranslationsAndComments(name);
         if (!writeObjectsAsJson) {
-            var w = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
-            addUiRow(name, new ConfigOption.SchemaValue<>(uiTitle(name), uiDescription(name), w, defaultSupplier::get, codec));
-            return w;
+            var forgeVal = track(ConfigHelper.defineObject(builder, name, codec, defaultSupplier, pendingMeta()));
+            addUiRow(name, new ConfigOption.SchemaOption<>(uiTitle(name), uiDescription(name), forgeVal, defaultSupplier::get, codec));
+            return forgeVal;
         }
 
-        com.google.common.base.Supplier<JsonElement> jsonSupplier = () -> {
+        Supplier<JsonElement> jsonSupplier = () -> {
             var e = codec.encodeStart(JsonOps.INSTANCE, defaultSupplier.get());
             var json = e.resultOrPartial(s -> {
                 throw new RuntimeException("Invalid default value for config " + name + ": " + s);
@@ -299,18 +277,18 @@ public class ConfigBuilderImpl extends ConfigBuilder {
             if (json.isEmpty()) throw new RuntimeException("Invalid default value for config " + name);
             return json.get();
         };
-        var w = track(ForgeConfigValue.codec(
+        var forgeVal = track(ForgeConfigValue.codec(
                 builder.define(name,
                         () -> jsonSupplier.get().toString().replace(" ", "").replace("\"", "'"),
                         o -> o != null && jsonSupplier.get().getClass().isAssignableFrom(o.getClass())),
                 codec, pendingMeta()
         ));
-        addUiRow(name, new ConfigOption.SchemaValue<>(uiTitle(name), uiDescription(name), w, defaultSupplier::get, codec));
-        return w;
+        addUiRow(name, new ConfigOption.SchemaOption<>(uiTitle(name), uiDescription(name), forgeVal, defaultSupplier::get, codec));
+        return forgeVal;
     }
 
     @Override
-    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
+    public <T> Supplier<List<T>> defineObjectList(String name, Supplier<List<T>> defaultSupplier, Codec<T> codec) {
         builder.comment("This is a list. Add more entries with syntax [[...]]");
         return super.defineObjectList(name, defaultSupplier, codec);
     }
@@ -318,35 +296,34 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     public Supplier<JsonElement> defineJson(String path, JsonElement defaultValue) {
         addTranslationsAndComments(path);
-        var w = track(ForgeConfigValue.json(builder.define(path,
+        var forgeVal = track(ForgeConfigValue.json(builder.define(path,
                 defaultValue.toString().replace(" ", "").replace("\"", "'")), pendingMeta()));
-        addUiRow(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
-        return w;
+        addUiRow(path, new ConfigOption.JsonOption(uiTitle(path),
+                uiDescription(path), forgeVal));
+        return forgeVal;
     }
 
     @Override
     public Supplier<JsonElement> defineJson(String path, Supplier<JsonElement> defaultValue) {
         addTranslationsAndComments(path);
-        com.google.common.base.Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
-        var w = track(ForgeConfigValue.json(builder.define(path,
+        Supplier<JsonElement> lazyDefaultValue = Suppliers.memoize(defaultValue::get);
+        var forgeVal = track(ForgeConfigValue.json(builder.define(path,
                 () -> lazyDefaultValue.get().toString().replace(" ", "").replace("\"", "'"),
                 o -> o != null && lazyDefaultValue.get().getClass().isAssignableFrom(o.getClass())), pendingMeta()));
-        addUiRow(path, new ConfigOption.JsonValue(uiTitle(path), uiDescription(path), w));
-        return w;
+        addUiRow(path, new ConfigOption.JsonOption(uiTitle(path), uiDescription(path), forgeVal));
+        return forgeVal;
     }
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
         addTranslationsAndComments(name);
         var value = builder.defineEnum(name, defaultValue);
-        var w = track(ForgeConfigValue.simple(value, pendingMeta()));
-        addUiRow(name, new ConfigOption.EnumValue<>(uiTitle(name), uiDescription(name), w, defaultValue,
+        var forgeVal = track(ForgeConfigValue.simple(value, pendingMeta()));
+        addUiRow(name, new ConfigOption.EnumOption<>(uiTitle(name), uiDescription(name), forgeVal, defaultValue,
                 defaultValue.getDeclaringClass().getEnumConstants()));
-        return w;
+        return forgeVal;
     }
 
-    // Forge applies these to the NEXT defined value and throws if a push comes first, so only hand them over right
-    // before the define runs
     private void forwardPendingReload() {
         if (pendingReload == ConfigReloadType.GAME_RESTART) {
             builder.gameRestart();
@@ -363,7 +340,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         super.addTranslationsAndComments(name);
     }
 
-    // must run before every builder.define(). after-comments never reach the toml, only the lang file and screen row
+    // Forge attaches a .toml comment to the NEXT defined value
     private void forwardPendingComment() {
         String toForward = pollCommentToForward();
         if (toForward != null) builder.comment(toForward);

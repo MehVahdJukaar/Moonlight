@@ -27,7 +27,7 @@ public class CategoryRow extends ConfigRow {
     private final ConfigCategory category;
     private final Button button;
     @Nullable
-    private final ConfigOption.BooleanValue gate;
+    private final ConfigOption.BooleanOption gate;
     @Nullable
     private final BooleanToggleWidget toggle;
     private final List<AbstractWidget> children;

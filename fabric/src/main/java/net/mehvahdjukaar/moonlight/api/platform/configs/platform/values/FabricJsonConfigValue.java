@@ -7,11 +7,11 @@ import com.google.gson.JsonElement;
 
 import java.util.function.Supplier;
 
-public class JsonConfigValue extends ConfigValue<JsonElement> {
+public class FabricJsonConfigValue extends FabricConfigValue<JsonElement> {
 
     private final Supplier<JsonElement> defValue;
 
-    public JsonConfigValue(String name, Supplier<JsonElement> defaultSupplier, ConfigMetadata meta) {
+    public FabricJsonConfigValue(String name, Supplier<JsonElement> defaultSupplier, ConfigMetadata meta) {
         super(name, null, meta);
         this.defValue = Suppliers.memoize(defaultSupplier::get);
     }

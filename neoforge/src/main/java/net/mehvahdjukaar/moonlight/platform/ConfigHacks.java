@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.platform;
 
+import java.lang.reflect.Modifier;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.neoforged.fml.config.ConfigTracker;
 import net.neoforged.fml.config.IConfigSpec;
@@ -42,7 +43,7 @@ public class ConfigHacks {
         field.setAccessible(true);
 
         // Ensure it's static
-        if ((field.getModifiers() & java.lang.reflect.Modifier.STATIC) == 0) {
+        if ((field.getModifiers() & Modifier.STATIC) == 0) {
             throw new IllegalArgumentException("Field " + fieldName + " is not static");
         }
 

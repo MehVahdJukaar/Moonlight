@@ -52,7 +52,7 @@ public final class ConfigControllers {
 
 
     static {
-        register(ConfigOption.BooleanValue.class, (o, s, onChange) -> {
+        register(ConfigOption.BooleanOption.class, (o, s, onChange) -> {
             CycleButton<Boolean> w = CycleButton.onOffBuilder(s.valueOrPendingValue(o))
                     .displayOnlyValue()
                     .create(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, Component.empty(), (btn, val) -> {
@@ -63,18 +63,18 @@ public final class ConfigControllers {
         });
 
         @SuppressWarnings("unchecked")
-        Class<ConfigOption.EnumValue<?>> enumClass =
-                (Class<ConfigOption.EnumValue<?>>) (Class<?>) ConfigOption.EnumValue.class;
+        Class<ConfigOption.EnumOption<?>> enumClass =
+                (Class<ConfigOption.EnumOption<?>>) (Class<?>) ConfigOption.EnumOption.class;
         register(enumClass, ConfigControllers::enumControl);
 
-        register(ConfigOption.StringValue.class, (o, s, onChange) ->
+        register(ConfigOption.StringOption.class, (o, s, onChange) ->
                 textField(s.valueOrPendingValue(o), String::valueOf, str -> {
                     if (!o.isValid(str)) throw new IllegalArgumentException();
                     s.put(o, str);
                     onChange.run();
                 }));
 
-        register(ConfigOption.RegexValue.class, (o, s, onChange) -> {
+        register(ConfigOption.RegexOption.class, (o, s, onChange) -> {
             ConfigControl<Object> control = textField(s.valueOrPendingValue(o), String::valueOf, str -> {
                 if (!o.isValid(str)) throw new IllegalArgumentException();
                 s.put(o, str);
@@ -85,7 +85,7 @@ public final class ConfigControllers {
             return control;
         });
 
-        register(ConfigOption.ColorValue.class, (o, s, onChange) -> {
+        register(ConfigOption.ColorOption.class, (o, s, onChange) -> {
             ColorFieldWidget w = new ColorFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, s.valueOrPendingValue(o), o.hasAlpha,
                     c -> {
                         s.put(o, c);
@@ -99,34 +99,34 @@ public final class ConfigControllers {
             return new ConfigControl<>(w, w::setColor);
         });
 
-        register(ConfigOption.IntValue.class, (o, s, onChange) ->
+        register(ConfigOption.IntOption.class, (o, s, onChange) ->
                 numberField(s.valueOrPendingValue(o), o.min, o.max, true, v -> {
                     s.put(o, (int) Math.round(v));
                     onChange.run();
                 }));
-        register(ConfigOption.IntSliderValue.class, (o, s, onChange) ->
+        register(ConfigOption.IntSliderOption.class, (o, s, onChange) ->
                 slider(o.min, o.max, s.valueOrPendingValue(o), true, v -> s.put(o, (int) Math.round(v)), onChange));
 
-        register(ConfigOption.DoubleValue.class, (o, s, onChange) ->
+        register(ConfigOption.DoubleOption.class, (o, s, onChange) ->
                 numberField(s.valueOrPendingValue(o), o.min, o.max, false, v -> {
                     s.put(o, v);
                     onChange.run();
                 }));
-        register(ConfigOption.DoubleSliderValue.class, (o, s, onChange) ->
+        register(ConfigOption.DoubleSliderOption.class, (o, s, onChange) ->
                 slider(o.min, o.max, s.valueOrPendingValue(o), false, v -> s.put(o, v), onChange));
 
-        register(ConfigOption.PercentValue.class, (o, s, onChange) ->
+        register(ConfigOption.PercentOption.class, (o, s, onChange) ->
                 slider(0, 1, s.valueOrPendingValue(o), false, true, v -> s.put(o, v), onChange));
 
-        register(ConfigOption.FloatValue.class, (o, s, onChange) ->
+        register(ConfigOption.FloatOption.class, (o, s, onChange) ->
                 numberField(s.valueOrPendingValue(o), o.min, o.max, false, v -> {
                     s.put(o, (float) v);
                     onChange.run();
                 }));
-        register(ConfigOption.FloatSliderValue.class, (o, s, onChange) ->
+        register(ConfigOption.FloatSliderOption.class, (o, s, onChange) ->
                 slider(o.min, o.max, s.valueOrPendingValue(o), false, v -> s.put(o, v.floatValue()), onChange));
 
-        register(ConfigOption.RangeValue.class, (o, s, onChange) -> {
+        register(ConfigOption.RangeOption.class, (o, s, onChange) -> {
             Range current = s.valueOrPendingValue(o);
             RangeControlWidget w = new RangeControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, current, o.min, o.max, r -> {
                 s.put(o, r);
@@ -135,7 +135,7 @@ public final class ConfigControllers {
             return new ConfigControl<>(w, w::setRange);
         });
 
-        register(ConfigOption.Vec2Value.class, (o, s, onChange) -> {
+        register(ConfigOption.Vec2Option.class, (o, s, onChange) -> {
             Vec2 c = s.valueOrPendingValue(o);
             VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x, c.y}, o.min, o.max, false,
                     v -> {
@@ -145,7 +145,7 @@ public final class ConfigControllers {
             return new ConfigControl<Vec2>(w, vv -> w.setValues(vv.x, vv.y));
         });
 
-        register(ConfigOption.Vec2iValue.class, (o, s, onChange) -> {
+        register(ConfigOption.Vec2iOption.class, (o, s, onChange) -> {
             Vec2i c = s.valueOrPendingValue(o);
             VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x(), c.y()}, o.min, o.max, true,
                     v -> {
@@ -155,7 +155,7 @@ public final class ConfigControllers {
             return new ConfigControl<Vec2i>(w, vv -> w.setValues(vv.x(), vv.y()));
         });
 
-        register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
+        register(ConfigOption.Vec3Option.class, (o, s, onChange) -> {
             Vec3 c = s.valueOrPendingValue(o);
             VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x, c.y, c.z}, o.min, o.max, false,
                     v -> {
@@ -165,7 +165,7 @@ public final class ConfigControllers {
             return new ConfigControl<Vec3>(w, vv -> w.setValues(vv.x, vv.y, vv.z));
         });
 
-        register(ConfigOption.Vec3iValue.class, (o, s, onChange) -> {
+        register(ConfigOption.Vec3iOption.class, (o, s, onChange) -> {
             Vec3i c = s.valueOrPendingValue(o);
             VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.getX(), c.getY(), c.getZ()}, o.min, o.max, true,
                     v -> {
@@ -175,7 +175,7 @@ public final class ConfigControllers {
             return new ConfigControl<Vec3i>(w, vv -> w.setValues(vv.getX(), vv.getY(), vv.getZ()));
         });
 
-        register(ConfigOption.DateValue.class, (o, s, onChange) -> {
+        register(ConfigOption.DateOption.class, (o, s, onChange) -> {
             MonthDay c = s.valueOrPendingValue(o);
             NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, "/", c.getMonthValue(), c.getDayOfMonth(),
                     MoonlightIcons.CALENDAR, DatePickerPopup::new, (m, d) -> {
@@ -185,7 +185,7 @@ public final class ConfigControllers {
             return new ConfigControl<MonthDay>(w, v -> w.setValues(v.getMonthValue(), v.getDayOfMonth()));
         });
 
-        register(ConfigOption.TimeValue.class, (o, s, onChange) -> {
+        register(ConfigOption.TimeOption.class, (o, s, onChange) -> {
             LocalTime c = s.valueOrPendingValue(o);
             NumberPickerFieldWidget w = new NumberPickerFieldWidget(CONTROL_WIDTH, CONTROL_HEIGHT, ":", c.getHour(), c.getMinute(),
                     MoonlightIcons.CLOCK, ClockPickerPopup::new, (h, m) -> {
@@ -195,7 +195,7 @@ public final class ConfigControllers {
             return new ConfigControl<LocalTime>(w, v -> w.setValues(v.getHour(), v.getMinute()));
         });
 
-        register(ConfigOption.DropdownValue.class, (o, s, onChange) -> {
+        register(ConfigOption.DropdownOption.class, (o, s, onChange) -> {
             DropdownWidget w = new DropdownWidget(CONTROL_WIDTH, CONTROL_HEIGHT, o.options.get(), o.icon, s.valueOrPendingValue(o), val -> {
                 s.put(o, val);
                 onChange.run();
@@ -203,7 +203,7 @@ public final class ConfigControllers {
             return new ConfigControl<>(w, w::setValue);
         });
 
-        ConfigControl.Provider<ConfigOption.ListValue> listProvider = (o, s, onChange) -> {
+        ConfigControl.Provider<ConfigOption.ListOption> listProvider = (o, s, onChange) -> {
             IconButton button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT, listLabel(s.valueOrPendingValue(o)), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(new ListEditScreen(o, s.valueOrPendingValue(o), Minecraft.getInstance().screen, edited -> {
                         s.put(o, edited);
@@ -211,10 +211,10 @@ public final class ConfigControllers {
                     })));
             return new ConfigControl<List<String>>(button, list -> button.setMessage(listLabel(list)));
         };
-        register(ConfigOption.ListValue.class, listProvider);
-        register(ConfigOption.ColorListValue.class, listProvider::create);
+        register(ConfigOption.ListOption.class, listProvider);
+        register(ConfigOption.ColorListOption.class, listProvider::create);
 
-        register(ConfigOption.JsonValue.class, (o, s, onChange) -> {
+        register(ConfigOption.JsonOption.class, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
                     Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, b ->
                     Minecraft.getInstance().setScreen(new JsonEditScreen(o.title(), o.description(), s.valueOrPendingValue(o), Minecraft.getInstance().screen, edited -> {
@@ -226,8 +226,8 @@ public final class ConfigControllers {
         });
 
         @SuppressWarnings("unchecked")
-        Class<ConfigOption.SchemaValue<?>> schemaClass =
-                (Class<ConfigOption.SchemaValue<?>>) (Class<?>) ConfigOption.SchemaValue.class;
+        Class<ConfigOption.SchemaOption<?>> schemaClass =
+                (Class<ConfigOption.SchemaOption<?>>) (Class<?>) ConfigOption.SchemaOption.class;
         register(schemaClass, (o, s, onChange) -> {
             Button button = new IconButton(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT,
                     Component.translatable("gui.moonlight.config.edit"), MoonlightIcons.EDIT, b ->
@@ -236,11 +236,11 @@ public final class ConfigControllers {
             });
         });
 
-        register(ConfigOption.UnsupportedValue.class, (o, s, onChange) -> disabled());
+        register(ConfigOption.UnsupportedOption.class, (o, s, onChange) -> disabled());
     }
 
 
-    public static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
+    public static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanOption o, ConfigEditSession s, Runnable onChange) {
         Identifier icon = o.icon();
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();
@@ -264,7 +264,7 @@ public final class ConfigControllers {
         return new ConfigControl<>(w, w::set);
     }
 
-    private static <E extends Enum<E>> ConfigControl<E> enumControl(ConfigOption.EnumValue<E> o, ConfigEditSession s, Runnable onChange) {
+    private static <E extends Enum<E>> ConfigControl<E> enumControl(ConfigOption.EnumOption<E> o, ConfigEditSession s, Runnable onChange) {
         CycleButton<E> w = CycleButton.builder(x -> Component.literal(x.name()), s.valueOrPendingValue(o))
                 .withValues(o.options)
                 .displayOnlyValue()

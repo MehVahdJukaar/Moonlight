@@ -38,7 +38,7 @@ public class OptionRow extends ConfigRow {
     private final boolean isGate;
     private final boolean isDrawnAsToggle;
     @Nullable
-    private final ConfigOption.BooleanValue feature; // same value as above, only set on toggle rows
+    private final ConfigOption.BooleanOption feature; // same value as above, only set on toggle rows
     private final Component title;
     @Nullable
     private final Component description;
@@ -64,11 +64,11 @@ public class OptionRow extends ConfigRow {
         this.title = categoryPath == null ? value.title()
                 : Component.empty().append(categoryPath).append(value.title());
         this.description = value.description();
-        this.editable = !(value instanceof ConfigOption.UnsupportedValue);
-        this.isDrawnAsToggle = isGate || (value instanceof ConfigOption.BooleanValue bv && bv.isFeature());
-        this.feature = isDrawnAsToggle ? (ConfigOption.BooleanValue) value : null;
+        this.editable = !(value instanceof ConfigOption.UnsupportedOption);
+        this.isDrawnAsToggle = isGate || (value instanceof ConfigOption.BooleanOption bv && bv.isFeature());
+        this.feature = isDrawnAsToggle ? (ConfigOption.BooleanOption) value : null;
         this.control = isDrawnAsToggle
-                ? ConfigControllers.featureToggle((ConfigOption.BooleanValue) value, session, this::onEdited)
+                ? ConfigControllers.featureToggle((ConfigOption.BooleanOption) value, session, this::onEdited)
                 : ConfigControllers.create(value, session, this::onEdited);
 
         this.resetButton = new IconButton(0, 0, RESET_WIDTH, CONTROL_HEIGHT, Component.empty(), MoonlightIcons.RESET, b -> resetToDefault())

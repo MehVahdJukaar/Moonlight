@@ -11,14 +11,15 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Objects;
 
-abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
+//map turns a stored value into the one we hand out, unmap goes back
+public abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     private final ModConfigSpec.ConfigValue<C> original;
     private final ConfigMetadata meta;
     private T cachedValue = null;
     private C cachedRaw = null;
     private boolean initialized = false;
 
-    ForgeConfigValue(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
+    protected ForgeConfigValue(ModConfigSpec.ConfigValue<C> original, ConfigMetadata meta) {
         this.original = original;
         this.meta = meta;
     }
@@ -26,20 +27,26 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     public static <T> ForgeConfigValue<T, T> simple(ModConfigSpec.ConfigValue<T> original, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
-            T map(T value) { return value; }
+            protected T map(T value) {
+                return value;
+            }
+
             @Override
-            T unmap(T value) { return value; }
+            protected T unmap(T value) {
+                return value;
+            }
         };
     }
 
     public static <T> ForgeConfigValue<T, String> fromString(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
-            T map(String value) {
+            protected T map(String value) {
                 return codec.parse(JavaOps.INSTANCE, value).getOrThrow();
             }
+
             @Override
-            String unmap(T value) {
+            protected String unmap(T value) {
                 return codec.encodeStart(JavaOps.INSTANCE, value).getOrThrow().toString();
             }
         };
@@ -48,7 +55,7 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     public static ForgeConfigValue<JsonElement, String> json(ModConfigSpec.ConfigValue<String> original, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
-            JsonElement map(String value) {
+            protected JsonElement map(String value) {
                 try {
                     return JsonParser.parseString(value.replace("'", "\""));
                 } catch (Exception e) {
@@ -56,7 +63,8 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
                 }
             }
             @Override
-            String unmap(JsonElement value) {
+            protected String unmap(JsonElement value) {
+                //single quotes so toml doesnt escape everything
                 return value.toString().replace(" ", "").replace("\"", "'");
             }
         };
@@ -65,7 +73,7 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     public static <T> ForgeConfigValue<T, String> codec(ModConfigSpec.ConfigValue<String> original, Codec<T> codec, ConfigMetadata meta) {
         return new ForgeConfigValue<>(original, meta) {
             @Override
-            T map(String raw) {
+            protected T map(String raw) {
                 JsonElement json = JsonParser.parseString(raw.replace("'", "\""));
                 return codec.decode(JsonOps.INSTANCE, json)
                         .getOrThrow()
@@ -73,15 +81,16 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
             }
 
             @Override
-            String unmap(T value) {
+            protected String unmap(T value) {
                 JsonElement json = codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow();
                 return json.toString().replace(" ", "").replace("\"", "'");
             }
         };
     }
 
-    abstract T map(C value);
-    abstract C unmap(T value);
+    protected abstract T map(C value);
+
+    protected abstract C unmap(T value);
 
     @Override
     public T get() {
@@ -114,8 +123,7 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
         C raw = unmap(value);
         boolean changed = !initialized || !Objects.equals(cachedRaw, raw);
         original.set(raw);
-        // NeoForge's ConfigValue.set() skips refreshing its own cache for worldRestart/gameRestart values, so
-        // original.get() would return the stale value and pollChanged() would revert the set, so clear the cache
+        //neo doesn't refresh its cache on set for restart values, so get() would give the old one back
         original.clearCache();
         cachedRaw = raw;
         cachedValue = value;
@@ -132,4 +140,5 @@ abstract class ForgeConfigValue<T, C> implements TrackedConfigValue<T> {
     public ConfigReloadType reloadType() {
         return meta.reloadType();
     }
+
 }
