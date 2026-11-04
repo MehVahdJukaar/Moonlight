@@ -100,6 +100,7 @@ transitive-accessible method net/minecraft/client/renderer/item/ItemProperties r
 
 #config list
 accessible method net/minecraft/client/gui/components/AbstractSelectionList replaceEntries (Ljava/util/Collection;)V
+extendable method net/minecraft/client/gui/components/AbstractSelectionList getEntryAtPosition (DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
 
 #falling block
 transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity cancelDrop Z

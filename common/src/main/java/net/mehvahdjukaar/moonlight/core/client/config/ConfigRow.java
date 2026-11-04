@@ -14,6 +14,10 @@ public abstract class ConfigRow extends ContainerObjectSelectionList.Entry<Confi
         return null;
     }
 
+    public int height(int itemHeight) {
+        return itemHeight;
+    }
+
     //null keeps whatever panel was showing
     @Nullable
     public DescriptionPanel.Content panelContent() {

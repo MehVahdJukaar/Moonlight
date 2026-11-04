@@ -1,5 +1,7 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.client.gui.Icon;
 import net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,22 +13,41 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-class DescriptionRow extends ConfigRow {
+import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
+
+public class DescriptionRow extends ConfigRow {
 
     private final Font font;
+    @Nullable
+    private final Icon image;
     private final List<FormattedCharSequence> lines;
+    private final int contentHeight;
 
-    DescriptionRow(Font font, List<FormattedCharSequence> lines) {
+    public DescriptionRow(Font font, @Nullable Icon image, @Nullable Component description, int rowWidth) {
         this.font = font;
-        this.lines = List.copyOf(lines);
+        this.image = image;
+        int textWidth = rowWidth - ARROW_WIDTH - GAP - (image == null ? 0 : DESC_IMAGE_SIZE + GAP);
+        this.lines = description == null ? List.of() : font.split(description, textWidth);
+        this.contentHeight = Math.max(image == null ? 0 : DESC_IMAGE_SIZE, this.lines.size() * font.lineHeight);
+    }
+
+    @Override
+    public int height(int itemHeight) {
+        return contentHeight + 4;
     }
 
     @Override
     public void render(GuiGraphics graphics, int index, int top, int left, int width, int height,
                        int mouseX, int mouseY, boolean hovering, float partialTick) {
-        int y = top + 1;
+        int x = left + ARROW_WIDTH + 2;
+        if (image != null) {
+            GuiHelper.renderCroppedIcon(graphics, image, x, top, DESC_IMAGE_SIZE);
+            x += DESC_IMAGE_SIZE + GAP;
+        }
+
+        int y = top;
         for (FormattedCharSequence line : lines) {
-            graphics.drawString(font, line, left + ConfigScreenLayout.ARROW_WIDTH + 2, y, ConfigGuiColors.DESCRIPTION);
+            graphics.drawString(font, line, x, y, ConfigGuiColors.DESCRIPTION);
             y += font.lineHeight;
         }
     }

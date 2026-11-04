@@ -191,7 +191,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
             collectMatches(category, query, false, matches);
             for (ConfigOption<?> v : matches) {
                 rows.add(new OptionRow(this, v, categorySearchPathOf(v)));
-                addDescriptionRows(rows, v);
+                addDescriptionRow(rows, v);
             }
         }
         this.list.setRows(rows);
@@ -199,7 +199,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
 
     private void addOption(List<ConfigRow> rows, ConfigOption<?> v) {
         rows.add(new OptionRow(this, v));
-        addDescriptionRows(rows, v);
+        addDescriptionRow(rows, v);
     }
 
     private static void collectMatches(ConfigCategory category, String query, boolean inMatchedCategory,

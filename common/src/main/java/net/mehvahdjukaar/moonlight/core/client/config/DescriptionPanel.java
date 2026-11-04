@@ -106,7 +106,7 @@ public class DescriptionPanel extends AbstractWidget {
     }
 
     @Nullable
-    private static Icon getImage(ResourceLocation texture) {
+    public static Icon getImage(ResourceLocation texture) {
         return IMAGES.computeIfAbsent(texture, t -> {
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(t);
 

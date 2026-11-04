@@ -93,7 +93,7 @@ public class OptionRow extends ConfigRow {
     }
 
     private boolean hasExpandArrow() {
-        return (description != null) && !view.hasDescriptionPanel();
+        return (description != null || value.image() != null) && !view.hasDescriptionPanel();
     }
 
     @Override

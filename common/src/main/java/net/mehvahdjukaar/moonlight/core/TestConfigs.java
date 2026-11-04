@@ -95,7 +95,7 @@ public class TestConfigs {
 
     public static void init() {
         ConfigBuilder builder = ConfigBuilder.create(Moonlight.res("test"), ConfigType.COMMON);
-        builder.enableDescriptionPanel();
+      //  builder.enableDescriptionPanel();
         builder.push("test_category");
         builder.comment("dev only");
 
