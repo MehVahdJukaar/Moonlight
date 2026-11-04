@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
@@ -49,6 +50,11 @@ class ListEntryRow extends ConfigRow {
     @Override
     public List<? extends GuiEventListener> children() {
         return children;
+    }
+
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        return Optional.of(remove.isMouseOver(mouseX, mouseY) ? remove : inner);
     }
 
     @Override
