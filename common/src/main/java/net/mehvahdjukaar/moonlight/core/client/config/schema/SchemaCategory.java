@@ -69,16 +69,31 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
 
     static final class ListEntries extends Entries<JsonElement> {
 
-        private final Schema.ListOf<?> schema;
+        @FunctionalInterface
+        interface EntryField {
+            FormField make(Component title, JsonElement value);
+        }
+
+        private final EntryField entryField;
         private final JsonElement newEntryTemplate;
+        private final int min;
+        private final int max;
         private final List<FormPart> entryValues = new ArrayList<>();
 
-        ListEntries(Component title, Schema.ListOf<?> schema, @Nullable JsonElement initial, @Nullable JsonElement fallback) {
+        ListEntries(Component title, EntryField entryField, JsonElement newEntryTemplate, int min, int max, List<JsonElement> initial) {
             super(title);
-            this.schema = schema;
+            this.entryField = entryField;
+            this.newEntryTemplate = newEntryTemplate;
+            this.min = min;
+            this.max = max;
+            rebuildRows(initial);
+        }
+
+        static ListEntries of(Component title, Schema.ListOf<?> schema, @Nullable JsonElement initial, @Nullable JsonElement fallback) {
             //first default entry already has every required field filled with something the codec accepts
-            this.newEntryTemplate = fallback instanceof JsonArray a && !a.isEmpty() ? a.get(0) : emptyFor(schema.element());
-            rebuildRows(initial instanceof JsonArray a ? a.asList() : List.of());
+            JsonElement template = fallback instanceof JsonArray a && !a.isEmpty() ? a.get(0) : emptyFor(schema.element());
+            return new ListEntries(title, (t, json) -> field(t, schema.element(), json, template), template,
+                    schema.min(), schema.max(), initial instanceof JsonArray a ? a.asList() : List.of());
         }
 
         @Override
@@ -103,7 +118,7 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             entryValues.clear();
             for (int i = 0; i < entries.size(); i++) {
                 Component entryTitle = Component.translatable("gui.moonlight.config.list_entry", i + 1);
-                entryValues.add(addField(this, entryTitle, schema.element(), entries.get(i), newEntryTemplate));
+                entryValues.add(addTo(this, entryField.make(entryTitle, entries.get(i))));
             }
         }
 
@@ -114,12 +129,12 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
 
         @Override
         boolean canAdd() {
-            return entryValues.size() < schema.max();
+            return entryValues.size() < max;
         }
 
         @Override
         boolean canRemove() {
-            return entryValues.size() > schema.min();
+            return entryValues.size() > min;
         }
     }
 
@@ -190,18 +205,19 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             return entries;
         }
 
+
         @Override
         void rebuildRows(List<Map.Entry<String, JsonElement>> entries) {
             clear();
             rows.clear();
             for (var entry : entries) {
-                ConfigCategory keyHolder = new ConfigCategory(KEY_TITLE);
-                FormPart key = addField(keyHolder, KEY_TITLE, keyFieldSchema, new JsonPrimitive(entry.getKey()), null);
+                FormField key = field(KEY_TITLE, keyFieldSchema, new JsonPrimitive(entry.getKey()), null);
                 Schema<?> valueSchema = valueSchemaForKey.apply(entry.getKey());
+
                 Component valueTitle = opensPage(valueSchema, entry.getValue()) ? EDIT_TITLE : Component.empty();
 
                 FormPart value = addField(this, valueTitle, valueSchema, entry.getValue(), newValueTemplate);
-                rows.add(new KeyedRow((ConfigOption<?>) keyHolder.entries().getFirst(), key, valueSchema, value));
+                rows.add(new KeyedRow((ConfigOption<?>) key.node(), key.part(), valueSchema, value));
             }
         }
 
@@ -243,7 +259,8 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         private ConfigOption.DropdownOption selector;
         private String selected;
         private FormPart body;
-        private boolean bodyIsInline;
+        @Nullable
+        private String bodyKey;
 
         private Variant(Component title, List<String> labels, Function<String, Schema<?>> schemaForLabel,
                         @Nullable String typeField, @Nullable String valueField) {
@@ -295,9 +312,9 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (typeField == null) return bodyJson;
             JsonObject object = new JsonObject();
             object.addProperty(typeField, selected);
-            if (!bodyIsInline) {
+            if (bodyKey != null) {
                 boolean isEmptyOptionalBody = valueField != null && bodyJson instanceof JsonObject o && o.isEmpty();
-                if (!isEmptyOptionalBody) object.add(bodyFieldName(), bodyJson);
+                if (!isEmptyOptionalBody) object.add(bodyKey, bodyJson);
             } else if (bodyJson instanceof JsonObject bodyFields) {
                 for (var e : bodyFields.entrySet()) {
                     if (!e.getKey().equals(typeField)) {
@@ -308,10 +325,6 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             return object;
         }
 
-        private String bodyFieldName() {
-            return valueField != null ? valueField : "value";
-        }
-
         private void selectVariant(String label, @Nullable JsonElement initial) {
             clear();
             this.selected = label;
@@ -319,13 +332,16 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             add(selector);
 
             Schema<?> schema = schemaForLabel.apply(label);
-            boolean isRecordBesideTypeField = schema instanceof Schema.Record<?> && valueField == null;
-            this.bodyIsInline = schema == null || typeField == null || isRecordBesideTypeField;
+
+            boolean nested = (typeField != null && schema != null) && (valueField != null || !(schema instanceof Schema.Record<?>));
+            this.bodyKey = null;
+            if (nested) this.bodyKey = valueField != null ? valueField : "value";
             if (schema == null) {
-                this.body = addRawJsonField(this, readable("value"), initial != null ? initial : JsonNull.INSTANCE);
-            } else if (!bodyIsInline) {
-                JsonElement nestedInitial = initial instanceof JsonObject o ? o.get(bodyFieldName()) : null;
-                this.body = addField(this, readable(bodyFieldName()), schema, nestedInitial, null);
+                this.body = addTo(this, rawJsonField(readable("value"), initial != null ? initial : JsonNull.INSTANCE));
+            } else if (bodyKey != null) {
+                JsonElement nestedInitial = initial instanceof JsonObject o ? o.get(bodyKey) : null;
+
+                this.body = addField(this, readable(bodyKey), schema, nestedInitial, null);
             } else if (schema instanceof Schema.Record<?> rec) {
                 this.body = addRecordFields(this, rec, initial, null);
             } else {
@@ -359,7 +375,7 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (!hasValue(json)) return NO_FIT;
             JsonElement roundTripped;
             try {
-                roundTripped = addField(new ConfigCategory(Component.empty()), Component.empty(), option, json, null).initialJson();
+                roundTripped = field(Component.empty(), option, json, null).part().initialJson();
             } catch (Exception e) {
                 return NO_FIT;
             }

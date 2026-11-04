@@ -28,9 +28,8 @@ class ListEntryRow extends ConfigRow {
         this.remove.active = canRemove;
         this.remove.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.list_remove")));
 
-        List<GuiEventListener> all = new ArrayList<>(inner.children());
-        all.add(remove);
-        this.children = List.copyOf(all);
+        // inner stays a child of its own so key events find focused widget through it
+        this.children = List.of(inner, remove);
 
         List<NarratableEntry> narrated = new ArrayList<>(inner.narratables());
         narrated.add(remove);
@@ -45,11 +44,6 @@ class ListEntryRow extends ConfigRow {
         remove.setX(left + width - RESET_WIDTH);
         remove.setY(top + (height - CONTROL_HEIGHT) / 2);
         remove.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return inner.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

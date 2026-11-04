@@ -42,6 +42,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     private final ConfigCategory category;
     @Nullable
     private final SchemaCategory.Entries<?> entries;
+    private final int extraFooter;
     @Nullable
     private final SchemaEditScreen parentPage;
     @Nullable
@@ -50,24 +51,35 @@ public class SchemaEditScreen extends ConfigPageScreen {
     private Component error;
 
     public static <T> Screen create(ConfigOption.SchemaOption<T> option, ConfigEditSession outerSession, Runnable onChange) {
-        Screen parent = Minecraft.getInstance().screen;
         SchemaCodec<T> codec = option.codec;
         T current = outerSession.valueOrPendingValue(option);
         JsonElement currentJson = encode(codec, current);
         JsonElement defaultJson = encode(codec, option.defaultValue());
         SchemaForm form = SchemaForm.build(option.title(), codec.schema(), currentJson, defaultJson);
-        Consumer<Object> onDone = decoded -> {
+        FormEdit edit = new FormEdit(ConfigEditSession.scratch(Minecraft.getInstance().screen), form.editedValue(), codec,
+                putInto(outerSession, option, onChange));
+        return new SchemaEditScreen(form.rootPage(), null, edit);
+    }
+
+    public static Screen create(ConfigOption.ListOption option, ConfigEditSession outerSession, Runnable onChange) {
+        SchemaCategory.ListEntries page = SchemaForm.listOptionEntries(option, outerSession.valueOrPendingValue(option));
+        FormEdit edit = new FormEdit(ConfigEditSession.scratch(Minecraft.getInstance().screen), page, Codec.STRING.listOf(),
+                putInto(outerSession, option, onChange));
+        return new SchemaEditScreen(page, null, edit);
+    }
+
+    private static Consumer<Object> putInto(ConfigEditSession outerSession, ConfigOption<?> option, Runnable onChange) {
+        return decoded -> {
             outerSession.put(option, decoded);
             onChange.run();
         };
-        FormEdit edit = new FormEdit(ConfigEditSession.scratch(parent), form.editedValue(), codec, onDone);
-        return new SchemaEditScreen(form.rootPage(), null, edit);
     }
 
     private SchemaEditScreen(ConfigCategory category, @Nullable SchemaEditScreen parentPage, FormEdit edit) {
         super(category.title());
         this.category = category;
         this.entries = category instanceof SchemaCategory.Entries<?> e ? e : null;
+        this.extraFooter = entries != null ? ADD_ENTRY_STRIP : 0;
         this.parentPage = parentPage;
         this.edit = edit;
     }
@@ -103,8 +115,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     protected void init() {
         this.overlay.clear();
 
-        int footer = entries != null ? FOOTER + ADD_ENTRY_STRIP : FOOTER;
-        this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - footer, HEADER, ITEM_HEIGHT);
+        this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - FOOTER - extraFooter, HEADER, ITEM_HEIGHT);
         populate();
         this.addRenderableWidget(this.list);
 
@@ -133,10 +144,16 @@ public class SchemaEditScreen extends ConfigPageScreen {
     protected void populate() {
         List<ConfigRow> rows = new ArrayList<>();
         List<ConfigNode> nodes = category.entries();
+        boolean plainList = entries instanceof SchemaCategory.ListEntries;
         for (int i = 0; i < nodes.size(); i++) {
-            ConfigRow row = nodes.get(i) instanceof ConfigCategory cat
-                    ? new CategoryRow(this, cat)
-                    : new OptionRow(this, (ConfigOption<?>) nodes.get(i));
+            ConfigRow row;
+            if (nodes.get(i) instanceof ConfigCategory cat) {
+                row = new CategoryRow(this, cat);
+            } else if (plainList) {
+                row = new WideOptionRow(this, (ConfigOption<?>) nodes.get(i), ROW_WIDTH - RESET_WIDTH - GAP);
+            } else {
+                row = new OptionRow(this, (ConfigOption<?>) nodes.get(i));
+            }
             rows.add(entries == null ? row : removableEntryRow(entries, row, i));
         }
         this.list.setRows(rows);
@@ -198,8 +215,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
         super.render(graphics, mouseX, mouseY, partialTick);
         if (renderOverlayOrTooltip(graphics, mouseX, mouseY)) return;
         if (this.error != null) {
-            int y = this.height - 42 - (entries != null ? ADD_ENTRY_STRIP : 0);
-            graphics.drawCenteredString(this.font, this.error, this.width / 2, y, ConfigGuiColors.ERROR);
+            graphics.drawCenteredString(this.font, this.error, this.width / 2, this.height - 42 - extraFooter, ConfigGuiColors.ERROR);
         }
     }
 }
