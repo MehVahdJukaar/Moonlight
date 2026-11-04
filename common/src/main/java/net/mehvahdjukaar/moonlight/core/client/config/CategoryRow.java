@@ -69,6 +69,9 @@ public class CategoryRow extends ConfigRow {
             gutter.add(graphics, left, MoonlightIcons.WARNING,
                     Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
         }
+        if (gate != null) {
+            gutter.addReload(graphics, left, gate.reloadType());
+        }
 
         int buttonWidth = toggle != null ? width - CONTROL_HEIGHT - GAP : width;
         button.setMessage(Component.empty()); // we draw our own icon + label over the (empty) button background

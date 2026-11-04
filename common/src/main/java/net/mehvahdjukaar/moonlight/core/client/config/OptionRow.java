@@ -7,7 +7,6 @@ import net.mehvahdjukaar.moonlight.api.client.gui.ConfigControl;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
-import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.minecraft.resources.Identifier;
 import net.minecraft.client.gui.Font;
@@ -144,10 +143,7 @@ public class OptionRow extends ConfigRow {
             gutter.add(graphics, left, MoonlightIcons.WARNING,
                     Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
         }
-        Identifier reloadIcon = ConfigScreenLayout.reloadIcon(value.reloadType());
-        if (reloadIcon != null) {
-            gutter.add(graphics, left, reloadIcon, reloadTooltip(value.reloadType()));
-        }
+        gutter.addReload(graphics, left, value.reloadType());
 
         boolean modified = !Objects.equals(session.valueOrPendingValue(value), value.get());
         int titleColor = !contextEnabled ? DESCRIPTION : modified ? MODIFIED : TEXT;
@@ -190,10 +186,5 @@ public class OptionRow extends ConfigRow {
     @Override
     public Component getGutterTooltip(int mouseX, int mouseY) {
         return gutter.tooltipAt(mouseX, mouseY);
-    }
-
-    private static Component reloadTooltip(ConfigReloadType type) {
-        return Component.translatable(type == ConfigReloadType.GAME_RESTART
-                ? "gui.moonlight.config.reload.game" : "gui.moonlight.config.reload.world");
     }
 }

@@ -84,7 +84,9 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         @Override
         public JsonElement toJson(ConfigEditSession session) {
             JsonArray array = new JsonArray();
-            for (JsonElement entry : editedEntries(session)) array.add(entry);
+            for (FormPart v : entryValues){
+                array.add(v.toJson(session));
+            }
             return array;
         }
 
@@ -182,7 +184,9 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         @Override
         List<Map.Entry<String, JsonElement>> editedEntries(ConfigEditSession session) {
             List<Map.Entry<String, JsonElement>> entries = new ArrayList<>(rows.size());
-            for (KeyedRow row : rows) entries.add(Map.entry(row.typedKey(session), row.value.toJson(session)));
+            for (KeyedRow row : rows) {
+                entries.add(Map.entry(row.typedKey(session), row.value.toJson(session)));
+            }
             return entries;
         }
 
@@ -194,7 +198,7 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
                 ConfigCategory keyHolder = new ConfigCategory(KEY_TITLE);
                 FormPart key = addField(keyHolder, KEY_TITLE, keyFieldSchema, new JsonPrimitive(entry.getKey()), null);
                 Schema<?> valueSchema = valueSchemaForKey.apply(entry.getKey());
-                Component valueTitle = opensPage(valueSchema) ? EDIT_TITLE : Component.empty();
+                Component valueTitle = opensPage(valueSchema, entry.getValue()) ? EDIT_TITLE : Component.empty();
 
                 FormPart value = addField(this, valueTitle, valueSchema, entry.getValue(), newValueTemplate);
                 rows.add(new KeyedRow((ConfigOption<?>) keyHolder.entries().getFirst(), key, valueSchema, value));
@@ -222,13 +226,6 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         private static boolean isTextLike(Schema<?> schema) {
             return schema instanceof Schema.Str || schema instanceof Schema.ResourceId
                     || schema instanceof Schema.TagId || schema instanceof Schema.Enum<?>;
-        }
-
-        private static boolean opensPage(Schema<?> schema) {
-            return schema instanceof Schema.Record<?> || schema instanceof Schema.PairOf<?, ?>
-                    || schema instanceof Schema.ListOf<?> || schema instanceof Schema.MapOf<?, ?>
-                    || schema instanceof Schema.DispatchedMapOf<?, ?>
-                    || schema instanceof Schema.OneOf<?> || schema instanceof Schema.AnyOf<?>;
         }
     }
 
@@ -298,18 +295,14 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (typeField == null) return bodyJson;
             JsonObject object = new JsonObject();
             object.addProperty(typeField, selected);
-            if (bodyIsInline) {
-                if (bodyJson instanceof JsonObject bodyFields) {
-                    for (var e : bodyFields.entrySet()) {
-                        if (!e.getKey().equals(typeField)){
-                            object.add(e.getKey(), e.getValue());
-                        }
-                    }
-                }
-            } else {
+            if (!bodyIsInline) {
                 boolean isEmptyOptionalBody = valueField != null && bodyJson instanceof JsonObject o && o.isEmpty();
-                if (!isEmptyOptionalBody) {
-                    object.add(bodyFieldName(), bodyJson);
+                if (!isEmptyOptionalBody) object.add(bodyFieldName(), bodyJson);
+            } else if (bodyJson instanceof JsonObject bodyFields) {
+                for (var e : bodyFields.entrySet()) {
+                    if (!e.getKey().equals(typeField)) {
+                        object.add(e.getKey(), e.getValue());
+                    }
                 }
             }
             return object;
@@ -328,11 +321,11 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             Schema<?> schema = schemaForLabel.apply(label);
             boolean isRecordBesideTypeField = schema instanceof Schema.Record<?> && valueField == null;
             this.bodyIsInline = schema == null || typeField == null || isRecordBesideTypeField;
-            if (!bodyIsInline) {
+            if (schema == null) {
+                this.body = addRawJsonField(this, readable("value"), initial != null ? initial : JsonNull.INSTANCE);
+            } else if (!bodyIsInline) {
                 JsonElement nestedInitial = initial instanceof JsonObject o ? o.get(bodyFieldName()) : null;
                 this.body = addField(this, readable(bodyFieldName()), schema, nestedInitial, null);
-            } else if (schema == null) {
-                this.body = addRawJsonField(this, readable("value"), initial != null ? initial : JsonNull.INSTANCE);
             } else if (schema instanceof Schema.Record<?> rec) {
                 this.body = addRecordFields(this, rec, initial, null);
             } else {

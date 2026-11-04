@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -30,6 +31,13 @@ public final class GutterHints {
         int x = left - (this.hints.size() + 1) * SPACING;
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, this.rowY0 + (this.rowY1 - this.rowY0 - SIZE) / 2, SIZE, SIZE);
         this.hints.add(new Hint(x, tooltip));
+    }
+
+    public void addReload(GuiGraphicsExtractor graphics, int left, ConfigReloadType type) {
+        Identifier icon = ConfigScreenLayout.reloadIcon(type);
+        if (icon == null) return;
+        add(graphics, left, icon, Component.translatable(type == ConfigReloadType.GAME_RESTART
+                ? "gui.moonlight.config.reload.game" : "gui.moonlight.config.reload.world"));
     }
 
     @Nullable
