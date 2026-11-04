@@ -18,7 +18,7 @@ import java.util.List;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 
-class ConfigHolderRow extends ConfigRow {
+public class ConfigHolderRow extends ConfigRow {
 
     private final Button button;
     private final Component label;
@@ -29,7 +29,7 @@ class ConfigHolderRow extends ConfigRow {
     @Nullable
     private final Component unavailableReason;
 
-    ConfigHolderRow(Component label, @Nullable Component subtitle, ResourceLocation icon,
+    public ConfigHolderRow(Component label, @Nullable Component subtitle, ResourceLocation icon,
                     @Nullable Component unavailableReason, Runnable onClick) {
         this.label = label;
         this.subtitle = subtitle;
