@@ -20,9 +20,9 @@ public final class ConfigEditSession {
     private final Screen returnScreen;
 
     private final Map<ConfigOption<?>, Object> pendingValuesByOption = new IdentityHashMap<>();
-    private final Set<ConfigOption<?>> expanded = Collections.newSetFromMap(new IdentityHashMap<>());
-    // the most severe reload requirement among values actually saved this visit (sticky across multiple saves)
-    private ConfigReloadType appliedReload = ConfigReloadType.NONE;
+    @Nullable
+    private ConfigOption<?> expanded;
+    private ConfigReloadType requestedReloadType = ConfigReloadType.NONE;
 
     public ConfigEditSession(ModConfigHolder holder, Screen returnScreen) {
         this.holder = holder;
@@ -64,13 +64,13 @@ public final class ConfigEditSession {
         pendingValuesByOption.forEach((v, value) -> {
             if (!Objects.equals(value, v.get())) {
                 v.apply(holder, value);
-                if (v.reloadType().ordinal() > appliedReload.ordinal()) appliedReload = v.reloadType();
+                if (v.reloadType().ordinal() > requestedReloadType.ordinal()) requestedReloadType = v.reloadType();
             }
         });
     }
 
     public ConfigReloadType appliedReload() {
-        return appliedReload;
+        return requestedReloadType;
     }
 
     public void clearPending() {
@@ -78,10 +78,10 @@ public final class ConfigEditSession {
     }
 
     public boolean isExpanded(ConfigOption<?> v) {
-        return expanded.contains(v);
+        return expanded == v;
     }
 
     public void toggleExpanded(ConfigOption<?> v) {
-        if (!expanded.remove(v)) expanded.add(v);
+        expanded = expanded == v ? null : v;
     }
 }

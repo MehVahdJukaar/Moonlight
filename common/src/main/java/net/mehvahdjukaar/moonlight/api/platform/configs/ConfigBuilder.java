@@ -396,7 +396,7 @@ public abstract class ConfigBuilder {
     /**
      * Shows option comments in a side panel. Alternative look for the config screen
      */
-    public ConfigBuilder enableDescriptionPanel() {
+    public ConfigBuilder enableSidePanel() {
         this.descriptionPanel = true;
 
         return this;

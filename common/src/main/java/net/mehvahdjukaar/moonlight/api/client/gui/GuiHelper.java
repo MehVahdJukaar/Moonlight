@@ -103,6 +103,13 @@ public final class GuiHelper {
                 icon.width(), icon.height(), icon.width(), icon.height());
     }
 
+    /** The centered square of an icon, cropped and scaled to the given size. */
+    public static void renderCroppedIcon(GuiGraphicsExtractor graphics, Icon icon, int x, int y, int size) {
+        int side = Math.min(icon.width(), icon.height());
+        graphics.blit(RenderPipelines.GUI_TEXTURED, icon.texture(), x, y, (icon.width() - side) / 2f, (icon.height() - side) / 2f,
+                size, size, side, side, icon.width(), icon.height());
+    }
+
     public static void renderListBackground(GuiGraphicsExtractor graphics, int top, int bottom, int width, double scroll) {
         renderListBackground(graphics, 0, top, bottom, width, scroll);
     }

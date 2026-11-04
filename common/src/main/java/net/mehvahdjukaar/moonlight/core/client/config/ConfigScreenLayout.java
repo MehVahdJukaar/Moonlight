@@ -28,7 +28,7 @@ public final class ConfigScreenLayout {
     public static final int ROW_WIDTH = 280;
     public static final int ROW_SIDE_ROOM = 28; //scrollbar plus some air, on top of the row width
     public static final int ROW_ICON = 16; // leading category/config icon
-    public static final int DESC_LINES_PER_ROW = 2;
+    public static final int DESC_IMAGE_SIZE = 48; //square thumbnail next to expanded description
 
     //side panes (mod info on select screen, descriptions on the config screen)
     public static final int PANE_MIN_WIDTH = 104;

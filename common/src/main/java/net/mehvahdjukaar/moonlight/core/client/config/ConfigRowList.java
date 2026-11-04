@@ -26,7 +26,7 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigRow> {
     public void setRows(List<ConfigRow> rows) {
         this.clearEntries();
         if (this.topPadding > 0) this.addEntry(new SpacerRow(), this.topPadding);
-        for (ConfigRow row : rows) this.addEntry(row);
+        for (ConfigRow row : rows) this.addEntry(row, row.height(this.defaultEntryHeight));
         this.refreshScrollAmount();
     }
 
@@ -44,7 +44,6 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigRow> {
         return this.rowWidth;
     }
 
-    // narrows the rows, for lists that live in a pane instead of the whole screen
     void setRowWidth(int rowWidth) {
         this.rowWidth = rowWidth;
     }

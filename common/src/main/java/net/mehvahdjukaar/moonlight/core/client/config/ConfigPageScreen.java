@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.client.gui.Icon;
 import net.mehvahdjukaar.moonlight.api.client.gui.OverlayLayer;
 import net.mehvahdjukaar.moonlight.api.client.gui.PopupHost;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
@@ -11,12 +12,9 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
 
 public abstract class ConfigPageScreen extends Screen implements ConfigScreenAccess, PopupHost {
 
@@ -60,15 +58,11 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
 
     protected abstract void populate();
 
-    protected void addDescriptionRows(List<ConfigRow> rows, ConfigOption<?> option) {
-        Component desc = option.description();
-        if (desc == null || panel != null || !session().isExpanded(option)) {
-            return;
-        }
-        List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - GAP);
-        for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
-            rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
-        }
+    protected void addDescriptionRow(List<ConfigRow> rows, ConfigOption<?> option) {
+        if (panel != null || !session().isExpanded(option)) return;
+        Icon image = option.image() == null ? null : DescriptionPanel.getImage(option.image());
+        if (image == null && option.description() == null) return;
+        rows.add(new DescriptionRow(this.font, image, option.description(), this.list.getRowWidth()));
     }
 
     @Override
