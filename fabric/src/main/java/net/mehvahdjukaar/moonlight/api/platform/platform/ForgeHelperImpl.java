@@ -154,7 +154,7 @@ public class ForgeHelperImpl {
     public static void fireOnCropsGrowPost(ServerLevel level, BlockPos pos, BlockState state) {
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     public static InteractionResult fireOnRightClickBlock(Player player, InteractionHand hand, BlockPos below, BlockHitResult rayTraceResult) {
         return null;
     }

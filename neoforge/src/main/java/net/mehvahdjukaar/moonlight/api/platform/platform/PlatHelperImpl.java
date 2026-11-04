@@ -246,7 +246,7 @@ public class PlatHelperImpl {
         String logo = info.getLogoFile().orElse(null);
         if (logo == null || logo.isBlank()) return null;
         Path path = info.getOwningFile().getFile().findResource(logo);
-        return path != null && java.nio.file.Files.exists(path) ? path : null;
+        return path != null && Files.exists(path) ? path : null;
     }
 
     @Nullable

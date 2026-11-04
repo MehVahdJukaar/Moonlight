@@ -8,12 +8,12 @@ import com.google.gson.JsonPrimitive;
 
 import java.util.Objects;
 
-public class IntConfigValue extends ConfigValue<Integer> {
+public class FabricDoubleConfigValue extends FabricConfigValue<Double> {
 
-    private final Integer min;
-    private final Integer max;
+    private final Double min;
+    private final Double max;
 
-    public IntConfigValue(String name, Integer defaultValue, Integer min, Integer max, ConfigMetadata meta) {
+    public FabricDoubleConfigValue(String name, Double defaultValue, Double min, Double max, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.min = Objects.requireNonNull(min);
         this.max = Objects.requireNonNull(max);
@@ -21,25 +21,25 @@ public class IntConfigValue extends ConfigValue<Integer> {
     }
 
     @Override
-    public boolean isValid(Integer value) {
+    public boolean isValid(Double value) {
         return value >= min && value <= max;
     }
 
     @Override
-    protected Integer parseValue(JsonElement element) {
-        return element.getAsInt();
+    protected Double parseValue(JsonElement element) {
+        return element.getAsDouble();
     }
 
     @Override
-    protected JsonElement encodeValue(Integer value) {
+    protected JsonElement encodeValue(Double value) {
         return new JsonPrimitive(value);
     }
 
-    public Integer getMax() {
+    public Double getMax() {
         return max;
     }
 
-    public Integer getMin() {
+    public Double getMin() {
         return min;
     }
 }

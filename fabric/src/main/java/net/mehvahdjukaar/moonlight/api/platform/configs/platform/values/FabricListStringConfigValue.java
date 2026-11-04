@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class ListStringConfigValue<T extends String> extends ConfigValue<List<String>> {
+public class FabricListStringConfigValue<T extends String> extends FabricConfigValue<List<String>> {
 
     private final Predicate<Object> predicate;
     // non-null -> entries are picked from a dropdown instead of typed (see the screen's list editor)
@@ -22,12 +22,12 @@ public class ListStringConfigValue<T extends String> extends ConfigValue<List<St
     @Nullable
     private final Function<String, ItemStack> icon;
 
-    public ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator, ConfigMetadata meta) {
+    public FabricListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator, ConfigMetadata meta) {
         this(name, defaultValue, validator, null, null, meta);
     }
 
-    public ListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator,
-                                 @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
+    public FabricListStringConfigValue(String name, List<String> defaultValue, Predicate<Object> validator,
+                                       @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.predicate = validator;
         this.options = options;

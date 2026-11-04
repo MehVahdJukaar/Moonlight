@@ -36,8 +36,14 @@ public class ClothConfigCompat {
         if (background != null) builder.setDefaultBackgroundTexture(background);
 
 
+        var rootValues = spec.getMainEntry().getEntries().stream()
+                .filter(e -> !(e instanceof JsonConfigCategory)).toList();
+        if (!rootValues.isEmpty()) {
+            ConfigCategory general = builder.getOrCreateCategory(Component.translatable("gui.moonlight.config.general"));
+            for (var entry : rootValues) general.addEntry(buildEntry(builder, entry));
+        }
+
         for (var en : spec.getMainEntry().getEntries()) {
-            //skips stray config values
             if (!(en instanceof JsonConfigCategory c)) continue;
             ConfigCategory mainCat = builder.getOrCreateCategory(Component.translatable(TextHelper.getReadableName(c.getName())));
             for (var entry : c.getEntries()) {
@@ -68,7 +74,7 @@ public class ClothConfigCompat {
 
     private static AbstractConfigListEntry<?> buildEntry(ConfigBuilder builder, JsonConfigEntry entry) {
 
-        if (entry instanceof ColorConfigValue col) {
+        if (entry instanceof FabricColorConfigValue col) {
             var eb = builder.entryBuilder();
             var e = (col.hasAlpha()
                     ? eb.startAlphaColorField(col.getTranslation(), col.get())
@@ -78,7 +84,7 @@ public class ClothConfigCompat {
             var description = col.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof IntConfigValue ic) {
+        } else if (entry instanceof FabricIntConfigValue ic) {
             var e = builder.entryBuilder()
                     .startIntField(ic.getTranslation(), ic.get())
                     .setMax(ic.getMax())
@@ -88,7 +94,7 @@ public class ClothConfigCompat {
             var description = ic.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof DoubleConfigValue dc) {
+        } else if (entry instanceof FabricDoubleConfigValue dc) {
             var e = builder.entryBuilder()
                     .startDoubleField(dc.getTranslation(), dc.get())
                     .setMax(dc.getMax())
@@ -98,7 +104,7 @@ public class ClothConfigCompat {
             var description = dc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if ( entry instanceof FloatConfigValue fc) {
+        } else if ( entry instanceof FabricFloatConfigValue fc) {
             var e = builder.entryBuilder()
                     .startFloatField(fc.getTranslation(), fc.get())
                     .setMax(fc.getMax())
@@ -109,7 +115,7 @@ public class ClothConfigCompat {
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
-        else if (entry instanceof StringConfigValue sc) {
+        else if (entry instanceof FabricStringConfigValue sc) {
             var e = builder.entryBuilder()
                     .startStrField(sc.getTranslation(), sc.get())
                     .setDefaultValue(sc.getDefaultValue()) // Recommended: Used when user click "Reset"
@@ -117,7 +123,7 @@ public class ClothConfigCompat {
             var description = sc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof BoolConfigValue bc) {
+        } else if (entry instanceof FabricBoolConfigValue bc) {
             var e = builder.entryBuilder()
                     .startBooleanToggle(bc.getTranslation(), bc.get())
                     .setDefaultValue(bc.getDefaultValue()) // Recommended: Used when user click "Reset"
@@ -125,9 +131,9 @@ public class ClothConfigCompat {
             var description = bc.getCommentComponent();
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof EnumConfigValue<?> ec) {
+        } else if (entry instanceof FabricEnumConfigValue<?> ec) {
             return addEnum(builder, ec);
-        } else if (entry instanceof ListStringConfigValue<?> lc) {
+        } else if (entry instanceof FabricListStringConfigValue<?> lc) {
             var e = builder.entryBuilder()
                     .startStrList(lc.getTranslation(), lc.get())
                     .setDefaultValue(lc.getDefaultValue()) // Recommended: Used when user click "Reset"
@@ -136,14 +142,14 @@ public class ClothConfigCompat {
             if (description != null) e.setTooltip(description);// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
         }
-        else if(entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>){
+        else if(entry instanceof FabricJsonConfigValue || entry instanceof FabricObjectConfigValue<?>){
           var e =  builder.entryBuilder().startTextDescription(Component.literal("Unsupported entry. Edit config manually"));
             return e.build();
         }
         throw new UnsupportedOperationException("unknown entry: " + entry.getClass().getName());
     }
 
-    private static @NotNull <T extends Enum<T>> EnumListEntry<T> addEnum(ConfigBuilder builder, EnumConfigValue<T> ec) {
+    private static @NotNull <T extends Enum<T>> EnumListEntry<T> addEnum(ConfigBuilder builder, FabricEnumConfigValue<T> ec) {
         var e = builder.entryBuilder()
                 .startEnumSelector(ec.getTranslation(), ec.getEnumClass(), ec.get())
                 .setDefaultValue(ec.getDefaultValue()) // Recommended: Used when user click "Reset"

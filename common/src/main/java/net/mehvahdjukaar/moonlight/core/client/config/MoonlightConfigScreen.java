@@ -153,7 +153,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
         for (ConfigNode e : cat.entries()) {
             if (e instanceof ConfigCategory sub) {
                 resetAllToDefaults(sub);
-            } else if (e instanceof ConfigOption<?> v && !(v instanceof ConfigOption.UnsupportedValue)) {
+            } else if (e instanceof ConfigOption<?> v && !(v instanceof ConfigOption.UnsupportedOption)) {
                 session.put(v, v.defaultValue());
             }
         }

@@ -103,11 +103,11 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class BooleanValue extends SimpleConfigOption<Boolean> {
+    public static class BooleanOption extends SimpleConfigOption<Boolean> {
         private boolean feature;
-        private List<BooleanValue> dependencies = List.of();
+        private List<BooleanOption> dependencies = List.of();
 
-        public BooleanValue(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
+        public BooleanOption(Component title, @Nullable Component description, IConfigValue<Boolean> handle, Boolean defaultValue) {
             super(title, description, handle, defaultValue);
         }
 
@@ -121,90 +121,90 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         /** Other features that must be on for this one to do anything, in the order they were declared. */
-        public List<BooleanValue> dependencies() {
+        public List<BooleanOption> dependencies() {
             return dependencies;
         }
 
         @ApiStatus.Internal
-        public void addDependency(BooleanValue dependency) {
+        public void addDependency(BooleanOption dependency) {
             var next = new ArrayList<>(this.dependencies);
             next.add(dependency);
             this.dependencies = List.copyOf(next);
         }
     }
 
-    public static class IntValue extends SimpleConfigOption<Integer> {
+    public static class IntOption extends SimpleConfigOption<Integer> {
         public final int min;
         public final int max;
 
-        public IntValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
+        public IntOption(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
         }
     }
 
-    public static class IntSliderValue extends IntValue {
-        public IntSliderValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
+    public static class IntSliderOption extends IntOption {
+        public IntSliderOption(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue, int min, int max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    public static class DoubleValue extends SimpleConfigOption<Double> {
+    public static class DoubleOption extends SimpleConfigOption<Double> {
         public final double min;
         public final double max;
 
-        public DoubleValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
+        public DoubleOption(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
         }
     }
 
-    public static class DoubleSliderValue extends DoubleValue {
-        public DoubleSliderValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
+    public static class DoubleSliderOption extends DoubleOption {
+        public DoubleSliderOption(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue, double min, double max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
     /** A 0 to 1 double shown as a percentage slider. */
-    public static class PercentValue extends DoubleValue {
-        public PercentValue(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
+    public static class PercentOption extends DoubleOption {
+        public PercentOption(Component title, @Nullable Component description, IConfigValue<Double> handle, Double defaultValue) {
             super(title, description, handle, defaultValue, 0.0, 1.0);
         }
     }
 
-    public static class FloatValue extends SimpleConfigOption<Float> {
+    public static class FloatOption extends SimpleConfigOption<Float> {
         public final float min;
         public final float max;
 
-        public FloatValue(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
+        public FloatOption(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue);
             this.min = min;
             this.max = max;
         }
     }
 
-    public static class FloatSliderValue extends FloatValue {
-        public FloatSliderValue(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
+    public static class FloatSliderOption extends FloatOption {
+        public FloatSliderOption(Component title, @Nullable Component description, IConfigValue<Float> handle, Float defaultValue, float min, float max) {
             super(title, description, handle, defaultValue, min, max);
         }
     }
 
-    public static class EnumValue<E extends Enum<E>> extends SimpleConfigOption<E> {
+    public static class EnumOption<E extends Enum<E>> extends SimpleConfigOption<E> {
         public final E[] options;
 
-        public EnumValue(Component title, @Nullable Component description, IConfigValue<E> handle, E defaultValue, E[] options) {
+        public EnumOption(Component title, @Nullable Component description, IConfigValue<E> handle, E defaultValue, E[] options) {
             super(title, description, handle, defaultValue);
             this.options = options;
         }
     }
 
-    public static class StringValue extends SimpleConfigOption<String> {
+    public static class StringOption extends SimpleConfigOption<String> {
         @Nullable
         public final Predicate<Object> validator;
 
-        public StringValue(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
+        public StringOption(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue, @Nullable Predicate<Object> validator) {
             super(title, description, handle, defaultValue);
             this.validator = validator;
         }
@@ -214,8 +214,8 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class RegexValue extends StringValue {
-        public RegexValue(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue) {
+    public static class RegexOption extends StringOption {
+        public RegexOption(Component title, @Nullable Component description, IConfigValue<String> handle, String defaultValue) {
             super(title, description, handle, defaultValue, o -> o instanceof String s && isValidRegex(s));
         }
 
@@ -229,42 +229,42 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class DropdownValue extends SimpleConfigOption<String> {
+    public static class DropdownOption extends SimpleConfigOption<String> {
         public final Supplier<List<String>> options;
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public DropdownValue(Component title, @Nullable Component description, IConfigValue<String> handle,
-                             String defaultValue, Supplier<List<String>> options,
-                             @Nullable Function<String, ItemStack> icon) {
+        public DropdownOption(Component title, @Nullable Component description, IConfigValue<String> handle,
+                              String defaultValue, Supplier<List<String>> options,
+                              @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
             this.options = options;
             this.icon = icon;
         }
     }
 
-    public static class ColorValue extends SimpleConfigOption<Integer> {
+    public static class ColorOption extends SimpleConfigOption<Integer> {
         public final boolean hasAlpha;
 
-        public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {
+        public ColorOption(Component title, @Nullable Component description, IConfigValue<Integer> handle, Integer defaultValue) {
             this(title, description, handle, defaultValue, true);
         }
 
-        public ColorValue(Component title, @Nullable Component description, IConfigValue<Integer> handle,
-                          Integer defaultValue, boolean hasAlpha) {
+        public ColorOption(Component title, @Nullable Component description, IConfigValue<Integer> handle,
+                           Integer defaultValue, boolean hasAlpha) {
             super(title, description, handle, defaultValue);
             this.hasAlpha = hasAlpha;
         }
     }
 
-    public static class RangeValue extends ConfigOption<Range> {
+    public static class RangeOption extends ConfigOption<Range> {
         public final Supplier<Double> minHandle;
         public final Supplier<Double> maxHandle;
         public final double min;
         public final double max;
 
-        public RangeValue(Component title, @Nullable Component description, Supplier<Double> minHandle,
-                          Supplier<Double> maxHandle, Range defaultValue, double min, double max) {
+        public RangeOption(Component title, @Nullable Component description, Supplier<Double> minHandle,
+                           Supplier<Double> maxHandle, Range defaultValue, double min, double max) {
             super(title, description, defaultValue);
             this.minHandle = minHandle;
             this.maxHandle = maxHandle;
@@ -290,14 +290,14 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class Vec2Value extends ConfigOption<Vec2> {
+    public static class Vec2Option extends ConfigOption<Vec2> {
         public final Supplier<Float> xHandle;
         public final Supplier<Float> yHandle;
         public final float min;
         public final float max;
 
-        public Vec2Value(Component title, @Nullable Component description, Supplier<Float> xHandle,
-                         Supplier<Float> yHandle, Vec2 defaultValue, float min, float max) {
+        public Vec2Option(Component title, @Nullable Component description, Supplier<Float> xHandle,
+                          Supplier<Float> yHandle, Vec2 defaultValue, float min, float max) {
             super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
@@ -323,14 +323,14 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class Vec2iValue extends ConfigOption<Vec2i> {
+    public static class Vec2iOption extends ConfigOption<Vec2i> {
         public final Supplier<Integer> xHandle;
         public final Supplier<Integer> yHandle;
         public final int min;
         public final int max;
 
-        public Vec2iValue(Component title, @Nullable Component description, Supplier<Integer> xHandle,
-                          Supplier<Integer> yHandle, Vec2i defaultValue, int min, int max) {
+        public Vec2iOption(Component title, @Nullable Component description, Supplier<Integer> xHandle,
+                           Supplier<Integer> yHandle, Vec2i defaultValue, int min, int max) {
             super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
@@ -356,15 +356,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class Vec3Value extends ConfigOption<Vec3> {
+    public static class Vec3Option extends ConfigOption<Vec3> {
         public final Supplier<Double> xHandle;
         public final Supplier<Double> yHandle;
         public final Supplier<Double> zHandle;
         public final double min;
         public final double max;
 
-        public Vec3Value(Component title, @Nullable Component description, Supplier<Double> xHandle,
-                         Supplier<Double> yHandle, Supplier<Double> zHandle, Vec3 defaultValue, double min, double max) {
+        public Vec3Option(Component title, @Nullable Component description, Supplier<Double> xHandle,
+                          Supplier<Double> yHandle, Supplier<Double> zHandle, Vec3 defaultValue, double min, double max) {
             super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
@@ -392,15 +392,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class Vec3iValue extends ConfigOption<Vec3i> {
+    public static class Vec3iOption extends ConfigOption<Vec3i> {
         public final Supplier<Integer> xHandle;
         public final Supplier<Integer> yHandle;
         public final Supplier<Integer> zHandle;
         public final int min;
         public final int max;
 
-        public Vec3iValue(Component title, @Nullable Component description, Supplier<Integer> xHandle,
-                          Supplier<Integer> yHandle, Supplier<Integer> zHandle, Vec3i defaultValue, int min, int max) {
+        public Vec3iOption(Component title, @Nullable Component description, Supplier<Integer> xHandle,
+                           Supplier<Integer> yHandle, Supplier<Integer> zHandle, Vec3i defaultValue, int min, int max) {
             super(title, description, defaultValue);
             this.xHandle = xHandle;
             this.yHandle = yHandle;
@@ -428,12 +428,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class DateValue extends ConfigOption<MonthDay> {
+    public static class DateOption extends ConfigOption<MonthDay> {
         public final Supplier<Integer> monthHandle;
         public final Supplier<Integer> dayHandle;
 
-        public DateValue(Component title, @Nullable Component description, Supplier<Integer> monthHandle,
-                         Supplier<Integer> dayHandle, MonthDay defaultValue) {
+        public DateOption(Component title, @Nullable Component description, Supplier<Integer> monthHandle,
+                          Supplier<Integer> dayHandle, MonthDay defaultValue) {
             super(title, description, defaultValue);
             this.monthHandle = monthHandle;
             this.dayHandle = dayHandle;
@@ -462,12 +462,12 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class TimeValue extends ConfigOption<LocalTime> {
+    public static class TimeOption extends ConfigOption<LocalTime> {
         public final Supplier<Integer> hourHandle;
         public final Supplier<Integer> minuteHandle;
 
-        public TimeValue(Component title, @Nullable Component description, Supplier<Integer> hourHandle,
-                         Supplier<Integer> minuteHandle, LocalTime defaultValue) {
+        public TimeOption(Component title, @Nullable Component description, Supplier<Integer> hourHandle,
+                          Supplier<Integer> minuteHandle, LocalTime defaultValue) {
             super(title, description, defaultValue);
             this.hourHandle = hourHandle;
             this.minuteHandle = minuteHandle;
@@ -495,7 +495,7 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class ListValue extends SimpleConfigOption<List<String>> {
+    public static class ListOption extends SimpleConfigOption<List<String>> {
         @Nullable
         public final Predicate<String> entryValidator;
         @Nullable
@@ -503,14 +503,14 @@ public abstract class ConfigOption<T> extends ConfigNode {
         @Nullable
         public final Function<String, ItemStack> icon;
 
-        public ListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
-                         List<String> defaultValue, @Nullable Predicate<String> entryValidator) {
+        public ListOption(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
+                          List<String> defaultValue, @Nullable Predicate<String> entryValidator) {
             this(title, description, handle, defaultValue, entryValidator, null, null);
         }
 
-        public ListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
-                         List<String> defaultValue, @Nullable Predicate<String> entryValidator,
-                         @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon) {
+        public ListOption(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
+                          List<String> defaultValue, @Nullable Predicate<String> entryValidator,
+                          @Nullable Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon) {
             super(title, description, handle, defaultValue);
             this.entryValidator = entryValidator;
             this.options = options;
@@ -523,23 +523,23 @@ public abstract class ConfigOption<T> extends ConfigNode {
     }
 
     /** A list of hex color strings, edited with a color field per entry. */
-    public static class ColorListValue extends ListValue {
+    public static class ColorListOption extends ListOption {
         public final boolean hasAlpha;
 
-        public ColorListValue(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
-                              List<String> defaultValue, @Nullable Predicate<String> entryValidator, boolean hasAlpha) {
+        public ColorListOption(Component title, @Nullable Component description, IConfigValue<List<String>> handle,
+                               List<String> defaultValue, @Nullable Predicate<String> entryValidator, boolean hasAlpha) {
             super(title, description, handle, defaultValue, entryValidator);
             this.hasAlpha = hasAlpha;
         }
     }
 
-    public static class JsonValue extends ConfigOption<String> {
+    public static class JsonOption extends ConfigOption<String> {
         public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
         private final Supplier<JsonElement> json;
 
         // stays lazy. On NeoForge the spec can't be read while defining, so never call json.get() here
-        public JsonValue(Component title, @Nullable Component description, Supplier<JsonElement> json) {
+        public JsonOption(Component title, @Nullable Component description, Supplier<JsonElement> json) {
             super(title, description, null);
             this.json = json;
         }
@@ -565,15 +565,13 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
     }
 
-    public static class SchemaValue<T> extends ConfigOption<T> {
-        private final IConfigValue<T> handle;
+    public static class SchemaOption<T> extends SimpleConfigOption<T> {
         private final Supplier<T> lazyDefault;
         public final SchemaCodec<T> codec;
 
-        public SchemaValue(Component title, @Nullable Component description, IConfigValue<T> handle,
-                           Supplier<T> lazyDefault, SchemaCodec<T> codec) {
-            super(title, description, null);
-            this.handle = handle;
+        public SchemaOption(Component title, @Nullable Component description, IConfigValue<T> handle,
+                            Supplier<T> lazyDefault, SchemaCodec<T> codec) {
+            super(title, description, handle, null);
             this.lazyDefault = lazyDefault;
             this.codec = codec;
         }
@@ -583,31 +581,15 @@ public abstract class ConfigOption<T> extends ConfigNode {
         }
 
         @Override
-        public T get() {
-            return handle.get();
-        }
-
-        @Override
         public T defaultValue() {
             return lazyDefault.get();
         }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public void apply(ModConfigHolder holder, Object value) {
-            holder.manuallySetValue(this.handle, (T) value);
-        }
-
-        @Override
-        protected Stream<IConfigValue<?>> backingValues() {
-            return Stream.of(this.handle);
-        }
     }
 
-    public static class UnsupportedValue extends ConfigOption<Object> {
+    public static class UnsupportedOption extends ConfigOption<Object> {
         private final Supplier<Object> handle;
 
-        public UnsupportedValue(Component title, @Nullable Component description, Supplier<Object> handle) {
+        public UnsupportedOption(Component title, @Nullable Component description, Supplier<Object> handle) {
             super(title, description, null);
             this.handle = handle;
         }

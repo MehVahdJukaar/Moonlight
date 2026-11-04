@@ -245,7 +245,7 @@ public class FakeServerLevel extends ServerLevel {
         }
 
         @Override
-        public void onStatusChange(ChunkPos chunkPos, @Nullable net.minecraft.world.level.chunk.status.ChunkStatus chunkStatus) {
+        public void onStatusChange(ChunkPos chunkPos, @Nullable ChunkStatus chunkStatus) {
         }
 
         @Override

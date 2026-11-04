@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigValue<T> {
+public abstract class FabricConfigValue<T> extends JsonConfigEntry implements IConfigValue<T> {
 
     protected final T defaultValue;
     protected T value;
@@ -25,11 +25,11 @@ public abstract class ConfigValue<T> extends JsonConfigEntry implements IConfigV
     private boolean slider = false;
     private boolean percent = false;
 
-    protected ConfigValue(String name, T defaultValue, ConfigMetadata meta) {
+    protected FabricConfigValue(String name, T defaultValue, ConfigMetadata meta) {
         super(name);
         this.defaultValue = defaultValue;
         this.meta = meta;
-        if (!(this instanceof ObjectConfigValue<T>) && !(this instanceof JsonConfigValue)) {
+        if (!(this instanceof FabricObjectConfigValue<T>) && !(this instanceof FabricJsonConfigValue)) {
             Objects.requireNonNull(defaultValue, "default value cant be null");
         }
     }

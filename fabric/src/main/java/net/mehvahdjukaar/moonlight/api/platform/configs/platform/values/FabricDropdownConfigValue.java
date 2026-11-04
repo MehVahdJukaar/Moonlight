@@ -12,17 +12,17 @@ import java.util.function.Supplier;
 
 /**
  * A string config value picked from a set of options (a plain list, or a registry). Stored like a
- * {@link StringConfigValue}; the distinct type carries the lazy option list and optional icon and tells the screen
+ * {@link FabricStringConfigValue}; the distinct type carries the lazy option list and optional icon and tells the screen
  * to use the dropdown widget.
  */
-public class DropdownConfigValue extends StringConfigValue {
+public class FabricDropdownConfigValue extends FabricStringConfigValue {
 
     private final Supplier<List<String>> options;
     @Nullable
     private final Function<String, ItemStack> icon;
 
-    public DropdownConfigValue(String name, String defaultValue, Predicate<Object> validator,
-                               Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
+    public FabricDropdownConfigValue(String name, String defaultValue, Predicate<Object> validator,
+                                     Supplier<List<String>> options, @Nullable Function<String, ItemStack> icon, ConfigMetadata meta) {
         super(name, defaultValue, validator, meta);
         this.options = options;
         this.icon = icon;

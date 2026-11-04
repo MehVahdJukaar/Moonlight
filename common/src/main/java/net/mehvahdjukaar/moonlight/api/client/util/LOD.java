@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -230,7 +231,7 @@ public final class LOD {
     @Deprecated(forRemoval = true)
     public static boolean isOutOfFocus(float relativeAngle, float blockYaw, float degMargin) {
         // Preserve old logic (note: this matched the legacy semantics)
-        return (net.minecraft.util.Mth.degreesDifference(relativeAngle, blockYaw - 90) > -degMargin);
+        return (Mth.degreesDifference(relativeAngle, blockYaw - 90) > -degMargin);
     }
 
     /**
@@ -247,7 +248,7 @@ public final class LOD {
     @Deprecated(forRemoval = true)
     public static float getRelativeAngle(Vec3 cameraPos, BlockPos pos, Direction dir, float offset) {
         // Matches legacy implementation
-        return (float) (net.minecraft.util.Mth.atan2(
+        return (float) (Mth.atan2(
                 offset * dir.getStepX() + cameraPos.x - (pos.getX() + 0.5f),
                 offset * dir.getStepZ() + cameraPos.z - (pos.getZ() + 0.5f)) * 180 / Math.PI);
     }

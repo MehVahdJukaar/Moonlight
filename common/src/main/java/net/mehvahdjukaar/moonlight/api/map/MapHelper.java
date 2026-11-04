@@ -18,6 +18,7 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +47,7 @@ public class MapHelper {
      * @param type     vanilla decorationType
      * @param mapColor map item tint color
      */
-    public static void addVanillaTargetDecorationToItem(ItemStack stack, BlockPos pos, Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> type, int mapColor) {
+    public static void addVanillaTargetDecorationToItem(ItemStack stack, BlockPos pos, Holder<MapDecorationType> type, int mapColor) {
         MapItemSavedData.addTargetDecoration(stack, pos, "+", type);
         if (mapColor != 0) {
             //custom map color overrides the deco one

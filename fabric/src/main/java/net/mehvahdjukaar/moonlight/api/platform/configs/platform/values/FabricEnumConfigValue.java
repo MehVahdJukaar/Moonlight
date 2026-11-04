@@ -5,11 +5,11 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
-public class EnumConfigValue<T extends Enum<T>> extends ConfigValue<T> {
+public class FabricEnumConfigValue<T extends Enum<T>> extends FabricConfigValue<T> {
 
     private final T[] acceptedValues;
 
-    public EnumConfigValue(String name, T defaultValue, ConfigMetadata meta) {
+    public FabricEnumConfigValue(String name, T defaultValue, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.acceptedValues = defaultValue.getDeclaringClass().getEnumConstants();
     }

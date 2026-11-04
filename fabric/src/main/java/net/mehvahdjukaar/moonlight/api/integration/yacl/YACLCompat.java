@@ -30,8 +30,16 @@ public class YACLCompat {
         builder.save(spec::saveConfig);
 
 
+        var rootValues = spec.getMainEntry().getEntries().stream()
+                .filter(e -> !(e instanceof JsonConfigCategory)).toList();
+        if (!rootValues.isEmpty()) {
+            var general = ConfigCategory.createBuilder()
+                    .name(Component.translatable("gui.moonlight.config.general"));
+            for (var entry : rootValues) general.option(buildEntry(entry));
+            builder.category(general.build());
+        }
+
         for (var en : spec.getMainEntry().getEntries()) {
-            //skips stray config values
             if (!(en instanceof JsonConfigCategory c)) continue;
             var mainCat = ConfigCategory.createBuilder()
                     .name(Component.translatable(c.getName()));
@@ -74,7 +82,7 @@ public class YACLCompat {
 
     private static Option<?> buildEntry(JsonConfigEntry entry) {
 
-        if (entry instanceof ColorConfigValue col) {
+        if (entry instanceof FabricColorConfigValue col) {
             boolean hasAlpha = col.hasAlpha();
             var e = Option.<Color>createBuilder()
                     .name(col.getTranslation())
@@ -85,7 +93,7 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof IntConfigValue ic) {
+        } else if (entry instanceof FabricIntConfigValue ic) {
             var e = Option.<Integer>createBuilder()
                     .name(ic.getTranslation())
                     .binding(ic.getDefaultValue(), ic, ic::set)
@@ -97,7 +105,7 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof DoubleConfigValue dc) {
+        } else if (entry instanceof FabricDoubleConfigValue dc) {
             var e = Option.<Double>createBuilder()
                     .name(dc.getTranslation())
                     .binding(dc.getDefaultValue(), dc, dc::set)
@@ -110,7 +118,7 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof FloatConfigValue fc) {
+        } else if (entry instanceof FabricFloatConfigValue fc) {
             var e = Option.<Float>createBuilder()
                     .name(fc.getTranslation())
                     .binding(fc.getDefaultValue(), fc, fc::set)
@@ -123,7 +131,7 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof StringConfigValue sc) {
+        } else if (entry instanceof FabricStringConfigValue sc) {
             var e = Option.<String>createBuilder()
                     .name(sc.getTranslation())
                     .binding(sc.getDefaultValue(), sc, sc::set)
@@ -132,7 +140,7 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof BoolConfigValue bc) {
+        } else if (entry instanceof FabricBoolConfigValue bc) {
             var e = Option.<Boolean>createBuilder()
                     .name(bc.getTranslation())
                     .binding(bc.getDefaultValue(), bc, bc::set)
@@ -141,9 +149,9 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof EnumConfigValue<?> ec) {
+        } else if (entry instanceof FabricEnumConfigValue<?> ec) {
             return addEnum(ec);
-        } else if (entry instanceof ListStringConfigValue<?> lc) {
+        } else if (entry instanceof FabricListStringConfigValue<?> lc) {
             var e = Option.<Component>createBuilder()
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("String Lists are not supported")))
@@ -152,8 +160,8 @@ public class YACLCompat {
             if (description != null)
                 e.description(OptionDescription.of(description));// Shown when the user hover over this option
             return e.build(); // Builds the option entry for cloth config
-        } else if (entry instanceof JsonConfigValue || entry instanceof ObjectConfigValue<?>) {
-            var lc = (ConfigValue) entry;
+        } else if (entry instanceof FabricJsonConfigValue || entry instanceof FabricObjectConfigValue<?>) {
+            var lc = (FabricConfigValue) entry;
             var e = Option.<Component>createBuilder()
                     .name(lc.getTranslation())
                     .binding(Binding.immutable(Component.literal("Object fields are not supported. Edit the config manually instead")))
@@ -168,7 +176,7 @@ public class YACLCompat {
     private static final ValueFormatter<Double> DOUBLE_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
     private static final ValueFormatter<Float> FLOAT_FORMATTER = value -> Component.nullToEmpty(String.format("%,.4f", value).replaceAll("[  ]", " "));
 
-    private static <T extends Enum<T>> Option<T> addEnum(EnumConfigValue<T> ec) {
+    private static <T extends Enum<T>> Option<T> addEnum(FabricEnumConfigValue<T> ec) {
         var e = Option.<T>createBuilder()
                 .name(ec.getTranslation())
                 .binding(ec.getDefaultValue(), ec, ec::set)

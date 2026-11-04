@@ -601,7 +601,7 @@ public class RegHelper {
         throw new AssertionError();
     }
 
-    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = java.util.List.of(CreativeModeTabs.SPAWN_EGGS.location());
+    private static final List<ResourceLocation> DEFAULT_AFTER_ENTRIES = List.of(CreativeModeTabs.SPAWN_EGGS.location());
 
     public static RegSupplier<CreativeModeTab> registerCreativeModeTab(ResourceLocation name, Consumer<CreativeModeTab.Builder> configurator) {
         return registerCreativeModeTab(name, false, configurator);
@@ -645,7 +645,7 @@ public class RegHelper {
         }
 
         default void addAfter(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            addItems(tab, target, true, java.util.List.of(items));
+            addItems(tab, target, true, List.of(items));
         }
 
         default void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemLike... items) {
@@ -659,7 +659,7 @@ public class RegHelper {
         }
 
         default void addBefore(ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> target, ItemStack... items) {
-            addItems(tab, target, false, java.util.List.of(items));
+            addItems(tab, target, false, List.of(items));
         }
 
         default void remove(ResourceKey<CreativeModeTab> tab, ItemLike... items) {

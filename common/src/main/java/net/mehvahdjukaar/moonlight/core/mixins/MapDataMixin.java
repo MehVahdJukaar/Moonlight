@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapBanner;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,7 +51,7 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Final
     @Shadow
-    Map<String, net.minecraft.world.level.saveddata.maps.MapDecoration> decorations;
+    Map<String, MapDecoration> decorations;
 
     @Shadow
     @Final

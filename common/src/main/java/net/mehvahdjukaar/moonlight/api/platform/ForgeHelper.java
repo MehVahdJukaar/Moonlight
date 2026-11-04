@@ -174,7 +174,7 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     @PlatformImpl
     public static DyeColor getColor(ItemStack stack) {
         throw new AssertionError();
@@ -193,7 +193,7 @@ public class ForgeHelper {
     }
 
     @PlatformImpl
-    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @org.jetbrains.annotations.Nullable AbstractMinecart o) {
+    public static RailShape getRailDirection(BaseRailBlock railBlock, BlockState blockstate, Level level, BlockPos blockpos, @Nullable AbstractMinecart o) {
         throw new AssertionError();
     }
 

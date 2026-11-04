@@ -8,12 +8,12 @@ import com.google.gson.JsonPrimitive;
 
 import java.util.Objects;
 
-public class FloatConfigValue extends ConfigValue<Float> {
+public class FabricFloatConfigValue extends FabricConfigValue<Float> {
 
     private final Float min;
     private final Float max;
 
-    public FloatConfigValue(String name, Float defaultValue, Float min, Float max, ConfigMetadata meta) {
+    public FabricFloatConfigValue(String name, Float defaultValue, Float min, Float max, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.min = Objects.requireNonNull(min);
         this.max = Objects.requireNonNull(max);

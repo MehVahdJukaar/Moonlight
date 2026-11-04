@@ -42,6 +42,7 @@
   "gui.moonlight.config.map_duplicate_key": "Duplicate key, only the last one is kept",
   "gui.moonlight.config.schema_type": "Type",
   "gui.moonlight.config.edit": "Edit",
+  "gui.moonlight.config.general": "General",
   "gui.moonlight.config.unavailable.not_in_world": "This config belongs to a world. Load a world to edit it.",
   "gui.moonlight.config.unavailable.server_controlled": "This config is set by the server you are connected to.",
   "gui.moonlight.config.reload.world": "Requires world reload",

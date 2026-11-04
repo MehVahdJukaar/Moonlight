@@ -158,7 +158,9 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         @Override
         public JsonElement toJson(ConfigEditSession session) {
             JsonObject object = new JsonObject();
-            for (var entry : editedEntries(session)) object.add(entry.getKey(), entry.getValue());
+            for (var entry : editedEntries(session)){
+                object.add(entry.getKey(), entry.getValue());
+            }
             return object;
         }
 
@@ -170,7 +172,9 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (index >= rows.size()) return false;
             String key = rows.get(index).typedKey(session);
             for (int i = 0; i < rows.size(); i++) {
-                if (i != index && rows.get(i).typedKey(session).equals(key)) return true;
+                if (i != index && rows.get(i).typedKey(session).equals(key)){
+                    return true;
+                }
             }
             return false;
         }
@@ -191,6 +195,7 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
                 FormPart key = addField(keyHolder, KEY_TITLE, keyFieldSchema, new JsonPrimitive(entry.getKey()), null);
                 Schema<?> valueSchema = valueSchemaForKey.apply(entry.getKey());
                 Component valueTitle = opensPage(valueSchema) ? EDIT_TITLE : Component.empty();
+
                 FormPart value = addField(this, valueTitle, valueSchema, entry.getValue(), newValueTemplate);
                 rows.add(new KeyedRow((ConfigOption<?>) keyHolder.entries().getFirst(), key, valueSchema, value));
             }
@@ -238,7 +243,7 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
         private final String typeField;
         @Nullable
         private final String valueField;
-        private ConfigOption.DropdownValue selector;
+        private ConfigOption.DropdownOption selector;
         private String selected;
         private FormPart body;
         private boolean bodyIsInline;
@@ -296,12 +301,16 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (bodyIsInline) {
                 if (bodyJson instanceof JsonObject bodyFields) {
                     for (var e : bodyFields.entrySet()) {
-                        if (!e.getKey().equals(typeField)) object.add(e.getKey(), e.getValue());
+                        if (!e.getKey().equals(typeField)){
+                            object.add(e.getKey(), e.getValue());
+                        }
                     }
                 }
             } else {
                 boolean isEmptyOptionalBody = valueField != null && bodyJson instanceof JsonObject o && o.isEmpty();
-                if (!isEmptyOptionalBody) object.add(bodyFieldName(), bodyJson);
+                if (!isEmptyOptionalBody) {
+                    object.add(bodyFieldName(), bodyJson);
+                }
             }
             return object;
         }
@@ -344,8 +353,11 @@ abstract class SchemaCategory extends ConfigCategory implements FormPart {
             if (variants.contains(type)) return type;
             ResourceLocation typeId = ResourceLocation.tryParse(type);
             if (typeId == null) return type;
+
             for (String variant : variants) {
-                if (typeId.equals(ResourceLocation.tryParse(variant))) return variant;
+                if (typeId.equals(ResourceLocation.tryParse(variant))) {
+                    return variant;
+                }
             }
             return type;
         }

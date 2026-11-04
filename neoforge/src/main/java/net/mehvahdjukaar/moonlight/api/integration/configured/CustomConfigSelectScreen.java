@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.integration.configured;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mrcrayfish.configured.api.ConfigType;
+import com.mrcrayfish.configured.api.IModConfig;
 import com.mrcrayfish.configured.client.screen.ModConfigSelectionScreen;
 import com.mrcrayfish.configured.client.screen.widget.IconButton;
 import com.mrcrayfish.configured.impl.neoforge.NeoForgeConfig;
@@ -38,7 +39,7 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
     private static final Field FILE_ITEM_BUTTON = CustomConfigScreen.findFieldOrNull(FileItem.class, "modifyButton");
     private static final Field FILE_ITEM_CONFIG = CustomConfigScreen.findFieldOrNull(FileItem.class, "config");
 
-    private final BiFunction<CustomConfigSelectScreen, com.mrcrayfish.configured.api.IModConfig, CustomConfigScreen> configScreenFactory;
+    private final BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory;
     private final ItemStack mainIcon;
     private final String modId;
     private final String modURL;
@@ -47,15 +48,15 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName,
                                     Screen parent,
-                                    BiFunction<CustomConfigSelectScreen, com.mrcrayfish.configured.api.IModConfig, CustomConfigScreen> configScreenFactory,
+                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
                                     ModConfigHolder... specs) {
         this(modId, mainIcon, displayName, parent, configScreenFactory, createConfigMap(specs));
     }
 
     public CustomConfigSelectScreen(String modId, ItemStack mainIcon, String displayName,
                                     Screen parent,
-                                    BiFunction<CustomConfigSelectScreen, com.mrcrayfish.configured.api.IModConfig, CustomConfigScreen> configScreenFactory,
-                                    Map<ConfigType, Set<com.mrcrayfish.configured.api.IModConfig>> configMap) {
+                                    BiFunction<CustomConfigSelectScreen, IModConfig, CustomConfigScreen> configScreenFactory,
+                                    Map<ConfigType, Set<IModConfig>> configMap) {
         super(parent, Component.literal(displayName), configMap);
         this.configScreenFactory = configScreenFactory;
         this.mainIcon = mainIcon;
@@ -81,8 +82,8 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
         container.registerExtensionPoint(IConfigScreenFactory.class, (a, s) -> screenSelectFactory.apply(s));
     }
 
-    private static Map<ConfigType, Set<com.mrcrayfish.configured.api.IModConfig>> createConfigMap(ModConfigHolder... specs) {
-        Map<ConfigType, Set<com.mrcrayfish.configured.api.IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
+    private static Map<ConfigType, Set<IModConfig>> createConfigMap(ModConfigHolder... specs) {
+        Map<ConfigType, Set<IModConfig>> modConfigMap = new EnumMap<>(ConfigType.class);
         for (var ss : specs) {
             ForgeConfigHolder s = (ForgeConfigHolder) ss;
             ModConfig modConfig = s.getModConfig();
@@ -111,14 +112,14 @@ public class CustomConfigSelectScreen extends ModConfigSelectionScreen {
                 try {
                     FILE_ITEM_BUTTON.setAccessible(true);
                     FILE_ITEM_CONFIG.setAccessible(true);
-                    FILE_ITEM_BUTTON.set(i, createModifyButton((com.mrcrayfish.configured.api.IModConfig) FILE_ITEM_CONFIG.get(item)));
+                    FILE_ITEM_BUTTON.set(i, createModifyButton((IModConfig) FILE_ITEM_CONFIG.get(item)));
                 } catch (IllegalAccessException ignored) {
                 }
             }
         }
     }
 
-    private Button createModifyButton(com.mrcrayfish.configured.api.IModConfig config) {
+    private Button createModifyButton(IModConfig config) {
         String langKey = "configured.gui.modify";
         return new IconButton(0, 0, 33, 0, 60, Component.translatable(langKey),
                 (onPress) -> Minecraft.getInstance().setScreen(configScreenFactory.apply(CustomConfigSelectScreen.this,

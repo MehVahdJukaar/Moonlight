@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.platform.configs.platform;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import net.mehvahdjukaar.codecui.SchemaCodec;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigMetadata;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
@@ -14,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.apache.http.annotation.Experimental;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -47,28 +45,11 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     @Override
-    public String currentCategory() {
-        return Objects.requireNonNull(categoryStack.peek()).getName();
-    }
-
-    @Nullable
-    @Override
-    public String parentCategory() {
-        if (categoryStack.size() < 2) {
-            return null;
-        }
-        var it = categoryStack.descendingIterator();
-        it.next();
-        return it.next().getName();
-    }
-
-    @Override
     public ConfigBuilderImpl push(String translation) {
         var cat = new JsonConfigCategory(translation);
         Objects.requireNonNull(categoryStack.peek()).addEntry(cat);
         categoryStack.push(cat);
-        noteCategoryName(translation);
-        uiPush(Component.translatable(translationKey("")));
+        enterCategory(translation);
         return this;
     }
 
@@ -77,7 +58,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         flushPendingComment(); // a trailing after-comment in this category has no following define to claim it
         assert categoryStack.size() != 1;
         categoryStack.pop();
-        uiPop();
+        exitCategory();
         return this;
     }
 
@@ -87,16 +68,15 @@ public class ConfigBuilderImpl extends ConfigBuilder {
         return new ConfigMetadata(this.pendingReload, this.pendingDynamicPacks);
     }
 
-    private void doAddConfig(String name, ConfigValue<?> config) {
+    private void doAddConfig(String name, FabricConfigValue<?> config) {
         doAddConfig(name, config, ConfigBuilderImpl::toOption);
     }
 
-    private void doAddConfig(String name, ConfigValue<?> config, Function<ConfigValue<?>, ConfigOption<?>> optionFactory) {
+    private void doAddConfig(String name, FabricConfigValue<?> config, Function<FabricConfigValue<?>, ConfigOption<?>> optionFactory) {
         config.setTranslationKey(this.translationKey(name));
         addTranslationsAndComments(name);
 
         Objects.requireNonNull(this.categoryStack.peek()).addEntry(config);
-        if (this.categoryStack.size() <= 1 && PlatHelper.isDev()) throw new AssertionError();
 
         // the comment, before or after, fills in the row's description
         if (!suppressUi) {
@@ -107,58 +87,58 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     }
 
     // Description is left empty here: comment(...) fills it in later through noteDefined
-    private static ConfigOption<?> toOption(ConfigValue<?> v) {
+    private static ConfigOption<?> toOption(FabricConfigValue<?> v) {
         Component title = v.getTranslation();
         boolean slider = v.isSlider();
-        // ColorConfigValue extends IntConfigValue, so it must be checked first
-        if (v instanceof ColorConfigValue c) {
-            return new ConfigOption.ColorValue(title, null, c, c.getDefaultValue(), c.hasAlpha());
-        } else if (v instanceof IntConfigValue i) {
+        // FabricColorConfigValue extends FabricIntConfigValue, so it must be checked first
+        if (v instanceof FabricColorConfigValue c) {
+            return new ConfigOption.ColorOption(title, null, c, c.getDefaultValue(), c.hasAlpha());
+        } else if (v instanceof FabricIntConfigValue i) {
             return slider
-                    ? new ConfigOption.IntSliderValue(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax())
-                    : new ConfigOption.IntValue(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax());
-        } else if (v instanceof DoubleConfigValue d) {
-            if (v.isPercent()) return new ConfigOption.PercentValue(title, null, d, d.getDefaultValue());
+                    ? new ConfigOption.IntSliderOption(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax())
+                    : new ConfigOption.IntOption(title, null, i, i.getDefaultValue(), i.getMin(), i.getMax());
+        } else if (v instanceof FabricDoubleConfigValue d) {
+            if (v.isPercent()) return new ConfigOption.PercentOption(title, null, d, d.getDefaultValue());
             return slider
-                    ? new ConfigOption.DoubleSliderValue(title, null, d, d.getDefaultValue(), d.getMin(), d.getMax())
-                    : new ConfigOption.DoubleValue(title, null, d, d.getDefaultValue(), d.getMin(), d.getMax());
-        } else if (v instanceof FloatConfigValue f) {
+                    ? new ConfigOption.DoubleSliderOption(title, null, d, d.getDefaultValue(), d.getMin(), d.getMax())
+                    : new ConfigOption.DoubleOption(title, null, d, d.getDefaultValue(), d.getMin(), d.getMax());
+        } else if (v instanceof FabricFloatConfigValue f) {
             return slider
-                    ? new ConfigOption.FloatSliderValue(title, null, f, f.getDefaultValue(), f.getMin(), f.getMax())
-                    : new ConfigOption.FloatValue(title, null, f, f.getDefaultValue(), f.getMin(), f.getMax());
-        } else if (v instanceof BoolConfigValue b) {
-            return new ConfigOption.BooleanValue(title, null, b, b.getDefaultValue());
-        } else if (v instanceof EnumConfigValue<?> e) {
+                    ? new ConfigOption.FloatSliderOption(title, null, f, f.getDefaultValue(), f.getMin(), f.getMax())
+                    : new ConfigOption.FloatOption(title, null, f, f.getDefaultValue(), f.getMin(), f.getMax());
+        } else if (v instanceof FabricBoolConfigValue b) {
+            return new ConfigOption.BooleanOption(title, null, b, b.getDefaultValue());
+        } else if (v instanceof FabricEnumConfigValue<?> e) {
             return enumOption(e, title);
-        } else if (v instanceof RegexConfigValue r) {
-            // must be checked before StringConfigValue (RegexConfigValue extends it)
-            return new ConfigOption.RegexValue(title, null, r, r.getDefaultValue());
-        } else if (v instanceof DropdownConfigValue d) {
-            // also extends StringConfigValue, so check first
-            return new ConfigOption.DropdownValue(title, null, d, d.getDefaultValue(), d.getOptions(), d.getIcon());
-        } else if (v instanceof StringConfigValue s) {
-            return new ConfigOption.StringValue(title, null, s, s.getDefaultValue(),
+        } else if (v instanceof FabricRegexConfigValue r) {
+            // must be checked before FabricStringConfigValue (FabricRegexConfigValue extends it)
+            return new ConfigOption.RegexOption(title, null, r, r.getDefaultValue());
+        } else if (v instanceof FabricDropdownConfigValue d) {
+            // also extends FabricStringConfigValue, so check first
+            return new ConfigOption.DropdownOption(title, null, d, d.getDefaultValue(), d.getOptions(), d.getIcon());
+        } else if (v instanceof FabricStringConfigValue s) {
+            return new ConfigOption.StringOption(title, null, s, s.getDefaultValue(),
                     o -> o instanceof String str && s.isValid(str));
-        } else if (v instanceof ListStringConfigValue<?> l) {
-            return new ConfigOption.ListValue(title, null, l, l.getDefaultValue(),
+        } else if (v instanceof FabricListStringConfigValue<?> l) {
+            return new ConfigOption.ListOption(title, null, l, l.getDefaultValue(),
                     l.getPredicate()::test, l.getOptions(), l.getIcon());
-        } else if (v instanceof JsonConfigValue j) {
+        } else if (v instanceof FabricJsonConfigValue j) {
             // raw json + beans (defineBean rides on defineJson) -> editable json text box
-            return new ConfigOption.JsonValue(title, null, j);
+            return new ConfigOption.JsonOption(title, null, j);
         }
         // codec objects: not yet editable
         @SuppressWarnings("unchecked")
         Supplier<Object> handle = (Supplier<Object>) v;
-        return new ConfigOption.UnsupportedValue(title, null, handle);
+        return new ConfigOption.UnsupportedOption(title, null, handle);
     }
 
-    private static <E extends Enum<E>> ConfigOption.EnumValue<E> enumOption(EnumConfigValue<E> e, Component title) {
-        return new ConfigOption.EnumValue<>(title, null, e, e.getDefaultValue(), e.getEnumClass().getEnumConstants());
+    private static <E extends Enum<E>> ConfigOption.EnumOption<E> enumOption(FabricEnumConfigValue<E> e, Component title) {
+        return new ConfigOption.EnumOption<>(title, null, e, e.getDefaultValue(), e.getEnumClass().getEnumConstants());
     }
 
     @Override
     public Supplier<Boolean> define(String name, boolean defaultValue) {
-        var config = new BoolConfigValue(name, defaultValue, pendingMeta());
+        var config = new FabricBoolConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -166,7 +146,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Double> define(String name, double defaultValue, double min, double max) {
-        var config = new DoubleConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricDoubleConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -174,14 +154,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Experimental
     @Override
     public Supplier<Float> define(String name, float defaultValue, float min, float max) {
-        var config = new FloatConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricFloatConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<Double> definePercentage(String name, double defaultValue) {
-        var config = new DoubleConfigValue(name, defaultValue, 0.0, 1.0, pendingMeta());
+        var config = new FabricDoubleConfigValue(name, defaultValue, 0.0, 1.0, pendingMeta());
         config.setPercent(true);
         doAddConfig(name, config);
         return config;
@@ -189,14 +169,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Integer> define(String name, int defaultValue, int min, int max) {
-        var config = new IntConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricIntConfigValue(name, defaultValue, min, max, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<Integer> defineSlider(String name, int defaultValue, int min, int max) {
-        var config = new IntConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricIntConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -204,7 +184,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Double> defineSlider(String name, double defaultValue, double min, double max) {
-        var config = new DoubleConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricDoubleConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -212,7 +192,7 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Float> defineSlider(String name, float defaultValue, float min, float max) {
-        var config = new FloatConfigValue(name, defaultValue, min, max, pendingMeta());
+        var config = new FabricFloatConfigValue(name, defaultValue, min, max, pendingMeta());
         config.setSlider(true);
         doAddConfig(name, config);
         return config;
@@ -220,21 +200,21 @@ public class ConfigBuilderImpl extends ConfigBuilder {
 
     @Override
     public Supplier<Integer> defineColor(String name, int defaultValue, boolean hasAlpha) {
-        var config = new ColorConfigValue(name, defaultValue, hasAlpha, pendingMeta());
+        var config = new FabricColorConfigValue(name, defaultValue, hasAlpha, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<String> define(String name, String defaultValue, Predicate<Object> validator) {
-        var config = new StringConfigValue(name, defaultValue, validator, pendingMeta());
+        var config = new FabricStringConfigValue(name, defaultValue, validator, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     protected Supplier<String> defineRegexInternal(String name, String defaultValue) {
-        var config = new RegexConfigValue(name, defaultValue, pendingMeta());
+        var config = new FabricRegexConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -242,14 +222,14 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     protected Supplier<String> defineChoiceInternal(String name, String defaultValue, Predicate<Object> validator,
                                                     Supplier<List<String>> options, Function<String, ItemStack> icon) {
-        var config = new DropdownConfigValue(name, defaultValue, validator, options, icon, pendingMeta());
+        var config = new FabricDropdownConfigValue(name, defaultValue, validator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public <T extends String> Supplier<List<String>> define(String name, List<? extends T> defaultValue, Predicate<Object> predicate) {
-        var config = new ListStringConfigValue<>(name, (List<String>) defaultValue, predicate, pendingMeta());
+        var config = new FabricListStringConfigValue<>(name, (List<String>) defaultValue, predicate, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
@@ -257,38 +237,38 @@ public class ConfigBuilderImpl extends ConfigBuilder {
     @Override
     protected Supplier<List<String>> defineListInternal(String name, List<String> defaultValue, Predicate<Object> entryValidator,
                                                         Supplier<List<String>> options, Function<String, ItemStack> icon) {
-        var config = new ListStringConfigValue<>(name, defaultValue, entryValidator, options, icon, pendingMeta());
+        var config = new FabricListStringConfigValue<>(name, defaultValue, entryValidator, options, icon, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public <V extends Enum<V>> Supplier<V> define(String name, V defaultValue) {
-        var config = new EnumConfigValue<>(name, defaultValue, pendingMeta());
+        var config = new FabricEnumConfigValue<>(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<JsonElement> defineJson(String name, Supplier<JsonElement> defaultValue) {
-        var config = new JsonConfigValue(name, defaultValue, pendingMeta());
+        var config = new FabricJsonConfigValue(name, defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
     public Supplier<JsonElement> defineJson(String name, JsonElement defaultValue) {
-        var config = new JsonConfigValue(name, () -> defaultValue, pendingMeta());
+        var config = new FabricJsonConfigValue(name, () -> defaultValue, pendingMeta());
         doAddConfig(name, config);
         return config;
     }
 
     @Override
-    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultValue, Codec<T> rawCodec) {
+    public <T> Supplier<T> defineObject(String name, Supplier<T> defaultValue, Codec<T> rawCodec) {
         // a SchemaCodec IS a Codec and writes the same thing, so wrapping it costs nothing and gets us a real form
         SchemaCodec<T> codec = SchemaCodec.wrap(rawCodec);
-        var config = new ObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
-        doAddConfig(name, config, c -> new ConfigOption.SchemaValue<>(
+        var config = new FabricObjectConfigValue<>(name, defaultValue, codec, pendingMeta());
+        doAddConfig(name, config, c -> new ConfigOption.SchemaOption<>(
                 config.getTranslation(), null, config, config::getDefaultValue, codec));
         return config;
     }

@@ -33,7 +33,7 @@ class ListEditScreen extends Screen implements PopupHost {
 
     private final Screen parent;
     private final Consumer<List<String>> onApply;
-    private final ConfigOption.ListValue option;
+    private final ConfigOption.ListOption option;
     private final List<String> editedEntries;
     // non-null -> entries are picked with a dropdown
     @Nullable
@@ -42,7 +42,7 @@ class ListEditScreen extends Screen implements PopupHost {
 
     private ConfigRowList list;
 
-    ListEditScreen(ConfigOption.ListValue option, List<String> initial, Screen parent, Consumer<List<String>> onApply) {
+    ListEditScreen(ConfigOption.ListOption option, List<String> initial, Screen parent, Consumer<List<String>> onApply) {
         super(option.title());
         this.option = option;
         this.editedEntries = new ArrayList<>(initial);
@@ -67,7 +67,7 @@ class ListEditScreen extends Screen implements PopupHost {
         Component addLabel = Component.literal("+ ").withStyle(ChatFormatting.AQUA)
                 .append(Component.translatable("gui.moonlight.config.list_add").withStyle(ChatFormatting.RESET));
         this.addRenderableWidget(Button.builder(addLabel, b -> {
-            if (option instanceof ConfigOption.ColorListValue colors) {
+            if (option instanceof ConfigOption.ColorListOption colors) {
                 editedEntries.add(ColorUtils.toHexString(-1, colors.hasAlpha));
             } else {
                 editedEntries.add(options != null && !options.isEmpty() ? options.getFirst() : "");
@@ -146,7 +146,7 @@ class ListEditScreen extends Screen implements PopupHost {
 
         private EntryRow(int index) {
             int editorWidth = ROW_WIDTH - RESET_WIDTH - GAP;
-            if (option instanceof ConfigOption.ColorListValue colors) {
+            if (option instanceof ConfigOption.ColorListOption colors) {
                 boolean alpha = colors.hasAlpha;
                 Consumer<Integer> setEntry = c -> editedEntries.set(index, ColorUtils.toHexString(c, alpha));
                 this.editor = new ColorFieldWidget(editorWidth, CONTROL_HEIGHT, parseOrWhite(editedEntries.get(index)), alpha, setEntry,

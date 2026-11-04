@@ -47,7 +47,7 @@ public class SchemaEditScreen extends ConfigPageScreen {
     @Nullable
     private Component error;
 
-    public static <T> Screen create(ConfigOption.SchemaValue<T> option, ConfigEditSession outerSession, Runnable onChange) {
+    public static <T> Screen create(ConfigOption.SchemaOption<T> option, ConfigEditSession outerSession, Runnable onChange) {
         Screen parent = Minecraft.getInstance().screen;
         SchemaCodec<T> codec = option.codec;
         T current = outerSession.valueOrPendingValue(option);

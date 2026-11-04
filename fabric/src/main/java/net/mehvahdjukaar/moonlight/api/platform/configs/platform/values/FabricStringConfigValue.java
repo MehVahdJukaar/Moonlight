@@ -8,11 +8,11 @@ import com.google.gson.JsonPrimitive;
 
 import java.util.function.Predicate;
 
-public class StringConfigValue extends ConfigValue<String> {
+public class FabricStringConfigValue extends FabricConfigValue<String> {
 
     private final Predicate<Object> validator;
 
-    public StringConfigValue(String name, String defaultValue, Predicate<Object> validator, ConfigMetadata meta) {
+    public FabricStringConfigValue(String name, String defaultValue, Predicate<Object> validator, ConfigMetadata meta) {
         super(name, defaultValue, meta);
         this.validator = validator;
         Preconditions.checkState(isValid(defaultValue), "Config defaults are invalid");
