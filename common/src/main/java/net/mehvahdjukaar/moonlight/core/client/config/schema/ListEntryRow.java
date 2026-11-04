@@ -8,7 +8,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,9 +28,8 @@ class ListEntryRow extends ConfigRow {
         this.remove.active = canRemove;
         this.remove.setTooltip(Tooltip.create(Component.translatable("gui.moonlight.config.list_remove")));
 
-        List<GuiEventListener> all = new ArrayList<>(inner.children());
-        all.add(remove);
-        this.children = List.copyOf(all);
+        // inner stays a child of its own so key events find focused widget through it
+        this.children = List.of(inner, remove);
 
         List<NarratableEntry> narrated = new ArrayList<>(inner.narratables());
         narrated.add(remove);
@@ -48,11 +46,6 @@ class ListEntryRow extends ConfigRow {
         remove.setX(this.getX() + this.getWidth() - RESET_WIDTH);
         remove.setY(this.getContentY() + (this.getContentHeight() - CONTROL_HEIGHT) / 2);
         remove.extractRenderState(graphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        return inner.mouseClicked(event, doubleClick) || super.mouseClicked(event, doubleClick);
     }
 
     @Override

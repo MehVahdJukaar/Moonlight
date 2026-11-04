@@ -6,6 +6,7 @@ import net.mehvahdjukaar.codecui.Schema;
 import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.mehvahdjukaar.moonlight.api.client.gui.ConfigEditSession;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigCategory;
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigNode;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
@@ -43,38 +44,56 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
         }
     }
 
+    record FormField(ConfigNode node, FormPart part) {
+
+        FormField(SchemaCategory page) {
+            this(page, page);
+        }
+    }
+
     private static final ConfigEditSession NO_EDITS = ConfigEditSession.scratch(null);
 
     private static final Map<ResourceKey<? extends Registry<?>>, List<String>> SORTED_BUILTIN_REGISTRY_IDS = new HashMap<>();
 
     static SchemaForm build(Component title, Schema<?> schema, JsonElement current, @Nullable JsonElement defaults) {
+        FormField root = field(title, schema, current, defaults);
+        if (root.node() instanceof ConfigCategory page) return new SchemaForm(page, root.part());
+
+        // lone value gets page of its own
         ConfigCategory holder = new ConfigCategory(title);
-        FormPart value = addField(holder, title, schema, current, defaults);
-        if (holder.entries().getFirst() instanceof ConfigCategory onlyPage) {
-            return new SchemaForm(onlyPage, value);
-        }
-        return new SchemaForm(holder, value);
+        holder.add(root.node());
+
+        return new SchemaForm(holder, root.part());
     }
 
     static FormPart addField(ConfigCategory parent, Component title, Schema<?> schema,
                              @Nullable JsonElement current, @Nullable JsonElement fallback) {
+        return addTo(parent, field(title, schema, current, fallback));
+    }
+
+    static FormPart addTo(ConfigCategory parent, FormField field) {
+        parent.add(field.node());
+        return field.part();
+    }
+
+    static FormField field(Component title, Schema<?> schema, @Nullable JsonElement current, @Nullable JsonElement fallback) {
         JsonElement initial = hasValue(current) ? current : fallback;
         return switch (schema) {
             case Schema.Bool ignored -> {
                 boolean v = isPrimitive(initial) && initial.getAsBoolean();
-                yield addOption(parent, new ConfigOption.BooleanOption(title, null, new InMemoryConfigValue<>(v), v), JsonPrimitive::new);
+                yield option(new ConfigOption.BooleanOption(title, null, new InMemoryConfigValue<>(v), v), JsonPrimitive::new);
             }
             case Schema.IntRange r -> {
                 int v = Math.clamp(asNumber(initial).intValue(), r.min(), r.max());
-                yield addOption(parent, new ConfigOption.IntOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
+                yield option(new ConfigOption.IntOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
             }
             case Schema.FloatRange r -> {
                 float v = Math.clamp(asNumber(initial).floatValue(), r.min(), r.max());
-                yield addOption(parent, new ConfigOption.FloatOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
+                yield option(new ConfigOption.FloatOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
             }
             case Schema.DoubleRange r -> {
                 double v = Math.clamp(asNumber(initial).doubleValue(), r.min(), r.max());
-                yield addOption(parent, new ConfigOption.DoubleOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
+                yield option(new ConfigOption.DoubleOption(title, null, new InMemoryConfigValue<>(v), v, r.min(), r.max()), JsonPrimitive::new);
             }
             case Schema.LongRange r -> {
                 //no long control. text field it is
@@ -83,52 +102,73 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
                     Long typed = Longs.tryParse(s.trim());
                     return typed != null && typed >= r.min() && typed <= r.max();
                 };
-                yield addOption(parent, textOption(title, Long.toString(v), isLongInRange), s -> {
+                yield option(textOption(title, Long.toString(v), isLongInRange), s -> {
                     Long typed = Longs.tryParse(s.trim());
                     return new JsonPrimitive(typed != null ? typed : v);
                 });
             }
             case Schema.Color c -> {
                 int argb = asColor(initial, CommonColors.WHITE);
-                yield addOption(parent, new ConfigOption.ColorOption(title, null, new InMemoryConfigValue<>(argb), argb, c.hasAlpha()),
+                yield option(new ConfigOption.ColorOption(title, null, new InMemoryConfigValue<>(argb), argb, c.hasAlpha()),
                         color -> c.hexString() ? new JsonPrimitive(ColorUtils.toHexString(color, c.hasAlpha())) : new JsonPrimitive(color));
             }
             case Schema.Str str -> {
                 Predicate<String> fitsSchema = s -> s.length() >= str.minLen() && s.length() <= str.maxLen()
                         && (str.pattern() == null || str.pattern().matcher(s).matches());
-                yield addOption(parent, textOption(title, asString(initial, ""), fitsSchema), JsonPrimitive::new);
+                yield option(textOption(title, asString(initial, ""), fitsSchema), JsonPrimitive::new);
             }
             case Schema.Enum<?> en -> {
                 List<String> labels = labelsOf(en);
                 String first = labels.isEmpty() ? "" : labels.getFirst();
                 String picked = asString(initial, first);
-                yield addOption(parent, dropdownOption(title, labels.contains(picked) ? picked : first, labels, null), JsonPrimitive::new);
+                yield option(dropdownOption(title, labels.contains(picked) ? picked : first, labels, null), JsonPrimitive::new);
             }
-            case Schema.ResourceId id -> addIdField(parent, title, registryIds(id.registry()), asString(initial, ""),
+            case Schema.ResourceId id -> idField(title, registryIds(id.registry()), asString(initial, ""),
                     s -> Identifier.tryParse(s) != null, UnaryOperator.identity(), itemIconsFor(id.registry()));
             case Schema.TagId tag -> {
                 List<String> knownTags = SchemaCodecs.availableTagIds(tag.registry()).stream()
                         .map(t -> withCodecTagPrefix(t.toString(), tag.hashed())).toList();
-                yield addIdField(parent, title, knownTags, asString(initial, ""),
+                yield idField(title, knownTags, asString(initial, ""),
                         s -> Identifier.tryParse(TextHelper.stripHash(s)) != null, s -> withCodecTagPrefix(s, tag.hashed()), null);
             }
-            case Schema.Record<?> rec ->
-                    addRecordFields(addPage(parent, new ConfigCategory(title)), rec, current, fallback);
-            case Schema.PairOf<?, ?> pair -> addPairFields(addPage(parent, new ConfigCategory(title)), pair, initial);
-            case Schema.ListOf<?> list ->
-                    addPage(parent, new SchemaCategory.ListEntries(title, list, initial, fallback));
+            case Schema.Record<?> rec -> {
+                ConfigCategory page = new ConfigCategory(title);
+                yield new FormField(page, addRecordFields(page, rec, current, fallback));
+            }
+            case Schema.PairOf<?, ?> pair -> {
+                ConfigCategory page = new ConfigCategory(title);
+                yield new FormField(page, addPairFields(page, pair, initial));
+            }
+            case Schema.ListOf<?> list -> new FormField(SchemaCategory.ListEntries.of(title, list, initial, fallback));
             case Schema.MapOf<?, ?> map ->
-                    addPage(parent, new SchemaCategory.MapEntries(title, map.key(), key -> map.value(), false, initial, fallback));
+                    new FormField(new SchemaCategory.MapEntries(title, map.key(), key -> map.value(), false, initial, fallback));
             case Schema.DispatchedMapOf<?, ?> map ->
-                    addPage(parent, new SchemaCategory.MapEntries(title, map.key(), map.valueForKey(), true, initial, fallback));
-            case Schema.OneOf<?> oneOf -> addPage(parent, SchemaCategory.Variant.oneOf(title, oneOf, initial));
-            case Schema.AnyOf<?> anyOf -> addPage(parent, SchemaCategory.Variant.anyOf(title, anyOf, initial));
+                    new FormField(new SchemaCategory.MapEntries(title, map.key(), map.valueForKey(), true, initial, fallback));
+            case Schema.OneOf<?> oneOf -> new FormField(SchemaCategory.Variant.oneOf(title, oneOf, initial));
+            case Schema.AnyOf<?> anyOf -> new FormField(SchemaCategory.Variant.anyOf(title, anyOf, initial));
             // only follow a recursive schema while there is data, else it never ends
             case Schema.Ref<?> ref when ref.target() != null && hasValue(initial) ->
-                    addField(parent, title, ref.target(), current, fallback);
-            default -> addRawJsonField(parent, title, initial != null ? initial : emptyFor(schema));
+                    field(title, ref.target(), current, fallback);
+            default -> rawJsonField(title, initial != null ? initial : emptyFor(schema));
         };
     }
+
+    // a plain string list edited on the same page a schema list gets
+    static SchemaCategory.ListEntries listOptionEntries(ConfigOption.ListOption option, List<String> current) {
+        List<JsonElement> initial = current.stream().<JsonElement>map(JsonPrimitive::new).toList();
+        if (option instanceof ConfigOption.ColorListOption colors) {
+            Schema.Color hex = new Schema.Color(colors.hasAlpha, true);
+            return new SchemaCategory.ListEntries(option.title(), (t, json) -> field(t, hex, json, null),
+                    new JsonPrimitive(ColorUtils.toHexString(-1, colors.hasAlpha)), 0, Integer.MAX_VALUE, initial);
+        }
+        List<String> options = option.options == null ? null : option.options.get();
+        SchemaCategory.ListEntries.EntryField entry = options == null
+                ? (t, json) -> option(textOption(t, asString(json, ""), option::isValidEntry), JsonPrimitive::new)
+                : (t, json) -> idField(t, options, asString(json, ""), option::isValidEntry, UnaryOperator.identity(), option.icon);
+        String template = options != null && !options.isEmpty() ? options.getFirst() : "";
+        return new SchemaCategory.ListEntries(option.title(), entry, new JsonPrimitive(template), 0, Integer.MAX_VALUE, initial);
+    }
+
 
     static boolean opensPage(Schema<?> schema, @Nullable JsonElement initial) {
         if (schema instanceof Schema.Ref<?> ref) {
@@ -140,14 +180,8 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
                 || schema instanceof Schema.OneOf<?> || schema instanceof Schema.AnyOf<?>;
     }
 
-    private static <T> FormPart addOption(ConfigCategory parent, ConfigOption<T> option, Function<T, JsonElement> toJson) {
-        parent.add(option);
-        return session -> toJson.apply(session.valueOrPendingValue(option));
-    }
-
-    private static <C extends ConfigCategory> C addPage(ConfigCategory parent, C page) {
-        parent.add(page);
-        return page;
+    private static <T> FormField option(ConfigOption<T> option, Function<T, JsonElement> toJson) {
+        return new FormField(option, session -> toJson.apply(session.valueOrPendingValue(option)));
     }
 
     private static ConfigOption.StringOption textOption(Component title, String initial, Predicate<String> isValid) {
@@ -155,12 +189,12 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
                 o -> o instanceof String s && isValid.test(s));
     }
 
-   public static ConfigOption.DropdownOption dropdownOption(Component title, String initial, List<String> options,
+    static ConfigOption.DropdownOption dropdownOption(Component title, String initial, List<String> options,
                                                       @Nullable Function<String, ItemStack> icon) {
         return new ConfigOption.DropdownOption(title, null, new InMemoryConfigValue<>(initial), initial, () -> options, icon);
     }
 
-   public static FormPart addRecordFields(ConfigCategory page, Schema.Record<?> rec,
+    static FormPart addRecordFields(ConfigCategory page, Schema.Record<?> rec,
                                     @Nullable JsonElement current, @Nullable JsonElement fallback) {
         JsonObject currentObject = current instanceof JsonObject o ? o : null;
         JsonObject fallbackObject = fallback instanceof JsonObject o ? o : null;
@@ -226,16 +260,16 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
         return addField(page, readable(name), half, initial, null);
     }
 
-    private static FormPart addIdField(ConfigCategory parent, Component title, List<String> knownIds, String current,
-                                       Predicate<String> isValidId, UnaryOperator<String> toCodecForm,
-                                       @Nullable Function<String, ItemStack> icon) {
+    private static FormField idField(Component title, List<String> knownIds, String current,
+                                     Predicate<String> isValidId, UnaryOperator<String> toCodecForm,
+                                     @Nullable Function<String, ItemStack> icon) {
         if (knownIds.isEmpty()) {
-            return addOption(parent, textOption(title, current, isValidId), s -> new JsonPrimitive(toCodecForm.apply(s)));
+            return option(textOption(title, current, isValidId), s -> new JsonPrimitive(toCodecForm.apply(s)));
         }
         //never swap an unknown or empty id for the first known one
         List<String> idsKeepingCurrent = knownIds.contains(current) ? knownIds
                 : Stream.concat(Stream.of(current), knownIds.stream()).toList();
-        return addOption(parent, dropdownOption(title, current, idsKeepingCurrent, icon), s -> new JsonPrimitive(toCodecForm.apply(s)));
+        return option(dropdownOption(title, current, idsKeepingCurrent, icon), s -> new JsonPrimitive(toCodecForm.apply(s)));
     }
 
     @Nullable
@@ -272,8 +306,8 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
         return en.options().stream().map(en.label()).toList();
     }
 
-    static FormPart addRawJsonField(ConfigCategory parent, Component title, JsonElement initial) {
-        return addOption(parent, new ConfigOption.JsonOption(title, null, () -> initial), text -> {
+    static FormField rawJsonField(Component title, JsonElement initial) {
+        return option(new ConfigOption.JsonOption(title, null, () -> initial), text -> {
             try {
                 return JsonParser.parseString(text);
             } catch (Exception invalidJson) {

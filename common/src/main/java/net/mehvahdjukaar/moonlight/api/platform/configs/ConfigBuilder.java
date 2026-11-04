@@ -317,6 +317,17 @@ public abstract class ConfigBuilder {
         return defineObject(name, defaultSupplier, codec.listOf());
     }
 
+    //TODO: remove
+    //binary compat, released mods call these with a guava supplier
+    public <T> Supplier<T> defineObject(String name, com.google.common.base.Supplier<T> defaultSupplier, Codec<T> codec) {
+        return defineObject(name, (Supplier<T>) defaultSupplier, codec);
+    }
+
+    //TODO: remove
+    public <T> Supplier<List<T>> defineObjectList(String name, com.google.common.base.Supplier<List<T>> defaultSupplier, Codec<T> codec) {
+        return defineObjectList(name, (Supplier<List<T>>) defaultSupplier, codec);
+    }
+
     public Supplier<Map<String, String>> defineMap(String name, Map<String, String> def) {
         return defineObject(name, () -> def, Codec.unboundedMap(Codec.STRING, Codec.STRING));
     }
