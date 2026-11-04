@@ -191,6 +191,6 @@ public class OptionRow extends ConfigRow {
 
     @Override
     public DescriptionPanel.Content panelContent() {
-        return new DescriptionPanel.Content(title, description, gutter.hints());
+        return new DescriptionPanel.Content(title, value.image(), description, gutter.hints());
     }
 }

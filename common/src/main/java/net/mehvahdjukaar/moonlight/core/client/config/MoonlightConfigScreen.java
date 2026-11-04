@@ -102,7 +102,8 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
 
         if (panelWidth > 0) {
             this.panel = new DescriptionPanel(this.font, this.list, listWidth, HEADER, panelWidth, listHeight);
-            this.panel.show(new DescriptionPanel.Content(isRoot() ? this.title : category.title(), category.description(), List.of()));
+            this.panel.show(new DescriptionPanel.Content((isRoot() ? this.title : category.title()),
+                    category.image(), category.description(), List.of()));
         }
 
         SearchBoxWidget searchBox = new SearchBoxWidget(this.font, this.width - SIDE_MARGIN - SearchBoxWidget.WIDTH, CRUMB_Y - 3,

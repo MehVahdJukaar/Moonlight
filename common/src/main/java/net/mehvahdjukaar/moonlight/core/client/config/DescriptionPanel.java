@@ -1,6 +1,10 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.mehvahdjukaar.moonlight.api.client.gui.GuiHelper;
+import net.mehvahdjukaar.moonlight.api.client.gui.Icon;
+import net.mehvahdjukaar.moonlight.core.Moonlight;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -9,11 +13,17 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.*;
@@ -21,8 +31,12 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 // sticks to last hovered row after mouse leaves list
 public class DescriptionPanel extends AbstractWidget {
 
-    public record Content(Component title, @Nullable Component description, List<GutterHints.Hint> hints) {
+    public record Content(Component title, @Nullable Identifier image, @Nullable Component description,
+                          List<GutterHints.Hint> hints) {
     }
+
+    //only needed to cache the image size
+    private static final Map<Identifier, Optional<Icon>> IMAGES = new HashMap<>();
 
     private final Font font;
     private final ConfigRowList list;
@@ -69,6 +83,12 @@ public class DescriptionPanel extends AbstractWidget {
         graphics.enableScissor(getX(), getY(), getRight(), bottom);
         y = drawLines(graphics, font.split(shown.title(), textWidth), textX, y, TEXT);
 
+        Icon image = (shown.image() == null) ? null : getImage(shown.image());
+        if (image != null) {
+            int imageHeight = Math.round(textWidth * image.height() / (float) image.width());
+            GuiHelper.renderModIcon(graphics, image, textX, y + GAP, textWidth, imageHeight);
+            y += GAP + imageHeight;
+        }
         if (shown.description() != null) {
             y = drawLines(graphics, font.split(shown.description(), textWidth), textX, y + GAP, DESCRIPTION);
         }
@@ -85,6 +105,25 @@ public class DescriptionPanel extends AbstractWidget {
 
         GuiHelper.renderScrollbar(graphics, getY(), bottom, getRight(), scroll, maxScroll);
     }
+
+    @Nullable
+    private static Icon getImage(Identifier texture) {
+        return IMAGES.computeIfAbsent(texture, t -> {
+            Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(t);
+
+            if (resource.isEmpty()) {
+                Moonlight.LOGGER.warn("Missing config image {}", t);
+                return Optional.empty();
+            }
+            try (InputStream stream = resource.get().open(); NativeImage img = NativeImage.read(stream)) {
+                return Optional.of(new Icon(t, img.getWidth(), img.getHeight()));
+            } catch (Exception e) {
+                Moonlight.LOGGER.warn("Failed to read config image {}", t, e);
+                return Optional.empty();
+            }
+        }).orElse(null);
+    }
+
 
     private int drawLines(GuiGraphicsExtractor graphics, List<FormattedCharSequence> lines, int x, int y, int color) {
         for (FormattedCharSequence line : lines) {

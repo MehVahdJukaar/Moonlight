@@ -130,6 +130,6 @@ public class CategoryRow extends ConfigRow {
 
     @Override
     public DescriptionPanel.Content panelContent() {
-        return new DescriptionPanel.Content(category.title(), description, gutter.hints());
+        return new DescriptionPanel.Content(category.title(), category.image(), description, gutter.hints());
     }
 }
