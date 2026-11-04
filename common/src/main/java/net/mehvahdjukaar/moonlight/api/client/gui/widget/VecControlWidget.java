@@ -10,30 +10,23 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static net.mehvahdjukaar.moonlight.api.client.gui.misc.ConfigGuiColors.*;
 import static net.mehvahdjukaar.moonlight.api.util.TextHelper.formatNumber;
 
-public class Vec3ControlWidget extends CompositeWidget {
-
-    @FunctionalInterface
-    public interface Sink {
-        void accept(double x, double y, double z);
-    }
+public class VecControlWidget extends CompositeWidget {
 
     private static final int INNER_GAP = 3;
 
-    private final EditBox xBox;
-    private final EditBox yBox;
-    private final EditBox zBox;
-    private final List<EditBox> boxes;
+    private final EditBox[] boxes;
     private final double boundLo;
     private final double boundHi;
     private final boolean integer;
-    private final Sink onChange;
+    private final Consumer<double[]> onChange;
 
-    public Vec3ControlWidget(int width, int height, double x, double y, double z,
-                      double boundLo, double boundHi, boolean integer, Sink onChange) {
+    public VecControlWidget(int width, int height, double[] values,
+                            double boundLo, double boundHi, boolean integer, Consumer<double[]> onChange) {
         super(0, 0, width, height, Component.empty());
         this.boundLo = boundLo;
         this.boundHi = boundHi;
@@ -41,11 +34,15 @@ public class Vec3ControlWidget extends CompositeWidget {
         this.onChange = onChange;
 
         Font font = Minecraft.getInstance().font;
-        int third = Math.max(1, (width - 2 * INNER_GAP) / 3);
-        this.xBox = makeBox(font, third, height, x);
-        this.yBox = makeBox(font, third, height, y);
-        this.zBox = makeBox(font, third, height, z);
-        this.boxes = List.of(xBox, yBox, zBox);
+        int boxWidth = boxWidth(width, values.length);
+        this.boxes = new EditBox[values.length];
+        for (int i = 0; i < values.length; i++) {
+            this.boxes[i] = makeBox(font, boxWidth, height, values[i]);
+        }
+    }
+
+    private static int boxWidth(int width, int count) {
+        return Math.max(1, (width - (count - 1) * INNER_GAP) / count);
     }
 
     private EditBox makeBox(Font font, int width, int height, double value) {
@@ -56,22 +53,24 @@ public class Vec3ControlWidget extends CompositeWidget {
         return box;
     }
 
-    /** Pushes the given triple into the fields (used by the row's reset button). */
-    public void setValues(double x, double y, double z) {
-        this.xBox.setValue(format(x));
-        this.yBox.setValue(format(y));
-        this.zBox.setValue(format(z));
+    public void setValues(double... values) {
+        for (int i = 0; i < boxes.length; i++) {
+            this.boxes[i].setValue(format(values[i]));
+        }
     }
 
     private void onEdited() {
-        Double px = parse(xBox);
-        Double py = parse(yBox);
-        Double pz = parse(zBox);
-        this.xBox.setTextColor(px != null ? FIELD_TEXT : ERROR);
-        this.yBox.setTextColor(py != null ? FIELD_TEXT : ERROR);
-        this.zBox.setTextColor(pz != null ? FIELD_TEXT : ERROR);
-        if (px != null && py != null && pz != null) {
-            this.onChange.accept(px, py, pz);
+        double[] parsed = new double[boxes.length];
+        boolean allValid = true;
+
+        for (int i = 0; i < boxes.length; i++) {
+            Double v = parse(boxes[i]);
+            boxes[i].setTextColor(v != null ? FIELD_TEXT : ERROR);
+            if (v == null) allValid = false;
+            else parsed[i] = v;
+        }
+        if (allValid) {
+            this.onChange.accept(parsed);
         }
     }
 
@@ -92,22 +91,19 @@ public class Vec3ControlWidget extends CompositeWidget {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        int third = (getWidth() - 2 * INNER_GAP) / 3;
-        int y = getY();
-        this.xBox.setPosition(getX(), y);
-        this.xBox.setWidth(third);
-        this.yBox.setPosition(getX() + third + INNER_GAP, y);
-        this.yBox.setWidth(third);
-        this.zBox.setPosition(getX() + 2 * (third + INNER_GAP), y);
-        this.zBox.setWidth(third);
-        this.xBox.render(graphics, mouseX, mouseY, partialTick);
-        this.yBox.render(graphics, mouseX, mouseY, partialTick);
-        this.zBox.render(graphics, mouseX, mouseY, partialTick);
+        int boxWidth = boxWidth(getWidth(), boxes.length);
+        int x = getX();
+        for (EditBox box : boxes) {
+            box.setPosition(x, getY());
+            box.setWidth(boxWidth);
+            box.render(graphics, mouseX, mouseY, partialTick);
+            x += boxWidth + INNER_GAP;
+        }
     }
 
     @Override
     public List<? extends GuiEventListener> children() {
-        return boxes;
+        return List.of(boxes);
     }
 
     @Override

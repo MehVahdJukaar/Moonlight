@@ -31,6 +31,10 @@ subprojects {
         enabled = true
     }
 
+    tasks.withType<Javadoc> {
+        (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+
     repositories {
         mavenLocal() // codecui 1.4.5 isnt on nexus yet
         nexus()
