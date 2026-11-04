@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigOption;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigControllers;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigRow;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenAccess;
+import net.mehvahdjukaar.moonlight.core.client.config.DescriptionPanel;
 import net.mehvahdjukaar.moonlight.core.client.config.GutterHints;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -81,5 +82,16 @@ class KeyValueRow extends ConfigRow {
     public Component getGutterTooltip(int mouseX, int mouseY) {
         Component own = gutter.tooltipAt(mouseX, mouseY);
         return own != null ? own : valueRow.getGutterTooltip(mouseX, mouseY);
+    }
+
+    @Nullable
+    @Override
+    public DescriptionPanel.Content panelContent() {
+        DescriptionPanel.Content inner = valueRow.panelContent();
+        if (inner == null || gutter.hints().isEmpty()) return inner;
+        List<GutterHints.Hint> hints = new ArrayList<>(gutter.hints());
+        hints.addAll(inner.hints());
+
+        return new DescriptionPanel.Content(inner.title(), inner.description(), hints);
     }
 }

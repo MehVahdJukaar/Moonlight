@@ -29,7 +29,6 @@ import static net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenLayout.
 public class MoonlightConfigSelectScreen extends Screen {
 
     private static final int CAROUSEL_STRIP_WIDTH = 20;
-    private static final int PAD = 8;
     private static final int ICON_MAX = 64;
 
     private final String modId;
@@ -83,14 +82,14 @@ public class MoonlightConfigSelectScreen extends Screen {
 
     @Override
     protected void init() {
-        this.leftPaneWidth = Mth.clamp(this.width / 3, 104, 170);
+        this.leftPaneWidth = paneWidth(this.width);
 
-        int blockWidth = this.leftPaneWidth - 2 * PAD;
+        int blockWidth = leftPaneWidth - 2 * PANE_PAD;
         ConfigScreenExtensions.Showcase showcase = ConfigScreenExtensions.showcaseFor(this.modId);
         this.customShowcase = showcase != null;
         boolean showcaseTakesCarousel = showcase != null && showcase.replacesCarousel();
         if (showcase != null) {
-            AbstractWidget widget = showcase.create(this.modId, PAD, this.iconTop(), blockWidth,
+            AbstractWidget widget = showcase.create(this.modId, PANE_PAD, this.iconTop(), blockWidth,
                     this.iconBottom() - this.iconTop() + (showcaseTakesCarousel ? CAROUSEL_STRIP_WIDTH + 4 : 0));
             this.addRenderableWidget(widget);
             this.leftPaneBottom = widget.getY() + widget.getHeight();
@@ -98,17 +97,18 @@ public class MoonlightConfigSelectScreen extends Screen {
 
         if (!showcaseTakesCarousel) {
             ItemCarouselWidget carousel = ClientConfigs.CONFIG_ITEM_CAROUSEL.get() ?
-                    ItemCarouselWidget.forMod(this.modId, PAD, this.iconBottom() + 4, blockWidth, CAROUSEL_STRIP_WIDTH) : null;
+                    ItemCarouselWidget.forMod(this.modId, PANE_PAD, this.iconBottom() + 4, blockWidth, CAROUSEL_STRIP_WIDTH) : null;
             this.leftPaneBottom = this.iconBottom() + (carousel == null ? 0 : CAROUSEL_STRIP_WIDTH + 4);
             if (carousel != null) {
                 this.addRenderableWidget(carousel.withOutline(ConfigGuiColors.TILE_OUTLINE));
             }
         }
 
-        int paneWidth = this.width - this.leftPaneWidth;
-        this.list = new ConfigRowList(this.minecraft, paneWidth, this.contentBottom() - HEADER, HEADER, SELECT_ITEM_HEIGHT);
+        int listWidth = this.width - this.leftPaneWidth;
+
+        this.list = new ConfigRowList(this.minecraft, listWidth, this.contentBottom() - HEADER, HEADER, SELECT_ITEM_HEIGHT);
         this.list.setX(this.leftPaneWidth);
-        this.list.setRowWidth(Math.min(ROW_WIDTH, paneWidth - 28));
+        this.list.setRowWidth(Math.min(ROW_WIDTH, listWidth - ROW_SIDE_ROOM));
         this.list.setDrawFooterSeparator(false);
         this.list.setTopPadding((this.contentBottom() - HEADER - this.holders.size() * SELECT_ITEM_HEIGHT) / 2 - 4);
 
@@ -138,7 +138,7 @@ public class MoonlightConfigSelectScreen extends Screen {
     }
 
     private int iconBottom() {
-        return this.iconTop() + Math.min(ICON_MAX, this.leftPaneWidth - 2 * PAD);
+        return this.iconTop() + Math.min(ICON_MAX, this.leftPaneWidth - 2 * PANE_PAD);
     }
 
     @Override
@@ -157,33 +157,33 @@ public class MoonlightConfigSelectScreen extends Screen {
         int bottom = this.contentBottom();
         GuiHelper.renderListBackground(graphics, HEADER, bottom, this.leftPaneWidth, 0);
 
-        int textWidth = this.leftPaneWidth - 2 * PAD;
+        int textWidth = this.leftPaneWidth - 2 * PANE_PAD;
         int iconHeight = Math.min(ICON_MAX, textWidth);
 
         if (!this.customShowcase) {
             Icon icon = ModIconCache.get(this.modId);
             if (icon != null) {
-                GuiHelper.renderModIcon(graphics, icon, PAD, this.iconTop(), textWidth, iconHeight);
+                GuiHelper.renderModIcon(graphics, icon, PANE_PAD, this.iconTop(), textWidth, iconHeight);
             } else {
                 GuiHelper.renderInitialTile(graphics, this.font, this.title.getString(),
-                        PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
+                        PANE_PAD + (textWidth - iconHeight) / 2, this.iconTop(), iconHeight,
                         ConfigGuiColors.TILE_LETTER_ICON_BG, ConfigGuiColors.initialLetterColor(this.modId), MoonlightIcons.CONFIG);
             }
         }
         int y = this.leftPaneBottom + 8;
 
         if (this.authors.isEmpty()) return;
-        GuiHelper.renderSeparator(graphics, PAD, y, textWidth);
+        GuiHelper.renderSeparator(graphics, PANE_PAD, y, textWidth);
         y += 8;
 
         int line = this.font.lineHeight;
-        graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PAD, y,
+        graphics.drawString(this.font, Component.translatable("gui.moonlight.config.authors"), PANE_PAD, y,
                 ConfigGuiColors.DESCRIPTION);
         y += line + 1;
         for (String author : this.authors) {
             for (FormattedCharSequence row : this.font.split(Component.literal(author), textWidth)) {
                 if (y + line > bottom - 2) return;
-                graphics.drawString(this.font, row, PAD, y, ConfigGuiColors.TEXT);
+                graphics.drawString(this.font, row, PANE_PAD, y, ConfigGuiColors.TEXT);
                 y += line;
             }
         }

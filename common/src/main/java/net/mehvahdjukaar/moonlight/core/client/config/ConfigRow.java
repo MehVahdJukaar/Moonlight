@@ -13,4 +13,10 @@ public abstract class ConfigRow extends ContainerObjectSelectionList.Entry<Confi
     public Component getGutterTooltip(int mouseX, int mouseY) {
         return null;
     }
+
+    //null keeps whatever panel was showing
+    @Nullable
+    public DescriptionPanel.Content panelContent() {
+        return null;
+    }
 }

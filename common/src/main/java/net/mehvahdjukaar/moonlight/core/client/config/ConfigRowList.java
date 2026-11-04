@@ -27,6 +27,10 @@ public class ConfigRowList extends ContainerObjectSelectionList<ConfigRow> {
 
     @Nullable
     ConfigRow getHovered(double mouseX, double mouseY) {
+        //vanilla doesnt check bottom edge, so without this footer buttons would hover rows
+        if (!this.isMouseOver(mouseX, mouseY)) {
+            return null;
+        }
         return this.getEntryAtPosition(mouseX, mouseY);
     }
 

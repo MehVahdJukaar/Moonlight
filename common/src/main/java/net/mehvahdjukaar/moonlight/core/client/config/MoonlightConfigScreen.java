@@ -90,7 +90,20 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
     @Override
     protected void init() {
         this.overlay.clear();
-        this.list = new ConfigRowList(this.minecraft, this.width, this.height - HEADER - FOOTER, HEADER, ITEM_HEIGHT);
+
+        // the panel gives way to the rows first, then the rows shrink
+        int panelWidth = !session.configHolder().hasDescriptionPanel() ? 0
+                : Math.max(PANE_MIN_WIDTH, Math.min(paneWidth(this.width), this.width - ROW_WIDTH - ROW_SIDE_ROOM));
+        int listWidth = this.width - panelWidth;
+        int listHeight = this.height - HEADER - FOOTER;
+        this.list = new ConfigRowList(this.minecraft, listWidth, listHeight, HEADER, ITEM_HEIGHT);
+        this.list.setRowWidth(Math.min(ROW_WIDTH, listWidth - ROW_SIDE_ROOM));
+        this.panel = null;
+
+        if (panelWidth > 0) {
+            this.panel = new DescriptionPanel(this.font, this.list, listWidth, HEADER, panelWidth, listHeight);
+            this.panel.show(new DescriptionPanel.Content(isRoot() ? this.title : category.title(), category.description(), List.of()));
+        }
 
         SearchBoxWidget searchBox = new SearchBoxWidget(this.font, this.width - SIDE_MARGIN - SearchBoxWidget.WIDTH, CRUMB_Y - 3,
                 this.searchQuery, query -> {
@@ -114,6 +127,7 @@ public class MoonlightConfigScreen extends ConfigPageScreen {
 
         populate();
         this.addRenderableWidget(this.list);
+        if (this.panel != null) this.addRenderableWidget(this.panel);
 
         int y = this.height - 28;
         int bw = 100, gap = 4;

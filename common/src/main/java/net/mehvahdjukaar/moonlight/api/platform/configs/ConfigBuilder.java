@@ -68,6 +68,7 @@ public abstract class ConfigBuilder {
     public static final String FEATURE_TOGGLE_NAME = "enabled";
 
     protected boolean writeObjectsAsJson = false;
+    private boolean descriptionPanel = false;
 
     protected ConfigReloadType pendingReload = ConfigReloadType.NONE;
 
@@ -111,6 +112,7 @@ public abstract class ConfigBuilder {
         flushPendingComment(); // a trailing after-comment has no define to claim it
         ModConfigHolder holder = buildHolder();
         holder.setFeatureToggles(getFeatureToggles());
+        holder.setDescriptionPanel(this.descriptionPanel);
         if (collectTranslations) {
             holder.setTranslationMap(translations, moonlightNames);
         }
@@ -398,6 +400,15 @@ public abstract class ConfigBuilder {
 
     public ConfigBuilder comment(String... comment) {
         return comment(String.join("\n", comment));
+    }
+
+    /**
+     * Shows option comments in a side panel. Alternative look for the config screen
+     */
+    public ConfigBuilder enableDescriptionPanel() {
+        this.descriptionPanel = true;
+
+        return this;
     }
 
     public ConfigBuilder icon(ResourceLocation id) {

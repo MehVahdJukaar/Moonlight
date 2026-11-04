@@ -92,8 +92,8 @@ public class OptionRow extends ConfigRow {
         onEdited();
     }
 
-    private boolean hasDescription() {
-        return description != null;
+    private boolean hasExpandArrow() {
+        return (description != null) && !view.hasDescriptionPanel();
     }
 
     @Override
@@ -119,7 +119,7 @@ public class OptionRow extends ConfigRow {
         w.render(graphics, mouseX, mouseY, partialTick);
 
         int textLeft = left;
-        if (hasDescription()) {
+        if (hasExpandArrow()) {
             boolean expanded = session.isExpanded(value);
             ResourceLocation arrow = expanded ? MoonlightIcons.SECTION_EXPANDED : MoonlightIcons.SECTION_COLLAPSED;
             int arrowSize = 7;
@@ -136,7 +136,7 @@ public class OptionRow extends ConfigRow {
         }
         int textRight = controlX - GAP;
 
-        gutter.begin(top, height);
+        gutter.begin(top, height, !view.hasDescriptionPanel());
         if (blockedBy != null) {
             gutter.add(graphics, left, MoonlightIcons.WARNING,
                     Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
@@ -156,7 +156,7 @@ public class OptionRow extends ConfigRow {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean overLabel = GuiHelper.isMouseOver(mouseX, mouseY, toggleX0, rowY0, toggleX1 - toggleX0, rowY1 - rowY0);
-        if (hasDescription() && button == InputConstants.MOUSE_BUTTON_LEFT && overLabel) {
+        if (hasExpandArrow() && button == InputConstants.MOUSE_BUTTON_LEFT && overLabel) {
             GuiHelper.playClickSound();
             view.toggleExpanded(value);
             return true;
@@ -184,5 +184,11 @@ public class OptionRow extends ConfigRow {
     @Override
     public Component getGutterTooltip(int mouseX, int mouseY) {
         return gutter.tooltipAt(mouseX, mouseY);
+    }
+
+
+    @Override
+    public DescriptionPanel.Content panelContent() {
+        return new DescriptionPanel.Content(title, description, gutter.hints());
     }
 }

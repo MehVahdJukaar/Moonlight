@@ -17,6 +17,10 @@ public interface ConfigScreenAccess {
 
     void toggleExpanded(ConfigOption<?> value);
 
+    default boolean hasDescriptionPanel() {
+        return false;
+    }
+
     void onValueEdited();
 
     boolean isCategoryEnabled(ConfigCategory category);

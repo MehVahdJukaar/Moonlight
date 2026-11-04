@@ -31,14 +31,14 @@ public class CategoryRow extends ConfigRow {
     private final BooleanToggleWidget toggle;
     private final List<AbstractWidget> children;
     @Nullable
-    private final Component tooltip;
+    private final Component description;
     private final ConfigScreenIcons.Anim iconAnim = new ConfigScreenIcons.Anim();
     private final GutterHints gutter = new GutterHints();
 
     public CategoryRow(ConfigScreenAccess view, ConfigCategory category) {
         this.screenView = view;
         this.category = category;
-        this.tooltip = category.description();
+        description = category.description();
         this.gate = category.gate();
         this.button = Button.builder(Component.empty(), b -> view.openCategory(category))
                 .bounds(0, 0, ROW_WIDTH, ITEM_HEIGHT).build();
@@ -63,7 +63,7 @@ public class CategoryRow extends ConfigRow {
         Component blockedBy = gate == null ? null : screenView.featureBlockedBy(gate);
         boolean enabled = screenView.isCategoryEnabled(category); // already false when blockedBy is set
 
-        gutter.begin(top, height);
+        gutter.begin(top, height, !screenView.hasDescriptionPanel());
         if (blockedBy != null) {
             gutter.add(graphics, left, MoonlightIcons.WARNING,
                     Component.translatable("gui.moonlight.config.disabled_by", blockedBy));
@@ -118,12 +118,17 @@ public class CategoryRow extends ConfigRow {
     @Nullable
     @Override
     public Component getTooltip(int mouseX, int mouseY) {
-        return tooltip;
+        return description;
     }
 
     @Nullable
     @Override
     public Component getGutterTooltip(int mouseX, int mouseY) {
         return gutter.tooltipAt(mouseX, mouseY);
+    }
+
+    @Override
+    public DescriptionPanel.Content panelContent() {
+        return new DescriptionPanel.Content(category.title(), description, gutter.hints());
     }
 }

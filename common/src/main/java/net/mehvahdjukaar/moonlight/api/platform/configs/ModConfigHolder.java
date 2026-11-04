@@ -74,6 +74,7 @@ public abstract class ModConfigHolder {
     // short name and full dotted path -> effective enabled supplier, filled in by the builder at build()
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
     private Map<String, String> missingTranslations = new LinkedHashMap<>();
+    private boolean descriptionPanel;
 
     protected ModConfigHolder(ResourceLocation id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this(id, fileExtension, configDirectory, type, changeCallback, true);
@@ -116,6 +117,16 @@ public abstract class ModConfigHolder {
             if (!alreadyTranslated.containsKey(key)) this.missingTranslations.put(key, name);
         });
     }
+
+    @ApiStatus.Internal
+    public void setDescriptionPanel(boolean descriptionPanel) {
+        this.descriptionPanel = descriptionPanel;
+    }
+
+    public boolean hasDescriptionPanel() {
+        return this.descriptionPanel;
+    }
+
 
     public boolean hasMissingTranslations() {
         return !this.missingTranslations.isEmpty();
