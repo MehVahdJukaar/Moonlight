@@ -37,7 +37,7 @@ public final class GuiHelper {
 
     /** The top bar plus its bottom separator, no title. Same chrome as vanilla's header layouts, just taller. */
     public static void renderHeaderBar(GuiGraphicsExtractor graphics, int width, int headerHeight) {
-        Screen.extractMenuBackgroundTexture(graphics, menuBackground(), 0, 0, 0f, 0f, width, headerHeight - 2);
+        //no background, the screen already draws its menu background under the whole thing
         renderSeparator(graphics, 0, headerHeight - 2, width);
     }
 
@@ -69,7 +69,7 @@ public final class GuiHelper {
         }
     }
 
-    /** The plain menu background the header bar uses, over an arbitrary rect, tiling still aligned to the screen. */
+    /** The plain menu background, over an arbitrary rect, tiling still aligned to the screen. */
     public static void renderMenuBand(GuiGraphicsExtractor graphics, int x, int y, int width, int height) {
         Screen.extractMenuBackgroundTexture(graphics, menuBackground(), x, y, x, y, width, height);
     }
@@ -86,8 +86,8 @@ public final class GuiHelper {
 
     /** Same as renderSeparator but vertical. Vanilla's sprites are horizontal, so this one is drawn by hand. */
     public static void renderVerticalSeparator(GuiGraphicsExtractor graphics, int x, int top, int bottom) {
-        graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.PANEL_BG);
-        graphics.fill(x + 1, top, x + 2, bottom, ConfigGuiColors.SEPARATOR_HIGHLIGHT);
+        graphics.fill(x, top, x + 1, bottom, ConfigGuiColors.SEPARATOR_HIGHLIGHT);
+        graphics.fill(x + 1, top, x + 2, bottom, ConfigGuiColors.SEPARATOR_SHADOW);
     }
 
     /** A mod icon at its real aspect ratio, scaled to fit and centered inside the given box. */
