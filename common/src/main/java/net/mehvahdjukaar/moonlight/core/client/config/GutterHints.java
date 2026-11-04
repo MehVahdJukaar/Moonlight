@@ -17,20 +17,27 @@ public final class GutterHints {
 
     private final List<Hint> hints = new ArrayList<>(2);
     private int rowY0, rowY1;
+    private boolean drawIcons = true;
 
-    private record Hint(int x, Component tooltip) {
+    public record Hint(int x, Identifier icon, Component text) {
     }
 
     public void begin(int top, int height) {
+        begin(top, height, true);
+    }
+
+    //with drawIcons off hints are only collected, for the description panel
+    public void begin(int top, int height, boolean drawIcons) {
         this.hints.clear();
         this.rowY0 = top;
         this.rowY1 = top + height;
+        this.drawIcons = drawIcons;
     }
 
-    public void add(GuiGraphicsExtractor graphics, int left, Identifier icon, Component tooltip) {
+    public void add(GuiGraphicsExtractor graphics, int left, Identifier icon, Component text) {
         int x = left - (this.hints.size() + 1) * SPACING;
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, this.rowY0 + (this.rowY1 - this.rowY0 - SIZE) / 2, SIZE, SIZE);
-        this.hints.add(new Hint(x, tooltip));
+        if (drawIcons) graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, this.rowY0 + (this.rowY1 - this.rowY0 - SIZE) / 2, SIZE, SIZE);
+        this.hints.add(new Hint(x, icon, text));
     }
 
     public void addReload(GuiGraphicsExtractor graphics, int left, ConfigReloadType type) {
@@ -40,11 +47,18 @@ public final class GutterHints {
                 ? "gui.moonlight.config.reload.game" : "gui.moonlight.config.reload.world"));
     }
 
+
+    public List<Hint> hints() {
+        return hints;
+    }
+
     @Nullable
     public Component tooltipAt(double mouseX, double mouseY) {
         if (mouseY < this.rowY0 || mouseY > this.rowY1) return null;
         for (Hint hint : this.hints) {
-            if (mouseX >= hint.x() && mouseX <= hint.x() + SIZE) return hint.tooltip();
+            if (mouseX >= hint.x() && mouseX <= hint.x() + SIZE) {
+                return hint.text();
+            }
         }
         return null;
     }

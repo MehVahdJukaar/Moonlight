@@ -104,15 +104,19 @@ public final class GuiHelper {
     }
 
     public static void renderListBackground(GuiGraphicsExtractor graphics, int top, int bottom, int width, double scroll) {
+        renderListBackground(graphics, 0, top, bottom, width, scroll);
+    }
+
+    public static void renderListBackground(GuiGraphicsExtractor graphics, int x, int top, int bottom, int width, double scroll) {
         Identifier bg = inWorld() ? AbstractSelectionList.INWORLD_MENU_LIST_BACKGROUND : AbstractSelectionList.MENU_LIST_BACKGROUND;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, bg, 0, top,
-                (float) width, (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, bg, x, top,
+                (float) (x + width), (float) (bottom + (int) scroll), width, bottom - top, 32, 32);
     }
 
     /** Thin right-edge scrollbar for a custom-scrolled panel. No-op when everything fits. */
-    public static void renderScrollbar(GuiGraphicsExtractor graphics, int top, int bottom, int width, double scroll, int maxScroll) {
+    public static void renderScrollbar(GuiGraphicsExtractor graphics, int top, int bottom, int right, double scroll, int maxScroll) {
         if (maxScroll <= 0) return;
-        int trackX = width - 6;
+        int trackX = right - 6;
         int trackH = bottom - top;
         int thumbH = Math.max(16, trackH * trackH / (trackH + maxScroll));
         int thumbY = top + (int) ((trackH - thumbH) * (scroll / maxScroll));

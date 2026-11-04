@@ -22,6 +22,8 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
 
     protected final OverlayLayer overlay = new OverlayLayer();
     protected ConfigRowList list;
+    @Nullable
+    protected DescriptionPanel panel;
 
     protected ConfigPageScreen(Component title) {
         super(title);
@@ -35,6 +37,11 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
     @Override
     public OverlayLayer getOverlayLayer() {
         return this.overlay;
+    }
+
+    @Override
+    public boolean hasDescriptionPanel() {
+        return panel != null;
     }
 
     @Override
@@ -55,7 +62,9 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
 
     protected void addDescriptionRows(List<ConfigRow> rows, ConfigOption<?> option) {
         Component desc = option.description();
-        if (desc == null || !session().isExpanded(option)) return;
+        if (desc == null || panel != null || !session().isExpanded(option)) {
+            return;
+        }
         List<FormattedCharSequence> lines = this.font.split(desc, ROW_WIDTH - ARROW_WIDTH - GAP);
         for (int i = 0; i < lines.size(); i += DESC_LINES_PER_ROW) {
             rows.add(new DescriptionRow(this.font, lines.subList(i, Math.min(i + DESC_LINES_PER_ROW, lines.size()))));
@@ -87,7 +96,7 @@ public abstract class ConfigPageScreen extends Screen implements ConfigScreenAcc
             overlay.render(graphics, mouseX, mouseY);
             return true;
         }
-        Component tooltip = tooltipAt(mouseX, mouseY);
+        Component tooltip = panel == null ? tooltipAt(mouseX, mouseY) : null;
         if (tooltip != null) {
             graphics.setTooltipForNextFrame(this.font, this.font.split(tooltip, 220), mouseX, mouseY);
         }

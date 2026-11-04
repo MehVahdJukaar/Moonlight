@@ -55,6 +55,7 @@ public abstract class ModConfigHolder {
     private final Runnable changeCallback;
     private Map<String, Supplier<Boolean>> featureToggles = Map.of();
     private Map<String, String> missingTranslations = new LinkedHashMap<>();
+    private boolean descriptionPanel;
 
     protected ModConfigHolder(Identifier id, String fileExtension, Path configDirectory, ConfigType type, @Nullable Runnable changeCallback) {
         this(id, fileExtension, configDirectory, type, changeCallback, true);
@@ -96,6 +97,16 @@ public abstract class ModConfigHolder {
             if (!alreadyTranslated.containsKey(key)) this.missingTranslations.put(key, name);
         });
     }
+
+    @ApiStatus.Internal
+    public void setDescriptionPanel(boolean descriptionPanel) {
+        this.descriptionPanel = descriptionPanel;
+    }
+
+    public boolean hasDescriptionPanel() {
+        return this.descriptionPanel;
+    }
+
 
     public boolean hasMissingTranslations() {
         return !this.missingTranslations.isEmpty();

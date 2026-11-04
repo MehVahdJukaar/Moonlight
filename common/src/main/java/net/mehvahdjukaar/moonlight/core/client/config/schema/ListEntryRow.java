@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.core.client.config.schema;
 import net.mehvahdjukaar.moonlight.api.client.gui.widget.IconButton;
 import net.mehvahdjukaar.moonlight.api.client.gui.MoonlightIcons;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigRow;
+import net.mehvahdjukaar.moonlight.core.client.config.DescriptionPanel;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -74,5 +75,12 @@ class ListEntryRow extends ConfigRow {
     @Override
     public Component getGutterTooltip(int mouseX, int mouseY) {
         return inner.getGutterTooltip(mouseX, mouseY);
+    }
+
+
+    @Nullable
+    @Override
+    public DescriptionPanel.Content panelContent() {
+        return inner.panelContent();
     }
 }

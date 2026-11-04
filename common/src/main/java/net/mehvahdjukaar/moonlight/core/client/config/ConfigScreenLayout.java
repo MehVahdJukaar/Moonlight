@@ -6,6 +6,7 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 //Shared sizing constants
@@ -25,8 +26,14 @@ public final class ConfigScreenLayout {
     public static final int ITEM_HEIGHT = 24;
     public static final int SELECT_ITEM_HEIGHT = 30; // taller two-line rows (title + subtitle) on the config-list screen
     public static final int ROW_WIDTH = 280;
+    public static final int ROW_SIDE_ROOM = 28; //scrollbar plus some air, on top of the row width
     public static final int ROW_ICON = 16; // leading category/config icon
     public static final int DESC_LINES_PER_ROW = 2;
+
+    //side panes (mod info on select screen, descriptions on the config screen)
+    public static final int PANE_MIN_WIDTH = 104;
+    public static final int PANE_MAX_WIDTH = 170;
+    public static final int PANE_PAD = 8;
 
     // the mod tile grids (mods hub, discover mods)
     public static final int GRID_SIDE_MARGIN = 24;
@@ -36,6 +43,11 @@ public final class ConfigScreenLayout {
     public static final int TITLE_SEARCH_GAP = 5;
     public static final int TITLE_Y_WITH_SEARCH = (HEADER - 2 - (FONT_LINE_HEIGHT + TITLE_SEARCH_GAP + SearchBoxWidget.HEIGHT)) / 2;
     public static final int SEARCH_Y = TITLE_Y_WITH_SEARCH + FONT_LINE_HEIGHT + TITLE_SEARCH_GAP;
+
+    static int paneWidth(int screenWidth) {
+        return Mth.clamp(screenWidth / 3, PANE_MIN_WIDTH, PANE_MAX_WIDTH);
+    }
+
 
     @Nullable
     static Identifier reloadIcon(ConfigReloadType type) {
