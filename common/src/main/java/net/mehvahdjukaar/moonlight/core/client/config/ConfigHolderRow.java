@@ -58,8 +58,8 @@ public class ConfigHolderRow extends ConfigRow {
         int textRight = editX - GAP;
 
         boolean available = this.unavailableReason == null;
-        int labelColor = available ? CATEGORY : DESCRIPTION;
-        int subtitleColor = available ? TEXT : DISABLED;
+        int labelColor = available ? CONFIG_FILE : DESCRIPTION;
+        int subtitleColor = available ? DESCRIPTION : DISABLED;
 
         graphics.blitSprite(icon, iconX, subtitle != null ? top + 5 : top + (height - ROW_ICON) / 2, ROW_ICON, ROW_ICON);
         if (subtitle != null) {

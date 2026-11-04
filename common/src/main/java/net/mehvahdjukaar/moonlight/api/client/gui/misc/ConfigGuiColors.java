@@ -13,8 +13,10 @@ public final class ConfigGuiColors {
         return 0xFF000000 | Objects.requireNonNull(color.getColor());
     }
 
-    public static final int PANEL_BG = 0xFF101010; // popups, description bands, the dark half of a hand drawn separator
-    public static final int SEPARATOR_HIGHLIGHT = 0x18FFFFFF; // the light half, same idea as the vanilla separator sprite
+    public static final int PANEL_BG = 0xFF101010; // popups, description bands
+    //same two rows as the vanilla separator sprites
+    public static final int SEPARATOR_HIGHLIGHT = 0x33FFFFFF;
+    public static final int SEPARATOR_SHADOW = 0xBF000000;
     public static final int HOVER_HIGHLIGHT = 0x40FFFFFF; // translucent wash over a hovered row, cell or icon button
     public static final int SCROLLBAR_THUMB = CommonColors.LIGHTER_GRAY;
     public static final int CHECKER_LIGHT = CommonColors.LIGHTER_GRAY; // behind translucent colors so alpha reads
@@ -29,6 +31,7 @@ public final class ConfigGuiColors {
     public static final int TITLE = chat(ChatFormatting.GOLD);
     public static final int MODIFIED = chat(ChatFormatting.YELLOW);
     public static final int CATEGORY = chat(ChatFormatting.GREEN);
+    public static final int CONFIG_FILE = chat(ChatFormatting.WHITE);
     public static final int SELECTED = chat(ChatFormatting.LIGHT_PURPLE);
 
     public static final int TILE_BG = 0xFF1B1B1B;
