@@ -92,6 +92,6 @@ class KeyValueRow extends ConfigRow {
         List<GutterHints.Hint> hints = new ArrayList<>(gutter.hints());
         hints.addAll(inner.hints());
 
-        return new DescriptionPanel.Content(inner.title(), inner.description(), hints);
+        return new DescriptionPanel.Content(inner.title(), inner.image(), inner.description(), hints);
     }
 }

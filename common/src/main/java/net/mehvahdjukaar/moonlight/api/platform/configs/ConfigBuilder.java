@@ -74,6 +74,8 @@ public abstract class ConfigBuilder {
 
     @Nullable
     private ResourceLocation pendingIcon;
+    @Nullable
+    private ResourceLocation pendingImage;
 
     @FunctionalInterface
     protected interface CommentTarget {
@@ -422,6 +424,23 @@ public abstract class ConfigBuilder {
                 : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), id));
     }
 
+    /**
+     * Picture shown above the next option or category description. Full texture path, not an atlas sprite.
+     * Only visible with enableDescriptionPanel()
+     */
+    public ConfigBuilder image(ResourceLocation texture) {
+        this.pendingImage = texture;
+
+        return this;
+    }
+
+    public ConfigBuilder image(String texture) {
+        return image(texture.indexOf(':') >= 0
+                ? ResourceLocation.parse(texture)
+                : ResourceLocation.fromNamespaceAndPath(this.name.getNamespace(), texture));
+    }
+
+
     private record PendingDependency(Supplier<Boolean> value, ConfigOption.BooleanOption row) {
     }
 
@@ -509,6 +528,10 @@ public abstract class ConfigBuilder {
             uiNode.setIcon(this.pendingIcon);
             this.pendingIcon = null;
         }
+        if (this.pendingImage != null && uiNode != null) {
+            uiNode.setImage(this.pendingImage);
+            pendingImage = null;
+        }
     }
 
     protected void enterCategory(String category) {
@@ -521,6 +544,10 @@ public abstract class ConfigBuilder {
         if (this.pendingIcon != null) {
             cat.setIcon(this.pendingIcon);
             this.pendingIcon = null;
+        }
+        if (this.pendingImage != null) {
+            cat.setImage(this.pendingImage);
+            this.pendingImage = null;
         }
         this.uiStack.peek().add(cat);
         this.uiStack.push(cat);

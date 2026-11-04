@@ -19,6 +19,8 @@ public abstract class ConfigNode {
     private ConfigCategory parent;
     @Nullable
     private ResourceLocation icon;
+    @Nullable
+    private ResourceLocation image;
 
     protected ConfigNode(Component title, @Nullable Component description) {
         this.title = title;
@@ -48,6 +50,17 @@ public abstract class ConfigNode {
     @Nullable
     public ResourceLocation icon() {
         return icon;
+    }
+
+    @ApiStatus.Internal
+    public void setImage(@Nullable ResourceLocation image) {
+        this.image = image;
+    }
+
+
+    @Nullable
+    public ResourceLocation image() {
+        return image;
     }
 
     public Component title() {

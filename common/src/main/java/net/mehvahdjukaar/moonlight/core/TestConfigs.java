@@ -99,7 +99,7 @@ public class TestConfigs {
         builder.push("test_category");
         builder.comment("dev only");
 
-        builder.icon("minecraft:lever").comment("feature toggle").feature("test_bool", true);
+        builder.icon("minecraft:lever").image("minecraft:textures/gui/title/background/panorama_0.png").comment("feature toggle").feature("test_bool", true);
         builder.comment("plain bool, world reload").worldReload().define("test_plain_bool", true);
         builder.comment("int, game restart").gameRestart().define("test_int", 5, 0, 100);
         builder.comment("int slider").defineSlider("test_int_slider", 50, 0, 100);
