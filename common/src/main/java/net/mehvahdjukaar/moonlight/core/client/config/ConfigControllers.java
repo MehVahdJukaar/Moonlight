@@ -137,9 +137,9 @@ public final class ConfigControllers {
 
         register(ConfigOption.Vec2Value.class, (o, s, onChange) -> {
             Vec2 c = s.valueOrPendingValue(o);
-            Vec2ControlWidget w = new Vec2ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x, c.y, o.min, o.max, false,
-                    (x, y) -> {
-                        s.put(o, new Vec2((float) x, (float) y));
+            VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x, c.y}, o.min, o.max, false,
+                    v -> {
+                        s.put(o, new Vec2((float) v[0], (float) v[1]));
                         onChange.run();
                     });
             return new ConfigControl<Vec2>(w, vv -> w.setValues(vv.x, vv.y));
@@ -147,9 +147,9 @@ public final class ConfigControllers {
 
         register(ConfigOption.Vec2iValue.class, (o, s, onChange) -> {
             Vec2i c = s.valueOrPendingValue(o);
-            Vec2ControlWidget w = new Vec2ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x(), c.y(), o.min, o.max, true,
-                    (x, y) -> {
-                        s.put(o, new Vec2i((int) Math.round(x), (int) Math.round(y)));
+            VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x(), c.y()}, o.min, o.max, true,
+                    v -> {
+                        s.put(o, new Vec2i((int) Math.round(v[0]), (int) Math.round(v[1])));
                         onChange.run();
                     });
             return new ConfigControl<Vec2i>(w, vv -> w.setValues(vv.x(), vv.y()));
@@ -157,9 +157,9 @@ public final class ConfigControllers {
 
         register(ConfigOption.Vec3Value.class, (o, s, onChange) -> {
             Vec3 c = s.valueOrPendingValue(o);
-            Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.x, c.y, c.z, o.min, o.max, false,
-                    (x, y, z) -> {
-                        s.put(o, new Vec3(x, y, z));
+            VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.x, c.y, c.z}, o.min, o.max, false,
+                    v -> {
+                        s.put(o, new Vec3(v[0], v[1], v[2]));
                         onChange.run();
                     });
             return new ConfigControl<Vec3>(w, vv -> w.setValues(vv.x, vv.y, vv.z));
@@ -167,9 +167,9 @@ public final class ConfigControllers {
 
         register(ConfigOption.Vec3iValue.class, (o, s, onChange) -> {
             Vec3i c = s.valueOrPendingValue(o);
-            Vec3ControlWidget w = new Vec3ControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, c.getX(), c.getY(), c.getZ(), o.min, o.max, true,
-                    (x, y, z) -> {
-                        s.put(o, new Vec3i((int) Math.round(x), (int) Math.round(y), (int) Math.round(z)));
+            VecControlWidget w = new VecControlWidget(CONTROL_WIDTH, CONTROL_HEIGHT, new double[]{c.getX(), c.getY(), c.getZ()}, o.min, o.max, true,
+                    v -> {
+                        s.put(o, new Vec3i((int) Math.round(v[0]), (int) Math.round(v[1]), (int) Math.round(v[2])));
                         onChange.run();
                     });
             return new ConfigControl<Vec3i>(w, vv -> w.setValues(vv.getX(), vv.getY(), vv.getZ()));
@@ -240,7 +240,7 @@ public final class ConfigControllers {
     }
 
 
-    static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
+    public static ConfigControl<Boolean> featureToggle(ConfigOption.BooleanValue o, ConfigEditSession s, Runnable onChange) {
         Identifier icon = o.icon();
         BooleanToggleWidget.ExtraIcon iconRenderer = icon == null ? null : new BooleanToggleWidget.ExtraIcon() {
             private final ConfigScreenIcons.Anim anim = new ConfigScreenIcons.Anim();

@@ -609,7 +609,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.RangeValue node = new ConfigOption.RangeValue(
+        var node = new ConfigOption.RangeValue(
                 description(name), null, minHandle, maxHandle,
                 new Range(defaultMin, defaultMax), min, max);
         recordOption(node);
@@ -627,7 +627,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.Vec2Value node = new ConfigOption.Vec2Value(
+        var node = new ConfigOption.Vec2Value(
                 description(name), null, xHandle, yHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -644,7 +644,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.Vec2iValue node = new ConfigOption.Vec2iValue(
+        var node = new ConfigOption.Vec2iValue(
                 description(name), null, xHandle, yHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -662,7 +662,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.Vec3Value node = new ConfigOption.Vec3Value(
+        var node = new ConfigOption.Vec3Value(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -679,7 +679,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.Vec3iValue node = new ConfigOption.Vec3iValue(
+        var node = new ConfigOption.Vec3iValue(
                 description(name), null, xHandle, yHandle, zHandle, defaultValue, min, max);
         recordOption(node);
         noteDefined(name, node, null);
@@ -695,7 +695,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.DateValue node = new ConfigOption.DateValue(
+        var node = new ConfigOption.DateValue(
                 description(name), null, monthHandle, dayHandle, defaultValue);
         recordOption(node);
         noteDefined(name, node, null);
@@ -711,7 +711,7 @@ public abstract class ConfigBuilder {
         this.suppressUi = false;
 
         putName(this.translationKey(name), name);
-        ConfigOption.TimeValue node = new ConfigOption.TimeValue(
+        var node = new ConfigOption.TimeValue(
                 description(name), null, hourHandle, minuteHandle, defaultValue);
         recordOption(node);
         noteDefined(name, node, null);

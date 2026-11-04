@@ -55,7 +55,7 @@ public class OptionRow extends ConfigRow {
         this(view, value, null);
     }
 
-    OptionRow(ConfigScreenAccess view, ConfigOption<?> value, @Nullable Component categoryPath) {
+    public OptionRow(ConfigScreenAccess view, ConfigOption<?> value, @Nullable Component categoryPath) {
         this.view = view;
         this.session = view.session();
         this.value = value;

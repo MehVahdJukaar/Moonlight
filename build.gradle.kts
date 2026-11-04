@@ -33,6 +33,10 @@ subprojects {
         enabled = true
     }
 
+    tasks.withType<Javadoc> {
+        (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+
     repositories {
         nexus()
     }
