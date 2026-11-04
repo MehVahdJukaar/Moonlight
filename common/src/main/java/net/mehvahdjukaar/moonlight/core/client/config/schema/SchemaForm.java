@@ -129,6 +129,16 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
         };
     }
 
+    static boolean opensPage(Schema<?> schema, @Nullable JsonElement initial) {
+        if (schema instanceof Schema.Ref<?> ref) {
+            return ref.target() != null && hasValue(initial) && opensPage(ref.target(), initial);
+        }
+        return schema instanceof Schema.Record<?> || schema instanceof Schema.PairOf<?, ?>
+                || schema instanceof Schema.ListOf<?> || schema instanceof Schema.MapOf<?, ?>
+                || schema instanceof Schema.DispatchedMapOf<?, ?>
+                || schema instanceof Schema.OneOf<?> || schema instanceof Schema.AnyOf<?>;
+    }
+
     private static <T> FormPart addOption(ConfigCategory parent, ConfigOption<T> option, Function<T, JsonElement> toJson) {
         parent.add(option);
         return session -> toJson.apply(session.valueOrPendingValue(option));
@@ -321,6 +331,7 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
         return switch (schema) {
             case Schema.ListOf<?> ignored -> new JsonArray();
             case Schema.MapOf<?, ?> ignored -> new JsonObject();
+            case Schema.DispatchedMapOf<?, ?> ignored -> new JsonObject();
             case Schema.OneOf<?> ignored -> new JsonObject();
             case Schema.Record<?> ignored -> new JsonObject();
             default -> JsonNull.INSTANCE;

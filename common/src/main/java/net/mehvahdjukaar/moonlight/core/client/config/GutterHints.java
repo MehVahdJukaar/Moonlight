@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.client.config;
 
+import net.mehvahdjukaar.moonlight.api.platform.configs.options.ConfigReloadType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,13 @@ public final class GutterHints {
         int x = left - (this.hints.size() + 1) * SPACING;
         graphics.blitSprite(icon, x, this.rowY0 + (this.rowY1 - this.rowY0 - SIZE) / 2, SIZE, SIZE);
         this.hints.add(new Hint(x, tooltip));
+    }
+
+    public void addReload(GuiGraphics graphics, int left, ConfigReloadType type) {
+        ResourceLocation icon = ConfigScreenLayout.reloadIcon(type);
+        if (icon == null) return;
+        add(graphics, left, icon, Component.translatable(type == ConfigReloadType.GAME_RESTART
+                ? "gui.moonlight.config.reload.game" : "gui.moonlight.config.reload.world"));
     }
 
     @Nullable
