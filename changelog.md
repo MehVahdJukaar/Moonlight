@@ -1,2 +1,1 @@
-- configs support images 
-- fixed some issues with configs
+- Added plugin registration - Required by Every Compat
