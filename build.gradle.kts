@@ -44,9 +44,9 @@ subprojects {
 
 
     upload {
-        maven {
-            nexus()
-        }
+        //maven {
+        //    nexus()
+        //}
         curseforge {
             dependencies {
             }

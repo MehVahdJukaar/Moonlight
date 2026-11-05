@@ -40,9 +40,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -66,21 +66,19 @@ public class MoonlightForge {
 
         if (PlatHelper.getPhysicalSide().isClient()) {
             MoonlightForgeClient.init(bus);
-            // config screen wiring lives in MoonlightForgeClient#afterLoad (gated by the custom_config_screen client
-            // config); the old Configured delegation is kept in the integration classes but no longer registered here
         }
 
         PlatHelper.addCommonSetup(() -> {
             //stop bundling fabric api into shit!
-            if (ModList.get().isLoaded("fabric_api")) {
-                Set<String> modsThatHaveFabric = new HashSet<>();
-                for (var modInfo : ModList.get().getMods()) {
-                    var jij = modInfo.getOwningFile().getMods();
-                    if (jij.stream().anyMatch(m -> m.getModId().equals("fabric_api"))) {
-                        modsThatHaveFabric.add(modInfo.getOwningFile().getFile().getFileName());
-                    }
+            var fabricApiFile = ModList.get().getModFileById("fabric_api");
+            if (fabricApiFile != null) {
+                //walk up the jar in jar chain
+                List<String> bundleChain = new ArrayList<>();
+                for (var f = fabricApiFile.getFile(); f != null; f = f.getDiscoveryAttributes().parent()) {
+                    bundleChain.addFirst(f.getFileName());
                 }
-                Moonlight.LOGGER.error("Fabric API detected! This is not a Fabric mod, so please don't report related issues to MoonlightLib or its dependent(s). This can usually happen when using Connector, or when using a mod that does NOT have a native Neoforge implementation. This can easily lead to poor compatibility and other bizarre issues. Proceed at your own risk. \n Mods that bundle Fabric API: {}", modsThatHaveFabric);
+                String source = bundleChain.size() > 1 ? "bundled by " + bundleChain.getFirst() : "installed directly";
+                Moonlight.LOGGER.warn("Fabric API detected ({})! This is not a Fabric mod, so please don't report related issues to MoonlightLib or its dependent(s). This can usually happen when using Connector, or when using a mod that does NOT have a native Neoforge implementation. This can easily lead to poor compatibility and other bizarre issues. Proceed at your own risk. \n Jar chain: {}", source, String.join(" -> ", bundleChain));
             }
         });
     }
