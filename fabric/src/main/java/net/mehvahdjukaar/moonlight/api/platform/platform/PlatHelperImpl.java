@@ -72,6 +72,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -92,6 +93,11 @@ public class PlatHelperImpl {
     public static boolean isModLoaded(String name) {
         return FabricLoader.getInstance().isModLoaded(name);
     }
+
+    public static <T> List<T> loadPlugins(Class<T> pluginType, String fabricEntrypoint, Class<? extends Annotation> neoforgeAnnotation) {
+        return FabricLoader.getInstance().getEntrypoints(fabricEntrypoint, pluginType);
+    }
+
 
     @Nullable
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {

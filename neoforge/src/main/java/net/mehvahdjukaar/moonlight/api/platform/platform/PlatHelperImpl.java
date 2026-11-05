@@ -74,8 +74,12 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.neoforged.neoforgespi.language.IModFileInfo;
 import net.neoforged.neoforgespi.language.IModInfo;
+import net.neoforged.neoforgespi.language.ModFileScanData;
+import net.neoforged.neoforgespi.locating.IModFile;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -106,6 +110,22 @@ public class PlatHelperImpl {
 
     public static boolean isModLoaded(String name) {
         return ModList.get().isLoaded(name);
+    }
+
+    public static <T> List<T> loadPlugins(Class<T> pluginType, String fabricEntrypoint, Class<? extends Annotation> neoforgeAnnotation) {
+        List<T> plugins = new ArrayList<>();
+        for (ModFileScanData scanData : ModList.get().getAllScanData()) {
+            for (var annotation : scanData.getAnnotatedBy(neoforgeAnnotation, ElementType.TYPE).toList()) {
+                String className = annotation.clazz().getClassName();
+                try {
+                    plugins.add(Class.forName(className).asSubclass(pluginType)
+                            .getDeclaredConstructor().newInstance());
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException("Failed to create plugin " + className, e);
+                }
+            }
+        }
+        return plugins;
     }
 
     @Nullable

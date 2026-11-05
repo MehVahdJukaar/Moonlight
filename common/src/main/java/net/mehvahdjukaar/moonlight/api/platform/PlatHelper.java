@@ -52,6 +52,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -337,6 +338,14 @@ public class PlatHelper {
 
     @PlatformImpl
     public static boolean isModLoaded(String modId) {
+        throw new AssertionError();
+    }
+
+    /**
+     * These need no args constructor
+     */
+    @PlatformImpl
+    public static <T> List<T> loadPlugins(Class<T> pluginType, String fabricEntrypoint, Class<? extends Annotation> neoforgeAnnotation) {
         throw new AssertionError();
     }
 
