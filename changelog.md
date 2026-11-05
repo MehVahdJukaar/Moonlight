@@ -1,3 +1,2 @@
-- fixed an issue with custom models in neoforge
-- added more config stuff (defineVec2)
-- tags can read neoforge conditions
+- configs support images 
+- fixed some issues with configs
