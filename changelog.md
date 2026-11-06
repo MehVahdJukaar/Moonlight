@@ -1,1 +1,1 @@
-- fixed a concurrency issue
+- Added plugin registration - Required by Every Compat
