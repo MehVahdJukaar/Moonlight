@@ -52,10 +52,10 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
             Moonlight.beforeServerStart(s.registryAccess());
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
-            currentServer = null;
             FakeLevelManager.invalidateAll(false);
             SidedInstance.clearAll();
         });
+        ServerLifecycleEvents.SERVER_STOPPED.register(s -> currentServer = null);
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {
             try {

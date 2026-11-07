@@ -138,8 +138,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public MapItemSavedData ml$copy() {
-        MapItemSavedData newData = MapItemSavedData.load(this.save(
-                new CompoundTag(), Utils.hackyGetRegistryAccess()), Utils.hackyGetRegistryAccess());
+        return ml$copy(Utils.hackyGetRegistryAccess());
+    }
+
+    @Override
+    public MapItemSavedData ml$copy(HolderLookup.Provider registries) {
+        MapItemSavedData newData = MapItemSavedData.load(this.save(new CompoundTag(), registries), registries);
         newData.setDirty();
         return newData;
     }

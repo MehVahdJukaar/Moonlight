@@ -12,6 +12,7 @@ import net.mehvahdjukaar.moonlight.api.util.TextHelper;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.client.config.ConfigScreenIcons;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -294,11 +295,9 @@ record SchemaForm(ConfigCategory rootPage, FormPart editedValue) {
 
     @Nullable
     private static Registry<?> dynamicRegistry(ResourceKey<? extends Registry<?>> key) {
-        try {
-            return Utils.hackyGetRegistryAccess().registry(key).orElse(null);
-        } catch (Exception openedFromMainMenu) {
-            return null;
-        }
+        var level = Minecraft.getInstance().level;
+        if (level == null) return null;
+        return level.registryAccess().registry(key).orElse(null);
     }
 
     private static <A> List<String> labelsOf(Schema.Enum<A> en) {

@@ -4,6 +4,7 @@ package net.mehvahdjukaar.moonlight.api.map;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapDecoration;
 import net.mehvahdjukaar.moonlight.api.map.decoration.MLMapMarker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.ApiStatus;
@@ -32,7 +33,10 @@ public interface ExpandedMapData {
 
     boolean ml$removeCustomMarker(String id);
 
+    @Deprecated(forRemoval = true)
     MapItemSavedData ml$copy();
+
+    MapItemSavedData ml$copy(HolderLookup.Provider registries);
 
     void ml$setCustomDecorationsDirty();
 
