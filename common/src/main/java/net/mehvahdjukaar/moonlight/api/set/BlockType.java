@@ -227,7 +227,8 @@ public abstract class BlockType {
     public void addChild(String genericName, @Nullable Object obj) {
         if (obj == Items.AIR || obj == Blocks.AIR) {
             //add better check than this...
-            throw new IllegalStateException("Tried to add air block/item to Block Type. Key " + genericName + ". This is a Moonlight bug, please report me");
+            throw new IllegalStateException("Tried to add air to block type " + this.id + " (key " + genericName +
+                    "). Some mod's finder is pointing at a block that isn't registered, or a mod failed to register it earlier. Check the log for earlier errors");
         }
         if (obj != null) {
             try {
