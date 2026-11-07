@@ -1,6 +1,5 @@
 package net.mehvahdjukaar.moonlight.core;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.mehvahdjukaar.moonlight.api.client.model.ExtraModelData;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidColors;
@@ -127,9 +126,7 @@ public class MoonlightClient {
         @Override
         public void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
             fixShade = ClientConfigs.FIX_SHADE.get();
-            revertFixedShade();
             if (fixShade != ClientConfigs.ShadeFix.FALSE) {
-                applyFixedShade();
 
                 executor.accept((manager, sink) -> {
 
@@ -167,56 +164,12 @@ public class MoonlightClient {
         }
     }
 
-    private static ClientConfigs.ShadeFix fixShade = ClientConfigs.ShadeFix.FALSE;
+    public static ClientConfigs.ShadeFix fixShade = ClientConfigs.ShadeFix.FALSE;
 
-    public static void beforeRenderGui() {
-        if (fixShade == ClientConfigs.ShadeFix.NO_GUI) {
-            revertFixedShade();
-        }
-    }
-
-    public static void afterRenderGui() {
-        if (fixShade == ClientConfigs.ShadeFix.NO_GUI) {
-            applyFixedShade();
-        }
-    }
-
-    private static void revertFixedShade() {
-        if (oldL0 != null) {
-            Lighting.DIFFUSE_LIGHT_0 = oldL0;
-            Lighting.DIFFUSE_LIGHT_1 = oldL1;
-            Lighting.NETHER_DIFFUSE_LIGHT_0 = oldL0n;
-            Lighting.NETHER_DIFFUSE_LIGHT_1 = oldL1n;
-            oldL0 = null;
-            oldL1 = null;
-            oldL0n = null;
-            oldL1n = null;
-        }
-    }
-
-    private static void applyFixedShade() {
-        if (oldL0 == null) {
-            oldL0 = Lighting.DIFFUSE_LIGHT_0;
-            oldL1 = Lighting.DIFFUSE_LIGHT_1;
-            oldL0n = Lighting.NETHER_DIFFUSE_LIGHT_0;
-            oldL1n = Lighting.NETHER_DIFFUSE_LIGHT_1;
-        }
-        Lighting.DIFFUSE_LIGHT_0 = NEW_L_0;
-        Lighting.DIFFUSE_LIGHT_1 = NEW_L_1;
-        Lighting.NETHER_DIFFUSE_LIGHT_0 = NEW_L_0;
-        Lighting.NETHER_DIFFUSE_LIGHT_1 = NEW_L_1;
-    }
-
-
-    private static Vector3f oldL0 = null;
-    private static Vector3f oldL1 = null;
-
-    private static Vector3f oldL0n = null;
-    private static Vector3f oldL1n = null;
 
     // such neat numbers. These give exactly the same shade that block use (1, 0.8, 0.6, 0.5)
-    private static final Vector3f NEW_L_0 = new Vector3f(0.2f, 7 / 9f, -0.6f).normalize();
-    private static final Vector3f NEW_L_1 = new Vector3f(-0.2f, 7 / 9f, 0.6f).normalize();
+    public static final Vector3f NEW_L_0 = new Vector3f(0.2f, 7 / 9f, -0.6f).normalize();
+    public static final Vector3f NEW_L_1 = new Vector3f(-0.2f, 7 / 9f, 0.6f).normalize();
 
 
 }

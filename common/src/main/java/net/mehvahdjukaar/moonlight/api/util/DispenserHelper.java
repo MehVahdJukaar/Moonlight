@@ -4,6 +4,7 @@ package net.mehvahdjukaar.moonlight.api.util;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.mehvahdjukaar.moonlight.api.block.ISoftFluidTankProvider;
 import net.mehvahdjukaar.moonlight.api.fluids.SoftFluidTank;
+import net.mehvahdjukaar.moonlight.api.item.additional_placements.AdditionalItemPlacementsAPI;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockAccessor;
 import net.mehvahdjukaar.moonlight.core.mixins.accessor.DispenserBlockEntityAccessor;
@@ -244,6 +245,36 @@ public class DispenserHelper {
     }
 
 
+    public static class PlaceBlockBehavior extends DispenserHelper.AdditionalDispenserBehavior {
+
+        public PlaceBlockBehavior(Item item) {
+            super(item);
+        }
+
+        @Override
+        protected InteractionResultHolder<ItemStack> customBehavior(BlockSource source, ItemStack stack) {
+            Item item = stack.getItem();
+            Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
+            BlockPos blockpos = source.getPos().relative(direction);
+            // Direction direction1 = source.getLevel().isEmptyBlock(blockpos.below()) ? direction : Direction.UP;
+            DirectionalPlaceContext context = new DirectionalPlaceContext(source.getLevel(), blockpos, direction, stack, direction);
+
+            InteractionResult result = null;
+            //takes priority as it does when used by a player. Also covers items that aren't BlockItems at all
+            var placement = AdditionalItemPlacementsAPI.getBehavior(item);
+            if (placement != null) {
+                result = placement.overridePlace(context);
+            }
+            if ((result == null || !result.consumesAction()) && item instanceof BlockItem bi) {
+                result = bi.place(context);
+            }
+            if (result != null && result.consumesAction()) {
+                return new InteractionResultHolder<>(result, stack);
+            }
+            return InteractionResultHolder.pass(stack);
+        }
+    }
+
     public static class PlaceBlockDispenseBehavior extends OptionalDispenseItemBehavior {
 
         @Override
@@ -304,7 +335,7 @@ public class DispenserHelper {
         }
 
         default void registerPlaceBlock(ItemLike i) {
-            register(i.asItem(), PLACE_BLOCK_BEHAVIOR);
+            register(new PlaceBlockBehavior(i.asItem()));
         }
 
 

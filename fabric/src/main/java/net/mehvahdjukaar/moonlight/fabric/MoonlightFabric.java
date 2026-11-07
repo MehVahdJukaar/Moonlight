@@ -56,9 +56,9 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         });
         CommonLifecycleEvents.TAGS_LOADED.register(Moonlight::afterDataReload);
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
-            currentServer = null;
             FakeLevelManager.invalidateAll();
         });
+        ServerLifecycleEvents.SERVER_STOPPED.register(s -> currentServer = null);
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {
             try {

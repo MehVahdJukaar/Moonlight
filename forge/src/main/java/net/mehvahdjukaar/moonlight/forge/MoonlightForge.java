@@ -77,7 +77,7 @@ public class MoonlightForge {
     public static void configsLoaded(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() == ((ConfigSpecWrapper) CommonConfigs.CONFIG).getSpec()) {
             if (!ModLoader.get().hasCompletedState("LOAD_REGISTRIES")) {
-                throw new IllegalStateException("Some OTHER mod has forcefully loaded ALL other mods configs before the registry phase. This should not be done. Dont report this to Moonlight. Refusing to proceed further");
+                throw new IllegalStateException("Moonlight detected that another mod force loaded the configs of ALL mods before the registry phase. That breaks other mods and should never be done. Moonlight is not the cause, find the mod doing this and report it to them");
             }
         }
     }
