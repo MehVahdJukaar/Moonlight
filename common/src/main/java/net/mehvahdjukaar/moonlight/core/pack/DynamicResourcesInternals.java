@@ -1,8 +1,6 @@
 package net.mehvahdjukaar.moonlight.core.pack;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import net.mehvahdjukaar.moonlight.api.events.EarlyPackReloadEvent;
 import net.mehvahdjukaar.moonlight.api.events.MoonlightEventsHelper;
 import net.mehvahdjukaar.moonlight.api.misc.IProgressTracker;
@@ -21,6 +19,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,7 +29,7 @@ public class DynamicResourcesInternals {
     @Deprecated(forRemoval = true)
     private static final Set<DynResourceGenerator<?>> GENERATORS = ConcurrentHashMap.newKeySet();
 
-    private static final Multimap<PackType, DynamicResourcesProvider> PROVIDERS = HashMultimap.create();
+    private static final Map<PackType, Set<DynamicResourcesProvider>> PROVIDERS = new ConcurrentHashMap<>();
 
     public static void init() {
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
@@ -69,7 +68,7 @@ public class DynamicResourcesInternals {
 
         MoonlightEventsHelper.addListener(earlyPackReloadEvent -> {
             PackType type = earlyPackReloadEvent.type();
-            Collection<DynamicResourcesProvider> validGen = PROVIDERS.get(type);
+            Collection<DynamicResourcesProvider> validGen = PROVIDERS.getOrDefault(type, Set.of());
             if (validGen.isEmpty()) return;
 
             var selectedPacks = earlyPackReloadEvent.selectedPacks();
@@ -77,7 +76,7 @@ public class DynamicResourcesInternals {
 
             GlobalCachedStrategy.refreshState(type, selectedPacks);
 
-            for (var p : PROVIDERS.get(type)) {
+            for (var p : validGen) {
                 p.prepare();
             }
 
@@ -121,13 +120,14 @@ public class DynamicResourcesInternals {
 
     public static void registerProvider(DynamicResourcesProvider provider) {
         PackType packType = provider.getPackType();
+        Set<DynamicResourcesProvider> providers = PROVIDERS.computeIfAbsent(packType, t -> ConcurrentHashMap.newKeySet());
         //validate no other with same ID exist
-        for (var p : PROVIDERS.get(packType)) {
+        for (var p : providers) {
             if (p != provider && p.getName().equals(provider.getName())) {
                 throw new IllegalStateException("Duplicate Dynamic Resource Provider ID: " + provider.getName());
             }
         }
-        PROVIDERS.put(packType, provider);
+        providers.add(provider);
     }
 
     public static void clearAfterReload(PackType targetType) {
