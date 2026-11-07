@@ -142,7 +142,12 @@ public abstract class MapDataMixin extends SavedData implements ExpandedMapData 
 
     @Override
     public MapItemSavedData ml$copy() {
-        RegistryOps<Tag> ops = Utils.hackyGetRegistryAccess().createSerializationContext(NbtOps.INSTANCE);
+        return ml$copy(Utils.hackyGetRegistryAccess());
+    }
+
+    @Override
+    public MapItemSavedData ml$copy(HolderLookup.Provider registries) {
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         Tag encoded = MapDataInternal.EXPANDED_CODEC.encodeStart(ops, (MapItemSavedData) (Object) this).getOrThrow();
         MapItemSavedData newData = MapDataInternal.EXPANDED_CODEC.parse(ops, encoded).getOrThrow();
         newData.setDirty();
