@@ -1,1 +1,1 @@
-**Undetected WoodType**: Added **Nourishend**'s strange - [EveryCompat#1323](https://github.com/MehVahdJukaar/WoodGood/issues/1323)
+- many old fixes
