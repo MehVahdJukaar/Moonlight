@@ -1,2 +1,1 @@
-- ported recent 1.21.1 changes
-- includes new improvements to config screen & plugin helper methods
+- fixed a concurrency issue
