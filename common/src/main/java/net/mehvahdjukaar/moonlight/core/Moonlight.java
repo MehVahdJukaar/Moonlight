@@ -109,7 +109,7 @@ public class Moonlight {
         }, BuiltInRegistries.BLOCK);
 
         RegHelper.addItemsToTabsRegistration(event -> {
-            if (event.getTab().hasAnyItems()) {
+            if (event.getParameters().hasPermissions()) {
                 event.addAfter(CreativeModeTabs.OP_BLOCKS,  i -> i.is(Items.JIGSAW), MoonlightRegistry.SPAWN_BOX_BLOCK.get());
             }
         });
