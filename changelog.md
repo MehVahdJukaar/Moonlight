@@ -1,1 +1,1 @@
-- Added plugin registration - Required by Every Compat
+- fixed some lifecycle issues, minor leaks on the world screen only
