@@ -19,6 +19,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -37,6 +38,12 @@ public class MapDecorationClientManager {
      */
     public static <T extends MLMapDecoration> void registerCustomRenderer(Identifier typeFactoryId, Function<Identifier, MapDecorationRenderer<T>> renderer) {
         CUSTOM_RENDERERS_FACTORIES.put(typeFactoryId, (Function<Identifier, MapDecorationRenderer<?>>) (Object) renderer);
+    }
+
+    //types hold structure holder sets so they keep the old client registries alive
+    @ApiStatus.Internal
+    public static void clearCache() {
+        RENDERERS.clear();
     }
 
     private static MapDecorationRenderer<?> createRenderer(Holder<MLMapDecorationType<?, ?>> type) {
