@@ -4,6 +4,7 @@ package net.mehvahdjukaar.moonlight.platform;
 import net.mehvahdjukaar.moonlight.core.client.config.MoonlightConfigSelectScreen;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
@@ -42,6 +43,7 @@ public class MoonlightForgeClient {
         FakeLevelManager.invalidateAll(true);
         DynamicTextureRenderer.clearCache();
         RenderedTexturesManager.clearCache();
+        MapDecorationClientManager.clearCache();
         var player = event.getPlayer();
         if (player != null) SidedInstance.clearAll(player.registryAccess());
     }

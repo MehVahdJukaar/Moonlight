@@ -47,15 +47,21 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
 
         ServerPlayConnectionEvents.JOIN.register((l, s, m) -> NetworkHelper.sendToClientPlayer(l.player,
                 new ClientBoundSendLoginMessage()));
+
         ServerLifecycleEvents.SERVER_STARTING.register(s -> {
             currentServer = s;
             Moonlight.beforeServerStart(s.registryAccess());
         });
+
         ServerLifecycleEvents.SERVER_STOPPING.register(s -> {
             FakeLevelManager.invalidateAll(false);
             SidedInstance.clearAll();
         });
-        ServerLifecycleEvents.SERVER_STOPPED.register(s -> currentServer = null);
+
+        ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
+            currentServer = null;
+            DataMapBridge.clearServerInstances();
+        });
 
         ServerWorldEvents.UNLOAD.register((server, world) -> {
             try {

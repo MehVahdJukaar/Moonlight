@@ -72,6 +72,11 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     }
 
     @ApiStatus.Internal
+    public static void clearServerInstances() {
+        SERVER_INSTANCES.clear();
+    }
+
+    @ApiStatus.Internal
     public static void onDataSyncToPlayer(ServerPlayer player, boolean isJoined) {
         for (var entry : SERVER_INSTANCES.entrySet()) {
             var map = entry.getValue();

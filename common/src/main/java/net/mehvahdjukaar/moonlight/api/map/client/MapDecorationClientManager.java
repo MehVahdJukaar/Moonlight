@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -34,6 +35,12 @@ public class MapDecorationClientManager {
     private static final Map<ResourceLocation, Function<ResourceLocation, MapDecorationRenderer<?>>> CUSTOM_RENDERERS_FACTORIES = Maps.newHashMap();
 
     private static final Map<MLMapDecorationType<?, ?>, MapDecorationRenderer<?>> RENDERERS = Maps.newHashMap();
+
+    //types hold structure holder sets so they keep the old client registries alive
+    @ApiStatus.Internal
+    public static void clearCache() {
+        RENDERERS.clear();
+    }
 
     private static MapDecorationRenderer<?> createRenderer(Holder<MLMapDecorationType<?, ?>> type) {
         ResourceLocation id = type.unwrapKey().get().location();

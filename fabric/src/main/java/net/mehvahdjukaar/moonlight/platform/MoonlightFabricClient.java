@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.DynamicTextureRenderer;
 import net.mehvahdjukaar.moonlight.api.client.texture_renderer.RenderedTexturesManager;
+import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
@@ -28,6 +29,7 @@ public class MoonlightFabricClient implements ClientModInitializer {
             FakeLevelManager.invalidateAll(true);
             RenderedTexturesManager.clearCache();
             DynamicTextureRenderer.clearCache();
+            MapDecorationClientManager.clearCache();
             var level = clientPacketListener.getLevel();
             if (level != null) SidedInstance.clearAll(level.registryAccess());
         });
