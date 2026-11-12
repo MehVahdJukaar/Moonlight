@@ -22,9 +22,8 @@ public interface IOneUserInteractable {
     //call before access. if free or claimed by self, returns true
     default boolean canBeUsedBy(BlockPos myPos, Entity player) {
         //player who may edit is a server side concept. here we just check if player is close by
-        if (!(player instanceof ServerPlayer sp)) {
-            return isCloseEnoughToUse(player, myPos);
-        }
+        if (!isCloseEnoughToUse(player, myPos)) return false;
+        if (!(player instanceof ServerPlayer sp)) return true;
         validateClaimer(myPos, sp.serverLevel());
         UUID uuid = this.getCurrentUser();
         if (uuid == null) return true;

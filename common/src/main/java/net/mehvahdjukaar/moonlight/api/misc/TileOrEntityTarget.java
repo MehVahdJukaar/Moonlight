@@ -63,6 +63,8 @@ public class TileOrEntityTarget {
     public Object getTarget(Level level) {
         if (this.posOrEntityId.left().isPresent()) {
             BlockPos pos = this.posOrEntityId.left().get();
+            //dont load chunks for whatever pos a client sent us!!
+            if (!level.isLoaded(pos)) return null;
             var be = level.getBlockEntity(pos);
             if (be != null) return be;
             return level.getBlockState(pos);
@@ -78,7 +80,7 @@ public class TileOrEntityTarget {
     }
 
     public <T extends BlockEntity> T getBlockEntityOrThrow(Level level, BlockEntityType<T> type) {
-        if (this.posOrEntityId.left().isPresent()) {
+        if (this.posOrEntityId.left().isPresent() && level.isLoaded(this.posOrEntityId.left().get())) {
             var be = type.getBlockEntity(level, this.posOrEntityId.left().get());
             if (be != null) {
                 return be;
@@ -110,7 +112,9 @@ public class TileOrEntityTarget {
     @Nullable
     public <T> T map(Level level, Function<BlockEntity, T> a, Function<Entity, T> b) {
         if (this.posOrEntityId.left().isPresent()) {
-            var be = level.getBlockEntity(this.posOrEntityId.left().get());
+            BlockPos pos = this.posOrEntityId.left().get();
+            if (!level.isLoaded(pos)) return null;
+            var be = level.getBlockEntity(pos);
             if (be != null) return a.apply(be);
         } else {
             var entity = level.getEntity(this.posOrEntityId.right().get());
