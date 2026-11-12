@@ -102,10 +102,17 @@ public class Utils {
 
     /// Prefer using this over the above one.
     public static boolean openGuiIfPossible(TileOrEntityTarget target, ServerPlayer player, ItemStack stack, Direction hitFace, Vec3 hitPos) {
+        Object targetObj = target.getTarget(player.level());
+        BlockPos targetPos;
+        if (targetObj instanceof Entity e){
+            targetPos = e.blockPosition();
+        }
+        else if (targetObj instanceof BlockEntity be) {
+            targetPos = be.getBlockPos();
+        }
+        else return false;
         //this is likely not needed
-        Object targetObj = target.getTargetOrThrow(player.level());
-        BlockPos targetPos = targetObj instanceof Entity e ? e.blockPosition() : ((BlockEntity) targetObj).getBlockPos();
-        if (!Utils.mayPerformBlockAction(player, targetPos, stack)) {
+        if (!player.level().mayInteract(player, targetPos) || !Utils.mayPerformBlockAction(player, targetPos, stack)) {
             return false;
         }
         switch (targetObj) {
