@@ -1,0 +1,7 @@
+{
+  "id": "minecraft:concrete",
+  "colors": {
+    "default": "clayworks:concrete"
+  },
+  "replace": false
+}
