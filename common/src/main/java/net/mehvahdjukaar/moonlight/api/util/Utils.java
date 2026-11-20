@@ -184,6 +184,7 @@ public class Utils {
         if (comp != null) {
             comp.loadInto(tile, tile.getLevel().registryAccess());
         }
+        tile.applyComponentsFromItemStack(stack);
     }
 
     public static void swapItem(Player player, InteractionHand hand, ItemStack oldItem, ItemStack newItem, boolean bothSides) {
