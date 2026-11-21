@@ -24,7 +24,10 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
@@ -166,6 +169,19 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addRenderPipelineRegistration(Consumer<RenderPipelineEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface ParticleGroupEvent {
+        void register(ParticleRenderType type, Function<ParticleEngine, ParticleGroup<?>> factory);
+    }
+
+    /**
+     * For particles that return their own ParticleRenderType from getGroup. Groups render after the vanilla ones
+     */
+    @PlatformImpl
+    public static void addParticleGroupRegistration(Consumer<ParticleGroupEvent> eventListener) {
         throw new AssertionError();
     }
 

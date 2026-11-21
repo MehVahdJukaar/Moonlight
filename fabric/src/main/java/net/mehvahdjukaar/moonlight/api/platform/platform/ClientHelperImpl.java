@@ -22,6 +22,9 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.mixins.platform.RenderPipelinesAccessor;
 import net.mehvahdjukaar.moonlight.platform.MoonlightFabricClient;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleGroup;
+import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
@@ -57,6 +60,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -310,6 +314,20 @@ public class ClientHelperImpl {
         //no fabric event for this. registering just precompiles the pipeline on reload
         MoonlightFabricClient.addClientTask(() -> eventListener.accept(pipeline ->
                 RenderPipelinesAccessor.getPIPELINES_BY_LOCATION().putIfAbsent(pipeline.getLocation(), pipeline)));
+    }
+
+    public static final Map<ParticleRenderType, Function<ParticleEngine, ParticleGroup<?>>> PARTICLE_GROUPS = new IdentityHashMap<>();
+    public static final List<ParticleRenderType> PARTICLE_GROUPS_ORDER = new ArrayList<>();
+
+    public static void addParticleGroupRegistration(Consumer<ClientHelper.ParticleGroupEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        //no fabric event for this. great
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept((type, factory) -> {
+            if (PARTICLE_GROUPS.putIfAbsent(type, factory) != null) {
+                throw new IllegalArgumentException("Particle group already registered for " + type.name());
+            }
+            PARTICLE_GROUPS_ORDER.add(type);
+        }));
     }
 
     public static void addPictureInPictureRendererRegistration(Consumer<ClientHelper.PictureInPictureEvent> eventListener) {

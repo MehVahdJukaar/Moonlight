@@ -9,6 +9,7 @@
     "CreateWorldScreenMixin",
     "ItemRendererMixin",
     "LocalPlayerMixin",
+    "ParticleEngineMixin",
     "RenderPipelinesAccessor",
     "SelfIExtraModelDataProvider",
     "TextureAtlasMixin"

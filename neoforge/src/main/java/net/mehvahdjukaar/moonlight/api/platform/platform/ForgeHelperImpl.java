@@ -120,7 +120,7 @@ public class ForgeHelperImpl {
     }
 
     public static void fireOnLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {
-        EventHooks.onLivingConvert(newHorse, newHorse);
+        EventHooks.onLivingConvert(skellyHorseMixin, newHorse);
     }
 
     public static boolean canLivingConvert(LivingEntity entity, EntityType<? extends LivingEntity> outcome, Consumer<Integer> timer) {

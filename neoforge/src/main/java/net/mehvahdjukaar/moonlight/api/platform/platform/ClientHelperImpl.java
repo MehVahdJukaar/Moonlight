@@ -366,6 +366,15 @@ public class ClientHelperImpl {
         getCurrentBus().addListener(eventConsumer);
     }
 
+    public static void addParticleGroupRegistration(Consumer<ClientHelper.ParticleGroupEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterParticleGroupsEvent> eventConsumer = event ->
+                eventListener.accept(event::register);
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+
     public static void addPictureInPictureRendererRegistration(Consumer<ClientHelper.PictureInPictureEvent> eventListener) {
         Moonlight.assertInitPhase();
 
