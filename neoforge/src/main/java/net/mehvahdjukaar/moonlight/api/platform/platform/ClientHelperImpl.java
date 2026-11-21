@@ -1,5 +1,10 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
+import net.mehvahdjukaar.moonlight.api.client.ExtraEntityRenderDataKey;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.mehvahdjukaar.moonlight.api.client.model.platform.CustomUnbakedModelWrapper;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
@@ -118,6 +123,30 @@ public class ClientHelperImpl {
             ((LivingEntityRenderer) renderer).addLayer(layer);
         }
     }
+
+    public static void addEntityRenderDataRegistration(Consumer<ClientHelper.EntityRenderDataEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterRenderStateModifiersEvent> eventConsumer = event ->
+                eventListener.accept(new ClientHelper.EntityRenderDataEvent() {
+                    @Override
+                    public <E extends Entity, S extends EntityRenderState, T> void register(
+                            Class<E> entityClass, Class<S> stateClass, ExtraEntityRenderDataKey<T> key,
+                            ExtraEntityRenderDataKey.Extractor<E, S, T> extractor) {
+
+                        event.registerEntityModifier(ANY_ENTITY_RENDERER, (entity, state) -> {
+                            if (entityClass.isInstance(entity) && stateClass.isInstance(state)) {
+                                key.set(state, extractor.extract(entityClass.cast(entity), stateClass.cast(state), state.partialTick));
+                            }
+                        });
+                    }
+                });
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static final Class<EntityRenderer<Entity, EntityRenderState>> ANY_ENTITY_RENDERER =
+            (Class<EntityRenderer<Entity, EntityRenderState>>) (Class<?>) EntityRenderer.class;
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
         Moonlight.assertInitPhase();

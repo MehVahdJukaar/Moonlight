@@ -48,6 +48,9 @@ public class MLRenderTypes {
     public static final SingleQuadParticle.Layer ADDITIVE_TERRAIN_PARTICLE_LAYER =
             new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_BLOCKS, ADDITIVE_PARTICLE);
 
+    public static final SingleQuadParticle.Layer ADDITIVE_TRANSLUCENT_PARTICLE_LAYER =
+            new SingleQuadParticle.Layer(true, TextureAtlas.LOCATION_PARTICLES, ADDITIVE_PARTICLE);
+
     public static final Function<Identifier, RenderType> COLOR_TEXT = Util.memoize(texture ->
             RenderType.create("moonlight_text_color", RenderSetup.builder(TEXT_ALPHA_COLOR)
                     .withTexture("Sampler0", texture, MIPMAP_SAMPLER)

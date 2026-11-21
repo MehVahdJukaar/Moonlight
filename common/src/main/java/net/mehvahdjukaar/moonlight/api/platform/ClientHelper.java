@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.platform;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.serialization.MapCodec;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
+import net.mehvahdjukaar.moonlight.api.client.ExtraEntityRenderDataKey;
 import net.mehvahdjukaar.moonlight.api.client.gui.IItemDecoratorRenderer;
 import net.mehvahdjukaar.moonlight.api.client.model.CustomUnbakedModel;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
@@ -39,6 +40,7 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
@@ -237,6 +239,21 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addEntityLayersRegistration(EntityLayerEvent listener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface EntityRenderDataEvent {
+        <E extends Entity, S extends EntityRenderState, T> void register(
+                Class<E> entityClass, Class<S> stateClass, ExtraEntityRenderDataKey<T> key, ExtraEntityRenderDataKey.Extractor<E,S, T> extractor);
+    }
+
+    /**
+     * extractors run each frame after vanilla has filled the render state, for any entity and state of those classes.
+     * layers and renderers then read it with ExtraEntityRenderDataKey.get
+     */
+    @PlatformImpl
+    public static void addEntityRenderDataRegistration(Consumer<EntityRenderDataEvent> eventListener) {
         throw new AssertionError();
     }
 

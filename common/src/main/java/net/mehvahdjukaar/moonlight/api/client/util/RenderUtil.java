@@ -150,11 +150,17 @@ public class RenderUtil {
     }
 
     /**
-     * Return this from SingleQuadParticle.getLayer for a
-     * block atlas particle that blends additively. Vanilla only has opaque and translucent ones
+     * Return this from SingleQuadParticle.getLayer for a block atlas particle that blends additively
      */
     public static SingleQuadParticle.Layer getAdditiveParticleLayer() {
         return MLRenderTypes.ADDITIVE_TERRAIN_PARTICLE_LAYER;
+    }
+
+    /**
+     * Return this from SingleQuadParticle.getLayer for a particle atlas particle that blends additively
+     */
+    public static SingleQuadParticle.Layer getAdditiveTranslucentParticleLayer() {
+        return MLRenderTypes.ADDITIVE_TRANSLUCENT_PARTICLE_LAYER;
     }
 
 }

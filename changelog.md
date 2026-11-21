@@ -1,1 +1,2 @@
 - fixed a concurrency issue
+- added additive layer for particles on the particle atlas

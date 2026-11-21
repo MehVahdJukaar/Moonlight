@@ -1,5 +1,8 @@
 package net.mehvahdjukaar.moonlight.api.platform.platform;
 
+import net.mehvahdjukaar.moonlight.api.client.ExtraEntityRenderDataKey;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 import com.google.common.base.Suppliers;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.CustomUnbakedBlockStateModel;
@@ -98,6 +101,35 @@ public class ClientHelperImpl {
 
         LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) ->
                 listener.onRendererCreated(type, renderer, helper::register, context));
+    }
+
+    private static final List<RenderDataEntry<?, ?, ?>> RENDER_DATA_EXTRACTORS = new ArrayList<>();
+
+    public static void addEntityRenderDataRegistration(Consumer<ClientHelper.EntityRenderDataEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(new ClientHelper.EntityRenderDataEvent() {
+            @Override
+            public <E extends Entity, S extends EntityRenderState, T> void register(
+                    Class<E> entityClass, Class<S> stateClass, ExtraEntityRenderDataKey<T> key, ExtraEntityRenderDataKey.Extractor<E, S, T> extractor) {
+                RENDER_DATA_EXTRACTORS.add(new RenderDataEntry<>(entityClass, stateClass, key, extractor));
+            }
+        }));
+    }
+
+    public static void extractRenderData(Entity entity, EntityRenderState state, float partialTicks) {
+        for (var entry : RENDER_DATA_EXTRACTORS) {
+            entry.extract(entity, state, partialTicks);
+        }
+    }
+
+    private record RenderDataEntry<E extends Entity, S extends EntityRenderState,T>(
+            Class<E> entityClass, Class<S> stateClass, ExtraEntityRenderDataKey<T> key, ExtraEntityRenderDataKey.Extractor<E, S, T> extractor) {
+
+        private void extract(Entity entity, EntityRenderState state, float partialTicks) {
+            if (entityClass.isInstance(entity) && stateClass.isInstance(state)) {
+                key.set(state, extractor.extract(entityClass.cast(entity), stateClass.cast(state), partialTicks));
+            }
+        }
     }
 
     public static void addBlockEntityRenderersRegistration(Consumer<ClientHelper.BlockEntityRendererEvent> eventListener) {
