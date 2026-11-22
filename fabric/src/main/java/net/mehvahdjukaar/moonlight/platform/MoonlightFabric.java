@@ -80,7 +80,6 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
                 Moonlight.onPlayerCloned(oldPlayer, newPlayer, !alive));
 
-        ResourceConditionsBridge.init();
         DataMapBridge.init();
         BlockTypeSwapIngredientImpl.register();
 
@@ -91,6 +90,8 @@ public class MoonlightFabric implements ModInitializer, DedicatedServerModInitia
     static void commonSetup() {
 
         registerFlammableBlocks();
+        //late so we dont clash with conditions fabric or other mods register
+        ResourceConditionsBridge.init();
 
         RegHelperImpl.lateRegisterEntries();
         FabricConfigHolder.loadAllConfigs();
