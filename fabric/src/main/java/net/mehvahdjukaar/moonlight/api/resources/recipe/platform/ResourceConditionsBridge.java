@@ -20,10 +20,16 @@ public class ResourceConditionsBridge {
     //registers equivalent of fabric conditions
     public static void init() {
         try {
-            ResourceConditions.register(ModLoadedCondition.TYPE);
-            ResourceConditions.register(TagEmptyCondition.TYPE);
+            registerIfMissing(ModLoadedCondition.TYPE);
+            registerIfMissing(TagEmptyCondition.TYPE);
         } catch (Exception e) {
             Moonlight.LOGGER.error("Failed to register fabric conditions", e);
+        }
+    }
+
+    private static void registerIfMissing(ResourceConditionType<?> type) {
+        if (ResourceConditions.getConditionType(type.id()) == null) {
+            ResourceConditions.register(type);
         }
     }
 
