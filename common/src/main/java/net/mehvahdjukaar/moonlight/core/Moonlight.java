@@ -149,8 +149,8 @@ public class Moonlight {
         BackCommand.onPlayerCloned(oldPlayer, newPlayer);
         if (wasDeath && !oldPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
             var inv = oldPlayer.getInventory();
-            int i = 0;
-            for (var v : inv.items) {
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                ItemStack v = inv.getItem(i);
                 if (v != ItemStack.EMPTY) {
                     IDropItemOnDeathEvent e = IDropItemOnDeathEvent.create(v, oldPlayer, false);
                     MoonlightEventsHelper.postEvent(e, IDropItemOnDeathEvent.class);
@@ -158,7 +158,6 @@ public class Moonlight {
                         newPlayer.getInventory().setItem(i, e.getReturnItemStack());
                     }
                 }
-                i++;
             }
         }
     }
