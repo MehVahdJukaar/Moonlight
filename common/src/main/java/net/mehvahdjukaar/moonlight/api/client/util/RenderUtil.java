@@ -150,6 +150,14 @@ public class RenderUtil {
     }
 
     /**
+     * Particle atlas with the vanilla translucent particle shader.
+     * For particles in their own ParticleGroup that submit custom geometry
+     */
+    public static RenderType getTranslucentParticleRenderType() {
+        return MLRenderTypes.TRANSLUCENT_PARTICLE;
+    }
+
+    /**
      * Return this from SingleQuadParticle.getLayer for a block atlas particle that blends additively
      */
     public static SingleQuadParticle.Layer getAdditiveParticleLayer() {

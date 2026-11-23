@@ -1,2 +1,3 @@
+- added translucent particle render type
 - fixed a concurrency issue
 - added additive layer for particles on the particle atlas
