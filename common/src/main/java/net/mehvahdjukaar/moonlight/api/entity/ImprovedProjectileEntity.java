@@ -124,6 +124,7 @@ public abstract class ImprovedProjectileEntity extends ThrowableItemProjectile {
         this.move(MoverType.SELF, movement);
 
         //rest stuff
+        this.applyEffectsFromBlocks();
         this.updateFireState();
 
         // after we finished moving we can apply forces and  particles
