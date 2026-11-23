@@ -1,2 +1,2 @@
--fixed some issue with data trades on reload
-- fixed an issue on fabric on reload
+- more trade fixes
+- fixed an issue with dynamic datapck when adding loot tables
