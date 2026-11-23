@@ -3,7 +3,6 @@ package net.mehvahdjukaar.moonlight.api.entity;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -70,10 +69,7 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
         if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
             state = state.setValue(BlockStateProperties.WATERLOGGED, false);
         }
-        CompoundTag tag = new CompoundTag();
-        tag.put("BlockState", NbtUtils.writeBlockState(state));
-        tag.putInt("Time", this.time);
-        this.readAdditionalSaveData(tag);
+        this.blockState = state;
     }
 
     @Override

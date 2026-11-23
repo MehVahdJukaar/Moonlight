@@ -104,6 +104,7 @@ extendable method net/minecraft/client/gui/components/AbstractSelectionList getE
 
 #falling block
 transitive-accessible field net/minecraft/world/entity/item/FallingBlockEntity cancelDrop Z
+accessible field net/minecraft/world/entity/item/FallingBlockEntity blockState Lnet/minecraft/world/level/block/state/BlockState;
 #arrow
 transitive-accessible field net/minecraft/world/entity/projectile/Projectile hasBeenShot Z
 
