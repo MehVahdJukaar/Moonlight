@@ -180,12 +180,12 @@ public class SpawnBoxScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        graphics.centeredText(this.font, this.title, this.width / 2, 10, 16777215);
-        graphics.text(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
-        graphics.text(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
+        graphics.centeredText(this.font, this.title, this.width / 2, 10, 0xFFFFFFFF);
+        graphics.text(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 0xFFA0A0A0);
+        graphics.text(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 0xFFA0A0A0);
         graphics.text(this.font, SHOW_BOUNDING_BOX_LABEL,
-                this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
-        graphics.text(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 150, 10526880);
+                this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 0xFFA0A0A0);
+        graphics.text(this.font, FINAL_STATE_LABEL, this.width / 2 - 153, 150, 0xFFA0A0A0);
     }
 
     @Override
