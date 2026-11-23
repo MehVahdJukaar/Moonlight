@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.platform.platform.ForgeHelperImpl;
 import net.mehvahdjukaar.moonlight.api.platform.platform.RegHelperImpl;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ModIngredientTypes;
 import net.mehvahdjukaar.moonlight.api.resources.recipe.platform.ResourceConditionsBridge;
+import net.mehvahdjukaar.moonlight.api.trades.ItemListingManager;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.mehvahdjukaar.moonlight.core.fake_player.FPClientAccess;
 import net.mehvahdjukaar.moonlight.core.fake_player.FakeGenericPlayer;
@@ -41,6 +42,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.neoforge.event.village.WandererTradesEvent;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
@@ -136,6 +139,17 @@ public class MoonlightForge {
     @SubscribeEvent
     public static void onResourceReload(AddReloadListenerEvent event) {
         context = new WeakReference<>(event.getConditionContext());
+    }
+
+    //lowest so remove_all_non_data also catches trades other mods add here
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onVillagerTrades(VillagerTradesEvent event) {
+        ItemListingManager.modifyVillagerTrades(event.getType(), event.getTrades());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onWandererTrades(WandererTradesEvent event) {
+        ItemListingManager.modifyWandererTrades(event.getGenericTrades(), event.getRareTrades());
     }
 
     @SubscribeEvent
