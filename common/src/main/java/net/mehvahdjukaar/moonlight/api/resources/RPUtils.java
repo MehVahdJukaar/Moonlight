@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.client.TextureCache;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
@@ -15,6 +16,10 @@ import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.renderer.block.model.ItemOverride;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -33,6 +38,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RPUtils {
@@ -260,6 +266,14 @@ public class RPUtils {
 
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
         return Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow();
+    }
+
+    private static final Supplier<HolderLookup.Provider> STATIC_REGISTRIES = Suppliers.memoize(() ->
+            HolderLookup.Provider.create(BuiltInRegistries.REGISTRY.stream().<HolderLookup.RegistryLookup<?>>map(Registry::asLookup)));
+
+    //dynamic packs can run before the world registry access exists
+    public static RegistryOps<JsonElement> staticRegistryOps() {
+        return RegistryOps.create(JsonOps.INSTANCE, STATIC_REGISTRIES.get());
     }
 
     @Deprecated(forRemoval = true)

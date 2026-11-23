@@ -1,7 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.resources.pack;
 
 import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import io.netty.util.internal.UnstableApi;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
@@ -237,7 +236,7 @@ public abstract class DynamicResourcePack extends InMemoryPackResources {
 
     @Deprecated(forRemoval = true)
     public void addLootTable(ResourceLocation id, LootTable table) {
-        this.addJson(id, LootDataType.TABLE.codec().encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.codec().encodeStart(RPUtils.staticRegistryOps(), table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
