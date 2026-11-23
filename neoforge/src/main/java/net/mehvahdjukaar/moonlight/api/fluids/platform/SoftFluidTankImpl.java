@@ -53,8 +53,9 @@ public class SoftFluidTankImpl extends SoftFluidTank {
     public boolean transferToFluidTank(IFluidHandler fluidDestination, int bottles) {
         if (this.isEmpty() || this.getFluidCount() < bottles) return false;
         FluidStack stack = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
-        int milliBuckets = stack.getAmount();
+        int milliBuckets = bottlesToMB(bottles);
         if (!stack.isEmpty()) {
+            stack = stack.copyWithAmount(milliBuckets);
             int fillableAmount = fluidDestination.fill(stack, IFluidHandler.FluidAction.SIMULATE);
             if (fillableAmount == milliBuckets) {
                 fluidDestination.fill(stack, IFluidHandler.FluidAction.EXECUTE);
