@@ -33,11 +33,11 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 import java.util.function.Consumer;
 
-// point of this class is to
-// dynamically register dispenser behaviors such that they can depend on tags
+// point of this class is to dynamically register dispenser behaviors such that they can depend on tags
 public class DispenserHelper {
 
     private static final Map<Item, List<DispenseItemBehavior>> MODDED_BEHAVIORS = new HashMap<>();
+    private static final Map<Item, DispenseItemBehavior> BEHAVIORS_BEFORE_MODDED = new HashMap<>();
 
     private static final Map<Priority, List<Consumer<Event>>> EVENT_LISTENERS = Map.of(
             Priority.LOW, new ArrayList<>(),
@@ -65,7 +65,7 @@ public class DispenserHelper {
                 if (expected.contains(original)) {
                     expected.remove(original);
                     //if original was also a custom behavior we unregister it
-                    original = null;
+                    original = BEHAVIORS_BEFORE_MODDED.get(item);
                 }
                 if (expected.equals(visited)) {
                     originals.put(item, original);
@@ -74,7 +74,7 @@ public class DispenserHelper {
                     failed.add(item);
                 }
             } else if (expected.size() == 1 && expected.stream().findAny().get() == current) {
-                originals.put(item, null);
+                originals.put(item, BEHAVIORS_BEFORE_MODDED.get(item));
             } else {
                 failed.add(item);
                 Moonlight.LOGGER.error("Failed to restore original behavior for item: {}, {}", item, current);
@@ -93,11 +93,15 @@ public class DispenserHelper {
 
         //re-register all behaviors
         MODDED_BEHAVIORS.clear();
+        BEHAVIORS_BEFORE_MODDED.clear();
 
         Event event = new Event() {
             @Override
             public void register(Item i, DispenseItemBehavior behavior) {
                 if (!failed.contains(i)) {
+                    if (!MODDED_BEHAVIORS.containsKey(i) && DispenserBlock.DISPENSER_REGISTRY.containsKey(i)) {
+                        BEHAVIORS_BEFORE_MODDED.put(i, DispenserBlock.DISPENSER_REGISTRY.get(i));
+                    }
                     MODDED_BEHAVIORS.computeIfAbsent(i, k -> new ArrayList<>()).add(behavior);
                     DispenserBlock.registerBehavior(i, behavior);
                 }
