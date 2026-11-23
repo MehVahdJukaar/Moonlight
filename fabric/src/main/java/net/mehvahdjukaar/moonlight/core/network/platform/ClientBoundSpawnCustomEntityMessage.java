@@ -4,7 +4,6 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.mehvahdjukaar.moonlight.api.entity.IExtraClientSpawnData;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.network.Message;
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -60,7 +59,7 @@ public class ClientBoundSpawnCustomEntityMessage implements Message {
         this.velX = (int) (d1 * 8000.0);
         this.velY = (int) (d2 * 8000.0);
         this.velZ = (int) (d3 * 8000.0);
-        RegistryAccess ra = Objects.requireNonNull(PlatHelper.getCurrentServer()).registryAccess();
+        RegistryAccess ra = e.registryAccess();
         this.extraBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), ra);
         if (this.entity instanceof IExtraClientSpawnData spawnData) {
             spawnData.writeSpawnData(extraBuf);

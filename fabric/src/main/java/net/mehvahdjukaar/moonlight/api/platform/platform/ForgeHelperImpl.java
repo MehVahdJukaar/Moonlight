@@ -80,7 +80,7 @@ public class ForgeHelperImpl {
         return false; //true if event cancelled
     }
 
-    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, List<BlockPos> blocks) {
     }
 
     public static void fireOnLivingConvert(LivingEntity skellyHorseMixin, LivingEntity newHorse) {

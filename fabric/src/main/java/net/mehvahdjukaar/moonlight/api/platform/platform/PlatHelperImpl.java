@@ -136,11 +136,8 @@ public class PlatHelperImpl {
     }
 
 
-    public static int getBurnTime(ItemStack stack) {
-        // fuel values live on the server
-        var server = getCurrentServer();
-        if (server == null) return 0;
-        return server.fuelValues().burnDuration(stack);
+    public static int getBurnTime(ItemStack stack, Level level) {
+        return level.fuelValues().burnDuration(stack);
     }
 
     public static boolean canLightFire(ItemStack stack) {

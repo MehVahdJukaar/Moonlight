@@ -66,18 +66,19 @@ public class DynamicTextureRenderer {
     @SuppressWarnings("unchecked")
     public static <T extends RenderableDynamicTexture> T requestTexture(Identifier id, Supplier<T> textureSupplier) {
         RenderSystem.assertOnRenderThread();
-        RenderableDynamicTexture texture = TEXTURE_CACHE.asMap().computeIfAbsent(id, key -> {
+        RenderableDynamicTexture texture = TEXTURE_CACHE.getIfPresent(id);
+        if (texture == null) {
             try {
                 T newTexture = textureSupplier.get();
                 newTexture.register();
-                newTexture.redraw();
-                return newTexture;
+                TEXTURE_CACHE.put(id, newTexture);
+                //not drawing now. we could be mid level render and drawing flushes shared dispatcher
+                Minecraft.getInstance().schedule(newTexture::redraw);
             } catch (Throwable t) {
-                Moonlight.LOGGER.error("Failed to create dynamic texture for id {}", key, t);
-                return null;
+                Moonlight.LOGGER.error("Failed to create dynamic texture for id {}", id, t);
             }
-        });
-        if (texture == null) return null;
+            return null;
+        }
         if (texture.isClosed()) {
             //closed elsewhere, drop it
             TEXTURE_CACHE.invalidate(id);

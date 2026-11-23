@@ -112,10 +112,10 @@ public class ForgeHelperImpl {
         return false;
     }
 
-    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, List<BlockPos> blocks) {
         if (explosion instanceof ServerExplosion serverExplosion) {
-            // the affected block list is computed inside vanilla's explode() and not exposed here
-            EventHooks.onExplosionDetonate(level, serverExplosion, entities, List.of());
+            //EventHooks.onExplosionDetonate(level, serverExplosion, entities, List.of());
+            EventHooks.onExplosionDetonate(level, serverExplosion, entities, blocks);
         }
     }
 

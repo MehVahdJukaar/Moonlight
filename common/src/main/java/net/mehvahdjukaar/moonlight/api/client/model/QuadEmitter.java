@@ -60,14 +60,23 @@ public abstract class QuadEmitter {
         if (this.sprite == null) {
             throw new IllegalStateException("No sprite set on the quad emitter");
         }
+        Direction cull = this.cullFace;
         if (this.transform != null) {
             for (int i = 0; i < VERTICES; i++) {
                 this.transform.transformPosition(this.positions[i]);
                 if (this.hasNormals) this.transform.transformDirection(this.normals[i]);
             }
+            if (this.lightFace != null) {
+                this.lightFace = Direction.rotate(this.transform, this.lightFace);
+            }
+            if (cull != null) {
+                this.cullFace = Direction.rotate(this.transform, cull);
+            }
         }
         if (this.lightFace == null) this.lightFace = this.computeFace();
+
         this.pushQuad();
+        this.cullFace = cull;
         this.resetVertices();
         return this;
     }
@@ -239,6 +248,7 @@ public abstract class QuadEmitter {
 
     public final QuadEmitter clear() {
         this.resetVertices();
+        this.color(WHITE);
         this.sprite = null;
         this.cullFace = null;
         this.transform = null;

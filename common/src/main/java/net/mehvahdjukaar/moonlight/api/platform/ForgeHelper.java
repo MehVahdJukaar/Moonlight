@@ -42,6 +42,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,8 +112,13 @@ public class ForgeHelper {
         throw new AssertionError();
     }
 
-    @PlatformImpl
+    @Deprecated(forRemoval = true)
     public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, double diameter) {
+        fireOnExplosionDetonate(level, explosion,entities, new ArrayList<>());
+    }
+
+    @PlatformImpl
+    public static void fireOnExplosionDetonate(Level level, Explosion explosion, List<Entity> entities, List<BlockPos> blocks) {
         throw new AssertionError();
     }
 

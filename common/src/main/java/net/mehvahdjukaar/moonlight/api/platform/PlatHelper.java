@@ -368,7 +368,7 @@ public class PlatHelper {
     }
 
     @PlatformImpl
-    public static int getBurnTime(ItemStack stack) {
+    public static int getBurnTime(ItemStack stack, Level level) {
         throw new AssertionError();
     }
 

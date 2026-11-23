@@ -169,10 +169,8 @@ public class PlatHelperImpl {
         return stack.get(DataComponents.FOOD);
     }
 
-    public static int getBurnTime(ItemStack stack) {
-        MinecraftServer server = getCurrentServer();
-        if (server == null) return 0;
-        return stack.getBurnTime(RecipeType.SMELTING, server.fuelValues());
+    public static int getBurnTime(ItemStack stack, Level level) {
+        return stack.getBurnTime(RecipeType.SMELTING, level.fuelValues());
     }
 
     private static final ItemAbility TINKERS_LIGHT_FIRE = ItemAbility.get("light_fire");
@@ -275,7 +273,6 @@ public class PlatHelperImpl {
         var container = ModList.get().getModContainerById(modId).orElse(null);
         if (container == null) return null;
         IModInfo info = container.getModInfo();
-        //iconFile is the square one since 26.2. logoFile is the wide banner now, so it's only a fallback
         String icon = modImageFile(info, "iconFile");
         if (icon == null) icon = info.getLogoFile().filter(s -> !s.isBlank()).orElse(null);
         if (icon == null) icon = modImageFile(info, "logoFile");
