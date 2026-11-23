@@ -293,7 +293,7 @@ public class RegHelperImpl {
             var b = CreativeModeTab.builder();
             configurator.accept(b);
             if (!beforeEntries.isEmpty()) {
-                b.withTabsBefore(beforeEntries.toArray(Identifier[]::new));
+                b.withTabsAfter(beforeEntries.toArray(Identifier[]::new));
             }
             if (!afterEntries.isEmpty()) {
                 b.withTabsBefore(afterEntries.toArray(Identifier[]::new));
