@@ -308,7 +308,7 @@ public class Utils {
             case Fluid b -> getID(b);
             case EntityType<?> b -> getID(b);
             case BlockEntityType<?> b -> getID(b);
-            case SoftFluid s -> getID(s);
+            case SoftFluid s -> SoftFluidRegistry.get(hackyGetRegistryAccess()).getKey(s);
             case MobEffect c -> getID(c);
             case Potion c -> getID(c);
             case RecipeSerializer<?> b -> getID(b);
@@ -317,7 +317,7 @@ public class Utils {
             case Biome b -> getID(b);
             case DamageType t -> getID(t);
             case ConfiguredFeature<?, ?> c -> getID(c);
-            case MLMapDecorationType<?, ?> s -> getID(s);
+            case MLMapDecorationType<?, ?> s -> MapDataInternal.getMapDecorationRegistry(hackyGetRegistryAccess()).getKey(s);
             //RegSupplier is both a supplier and a holder, so this one has to stay above
             case Supplier<?> s -> getID(s.get());
             case Holder<?> h -> getId(h);
