@@ -1,1 +1,1 @@
-- fixed some lifecycle issues, minor leaks on the world screen only
+fixed an issue on new fabric
