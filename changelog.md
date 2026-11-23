@@ -1,1 +1,2 @@
-fixed an issue on new fabric
+-fixed some issue with data trades on reload
+- fixed an issue on fabric on reload

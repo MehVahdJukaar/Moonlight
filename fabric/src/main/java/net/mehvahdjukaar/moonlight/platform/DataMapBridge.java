@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.platform;
 
+import com.google.common.collect.BiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,10 +33,13 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -50,6 +54,7 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
 
     public static final Map<String, Function<HolderLookup.Provider, DataMapBridge<?, ?>>> FACTORIES = new HashMap<>();
     private static final Map<String, DataMapBridge<?, ?>> SERVER_INSTANCES = new HashMap<>();
+    private static final Map<String, List<Runnable>> UNDO_BY_PATH = new HashMap<>();
     private static final String ML_MARKER = "moonlight_parse_on_fabric";
 
 
@@ -145,16 +150,26 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
     }
 
     public final void applyData() {
-        for (var entry : this.map.entrySet()) {
-            for (var holder : entry.getKey()) {
-                var object = holder.value();
-                var data = entry.getValue();
-                this.applyEntry(object, data);
+        synchronized (UNDO_BY_PATH) {
+            List<Runnable> undo = UNDO_BY_PATH.computeIfAbsent(path, k -> new ArrayList<>());
+            undo.reversed().forEach(Runnable::run);
+            undo.clear();
+            for (var entry : this.map.entrySet()) {
+                for (var holder : entry.getKey()) {
+                    var object = holder.value();
+                    var data = entry.getValue();
+                    undo.add(this.applyEntry(object, data));
+                }
             }
         }
     }
 
-    protected abstract void applyEntry(O object, T dataEntry);
+    protected abstract Runnable applyEntry(O object, T dataEntry);
+
+    private static void restorePair(BiMap<Block, Block> map, Block key, @Nullable Block old) {
+        if (old == null) map.remove(key);
+        else map.forcePut(key, old);
+    }
 
     public void encode(RegistryFriendlyByteBuf buf) {
         streamCodec.encode(buf, this.map);
@@ -174,8 +189,18 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
         }
 
         @Override
-        protected void applyEntry(Item object, FurnaceFuel dataEntry) {
+        protected Runnable applyEntry(Item object, FurnaceFuel dataEntry) {
+            Integer old = FuelRegistry.INSTANCE.get(object);
             FuelRegistry.INSTANCE.add(object, dataEntry.burnTime);
+            return () -> {
+                FuelRegistry.INSTANCE.clear(object);
+                //clear also drops overrides from other mods
+                if (old == null) {
+                    if (FuelRegistry.INSTANCE.get(object) != null) FuelRegistry.INSTANCE.remove(object);
+                } else if (!old.equals(FuelRegistry.INSTANCE.get(object))) {
+                    FuelRegistry.INSTANCE.add(object, old);
+                }
+            };
         }
 
         protected record FurnaceFuel(int burnTime) {
@@ -194,8 +219,13 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
         }
 
         @Override
-        protected void applyEntry(Item object, Compostable dataEntry) {
-            ComposterBlock.COMPOSTABLES.put(object, dataEntry.chance);
+        protected Runnable applyEntry(Item object, Compostable dataEntry) {
+            float old = ComposterBlock.COMPOSTABLES.put(object, dataEntry.chance);
+            return () -> {
+                //-1 when it wasnt there
+                if (old < 0) ComposterBlock.COMPOSTABLES.removeFloat(object);
+                else ComposterBlock.COMPOSTABLES.put(object, old);
+            };
         }
 
         protected record Compostable(float chance, boolean canVillagerCompost) {
@@ -220,8 +250,10 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
         }
 
         @Override
-        protected void applyEntry(Block object, Oxidizable dataEntry) {
+        protected Runnable applyEntry(Block object, Oxidizable dataEntry) {
+            Block old = WeatheringCopper.NEXT_BY_BLOCK.get().get(object);
             OxidizableBlocksRegistry.registerOxidizableBlockPair(object, dataEntry.nextOxidationStage);
+            return () -> restorePair(WeatheringCopper.NEXT_BY_BLOCK.get(), object, old);
         }
 
         public record Oxidizable(Block nextOxidationStage) {
@@ -242,8 +274,10 @@ public abstract class DataMapBridge<T, O> extends SimplePreparableReloadListener
         }
 
         @Override
-        protected void applyEntry(Block object, Waxable dataEntry) {
+        protected Runnable applyEntry(Block object, Waxable dataEntry) {
+            Block old = HoneycombItem.WAXABLES.get().get(object);
             OxidizableBlocksRegistry.registerWaxableBlockPair(object, dataEntry.waxed);
+            return () -> restorePair(HoneycombItem.WAXABLES.get(), object, old);
         }
 
         public record Waxable(Block waxed) {
