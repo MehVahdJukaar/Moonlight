@@ -2,7 +2,9 @@ package net.mehvahdjukaar.moonlight.core.client;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.platform.DestFactor;
 import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -27,8 +29,8 @@ public class MLRenderTypes {
 
     // vanilla's atlas sampler never mipmaps
     private static final Supplier<GpuSampler> MIPMAP_SAMPLER = Suppliers.memoize(() -> RenderSystem.getDevice()
-            .createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE,
-                    FilterMode.LINEAR, FilterMode.NEAREST, 1, OptionalDouble.empty()));
+            .createSampler(AddressMode.REPEAT, AddressMode.REPEAT,
+                    FilterMode.NEAREST, FilterMode.NEAREST, 1, OptionalDouble.empty()));
 
     // paints the texture's shape with the vertex color. Uses the text vertex shader, so POSITION_COLOR_TEX_LIGHTMAP quads
     public static final RenderPipeline TEXT_ALPHA_COLOR = RenderPipeline.builder(RenderPipelines.TEXT_SNIPPET, RenderPipelines.FOG_SNIPPET)
@@ -42,7 +44,9 @@ public class MLRenderTypes {
     // vanilla particle shaders with additive blending
     public static final RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
             .withLocation(Moonlight.res("pipeline/additive_particle"))
+            .withFragmentShader(Moonlight.res("core/additive_particle"))
             .withColorTargetState(new ColorTargetState(new BlendFunction(SourceFactor.SRC_ALPHA, DestFactor.ONE)))
+            .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
             .build();
 
     public static final SingleQuadParticle.Layer ADDITIVE_TERRAIN_PARTICLE_LAYER =
