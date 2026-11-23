@@ -276,14 +276,14 @@ public class RPUtils {
     }
 
     public static Recipe<?> readRecipe(JsonElement element) {
-        return Recipe.CODEC.parse(recipeOps(), element).getOrThrow();
+        return Recipe.CODEC.parse(staticRegistryOps(), element).getOrThrow();
     }
 
     public static <T extends Recipe<?>> JsonElement writeRecipe(T recipe) {
-        return Recipe.CODEC.encodeStart(recipeOps(), recipe).getOrThrow();
+        return Recipe.CODEC.encodeStart(staticRegistryOps(), recipe).getOrThrow();
     }
 
-    private static RegistryOps<JsonElement> recipeOps() {
+    public static RegistryOps<JsonElement> staticRegistryOps() {
         return RegistryOps.create(JsonOps.INSTANCE, STATIC_REGISTRIES_WITH_UNBOUND_TAGS);
     }
 

@@ -7,7 +7,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.serialization.JsonOps;
 import net.mehvahdjukaar.moonlight.api.misc.ThrowingSupplier;
 import net.mehvahdjukaar.moonlight.api.resources.*;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
@@ -159,7 +158,7 @@ public class ResourceSink {
     }
 
     public void addLootTable(Identifier id, LootTable table) {
-        this.addJson(id, LootDataType.TABLE.codec().encodeStart(JsonOps.INSTANCE, table).getOrThrow(), ResType.LOOT_TABLES);
+        this.addJson(id, LootDataType.TABLE.codec().encodeStart(RPUtils.staticRegistryOps(), table).getOrThrow(), ResType.LOOT_TABLES);
     }
 
     protected static LootTable.Builder createSingleItemTable(ItemLike itemLike) {
