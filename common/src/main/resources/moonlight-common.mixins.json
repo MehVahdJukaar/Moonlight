@@ -29,6 +29,7 @@
     "CartographyTableMenuMixin",
     "ChunkGeneratorMixin",
     "ChunkMapMixin",
+    "EntityEquipmentMixin",
     "FixBlockPlaceContextMixin",
     "GrindstoneMenuMixin",
     "GrindstoneMenuSlotMixin",

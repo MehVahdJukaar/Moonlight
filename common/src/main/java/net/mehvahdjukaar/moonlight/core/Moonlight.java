@@ -152,8 +152,9 @@ public class Moonlight {
         if (wasDeath && oldPlayer.level() instanceof ServerLevel serverLevel
                 && !serverLevel.getGameRules().get(GameRules.KEEP_INVENTORY)) {
             var inv = oldPlayer.getInventory();
-            int i = 0;
-            for (var v : inv.getNonEquipmentItems()) {
+            for (int i = 0; i < inv.getContainerSize(); i++) {
+                //  ItemStack v = inv.getNonEquipmentItems().get(i);
+                ItemStack v = inv.getItem(i);
                 if (v != ItemStack.EMPTY) {
                     IDropItemOnDeathEvent e = IDropItemOnDeathEvent.create(v, oldPlayer, false);
                     MoonlightEventsHelper.postEvent(e, IDropItemOnDeathEvent.class);
@@ -161,7 +162,6 @@ public class Moonlight {
                         newPlayer.getInventory().setItem(i, e.getReturnItemStack());
                     }
                 }
-                i++;
             }
         }
     }
