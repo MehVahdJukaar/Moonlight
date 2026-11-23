@@ -283,7 +283,6 @@ public class RPUtils {
         return Recipe.CODEC.encodeStart(recipeOps(), recipe).getOrThrow();
     }
 
-    //ingredients are holder sets now so they need a registry either way, plain JsonOps just fails
     private static RegistryOps<JsonElement> recipeOps() {
         return RegistryOps.create(JsonOps.INSTANCE, STATIC_REGISTRIES_WITH_UNBOUND_TAGS);
     }

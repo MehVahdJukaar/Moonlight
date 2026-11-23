@@ -115,7 +115,6 @@ public class RGBColor extends BaseColor<RGBColor> {
     }
 
     public int toInt() {
-        //round, truncating made every computed color a bit darker
         return combine(Math.round(this.alpha() * 255), Math.round(this.blue() * 255),
                 Math.round(this.green() * 255), Math.round(this.red() * 255));
     }

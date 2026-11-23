@@ -36,7 +36,7 @@ public class SoftFluidTankImpl extends SoftFluidTank {
         if (this.isEmpty() || this.getFluidCount() < bottles) return false;
         FluidStack stack = ((SoftFluidStackImpl) this.fluidStack).toForgeFluid();
         if (stack.isEmpty()) return false;
-        int milliBuckets = stack.getAmount();
+        int milliBuckets = bottlesToMB(bottles);
         try (Transaction t = Transaction.openRoot()) {
             if (fluidDestination.insert(FluidResource.of(stack), milliBuckets, t) != milliBuckets) return false;
             t.commit();

@@ -7,12 +7,14 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 
+import java.util.List;
 import java.util.Map;
 
 public class SoftFluidInternalImpl {
@@ -33,9 +35,12 @@ public class SoftFluidInternalImpl {
                 //calling vanilla register function because calling that deferred register or forge registry now does nothing
                 //cope
                 //SOFT_FLUIDS.get().register(sf.getRegistryName(),sf);
-                Registry.register(reg, Utils.getID(f), sf);
+                var holder = Registry.registerForHolder(reg, Utils.getID(f), sf);
+                //freeze wont bind these when tags are already there
+                holder.bindTags(List.of());
+                holder.bindComponents(DataComponentMap.EMPTY);
 
-                fluidMap.put(f, reg.wrapAsHolder(sf));
+                fluidMap.put(f, holder);
             } catch (Exception ignored) {
             }
         }

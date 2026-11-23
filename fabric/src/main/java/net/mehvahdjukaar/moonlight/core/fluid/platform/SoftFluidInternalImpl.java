@@ -16,6 +16,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
+import java.util.List;
 import java.util.Map;
 
 public class SoftFluidInternalImpl {
@@ -42,6 +43,7 @@ public class SoftFluidInternalImpl {
                 //freeze() cant run again once tags are bound
                 ((HolderReferenceInvoker) holder).invokeBindValue(sf);
                 holder.bindComponents(DataComponentMap.EMPTY);
+                holder.bindTags(List.of());
                 fluidMap.put(f, holder);
 
             } catch (Exception ignored) {
