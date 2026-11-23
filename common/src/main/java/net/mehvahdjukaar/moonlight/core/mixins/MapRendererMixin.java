@@ -2,7 +2,6 @@ package net.mehvahdjukaar.moonlight.core.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.mehvahdjukaar.moonlight.api.map.ExpandedMapData;
@@ -51,19 +50,6 @@ public abstract class MapRendererMixin {
         for (MLDecorationRenderState state : ((IMapRenderStateExtension) renderState).moonlight$getCustomDecorations()) {
             MapDecorationClientManager.submit(state, poseStack, collector, showOnlyFrame, lightCoords, index++);
         }
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V", ordinal = 0))
-    private void moonlight$transformVanillaDecoration(MapRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector,
-                                                      boolean showOnlyFrame, int lightCoords, CallbackInfo ci) {
-        MapDecorationClientManager.applyTransformToSprite(poseStack);
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V", ordinal = 1))
-    private void moonlight$transformVanillaDecorationName(MapRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector,
-                                                          boolean showOnlyFrame, int lightCoords, CallbackInfo ci,
-                                                          @Local MapRenderState.MapDecorationRenderState decoration) {
-        MapDecorationClientManager.applyTransformToName(poseStack, decoration.name);
     }
 
     @WrapOperation(method = "render",

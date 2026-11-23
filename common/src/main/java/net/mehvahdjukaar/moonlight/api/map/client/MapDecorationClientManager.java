@@ -30,9 +30,6 @@ public class MapDecorationClientManager {
     private static final Map<Identifier, Function<Identifier, MapDecorationRenderer<?>>> CUSTOM_RENDERERS_FACTORIES = Maps.newHashMap();
     private static final Map<MLMapDecorationType<?, ?>, MapDecorationRenderer<?>> RENDERERS = Maps.newHashMap();
 
-    @Nullable
-    private static DecorationTransform transform = null;
-
     /**
      * Registers a renderer for this decoration. Use it to add fancy ones
      */
@@ -65,24 +62,6 @@ public class MapDecorationClientManager {
         return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.MAP_DECORATIONS).getSprite(texture);
     }
 
-    /**
-     * Extra transform applied to every map decoration, vanilla ones too. Set it around your own
-     * MapRenderer calls, then clear it.
-     */
-    public static void setDecorationTransform(@Nullable DecorationTransform decorationTransform) {
-        transform = decorationTransform;
-    }
-
-    public static void applyTransformToSprite(PoseStack poseStack) {
-        if (transform != null) transform.applyToSprite(poseStack);
-    }
-
-    public static void applyTransformToName(PoseStack poseStack, @Nullable Component name) {
-        if (transform == null || name == null) return;
-        float width = Minecraft.getInstance().font.width(name);
-        transform.applyToName(poseStack, width, nameScale(width));
-    }
-
     private static float nameScale(float textWidth) {
         return Mth.clamp(25.0F / textWidth, 0.0F, 6.0F / 9.0F);
     }
@@ -102,7 +81,6 @@ public class MapDecorationClientManager {
         poseStack.pushPose();
         poseStack.translate(state.x / 2.0F + 64.0F, state.y / 2.0F + 64.0F, -0.02F);
         poseStack.mulPose(Axis.ZP.rotationDegrees(state.rot * 360 / 16.0F));
-        applyTransformToSprite(poseStack);
         poseStack.scale(4.0F, 4.0F, 3.0F);
 
         submitSprite(poseStack, collector, state.sprite, state.color, state.outline, light, index);
@@ -148,17 +126,10 @@ public class MapDecorationClientManager {
 
         poseStack.pushPose();
         poseStack.translate(state.x / 2.0F + 64.0F - width * scale / 2.0F, state.y / 2.0F + 64.0F + 4.0F, -0.025F);
-        if (transform != null) transform.applyToName(poseStack, width, scale);
         poseStack.scale(scale, scale, -1.0F);
         poseStack.translate(0.0F, 0.0F, 0.1F);
         collector.order(1).submitText(poseStack, 0.0F, 0.0F, name.getVisualOrderText(), false,
                 Font.DisplayMode.NORMAL, light, -1, Integer.MIN_VALUE, 0);
         poseStack.popPose();
-    }
-
-    public interface DecorationTransform {
-        void applyToSprite(PoseStack poseStack);
-
-        void applyToName(PoseStack poseStack, float textWidth, float textScale);
     }
 }
