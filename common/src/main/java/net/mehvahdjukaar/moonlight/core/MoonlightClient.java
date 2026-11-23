@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
+import net.mehvahdjukaar.moonlight.api.client.gui.QuickPictureInPicture;
 import net.mehvahdjukaar.moonlight.api.client.gui.ModCatalogAPI;
 
 @ApiStatus.Internal
@@ -59,6 +60,7 @@ public class MoonlightClient {
         ModCatalogAPI.register(OurModsList.INSTANCE);
         ClientHelper.addRenderPipelineRegistration(MoonlightClient::registerRenderPipelines);
         AnimatedGuiItem.register();
+        QuickPictureInPicture.register();
         ClientHelper.addClientReloadListener(SoftFluidColors::new, Moonlight.res("soft_fluid"));
         ClientHelper.addBlockEntityRenderersRegistration(event -> {
             event.register(MoonlightRegistry.SPAWN_BOX_BLOCK_ENTITY.get(), SpawnBoxBlockEntityRenderer::new);
