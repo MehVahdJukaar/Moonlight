@@ -2,11 +2,7 @@ package net.mehvahdjukaar.moonlight.api.entity;
 
 import net.mehvahdjukaar.moonlight.core.Moonlight;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.damagesource.DamageSource;
@@ -75,10 +71,7 @@ public class ImprovedFallingBlockEntity extends FallingBlockEntity {
         if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
             state = state.setValue(BlockStateProperties.WATERLOGGED, false);
         }
-        CompoundTag tag = new CompoundTag();
-        tag.put("BlockState", NbtUtils.writeBlockState(state));
-        tag.putInt("Time", this.time);
-        this.readAdditionalSaveData(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+        this.blockState = state;
     }
 
     // only ever called with this entity's own block
