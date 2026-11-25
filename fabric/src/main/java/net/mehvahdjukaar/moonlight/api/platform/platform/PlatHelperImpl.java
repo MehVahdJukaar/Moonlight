@@ -76,6 +76,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -95,7 +96,24 @@ public class PlatHelperImpl {
     }
 
     public static <T> List<T> loadPlugins(Class<T> pluginType, String fabricEntrypoint, Class<? extends Annotation> neoforgeAnnotation) {
-        return FabricLoader.getInstance().getEntrypoints(fabricEntrypoint, pluginType);
+        List<T> plugins = new ArrayList<>();
+        for (var c : FabricLoader.getInstance().getEntrypointContainers(fabricEntrypoint, pluginType)) {
+            String modId = c.getProvider().getMetadata().getId();
+            String className = c.getDefinition();
+            T plugin = null;
+            // fabric only does no args ctors. method refs still go through language adapter
+            if (!className.contains("::")) {
+                try {
+                    Class<? extends T> klass = Class.forName(className).asSubclass(pluginType);
+                    plugin = klass.getDeclaredConstructor(String.class).newInstance(modId);
+                } catch (NoSuchMethodException ignored) {
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException("Failed to create plugin " + className, e);
+                }
+            }
+            plugins.add(plugin != null ? plugin : c.getEntrypoint());
+        }
+        return plugins;
     }
 
 

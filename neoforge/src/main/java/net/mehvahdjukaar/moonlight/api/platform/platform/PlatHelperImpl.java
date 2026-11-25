@@ -118,14 +118,22 @@ public class PlatHelperImpl {
             for (var annotation : scanData.getAnnotatedBy(neoforgeAnnotation, ElementType.TYPE).toList()) {
                 String className = annotation.clazz().getClassName();
                 try {
-                    plugins.add(Class.forName(className).asSubclass(pluginType)
-                            .getDeclaredConstructor().newInstance());
+                    String modId = scanData.getIModInfoData().getFirst().getMods().getFirst().getModId();
+                    plugins.add(createPlugin(Class.forName(className).asSubclass(pluginType), modId));
                 } catch (ReflectiveOperationException e) {
                     throw new RuntimeException("Failed to create plugin " + className, e);
                 }
             }
         }
         return plugins;
+    }
+
+    private static <T> T createPlugin(Class<? extends T> c, String modId) throws ReflectiveOperationException {
+        try {
+            return c.getDeclaredConstructor(String.class).newInstance(modId);
+        } catch (NoSuchMethodException e) {
+            return c.getDeclaredConstructor().newInstance();
+        }
     }
 
     @Nullable
