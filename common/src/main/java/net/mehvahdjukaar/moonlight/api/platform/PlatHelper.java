@@ -327,7 +327,7 @@ public class PlatHelper {
     }
 
     /**
-     * These need no args constructor
+     * These need a no args constructor, or one taking a String mod id
      */
     @PlatformImpl
     public static <T> List<T> loadPlugins(Class<T> pluginType, String fabricEntrypoint, Class<? extends Annotation> neoforgeAnnotation) {
