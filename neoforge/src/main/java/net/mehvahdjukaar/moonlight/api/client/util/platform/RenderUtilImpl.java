@@ -3,6 +3,7 @@ package net.mehvahdjukaar.moonlight.api.client.util.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.mehvahdjukaar.moonlight.api.client.util.RenderUtil;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -19,13 +20,25 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class RenderUtilImpl {
 
 
-    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+    public static void renderBlockInWorld(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
                                    Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
         //same as ForgeHooksClient.renderPistonMovedBlocks (what pistons use)
         for (var renderType : model.getRenderTypes(state, RandomSource.create(seed), ModelData.EMPTY)) {
             VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypeHelper.getMovingBlockRenderType(renderType));
             dispatcher.getModelRenderer().tesselateBlock(level, model, state, pos, poseStack, vertexConsumer, false,
                     RandomSource.create(), state.getSeed(pos), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
+        }
+    }
+
+    public static void renderBlockDetached(BakedModel model, BlockState state, PoseStack poseStack, MultiBufferSource buffer,
+                                           int light, int overlay) {
+        RandomSource random = RandomSource.create(42L);
+        for (var renderType : model.getRenderTypes(state, random, ModelData.EMPTY)) {
+            VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypeHelper.getMovingBlockRenderType(renderType));
+            RenderUtil.putBlockQuads(poseStack.last(), vertexConsumer, state, dir -> {
+                random.setSeed(42L);
+                return model.getQuads(state, dir, random, ModelData.EMPTY, renderType);
+            }, light, overlay);
         }
     }
 

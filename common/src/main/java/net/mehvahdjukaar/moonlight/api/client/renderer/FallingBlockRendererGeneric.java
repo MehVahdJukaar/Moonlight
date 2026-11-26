@@ -40,7 +40,7 @@ public class FallingBlockRendererGeneric<T extends FallingBlockEntity> extends E
 
                 poseStack.translate(-0.5D, 0.0D, -0.5D);
                 BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-                RenderUtil.renderBlock(state.getSeed(entity.getStartPos()),
+                RenderUtil.renderBlockInWorld(state.getSeed(entity.getStartPos()),
                         poseStack, buffer, state, level, blockPos, dispatcher);
                 poseStack.popPose();
                 super.render(entity, pEntityYaw, pPartialTicks, poseStack, buffer, pPackedLight);

@@ -10,46 +10,135 @@ import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 
 public class RenderUtil {
 
     //TODO: fix shading so it can be rotated and have consistent shading and is also rendered like a block
     @PlatformImpl
-    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
-                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
+    public static void renderBlockInWorld(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                          Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
         throw new AssertionError();
     }
 
+    public static void renderBlockInWorld(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                          Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
+        BakedModel model = dispatcher.getBlockModel(state);
+        renderBlockInWorld(model, seed, poseStack, buffer, state, level, pos, dispatcher);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static void renderBlock(BakedModel model, long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
+                                   Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
+        renderBlockInWorld(model, seed, poseStack, buffer, state, level, pos, dispatcher);
+    }
+
+    @Deprecated(forRemoval = true)
     public static void renderBlock(long seed, PoseStack poseStack, MultiBufferSource buffer, BlockState state,
                                    Level level, BlockPos pos, BlockRenderDispatcher dispatcher) {
-        BakedModel model = dispatcher.getBlockModel(state);
-        renderBlock(model, seed, poseStack, buffer, state, level, pos, dispatcher);
+        renderBlockInWorld(seed, poseStack, buffer, state, level, pos, dispatcher);
+    }
+
+    /**
+     * renders block model like chunks do but without level. not centered same as renderBlockInWorld
+     * face shade follows the pose so it still looks right when rotated
+     */
+    public static void renderBlockDetached(BlockState state, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay) {
+        BakedModel model = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
+        renderBlockDetached(model, state, poseStack, buffer, light, overlay);
+    }
+
+    @PlatformImpl
+    public static void renderBlockDetached(BakedModel model, BlockState state, PoseStack poseStack, MultiBufferSource buffer,
+                                           int light, int overlay) {
+        throw new AssertionError();
+    }
+
+    @ApiStatus.Internal
+    public static void putBlockQuads(PoseStack.Pose pose, VertexConsumer consumer, BlockState state,
+                                     Function<Direction, List<BakedQuad>> quadsBySide, int light, int overlay) {
+        BlockColors colors = Minecraft.getInstance().getBlockColors();
+        var level = Minecraft.getInstance().level;
+        boolean constantAmbient = level != null && level.effects().constantAmbientLight();
+        Vector3f n = new Vector3f();
+        for (Direction dir : DIRECTIONS_AND_NULL) {
+            for (BakedQuad quad : quadsBySide.apply(dir)) {
+                float r = 1, g = 1, b = 1;
+                if (quad.isTinted() && state != null) {
+                    int tint = colors.getColor(state, null, null, quad.getTintIndex());
+                    r = (tint >> 16 & 255) / 255f;
+                    g = (tint >> 8 & 255) / 255f;
+                    b = (tint & 255) / 255f;
+                }
+                if (quad.isShade()) {
+                    Vec3i normal = quad.getDirection().getNormal();
+                    pose.transformNormal(normal.getX(), normal.getY(), normal.getZ(), n).normalize();
+                    float shade = getShade(n, constantAmbient);
+                    r *= shade;
+                    g *= shade;
+                    b *= shade;
+                }
+                consumer.putBulkData(pose, quad, r, g, b, 1, light, overlay);
+            }
+        }
+    }
+
+    //ClientLevel.getShade blended over the normal so rotated faces dont snap between values
+    private static float getShade(Vector3f n, boolean constantAmbient) {
+        float up = constantAmbient ? 0.9f : 1;
+        float down = constantAmbient ? 0.9f : 0.5f;
+        float y = n.y * n.y * (n.y > 0 ? up : down);
+        return Math.min(n.x * n.x * 0.6f + y + n.z * n.z * 0.8f, 1);
+    }
+
+    private static final Direction[] DIRECTIONS_AND_NULL = {Direction.DOWN, Direction.UP, Direction.NORTH,
+            Direction.SOUTH, Direction.WEST, Direction.EAST, null};
+
+    // standalone models have no state to get the render type from
+    public static void renderModelDetached(ModelResourceLocation modelLocation, PoseStack poseStack, MultiBufferSource buffer,
+                                           int light, int overlay, boolean cutout) {
+        BakedModel model = ClientHelper.getModel(Minecraft.getInstance().getModelManager(), modelLocation);
+        RandomSource random = RandomSource.create();
+        VertexConsumer consumer = buffer.getBuffer(cutout ? RenderType.cutout() : RenderType.solid());
+        putBlockQuads(poseStack.last(), consumer, null, dir -> {
+            random.setSeed(42L);
+            return model.getQuads(null, dir, random);
+        }, light, overlay);
     }
 
     //should be a weaker version of what's above as it doesnt take in level so stuff like offset isnt there
     //from resource location
+    @Deprecated(forRemoval = true)
     public static void renderModel(ModelResourceLocation modelLocation, PoseStack matrixStack, MultiBufferSource buffer,
                                    BlockRenderDispatcher blockRenderer, int light, int overlay, boolean cutout) {
 
