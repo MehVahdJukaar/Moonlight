@@ -387,13 +387,13 @@ public class PlatHelperImpl {
         return new BlockEntityType<>(blockEntitySupplier::create, validBlocks);
     }
 
-    public static <E extends Entity> EntityType<E> newEntityType(String name,
+    public static <E extends Entity> EntityType<E> newEntityType(Identifier id,
                                                                  EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
                                                                  int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
         return EntityType.Builder.of(factory, category)
                 .sized(width, height).clientTrackingRange(clientTrackingRange)
                 .setShouldReceiveVelocityUpdates(velocityUpdates).updateInterval(updateInterval)
-                .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.parse(name)));
+                .build(ResourceKey.create(Registries.ENTITY_TYPE, id));
     }
 
 

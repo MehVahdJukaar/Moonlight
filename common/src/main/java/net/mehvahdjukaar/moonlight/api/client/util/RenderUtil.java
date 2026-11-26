@@ -1,12 +1,15 @@
 package net.mehvahdjukaar.moonlight.api.client.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.mehvahdjukaar.moonlight.api.client.gui.AnimatedGuiItem;
 import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
+import net.mehvahdjukaar.moonlight.api.util.math.ColorUtils;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.mehvahdjukaar.moonlight.core.client.MLRenderTypes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SingleQuadParticle;
@@ -17,18 +20,25 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.MovingBlockRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +82,66 @@ public class RenderUtil {
         RenderType renderType = cutout ? Sheets.cutoutBlockSheet() : Sheets.translucentBlockSheet();
         collector.submitBlockModel(poseStack, renderType, parts, NO_TINTS, light, overlay, 0);
     }
+
+    /**
+     * block but can have rotated non axis aligned normals
+     */
+    public static void submitBlockDetached(PoseStack poseStack, SubmitNodeCollector collector, BlockState state, int light) {
+        submitModelDetached(poseStack, collector, getBlockModel(state), state, light);
+    }
+
+    public static void submitModelDetached(PoseStack poseStack, SubmitNodeCollector collector, BlockStateModel model,
+                                           @Nullable BlockState state, int light) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        ClientHelper.collectModelParts(model, null, null, state, RandomSource.create(42L), parts);
+        if (parts.isEmpty()) return;
+
+        List<BlockTintSource> tints = state == null ? List.of() : Minecraft.getInstance().getBlockColors().getTintSources(state);
+        var l = Minecraft.getInstance().level;
+        CardinalLighting lighting = l == null ? CardinalLighting.DEFAULT : l.cardinalLighting();
+
+        for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
+            RenderType type = switch (layer) {
+                case SOLID -> RenderTypes.solidMovingBlock();
+                case CUTOUT -> RenderTypes.cutoutMovingBlock();
+                case TRANSLUCENT -> RenderTypes.translucentMovingBlock();
+            };
+            collector.submitCustomGeometry(poseStack, type, (pose, buffer) ->
+                    putDetachedQuads(pose, buffer, layer, parts, state, tints, lighting, light));
+        }
+    }
+
+    private static void putDetachedQuads(PoseStack.Pose pose, VertexConsumer buffer, ChunkSectionLayer layer,
+                                         List<BlockStateModelPart> parts, @Nullable BlockState state,
+                                         List<BlockTintSource> tints, CardinalLighting lighting, int light) {
+        QuadInstance instance = new QuadInstance();
+        instance.setLightCoords(light);
+        Vector3f n = new Vector3f();
+        for (BlockStateModelPart part : parts) {
+            for (Direction dir : DIRECTIONS_AND_NULL) {
+                for (BakedQuad quad : part.getQuads(dir)) {
+                    var mat = quad.materialInfo();
+
+                    if (mat.layer() != layer) continue;
+                    instance.setColor(-1);
+                    int tintIndex = mat.tintIndex();
+                    if (tintIndex != -1 && tintIndex < tints.size() && tints.get(tintIndex) != null) {
+                        instance.multiplyColor(tints.get(tintIndex).color(state));
+                    }
+                    if (mat.shade()) {
+                        Vec3i normal = quad.direction().getUnitVec3i();
+                        pose.transformNormal(normal.getX(), normal.getY(), normal.getZ(), n).normalize();
+                        instance.scaleColor(ColorUtils.getBlockShading(n, lighting));
+                    }
+                    //instance.setLightCoords(LightCoordsUtil.FULL_BRIGHT);
+                    buffer.putBakedQuad(pose, quad, instance);
+                }
+            }
+        }
+    }
+
+    private static final Direction[] DIRECTIONS_AND_NULL = {Direction.DOWN, Direction.UP, Direction.NORTH,
+            Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
     public static void renderGuiItemRelative(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y, int size,
                                              AnimatedGuiItem.Transform transform) {

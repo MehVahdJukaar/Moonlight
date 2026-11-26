@@ -8,6 +8,7 @@ import net.mehvahdjukaar.moonlight.api.util.math.colors.HSVColor;
 import net.mehvahdjukaar.moonlight.api.util.math.colors.RGBColor;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.level.CardinalLighting;
 import org.joml.Vector3f;
 
 import java.util.Locale;
@@ -100,10 +101,15 @@ public final class ColorUtils {
 
     //equivalent of function with same name used by the game to calculate shading
     public static int shadeColor(Vector3f normal, int color) {
-        return multiply(color, getShading(normal));
+        return multiply(color, getEntityShading(normal));
     }
 
+    @Deprecated(forRemoval = true)
     public static float getShading(Vector3f normal) {
+        return getEntityShading(normal);
+    }
+
+    public static float getEntityShading(Vector3f normal) {
         if (normal.equals(Direction.UP.step())) return 1;
         Vector3f lightDir0 = DIFFUSE_LIGHT_0;//RenderSystem.shaderLightDirections[0];
         Vector3f lightDir1 = DIFFUSE_LIGHT_1;//RenderSystem.shaderLightDirections[1];
@@ -112,6 +118,13 @@ public final class ColorUtils {
         float light0 = Math.max(0.0f, lightDir0.dot(normal));
         float light1 = Math.max(0.0f, lightDir1.dot(normal));
         return Math.min(1.0f, (light0 + light1) * MINECRAFT_LIGHT_POWER + MINECRAFT_AMBIENT_LIGHT);
+    }
+
+    //same as vanilla logic as CardinalLighting.byFace(dir)
+    public static float getBlockShading(Vector3f n, CardinalLighting l) {
+        return n.x * n.x * (n.x > 0 ? l.east() : l.west())
+                + n.y * n.y * (n.y > 0 ? l.up() : l.down())
+                + n.z * n.z * (n.z > 0 ? l.south() : l.north());
     }
 
 

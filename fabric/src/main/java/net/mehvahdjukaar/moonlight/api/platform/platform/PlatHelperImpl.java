@@ -295,7 +295,7 @@ public class PlatHelperImpl {
         return FabricBlockEntityTypeBuilder.create(blockEntitySupplier::create, validBlocks).build();
     }
 
-    public static <E extends Entity> EntityType<E> newEntityType(String name,
+    public static <E extends Entity> EntityType<E> newEntityType(Identifier id,
                                                                  EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
                                                                  int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
         return EntityType.Builder.of(factory, category)
@@ -303,7 +303,7 @@ public class PlatHelperImpl {
                 .updateInterval(updateInterval)
                 .clientTrackingRange(clientTrackingRange)
                 .alwaysUpdateVelocity(velocityUpdates)
-                .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.parse(name)));
+                .build(ResourceKey.create(Registries.ENTITY_TYPE, id));
     }
 
     public static void addServerReloadListener(Function<HolderLookup.Provider, PreparableReloadListener> listener, Identifier name) {

@@ -147,6 +147,11 @@ public class RegHelper {
         return registerItem(name, p -> new BlockItem(block.get(), p), properties.useBlockDescriptionPrefix());
     }
 
+    public static <T extends Item> RegSupplier<T> registerBlockItem(Identifier name, Function<Item.Properties, T> factory,
+                                                                    Item.Properties properties) {
+        return registerItem(name, factory, properties.useBlockDescriptionPrefix());
+    }
+
     public static <T extends SimpleCriterionTrigger<?>> RegSupplier<T> registerTriggerType(Identifier name, Supplier<T> instance) {
         return register(name, instance, Registries.TRIGGER_TYPE);
     }

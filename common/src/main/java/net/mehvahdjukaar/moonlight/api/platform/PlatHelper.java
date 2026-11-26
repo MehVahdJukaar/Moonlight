@@ -441,8 +441,16 @@ public class PlatHelper {
         @NotNull T create(BlockPos pos, BlockState state);
     }
 
-    @PlatformImpl
+    //use identifier one
+    @Deprecated(forRemoval = true)
     public static <E extends Entity> EntityType<E> newEntityType(String name,
+                                                                 EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
+                                                                 int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
+        return newEntityType(Identifier.parse(name), factory, category, width, height, clientTrackingRange, velocityUpdates, updateInterval);
+    }
+
+    @PlatformImpl
+    public static <E extends Entity> EntityType<E> newEntityType(Identifier id,
                                                                  EntityType.EntityFactory<E> factory, MobCategory category, float width, float height,
                                                                  int clientTrackingRange, boolean velocityUpdates, int updateInterval) {
         throw new AssertionError();
