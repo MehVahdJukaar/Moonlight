@@ -48,6 +48,13 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.IItemDecorator;
 import net.neoforged.neoforge.client.event.*;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperty;
+import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
+import com.mojang.serialization.MapCodec;
+import com.google.common.base.Suppliers;
+import net.neoforged.bus.api.IEventBus;
+import java.util.HashMap;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
@@ -183,6 +190,55 @@ public class ClientHelperImpl {
         Consumer<RegisterColorHandlersEvent.ItemTintSources> eventConsumer = event ->
                 eventListener.accept(event::register);
         getCurrentBus().addListener(eventConsumer);
+    }
+
+    public static void addItemModelRegistration(Consumer<ClientHelper.ItemModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Consumer<RegisterItemModelsEvent> eventConsumer = event -> eventListener.accept(event::register);
+        getCurrentBus().addListener(eventConsumer);
+    }
+
+    //neo splits these in 3 events that fire back to back
+    public static void addItemModelPropertyRegistration(Consumer<ClientHelper.ItemModelPropertyEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        Map<Identifier, MapCodec<? extends ConditionalItemModelProperty>> conditionals = new HashMap<>();
+        Map<Identifier, SelectItemModelProperty.Type<?, ?>> selects = new HashMap<>();
+        Map<Identifier, MapCodec<? extends RangeSelectItemModelProperty>> ranges = new HashMap<>();
+        Supplier<Boolean> collect = Suppliers.memoize(() -> {
+            eventListener.accept(new ClientHelper.ItemModelPropertyEvent() {
+                @Override
+                public void registerConditional(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec) {
+                    conditionals.put(id, codec);
+                }
+
+                @Override
+                public void registerSelect(Identifier id, SelectItemModelProperty.Type<?, ?> type) {
+                    selects.put(id, type);
+                }
+
+                @Override
+                public void registerRangeSelect(Identifier id, MapCodec<? extends RangeSelectItemModelProperty> codec) {
+                    ranges.put(id, codec);
+                }
+            });
+            return true;
+        });
+        IEventBus bus = getCurrentBus();
+        bus.addListener((RegisterConditionalItemModelPropertyEvent e) -> {
+            collect.get();
+            conditionals.forEach(e::register);
+        });
+        bus.addListener((RegisterSelectItemModelPropertyEvent e) -> {
+            collect.get();
+
+            selects.forEach(e::register);
+        });
+        bus.addListener((RegisterRangeSelectItemModelPropertyEvent e) -> {
+            collect.get();
+            ranges.forEach(e::register);
+        });
     }
 
     @SuppressWarnings("ConstantConditions")

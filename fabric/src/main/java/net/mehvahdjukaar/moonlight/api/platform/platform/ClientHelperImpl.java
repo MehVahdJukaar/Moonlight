@@ -41,6 +41,14 @@ import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.client.renderer.item.ItemModels;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperties;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperties;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperty;
+import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperties;
+import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.core.BlockPos;
@@ -163,6 +171,32 @@ public class ClientHelperImpl {
         Moonlight.assertInitPhase();
 
         MoonlightFabricClient.addClientTask(() -> eventListener.accept(ItemTintSources.ID_MAPPER::put));
+    }
+
+    public static void addItemModelRegistration(Consumer<ClientHelper.ItemModelEvent> eventListener) {
+        Moonlight.assertInitPhase();
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(ItemModels.ID_MAPPER::put));
+    }
+
+    public static void addItemModelPropertyRegistration(Consumer<ClientHelper.ItemModelPropertyEvent> eventListener) {
+        Moonlight.assertInitPhase();
+
+        MoonlightFabricClient.addClientTask(() -> eventListener.accept(new ClientHelper.ItemModelPropertyEvent() {
+            @Override
+            public void registerConditional(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec) {
+                ConditionalItemModelProperties.ID_MAPPER.put(id, codec);
+            }
+
+            @Override
+            public void registerSelect(Identifier id, SelectItemModelProperty.Type<?, ?> type) {
+                SelectItemModelProperties.ID_MAPPER.put(id, type);
+            }
+
+            @Override
+            public void registerRangeSelect(Identifier id, MapCodec<? extends RangeSelectItemModelProperty> codec) {
+                RangeSelectItemModelProperties.ID_MAPPER.put(id, codec);
+            }
+        }));
     }
 
     public static void addClientReloadListener(Supplier<PreparableReloadListener> listener, Identifier name) {

@@ -42,6 +42,10 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.properties.conditional.ConditionalItemModelProperty;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperty;
+import net.minecraft.client.renderer.item.properties.select.SelectItemModelProperty;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -289,6 +293,31 @@ public class ClientHelper {
 
     @PlatformImpl
     public static void addItemTintSourceRegistration(Consumer<ItemTintSourceEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    @FunctionalInterface
+    public interface ItemModelEvent {
+        void register(Identifier id, MapCodec<? extends ItemModel.Unbaked> codec);
+    }
+
+    @PlatformImpl
+    public static void addItemModelRegistration(Consumer<ItemModelEvent> eventListener) {
+        throw new AssertionError();
+    }
+
+    public interface ItemModelPropertyEvent {
+        void registerConditional(Identifier id, MapCodec<? extends ConditionalItemModelProperty> codec);
+
+        void registerSelect(Identifier id, SelectItemModelProperty.Type<?, ?> type);
+        void registerRangeSelect(Identifier id, MapCodec<? extends RangeSelectItemModelProperty> codec);
+    }
+
+    /**
+     * Custom properties for minecraft:condition, minecraft:select and minecraft:range_dispatch in items/<id>.json
+     */
+    @PlatformImpl
+    public static void addItemModelPropertyRegistration(Consumer<ItemModelPropertyEvent> eventListener) {
         throw new AssertionError();
     }
 

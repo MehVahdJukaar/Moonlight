@@ -278,6 +278,31 @@ public class ResourceSink {
         }
     }
 
+    /**
+     * Constructively adds a model condition to an item in a non destructive vey
+     * Model shows when modelOnTrue condition is true
+     */
+    public void appendItemModelCondition(ResourceManager manager, Identifier itemId, JsonObject condition, Identifier modelOnTrue) {
+        try {
+            JsonObject old = StaticResource.getOrThrow(manager, ResType.ITEMS.getPath(itemId)).toJson().getAsJsonObject("model");
+
+            JsonObject onTrue = new JsonObject();
+            onTrue.addProperty("type", "minecraft:model");
+            onTrue.addProperty("model", modelOnTrue.toString());
+            if (old.has("tints")) onTrue.add("tints", old.get("tints"));
+
+            JsonObject wrapped = condition.deepCopy();
+            wrapped.addProperty("type", "minecraft:condition");
+            wrapped.add("on_true", onTrue);
+            wrapped.add("on_false", old);
+            JsonObject root = new JsonObject();
+            root.add("model", wrapped);
+            this.addItemModelDefinition(itemId, root);
+        } catch (Exception e) {
+            Moonlight.LOGGER.error("Failed to add conditional model to item {}", itemId, e);
+        }
+    }
+
     public void copyResource(ResourceManager manager, Identifier from, Identifier to, boolean lenient) {
         var resource = manager.getResource(from);
         if (resource.isPresent()) {
