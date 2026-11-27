@@ -1,5 +1,4 @@
-- added QuickPictureInPicture to draw 3d stuff in guis
-- added translucent particle render type
-- fixed a concurrency issue
-- added additive layer for particles on the particle atlas
-- fixed an issue on fabric on reload
+- improved block registration api
+- added new helper to render a block
+- added weathering copper block set registration helpers
+- added PlatHelper.getUnwaxed

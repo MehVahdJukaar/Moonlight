@@ -373,6 +373,12 @@ public class PlatHelper {
     }
 
     @PlatformImpl
+    @Nullable
+    public static Block getUnwaxed(Block block) {
+        throw new AssertionError();
+    }
+
+    @PlatformImpl
     public static boolean canLightFire(ItemStack stack) {
         throw new AssertionError();
     }

@@ -1,5 +1,6 @@
 package net.mehvahdjukaar.moonlight.api.platform;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -65,6 +66,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.WeatheringCopperBlocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -776,6 +779,51 @@ public class RegHelper {
             map.put(type, block);
         }
         return map;
+    }
+
+    //same order as the WeatheringCopperBlocks record
+    private static final List<String> COPPER_PREFIXES = List.of("", "exposed_", "weathered_", "oxidized_",
+            "waxed_", "waxed_exposed_", "waxed_weathered_", "waxed_oxidized_");
+    private static final List<Function<WeatheringCopperBlocks, Block>> COPPER_GETTERS = List.of(
+            WeatheringCopperBlocks::unaffected, WeatheringCopperBlocks::exposed, WeatheringCopperBlocks::weathered, WeatheringCopperBlocks::oxidized,
+            WeatheringCopperBlocks::waxed, WeatheringCopperBlocks::waxedExposed, WeatheringCopperBlocks::waxedWeathered, WeatheringCopperBlocks::waxedOxidized);
+
+    public static Supplier<WeatheringCopperBlocks> registerWeatheringCopperBlocks(
+            Identifier baseName, Function<BlockBehaviour.Properties, ? extends Block> waxedFactory,
+            BiFunction<WeatheringCopper.WeatherState, BlockBehaviour.Properties, ? extends Block> weatheringFactory,
+            Function<WeatheringCopper.WeatherState, BlockBehaviour.Properties> propertiesByState) {
+        List<Supplier<? extends Block>> blocks = new ArrayList<>();
+        for (var state : WeatheringCopper.WeatherState.values()) {
+            blocks.add(registerBlock(baseName.withPrefix(COPPER_PREFIXES.get(state.ordinal())),
+                    p -> weatheringFactory.apply(state, p), () -> propertiesByState.apply(state)));
+        }
+        for (var state : WeatheringCopper.WeatherState.values()) {
+            blocks.add(registerBlock(baseName.withPrefix(COPPER_PREFIXES.get(state.ordinal() + 4)),
+                    waxedFactory, () -> propertiesByState.apply(state)));
+        }
+
+        return Suppliers.memoize(() -> new WeatheringCopperBlocks(blocks.get(0).get(), blocks.get(1).get(), blocks.get(2).get(), blocks.get(3).get(),
+                blocks.get(4).get(), blocks.get(5).get(), blocks.get(6).get(), blocks.get(7).get()));
+    }
+
+    public static Supplier<WeatheringCopperBlocks> registerWeatheringCopperBlocksWithItems(
+            Identifier baseName, Function<BlockBehaviour.Properties, ? extends Block> waxedFactory,
+            BiFunction<WeatheringCopper.WeatherState, BlockBehaviour.Properties, ? extends Block> weatheringFactory,
+            Function<WeatheringCopper.WeatherState, BlockBehaviour.Properties> propertiesByState) {
+        var blocks = registerWeatheringCopperBlocks(baseName, waxedFactory, weatheringFactory, propertiesByState);
+        registerWeatheringCopperItems(baseName, (variant, p) -> new BlockItem(variant.apply(blocks.get()), p));
+        return blocks;
+    }
+
+    public static Supplier<WeatheringCopperItems> registerWeatheringCopperItems(
+            Identifier baseName, BiFunction<Function<WeatheringCopperBlocks, Block>, Item.Properties, ? extends Item> factory) {
+        List<Supplier<? extends Item>> items = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            var g = COPPER_GETTERS.get(i);
+            items.add(registerBlockItem(baseName.withPrefix(COPPER_PREFIXES.get(i)), p -> factory.apply(g, p), new Item.Properties()));
+        }
+        return Suppliers.memoize(() -> new WeatheringCopperItems(items.get(0).get(), items.get(1).get(), items.get(2).get(), items.get(3).get(),
+                items.get(4).get(), items.get(5).get(), items.get(6).get(), items.get(7).get()));
     }
 
     public interface LootInjectEvent {

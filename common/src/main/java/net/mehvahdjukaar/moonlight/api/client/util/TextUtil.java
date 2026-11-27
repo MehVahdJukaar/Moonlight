@@ -181,7 +181,7 @@ public class TextUtil {
         boolean outline = glowing && (dyeColor == DyeColor.BLACK || isVeryNear.getAsBoolean());
 
         int textColor = dyeColor.getTextColor();
-        float shading = ColorUtils.getShading(normal);
+        float shading = ColorUtils.getEntityShading(normal);
         int color = glowing ? textColor : ColorUtils.multiply(textColor, shading);
         int dark;
         if (!glowing || outline) {

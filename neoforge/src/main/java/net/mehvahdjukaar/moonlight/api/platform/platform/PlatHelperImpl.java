@@ -47,6 +47,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.DataMapHooks;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -179,6 +180,11 @@ public class PlatHelperImpl {
 
     public static int getBurnTime(ItemStack stack, Level level) {
         return stack.getBurnTime(RecipeType.SMELTING, level.fuelValues());
+    }
+
+    @Nullable
+    public static Block getUnwaxed(Block block) {
+        return DataMapHooks.getBlockUnwaxed(block);
     }
 
     private static final ItemAbility TINKERS_LIGHT_FIRE = ItemAbility.get("light_fire");

@@ -66,6 +66,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -156,6 +157,12 @@ public class PlatHelperImpl {
 
     public static int getBurnTime(ItemStack stack, Level level) {
         return level.fuelValues().burnDuration(stack);
+    }
+
+
+    @Nullable
+    public static Block getUnwaxed(Block block) {
+        return HoneycombItem.WAX_OFF_BY_BLOCK.get().get(block);
     }
 
     public static boolean canLightFire(ItemStack stack) {
