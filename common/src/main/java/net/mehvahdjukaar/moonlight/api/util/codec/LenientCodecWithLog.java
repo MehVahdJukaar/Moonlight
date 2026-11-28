@@ -7,6 +7,8 @@ import net.mehvahdjukaar.moonlight.core.Moonlight;
 import java.util.Objects;
 import java.util.Optional;
 
+//use codec ui one
+@Deprecated
 public class LenientCodecWithLog<A> extends OptionalFieldCodec<A> {
     private final String name;
     private final Codec<A> elementCodec;

@@ -11,6 +11,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.mehvahdjukaar.candlelight.api.PlatformImpl;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -105,13 +106,12 @@ public class CodecUtils {
 
 
     public static <A> Codec<List<A>> lenientListOrSingleCodec(final Codec<A> elementCodec) {
-        return Codec.either(lenientListCodec(elementCodec), elementCodec)
+        return Codec.either(SchemaCodecs.lenientList(elementCodec), elementCodec)
                 .xmap(either -> either.map(Function.identity(), List::of), Either::left);
     }
 
-    /**
-     * Like listOf but won't fail for missing entries.
-     */
+    /// Use codec ui one!
+    @Deprecated
     public static <A> LenientListCodec<A> lenientListCodec(final Codec<A> elementCodec) {
         return new LenientListCodec<>(elementCodec);
     }
@@ -120,7 +120,7 @@ public class CodecUtils {
      * Lenient holder set
      */
     public static <E> Codec<HolderSet<E>> lenientHomogeneousList(ResourceKey<? extends Registry<E>> registryKey) {
-        return LenientHolderSetCodec.create(registryKey, RegistryFixedCodec.create(registryKey), false);
+        return SchemaCodecs.lenientHolderSet(registryKey, RegistryFixedCodec.create(registryKey));
     }
 
     public static <T extends Enum<T>> StreamCodec<FriendlyByteBuf, T> enumStreamCodec(Class<T> enumClass) {
@@ -132,24 +132,24 @@ public class CodecUtils {
     }
 
     public static <A> MapCodec<A> lenientWithLog(Codec<A> elementCodec, String name, A defaultValue) {
-        return LenientCodecWithLog.of(elementCodec, name, defaultValue);
+        return SchemaCodecs.lenientWithLog(elementCodec, name, defaultValue);
     }
 
     public static <A> MapCodec<Optional<A>> lenientWithLog(Codec<A> elementCodec, String name) {
-        return LenientCodecWithLog.of(elementCodec, name);
+        return SchemaCodecs.lenientWithLog(elementCodec, name);
     }
 
     public static <B> MapCodec<Optional<B>> optionalAlias(Codec<B> codec, String primaryName, String alias) {
         //first lenient so we can go to second
-        return AlternativeMapCodec.optionalAlias(codec, primaryName, alias);
+        return SchemaCodecs.optionalAlias(codec, primaryName, alias);
     }
 
     public static <B> MapCodec<B> alias(Codec<B> codec, String primaryName, String alias) {
-        return AlternativeMapCodec.alias(codec, primaryName, alias);
+        return SchemaCodecs.alias(codec, primaryName, alias);
     }
 
     public static <A, B> Codec<Either<A, B>> eitherLeft(Codec<A> leftCodec) {
-        return new EitherLeftCodec<>(leftCodec);
+        return SchemaCodecs.eitherLeft(leftCodec);
     }
 
     public static final Codec<Vector2f> VEC2F = Codec.FLOAT.listOf()
@@ -173,16 +173,16 @@ public class CodecUtils {
     public static <A, B extends A, C extends A> Codec<A> bestAlternative(
             Codec<B> first, Codec<C> second, BiPredicate<B, C> chooseFirst) {
 
-        return new BestAlternativeCodec<>(first, second, chooseFirst);
+        return SchemaCodecs.bestAlternative(first, second, chooseFirst);
     }
 
     @SafeVarargs
     public static <A> Codec<A> alternatives(Codec<? extends A>... codecs) {
-        return new AlternativeCodec<>(codecs);
+        return SchemaCodecs.alternatives(codecs);
     }
 
     public static <A> Codec<List<A>> singleOrList(Codec<A> elementCodec) {
-        return Codec.withAlternative(elementCodec.listOf(), elementCodec, List::of);
+        return SchemaCodecs.singleOrList(elementCodec);
     }
 
     public static <A, B> Codec<A> union(Codec<A> codec, Codec<B> otherType, BiFunction<A, B, A> applyFunc) {

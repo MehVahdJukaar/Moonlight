@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import net.mehvahdjukaar.codecui.SchemaCodecs;
 import net.minecraft.core.*;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -23,7 +24,7 @@ public class LenientHolderSetCodec<E> implements Codec<HolderSet<E>> {
     private final Codec<Either<TagKey<E>, List<Holder<E>>>> registryAwareCodec;
 
     private static <E> Codec<List<Holder<E>>> homogenousList(Codec<Holder<E>> holderCodec, boolean disallowInline) {
-        Codec<List<Holder<E>>> codec = LenientListCodec.of(holderCodec).validate(ExtraCodecs.ensureHomogenous(Holder::kind));
+        Codec<List<Holder<E>>> codec = SchemaCodecs.lenientList(holderCodec).validate(ExtraCodecs.ensureHomogenous(Holder::kind));
         return disallowInline
                 ? codec
                 : Codec.either(codec, holderCodec)
@@ -31,6 +32,9 @@ public class LenientHolderSetCodec<E> implements Codec<HolderSet<E>> {
     }
 
     public static <E> Codec<HolderSet<E>> create(ResourceKey<? extends Registry<E>> registryKey, Codec<Holder<E>> holderCodec, boolean disallowInline) {
+        if (!disallowInline) {
+            return SchemaCodecs.lenientHolderSet(registryKey, holderCodec);
+        }
         return new LenientHolderSetCodec<>(registryKey, holderCodec, disallowInline);
     }
 
