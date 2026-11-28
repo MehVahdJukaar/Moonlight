@@ -81,7 +81,7 @@ public class ModsTilesScreen extends Screen {
     }
 
     private static boolean isOurs(String modId) {
-        if (EXTRA_MODS.contains(modId)) return true;
+        if (EXTRA_MODS.contains(modId) || asksForNativeScreen(modId)) return true;
         for (ModConfigHolder h : ModConfigHolder.getTrackedHolders()) {
             if (h.getModId().equals(modId)) return true;
         }
@@ -95,11 +95,12 @@ public class ModsTilesScreen extends Screen {
             if (ClientHelper.hasModConfigScreen(modId)) modIds.add(modId);
         }
         boolean convert = ClientConfigs.CONVERT_FOREIGN_CONFIGS.get().isOn();
-        if (ClientConfigs.SHOW_ALL_MOD_CONFIGS.get() || convert) {
-            for (String modId : PlatHelper.getInstalledMods()) {
-                if (ClientHelper.hasModConfigScreen(modId) || (convert && ClientHelper.hasNativeForeignConfig(modId))) {
-                    modIds.add(modId);
-                }
+        boolean showAll = ClientConfigs.SHOW_ALL_MOD_CONFIGS.get() || convert;
+        for (String modId : PlatHelper.getInstalledMods()) {
+            if (asksForNativeScreen(modId)) {
+                if (ClientHelper.hasNativeForeignConfig(modId)) modIds.add(modId);
+            } else if (showAll && (ClientHelper.hasModConfigScreen(modId) || (convert && ClientHelper.hasNativeForeignConfig(modId)))) {
+                modIds.add(modId);
             }
         }
         return modIds;
@@ -118,7 +119,7 @@ public class ModsTilesScreen extends Screen {
     @Nullable
     public static Screen configScreenFor(String modId, @Nullable Screen parent, @Nullable ResourceLocation background) {
         Screen s = MoonlightConfigSelectScreen.create(modId, parent, background);
-        if (s == null && shouldConvert(modId)) {
+        if (s == null && (asksForNativeScreen(modId) || shouldConvert(modId))) {
             s = ClientHelper.getNativeForeignConfigScreen(modId, parent, background);
         }
         if (s == null) s = ClientHelper.getModConfigScreen(modId, parent);
@@ -132,6 +133,13 @@ public class ModsTilesScreen extends Screen {
             case GENERIC_ONLY -> ClientHelper.hasOnlyGenericConfigScreen(modId);
         };
     }
+
+
+    //lets mods opt in without depending on us
+    public static boolean asksForNativeScreen(String modId) {
+        return Boolean.parseBoolean(PlatHelper.getModProperty(modId, "moonlight_config_screen"));
+    }
+
 
     @Override
     protected void init() {

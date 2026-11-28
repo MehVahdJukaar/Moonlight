@@ -304,6 +304,14 @@ public class PlatHelperImpl {
                 .orElse(null);
     }
 
+    @Nullable
+    public static String getModProperty(String modId, String key) {
+        return ModList.get().getModContainerById(modId)
+                .map(c -> c.getModInfo().getModProperties().get(key))
+                .map(Object::toString)
+                .orElse(null);
+    }
+
     public static SpawnEggItem newSpawnEgg(Supplier<? extends EntityType<? extends Mob>> entityType, int color, int outerColor, Item.Properties properties) {
         return new DeferredSpawnEggItem(entityType, color, outerColor, properties);
     }

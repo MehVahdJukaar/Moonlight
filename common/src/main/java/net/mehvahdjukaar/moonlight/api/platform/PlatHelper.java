@@ -317,6 +317,16 @@ public class PlatHelper {
         throw new AssertionError();
     }
 
+    /**
+     * gets a custom key from mod metadata as a string, null if unset.
+     */
+    @Nullable
+    @PlatformImpl
+    public static String getModProperty(String modId, String key) {
+        throw new AssertionError();
+    }
+
+
     @Nullable
     @PlatformImpl
     public static <T> Field findField(Class<? super T> clazz, String fieldName) {

@@ -8,7 +8,10 @@ import net.mehvahdjukaar.moonlight.api.map.client.MapDecorationClientManager;
 import net.mehvahdjukaar.moonlight.api.entity.IControllableVehicle;
 import net.mehvahdjukaar.moonlight.api.misc.SidedInstance;
 import net.mehvahdjukaar.moonlight.api.misc.fake_level.FakeLevelManager;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ModConfigHolder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.platform.NeoforgeConfigBridge;
+import net.mehvahdjukaar.moonlight.core.client.config.ModsTilesScreen;
 import net.mehvahdjukaar.moonlight.core.ClientConfigs;
 import net.mehvahdjukaar.moonlight.core.MoonlightClient;
 import net.minecraft.client.Minecraft;
@@ -59,15 +62,29 @@ public class MoonlightForgeClient {
         // Otherwise route each mod's config button to the native Moonlight screen (one extension point per mod
         // container; the vanilla ConfigurationScreen is kept as a fallback).
         Set<String> registered = new HashSet<>();
+        ModList modList = ModList.get();
         for (var config : ModConfigHolder.getTrackedHolders()) {
             String modId = config.getModId();
             if (!registered.add(modId)) continue;
-            ModList.get().getModContainerById(modId).ifPresent(c ->
+            modList.getModContainerById(modId).ifPresent(c ->
                     c.registerExtensionPoint(IConfigScreenFactory.class, (container, parent) -> {
                         // list every config registered for this mod (common, client, ...); opens the single one directly
                         var screen = MoonlightConfigSelectScreen.create(modId, parent, null);
                         return screen != null ? screen : new ConfigurationScreen(container, parent);
                     }));
+        }
+
+        //add one that request it
+        for (String modId : PlatHelper.getInstalledMods()) {
+            if (registered.contains(modId) || !ModsTilesScreen.asksForNativeScreen(modId)) continue;
+            modList.getModContainerById(modId).ifPresent(c -> {
+                IConfigScreenFactory old = c.getCustomExtension(IConfigScreenFactory.class).orElse(null);
+                c.registerExtensionPoint(IConfigScreenFactory.class, (container, parent) -> {
+                    var screen = NeoforgeConfigBridge.createScreen(modId, parent, null);
+                    if (screen != null) return screen;
+                    return old != null ? old.createScreen(container, parent) : new ConfigurationScreen(container, parent);
+                });
+            });
         }
     }
 

@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.Person;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.util.TextHelper;
@@ -277,6 +278,23 @@ public class PlatHelperImpl {
                 .map(c -> String.join(", ", c.getMetadata().getLicense()))
                 .filter(l -> !l.isBlank())
                 .orElse(null);
+    }
+
+    @Nullable
+    public static String getModProperty(String modId, String key) {
+        var container = FabricLoader.getInstance().getModContainer(modId).orElse(null);
+        if (container == null) return null;
+        CustomValue v = container.getMetadata().getCustomValue(key);
+        if (v == null) {
+            return null;
+        }
+        return switch (v.getType()) {
+            case STRING -> v.getAsString();
+            case BOOLEAN -> String.valueOf(v.getAsBoolean());
+            case NUMBER -> v.getAsNumber().toString();
+
+            default -> null;
+        };
     }
 
     public static FlowerPotBlock newFlowerPot(@Nullable Supplier<FlowerPotBlock> emptyPot, Supplier<? extends Block> supplier, BlockBehaviour.Properties properties) {
